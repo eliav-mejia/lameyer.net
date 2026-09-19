@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lameyer - Tech Firm</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ffffff;
+            color: #1a202c;
+            overflow-x: hidden;
+        }
+
+        /* Discrete Grey Circuit Pattern */
+        .circuit-bg {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background-color: #fcfdfe;
+
+            /* Major and Minor Grid Lines */
+            background-image:
+                linear-gradient(to right, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
+                linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+
+            background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+
+            /* Radial fade so it doesn't clash with the edges of the screen */
+            mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+        }
+
+        /* The "Nodes" or solder points at intersections */
+        .circuit-bg::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image: radial-gradient(circle, rgba(59, 130, 246, 0.2) 2px, transparent 2px);
+            background-size: 80px 80px;
+            background-position: -1px -1px;
+        }
+
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        /* Scrollbar hiding */
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Title reveal (used by SoftwareSection) */
+        .reveal-blur {
+            opacity: 0;
+            filter: blur(12px);
+            transform: translateY(24px);
+            transition: opacity 0.9s ease-out, filter 0.9s ease-out, transform 0.9s ease-out;
+        }
+        .reveal-blur.reveal-active {
+            opacity: 1;
+            filter: blur(0);
+            transform: translateY(0);
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+
+        @media (prefers-reduced-motion: reduce) {
+            html { scroll-behavior: auto; }
+            .reveal-blur { opacity: 1; filter: none; transform: none; transition: none; }
+            .animate-fade-in { animation: none; }
+        }
+    </style>
+
+    <!-- React + Babel from cdnjs (also works inside sandboxed previews) -->
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useLayoutEffect, useRef } = React;
+
+        // Change this to the address that should receive the contact form messages.
+        const CONTACT_EMAIL = 'contacto@lameyer.net';
+
+        const NAV_LINKS = [
+            { href: '/pages/SaaS', label: 'SaaS' },
+            { href: '/pages/blueprints', label: 'Blueprints' },
+            { href: '/pages/stack', label: 'Stack' },
+            { href: '/pages/components', label: 'Components' },
+            { href: '/pages/community', label: 'Community' },
+        ];
+
+        // --- LAYOUT COMPONENT (must be capitalized to be used as <Layout>) ---
+        const Layout = ({ children }) => {
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+            const toggleMenu = () => setIsMobileMenuOpen(prev => !prev);
+
+            const handleContactClick = () => {
+                const formElement = document.getElementById('form-section');
+
+                if (formElement) {
+                    // We are on the page with the form
+                    formElement.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    // We are on a different page
+                    window.location.href = '/index.html#form-section';
+                }
+
+                if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+            };
+
+            return (
+                <div className="relative min-h-screen">
+                    {/* Background Circuit Pattern */}
+                    <div className="circuit-bg"></div>
+
+                    {/* Top Banner */}
+                    <div className="fixed top-0 w-full h-10 bg-[#0f172a] z-[60] flex items-center justify-between px-8 overflow-hidden">
+                        <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap flex items-center gap-2">
+                            SUSTENTABILIDAD CORPORATIVA & ESG
+                        </span>
+                        <div className="flex items-center space-x-4 md:space-x-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 overflow-x-auto no-scrollbar">
+                            {['ODS 6', 'ODS 11', 'ODS 13', 'AGENDA 2030', 'ESG COMPLIANT'].map((cert, index) => (
+                                <div key={index} className="flex items-center space-x-1 flex-shrink-0">
+                                    <div className="w-1 h-3 bg-blue-500"></div>
+                                    <span className="text-[9px] font-bold text-white tracking-widest uppercase">{cert}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Navigation */}
+                    <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                        <a href="https://lameyer.net" className="block z-50">
+                            <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer Logo" className="h-10 md:h-12 w-auto object-contain" />
+                        </a>
+
+                        {/* Desktop Links */}
+                        <div className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase opacity-60">
+                            {NAV_LINKS.map(link => (
+                                <a key={link.href} href={link.href} className="hover:text-blue-600 transition-colors">{link.label}</a>
+                            ))}
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={handleContactClick}
+                                className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-md"
+                            >
+                                CONTACTO
+                            </button>
+
+                            {/* Mobile Hamburger Button */}
+                            <button
+                                onClick={toggleMenu}
+                                className="md:hidden p-2 text-gray-900 focus:outline-none"
+                                aria-label="Abrir menú"
+                            >
+                                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </nav>
+
+                    {/* Mobile Menu Overlay */}
+                    <div className={`fixed inset-0 bg-white/95 backdrop-blur-xl z-[100] md:hidden flex flex-col items-center justify-center space-y-8 transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
+
+                        {/* Close Button */}
+                        <button
+                            onClick={toggleMenu}
+                            className="absolute top-10 right-8 p-4 text-gray-900 hover:text-blue-600 transition-colors focus:outline-none z-[110]"
+                            aria-label="Cerrar menú"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        {NAV_LINKS.map(link => (
+                            <a
+                                key={link.href}
+                                href={link.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                className="text-3xl font-black tracking-tight text-gray-900 hover:text-blue-600 transition-colors"
+                            >
+                                {link.label}
+                            </a>
+                        ))}
+                        <button
+                            onClick={handleContactClick}
+                            className="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mt-4"
+                        >
+                            CONTACTO
+                        </button>
+                    </div>
+
+                    <main className="pt-32 px-4 md:px-8">
+                        {children}
+                    </main>
+
+                    <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">
+                        &copy; 2026 LAMEYER® EU. TODOS LOS DERECHOS RESERVADOS.
+                    </footer>
+                </div>
+            );
+        };
+
+        const ContentCard = ({ title, desc, align, active, icon }) => {
+            return (
+                <div className={`flex w-full ${align === 'right' ? 'justify-end' : 'justify-start'} transition-all duration-700 transform ${active ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 translate-y-12 scale-95'}`}>
+                    <div className={`max-w-xs md:max-w-sm p-8 rounded-[2.5rem] border bg-white/90 backdrop-blur-md shadow-2xl transition-all duration-500 ${active ? 'border-blue-500 shadow-blue-500/10 scale-105' : 'border-gray-100 shadow-gray-200/40'}`}>
+                        <div className={`mb-4 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl ${active ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-400'}`}>
+                            {icon}
+                        </div>
+                        <h3 className="text-xl font-black text-gray-900 mb-2">{title}</h3>
+                        <p className="text-sm text-gray-500 font-medium leading-relaxed">{desc}</p>
+                    </div>
+                </div>
+            );
+        };
+
+        const CircuitAnimationShowcase = () => {
+            const [scrollProgress, setScrollProgress] = useState(0);
+            const [pathLength, setPathLength] = useState(0);
+            const pathRef = useRef(null);
+            const containerRef = useRef(null);
+
+            const BEAM_LENGTH = 160;
+
+            useLayoutEffect(() => {
+                if (pathRef.current) {
+                    setPathLength(pathRef.current.getTotalLength());
+                }
+            }, []);
+
+            useEffect(() => {
+                const handleScroll = () => {
+                    if (!containerRef.current) return;
+                    const rect = containerRef.current.getBoundingClientRect();
+                    const totalScrollable = containerRef.current.offsetHeight - window.innerHeight;
+                    const progress = Math.max(0, Math.min(1, -rect.top / totalScrollable));
+                    setScrollProgress(progress);
+                };
+
+                handleScroll();
+                window.addEventListener('scroll', handleScroll, { passive: true });
+                return () => window.removeEventListener('scroll', handleScroll);
+            }, []);
+
+            const circuitD = "M 300,50 L 300,150 C 300,200 100,200 100,250 L 100,450 C 100,500 500,500 500,550 L 500,750 C 500,800 300,800 300,850 L 300,1000";
+
+            // The beam enters from before the start of the path and exits past the end,
+            // so it travels the full circuit as the user scrolls.
+            const dashOffset = BEAM_LENGTH - scrollProgress * (pathLength + BEAM_LENGTH);
+
+            return (
+                <section ref={containerRef} className="relative h-[800vh] w-full bg-slate-50/50">
+                    <div className="sticky top-0 h-screen w-full flex items-center justify-center pointer-events-none overflow-hidden">
+                        <svg viewBox="0 0 600 1100" className="w-full h-[75%] max-w-4xl transition-opacity duration-1000">
+                            <path d={circuitD} stroke="#e2e8f0" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                            <path
+                                ref={pathRef}
+                                d={circuitD}
+                                stroke="url(#blueBeam)"
+                                strokeWidth="8"
+                                fill="none"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                style={{
+                                    strokeDasharray: `${BEAM_LENGTH} ${pathLength + BEAM_LENGTH}`,
+                                    strokeDashoffset: dashOffset,
+                                    filter: 'drop-shadow(0 0 15px rgba(37, 99, 235, 0.6))'
+                                }}
+                            />
+                            <defs>
+                                <linearGradient id="blueBeam" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stopColor="#60a5fa" stopOpacity="0" />
+                                    <stop offset="50%" stopColor="#2563eb" stopOpacity="1" />
+                                    <stop offset="100%" stopColor="#1d4ed8" stopOpacity="0" />
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <div className="absolute inset-0 flex flex-col justify-between py-[100vh] z-10 px-6 md:px-20 max-w-6xl mx-auto pointer-events-none">
+                        <div className="pointer-events-auto">
+                            <ContentCard
+                                icon="⚡"
+                                title="Flujo de Datos"
+                                desc="Transmisión cinética optimizada para infraestructuras críticas sin latencia."
+                                align="left"
+                                active={scrollProgress > 0.01 && scrollProgress < 0.31}
+                            />
+                        </div>
+                        <div className="pointer-events-auto">
+                            <ContentCard
+                                icon="🛡️"
+                                title="Seguridad Zero Trust"
+                                desc="Cifrado de hardware en cada nodo de conexión para integridad total."
+                                align="right"
+                                active={scrollProgress > 0.35 && scrollProgress < 0.64}
+                            />
+                        </div>
+                        <div className="pointer-events-auto">
+                            <ContentCard
+                                icon="📊"
+                                title="Monitoreo Activo"
+                                desc="Seguimiento en tiempo real de voltajes y flujos de información redundante."
+                                align="left"
+                                active={scrollProgress > 0.68 && scrollProgress < 0.99}
+                            />
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        const SoftwareSection = () => {
+            const titleRef = useRef(null);
+
+            useEffect(() => {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('reveal-active');
+                        }
+                    });
+                }, { threshold: 0.1 });
+
+                if (titleRef.current) observer.observe(titleRef.current);
+                return () => observer.disconnect();
+            }, []);
+
+            return (
+                <section className="bg-white py-32 px-6 md:px-32 relative z-20 overflow-hidden">
+                    <div className="max-w-7xl mx-auto">
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+                            <div className="order-2 lg:order-1">
+                                <h2
+                                    ref={titleRef}
+                                    className="text-5xl md:text-7xl font-black text-gray-900 tracking-tighter mb-8 leading-tight reveal-blur"
+                                >
+                                    Software que <br/>
+                                    <span className="text-blue-600">Escala Realidades</span>
+                                </h2>
+                                <div className="space-y-6 text-lg text-gray-600 leading-relaxed max-w-xl">
+                                    <p>
+                                        En <span className="font-bold text-gray-900">Lameyer</span>, el desarrollo de software no es solo escribir código; es ingeniería de precisión. Diseñamos ecosistemas digitales robustos que actúan como el sistema nervioso de su empresa.
+                                    </p>
+                                    <p className="opacity-80">
+                                        Desde arquitecturas de microservicios hasta interfaces de usuario de alta fidelidad, nuestras soluciones están construidas para soportar el tráfico global mientras mantienen una latencia mínima y una seguridad impenetrable.
+                                    </p>
+                                    <div className="pt-6">
+                                        <a href="/pages/stack" className="inline-flex items-center gap-3 font-bold text-blue-600 group transition-all">
+                                            VER STACK TECNOLÓGICO
+                                            <svg className="w-5 h-5 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                            </svg>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="order-1 lg:order-2 relative">
+                                <div className="absolute -inset-4 bg-blue-600/5 rounded-[4rem] blur-2xl"></div>
+                                <img
+                                    src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200"
+                                    alt="Software Development"
+                                    className="relative rounded-[3rem] shadow-2xl object-cover aspect-[4/3] w-full border border-gray-100"
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = 'https://placehold.co/1200x900/1a202c/ffffff?text=Software+Development';
+                                    }}
+                                />
+                                <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-3xl shadow-xl border border-gray-50 flex items-center gap-4 max-w-[200px]">
+                                    <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold">99%</div>
+                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">Uptime en despliegues</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            );
+        };
+
+        // --- TECH STACK ---
+        const TECH_STACK = [
+            { name: 'JavaScript', slug: 'javascript' },
+            { name: 'Java', slug: 'openjdk' },
+            { name: 'Python', slug: 'python' },
+            { name: 'Docker', slug: 'docker' },
+            { name: 'React', slug: 'react' },
+            { name: 'Django', slug: 'django' },
+            { name: 'Vercel', slug: 'vercel' },
+            { name: 'AWS', slug: null, short: 'AWS' },   // Simple Icons no longer ships an AWS logo -> text badge
+            { name: 'Gemini', slug: 'googlegemini' },
+            { name: 'Google Cloud', slug: 'googlecloud' },
+            { name: 'Claude Code', slug: 'claude' },
+            { name: 'Figma', slug: 'figma' },
+            { name: 'Tailwind', slug: 'tailwindcss' },
+            { name: 'HTML5', slug: 'html5' },
+            { name: 'CSS3', slug: 'css' },
+        ];
+
+        // Grey icon by default, white on hover. If an icon fails to load (or has no slug),
+        // a text badge is shown instead of a broken image.
+        const TechIcon = ({ tech }) => {
+            const [failed, setFailed] = useState(!tech.slug);
+
+            if (failed) {
+                return (
+                    <div className="w-14 h-14 rounded-2xl border border-slate-600 flex items-center justify-center text-sm font-black tracking-tight text-slate-400 group-hover:text-white group-hover:border-blue-500/60 transition-colors duration-500">
+                        {tech.short || tech.name.slice(0, 3)}
+                    </div>
+                );
+            }
+
+            return (
+                <div className="relative w-14 h-14">
+                    {/* Grey baseline icon */}
+                    <img
+                        src={`https://cdn.simpleicons.org/${tech.slug}/94a3b8`}
+                        alt=""
+                        onError={() => setFailed(true)}
+                        className="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 group-hover:opacity-0"
+                    />
+                    {/* Highlighted icon (appears on hover) */}
+                    <img
+                        src={`https://cdn.simpleicons.org/${tech.slug}/ffffff`}
+                        alt={`${tech.name} logo`}
+                        className="absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+                    />
+                </div>
+            );
+        };
+
+        const StackSection = () => (
+            <section className="py-40 bg-slate-900 px-4 relative z-20">
+                <div className="max-w-7xl mx-auto text-center">
+                    <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-20">
+                        Stack Tecnológico
+                    </h3>
+
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+                        {TECH_STACK.map((tech) => (
+                            <div
+                                key={tech.name}
+                                className="group p-8 bg-slate-800/50 border border-slate-700 rounded-3xl hover:bg-slate-800 hover:border-blue-500/50 transition-all duration-300 flex flex-col items-center justify-center gap-4"
+                            >
+                                <TechIcon tech={tech} />
+                                <span className="text-slate-400 text-xs font-bold uppercase tracking-widest group-hover:text-white transition-colors">
+                                    {tech.name}
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
+        // --- CONTACT FORM (target of the CONTACTO buttons) ---
+        const ContactSection = () => {
+            const [form, setForm] = useState({ name: '', email: '', message: '' });
+
+            const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const subject = encodeURIComponent(`Contacto web - ${form.name}`);
+                const body = encodeURIComponent(`${form.message}\n\n${form.name}\n${form.email}`);
+                window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+            };
+
+            const inputClass = "w-full px-5 py-4 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
+
+            return (
+                <section id="form-section" className="scroll-mt-32 py-32 px-6 md:px-8 bg-white relative z-20">
+                    <div className="max-w-2xl mx-auto text-center">
+                        <h3 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter mb-4">
+                            Hablemos de su proyecto
+                        </h3>
+                        <p className="text-gray-500 font-medium mb-12">
+                            Cuéntenos qué necesita y le responderemos por correo.
+                        </p>
+
+                        <form onSubmit={handleSubmit} className="space-y-4 text-left">
+                            <div>
+                                <label htmlFor="contact-name" className="block text-sm font-bold text-gray-700 mb-2">Nombre</label>
+                                <input id="contact-name" type="text" required value={form.name} onChange={update('name')} className={inputClass} />
+                            </div>
+                            <div>
+                                <label htmlFor="contact-email" className="block text-sm font-bold text-gray-700 mb-2">Correo</label>
+                                <input id="contact-email" type="email" required value={form.email} onChange={update('email')} className={inputClass} />
+                            </div>
+                            <div>
+                                <label htmlFor="contact-message" className="block text-sm font-bold text-gray-700 mb-2">Mensaje</label>
+                                <textarea id="contact-message" rows="5" required value={form.message} onChange={update('message')} className={inputClass}></textarea>
+                            </div>
+                            <button
+                                type="submit"
+                                className="w-full sm:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full shadow-xl transition-all transform hover:scale-105"
+                            >
+                                Enviar mensaje
+                            </button>
+                        </form>
+                    </div>
+                </section>
+            );
+        };
+
+        const App = () => {
+            useEffect(() => {
+                gsap.registerPlugin(ScrollTrigger);
+                gsap.from("#hero-content", { duration: 1.5, y: 50, opacity: 0, ease: "power4.out" });
+            }, []);
+
+            return (
+                <Layout>
+                    <section className="min-h-[80vh] flex flex-col items-center justify-center px-4 text-center relative overflow-hidden">
+                        <div id="hero-content" className="relative z-10">
+                            <div className="inline-block mb-8 px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.5em] uppercase bg-blue-50/50">
+                                ES-MX 2026 | TECH FIRM & CONSULTING
+                            </div>
+                            <h1 className="text-6xl md:text-[10rem] font-black text-gray-900 tracking-tighter mb-10 leading-[0.85]">
+                                WEB SYSTEMS<br/><span className="text-blue-600">& DATA SOLUTIONS</span>
+                            </h1>
+                            <p className="text-xl md:text-2xl text-gray-500 max-w-3xl mx-auto mb-16 font-medium">
+                                Low-friction, evolutionary delivery framework with Modular Core + Serverless Edge (MC-SE) Strategy—built on top of the "As-a-Service" (XaaS) evolution.
+                            </p>
+                            <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+                                <button className="px-10 py-5 bg-blue-600 text-white font-black rounded-full shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs">Explorar Soluciones</button>
+                            </div>
+                        </div>
+                        <div className="absolute bottom-10 animate-bounce opacity-20">
+                            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 14l-7 7-7-7" strokeWidth="3"/></svg>
+                        </div>
+                    </section>
+
+                    <CircuitAnimationShowcase />
+
+                    <SoftwareSection />
+
+                    <StackSection />
+
+                    <ContactSection />
+                </Layout>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
