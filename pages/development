@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lameyer - Software Developement</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #ffffff;
+            color: #1a202c;
+            overflow-x: hidden;
+        }
+
+        .bubble-bg {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; overflow: hidden; z-index: 0;
+        }
+        .bubble {
+            position: absolute;
+            background: rgba(59, 130, 246, 0.08);
+            border: 1px solid rgba(59, 130, 246, 0.15);
+            border-radius: 50%;
+            bottom: -100px;
+            animation: rise var(--duration) infinite ease-in;
+        }
+        @keyframes rise {
+            0% { transform: translateY(0) scale(1); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.4; }
+            100% { transform: translateY(-110%) scale(1.2); opacity: 0; }
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        .menu-open #line1 { transform: translateY(8px) rotate(45deg); }
+        .menu-open #line2 { opacity: 0; }
+        .menu-open #line3 { transform: translateY(-8px) rotate(-45deg); }
+
+        .toggle-dot {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        input:checked ~ .toggle-dot {
+            transform: translateX(100%);
+            background-color: #2563eb;
+        }
+    </style>
+
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        const Layout = ({ children }) => {
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+            const toggleMenu = () => setIsMobileMenuOpen(!isMobileMenuOpen);
+
+            return (
+                <div className="relative min-h-screen">
+                    {/* Animated Background */}
+                    <div className="bubble-bg fixed inset-0 h-screen w-full">
+                        <div className="bubble" style={{ width: '300px', height: '300px', left: '10%', '--duration': '15s' }}></div>
+                        <div className="bubble" style={{ width: '200px', height: '200px', left: '60%', '--duration': '12s', animationDelay: '2s' }}></div>
+                        <div className="bubble" style={{ width: '150px', height: '150px', left: '30%', '--duration': '18s', animationDelay: '5s' }}></div>
+                        <div className="bubble" style={{ width: '100px', height: '100px', left: '80%', '--duration': '20s', animationDelay: '1s' }}></div>
+                    </div>
+
+                    {/* Top Banner */}
+                    <div className="fixed top-0 w-full h-10 bg-[#0f172a] z-[60] flex items-center justify-between px-8 overflow-hidden">
+                        <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap">
+                             SUSTENTABILIDAD CORPORATIVA & ESG
+                        </span>
+                        <div className="flex items-center space-x-4 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 overflow-x-auto no-scrollbar">
+                            {['ODS 6', 'ODS 11', 'ODS 13', 'AGENDA 2030'].map((cert, i) => (
+                                <div key={i} className="flex items-center space-x-1 flex-shrink-0">
+                                    <div className="w-1 h-3 bg-blue-500"></div>
+                                    <span className="text-[9px] font-bold text-white tracking-widest uppercase">{cert}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Desktop Navigation */}
+                    <nav className="fixed left-0 w-full z-50 px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px]">
+                        <a href="https://themeyer.eu" className="block z-50">
+                            <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer Logo" className="h-10 md:h-12 w-auto object-contain" />
+                        </a>
+                        
+                        <div className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase opacity-60">
+                            <a href="/pages/development" className="hover:text-blue-600 transition-colors">Development</a>
+                            <a href="/pages/blueprints" className="hover:text-blue-600 transition-colors">Blueprints</a>
+                            <a href="/pages/stack" className="hover:text-blue-600 transition-colors">Stack</a>                            
+                            <a href="/pages/components" className="hover:text-blue-600 transition-colors">Components</a>
+                            <a href="/pages/community" className="hover:text-blue-600 transition-colors">Community</a>
+                        </div>
+
+                        <div className="flex items-center space-x-4">
+                            <button 
+                                onClick={() => document.getElementById('form-section').scrollIntoView({ behavior: 'smooth' })} 
+                                className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-md"
+                            >
+                                CONTACTO
+                            </button>
+                            
+                            <button onClick={toggleMenu} className={`md:hidden flex flex-col justify-center items-center w-10 h-10 space-y-1.5 focus:outline-none z-[110] ${isMobileMenuOpen ? 'menu-open' : ''}`}>
+                                <span className="block w-6 h-0.5 bg-gray-900 transition-transform duration-300" id="line1"></span>
+                                <span className="block w-6 h-0.5 bg-gray-900 transition-opacity duration-300" id="line2"></span>
+                                <span className="block w-6 h-0.5 bg-gray-900 transition-transform duration-300" id="line3"></span>
+                            </button>
+                        </div>
+                    </nav>
+                        
+                    {/* Mobile Menu Overlay - Refactored Fix */}
+                    <div className={`fixed inset-0 bg-white/95 backdrop-blur-xl z-[100] md:hidden flex flex-col items-center justify-center space-y-8 transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'opacity-100 translate-x-0' : 'opacity-0 translate-x-full pointer-events-none'}`}>
+                        
+                        {/* Close Button Inside Overlay */}
+                        <button 
+                            onClick={toggleMenu} 
+                            className="absolute top-10 right-8 p-2 text-gray-900 hover:text-blue-600 transition-colors focus:outline-none"
+                            aria-label="Cerrar menú"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                            <a href="/pages/development" className="hover:text-blue-600 transition-colors">Development</a>
+                            <a href="/pages/blueprints" className="hover:text-blue-600 transition-colors">Blueprints</a>
+                            <a href="/pages/stack" className="hover:text-blue-600 transition-colors">Stack</a>                            
+                            <a href="/pages/components" className="hover:text-blue-600 transition-colors">Components</a>
+                            <a href="/pages/community" className="hover:text-blue-600 transition-colors">Community</a>
+                        <button 
+                            onClick={() => { toggleMenu(); document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' }); }} 
+                            className="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mt-4 active:scale-95 transition-transform"
+                        >
+                            CONTACTO
+                        </button>
+                    </div>
+
+                    <main className="pt-48 pb-20 relative z-10">
+                        {children}
+                    </main>
+                </div>
+            );
+        };
+
+        const ContactForm = () => {
+            const [status, setStatus] = useState({ loading: false, submitted: false, error: false });
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                const formData = new FormData(e.target);
+                if (formData.get("telefono_secundario")) {
+                    setStatus({ loading: false, submitted: true, error: false });
+                    return; 
+                }
+                setStatus({ loading: true, submitted: false, error: false });
+                const searchParams = new URLSearchParams(formData);
+                const scriptUrl = "https://script.google.com/macros/s/AKfycbzaqYJQIIWYBcbq0FCo38ulhTuYxGZxVVUOv1CklQ9mEJ_hheLsjvL3CYG9YUdfRDYl/exec"; 
+                try {
+                    await fetch(scriptUrl, { method: 'POST', body: searchParams, mode: 'no-cors' });
+                    setStatus({ loading: false, submitted: true, error: false });
+                    e.target.reset();
+                } catch (error) {
+                    setStatus({ loading: false, submitted: false, error: true });
+                }
+            };
+
+            if (status.submitted) {
+                return (
+                    <div className="p-12 text-center bg-white/80 rounded-3xl shadow-xl max-w-2xl mx-auto border border-green-100">
+                        <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h2 className="text-2xl font-extrabold text-gray-800 mb-2">¡RECIBIDO!</h2>
+                        <p className="text-gray-500">Nos pondremos en contacto con usted a la brevedad.</p>
+                        <button onClick={() => setStatus({ ...status, submitted: false })} className="mt-8 text-blue-600 font-bold hover:underline">Enviar otro mensaje</button>
+                    </div>
+                );
+            }
+
+            return (
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                    <div className="absolute left-[-9999px] top-[-9999px]" aria-hidden="true">
+                        <input type="text" name="telefono_secundario" tabIndex="-1" autoComplete="off" />
+                    </div>
+                    {[
+                        { label: 'NOMBRE', name: 'NOMBRE', type: 'text', placeholder: 'Nombre completo', req: true },
+                        { label: 'ORGANIZACIÓN', name: 'ORGANIZACIÓN', type: 'text', placeholder: 'Nombre de su empresa', req: true },
+                        { label: 'TELÉFONO', name: 'TELÉFONO', type: 'tel', placeholder: '+52...', req: true },
+                        { label: 'EMAIL', name: 'EMAIL', type: 'email', placeholder: 'correo@ejemplo.com', req: true }
+                    ].map((f, i) => (
+                        <div key={i} className="flex flex-col">
+                            <label className="mb-1 text-sm font-semibold text-gray-700">{f.label} {f.req && '*'}</label>
+                            <input type={f.type} name={f.name} placeholder={f.placeholder} required={f.req} className="px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 outline-none transition-all" />
+                        </div>
+                    ))}
+                    <div className="flex flex-col md:col-span-2">
+                        <label className="mb-1 text-sm font-semibold text-gray-700">TECNOLOGÍA *</label>
+                        <select name="TECNOLOGÍA" required defaultValue="" className="w-full px-4 py-3 rounded-lg border border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 outline-none appearance-none cursor-pointer">
+                            <option value="" disabled>Seleccione una opción...</option>
+                            <option value="ENTRETENIMIENTO INTERACTIVO">ENTRETENIMIENTO INTERACTIVO</option>
+                            <option value="CRM & DATA MANAGEMENT">CRM & DATA MANAGEMENT</option>
+                            <option value="CYBERSECURITY">CYBERSECURITY</option>
+                            <option value="React Development">React Development</option>
+                            <option value="API Cloud Integrations">API Cloud Integrations</option>
+                            <option value="SQL DB">SQL DB</option>
+                            <option value="System Technology Consulting">System Technology Consulting</option>
+                        </select>
+                    </div>
+                    <div className="md:col-span-2 mt-6">
+                        <button type="submit" disabled={status.loading} className={`w-full py-5 text-white font-extrabold rounded-2xl shadow-xl transition-all ${status.loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'}`}>
+                            {status.loading ? "PROCESANDO..." : "SOLICITAR INFORMACIÓN"}
+                        </button>
+                    </div>
+                </form>
+            );
+        };
+
+        const App = () => {
+            const [isCorporate, setIsCorporate] = useState(false);
+            const contentRef = useRef(null);
+
+            useEffect(() => {
+                gsap.registerPlugin(ScrollTrigger);
+                gsap.from("#title-anim", { duration: 1, y: 30, opacity: 0, ease: "power3.out" });
+            }, []);
+
+            useEffect(() => {
+                gsap.fromTo(contentRef.current, 
+                    { opacity: 0, y: 20 }, 
+                    { opacity: 1, y: 0, duration: 0.6, ease: "power2.out" }
+                );
+            }, [isCorporate]);
+
+            return (
+                <Layout>
+                    <section className="relative px-8 text-center mb-12">
+                        <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-4" id="title-anim">
+                            Red Digital de <span className="text-blue-600">Desarrolladores</span>
+                        </h1>
+                        <p className="text-gray-500 max-w-2xl mx-auto text-lg leading-relaxed">
+                            Orquestamos y automatizamos ecosistemas de ejecución segura, diseñando flujos de entrega continua con auditorías proactivas y rigor normativo, que unifican plataformasen de lógica visual en tiempo real con mitigación de tiempos de respuesta en nodos de alto rendimiento.
+                        </p>
+                    </section>
+
+                    <section className="py-12 md:py-20 px-4 md:px-8 bg-[#f8faff]/50 rounded-[3rem] relative z-20 mb-20 border border-blue-50">
+                        <div className="max-w-6xl mx-auto">
+                            <div className="grid md:grid-cols-2 gap-12 items-center glass rounded-[2.5rem] p-8 md:p-12 shadow-2xl shadow-blue-500/5 border border-white" id="ods-card">
+                                <div className="order-2 md:order-1 flex flex-col justify-center">
+                                    <span className="text-blue-600 font-bold text-xs uppercase tracking-widest mb-4 flex items-center gap-2">
+                                        <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                                        CON SUPERVISION INTERNA
+                                    </span>
+                                    <h2 className="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
+                                        Contrata gente de nuestra red
+                                    </h2>
+                                    <p className="text-gray-600 text-lg leading-relaxed mb-6">
+                                        Siempre estamos abiertos a conectar talento. Unete a la comunidad ya sea como desarrollador o cliente y explora los ultimos proyectos de la gente.
+                                    </p>
+                                    <ul className="space-y-3 mb-8">
+                                        <li className="flex items-start">
+                                            <span className="text-blue-500 mr-2">✓</span>
+                                            <span className="text-gray-600 font-medium">Sube tu repositorio para participar.</span>
+                                        </li>
+                                        <li className="flex items-start">
+                                            <span className="text-blue-500 mr-2">✓</span>
+                                            <span className="text-gray-600 font-medium">Registrate gratis para entrar.</span>
+                                        </li>
+                                    </ul>
+                                    <div className="flex items-center space-x-2">
+                                        <a href="/media/hero-images/computer-engineering-header.jpeg" target="_blank" rel="noreferrer" className="text-blue-600 font-bold flex items-center group">
+                                            Enviar curriculum
+                                            <svg className="w-4 h-4 ml-2 transform group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3"></path></svg>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div className="order-1 md:order-2 overflow-hidden rounded-2xl aspect-square relative group shadow-lg">
+                                    {/* Image or interactive element goes here */}
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <div id="form-section" className="max-w-4xl mx-auto px-4 pb-20">
+                        <div className="glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-white">
+                            <h2 className="text-3xl font-extrabold text-center text-gray-900 mb-2">Consultoria y Desarrollo</h2>
+                            <p className="text-center text-gray-500 mb-10">¿Quieres contratar nuestros servicios? Completa el formulario y nuestro equipo de expertos se pondrá en contacto con usted.</p>
+                            <ContactForm />
+                        </div>
+                    </div>
+                </Layout>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
