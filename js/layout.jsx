@@ -1,21 +1,26 @@
-// Shared by every page: header, footer and reusable sections.
-// Loaded with <script type="text/babel" src="/assets/layout.jsx"></script> before each page's own script.
+// Shared by EVERY page of the site (home, /pages/*, /blog/*).
+// Load it first:  <script type="text/babel" src="/js/layout.jsx"></script>
+// Then the page's own script calls renderPage(MyPage).
 const { useState, useEffect, useLayoutEffect, useRef } = React;
 
-// Change this to the address that should receive the contact form messages.
+// Change this to the address that should receive direct emails (CV, community, newsletter).
 const CONTACT_EMAIL = 'contacto@lameyer.net';
 
+// Google Apps Script that stores contact form submissions in Google Sheets.
+const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzaqYJQIIWYBcbq0FCo38ulhTuYxGZxVVUOv1CklQ9mEJ_hheLsjvL3CYG9YUdfRDYl/exec';
+
+// Header links. Every page lives in its own folder with an index.html.
 const NAV_LINKS = [
-    { href: '/pages/development', label: 'Development' },
-    { href: '/pages/components', label: 'Components' },
-    { href: '/pages/community', label: 'Community' },
-    { href: '/pages/stack', label: 'Stack' },
-    { href: '/blog', label: 'Blog' },
+    { href: '/pages/development/', label: 'Development' },
+    { href: '/pages/components/', label: 'Components' },
+    { href: '/pages/community/', label: 'Community' },
+    { href: '/pages/stack/', label: 'Stack' },
+    { href: '/blog/', label: 'Blog' },
 ];
 
-const isActive = (href) => window.location.pathname.replace(/\/$/, '').startsWith(href);
+const isActive = (href) => window.location.pathname.startsWith(href.replace(/\/$/, ''));
 
-// --- LAYOUT ---
+// --- LAYOUT: top banner, header, mobile menu, footer ---
 const Layout = ({ children }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -25,7 +30,7 @@ const Layout = ({ children }) => {
         const formElement = document.getElementById('form-section');
 
         if (formElement) {
-            // We are on the page with the form
+            // This page has the contact form
             formElement.scrollIntoView({ behavior: 'smooth' });
         } else {
             // The form lives on the home page
@@ -139,6 +144,113 @@ const Layout = ({ children }) => {
     );
 };
 
+// --- CONTACT FORM (Google Sheets via Apps Script, with a honeypot against bots) ---
+const ContactForm = () => {
+    const [status, setStatus] = useState({ loading: false, submitted: false, error: false });
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+
+        // Bots fill the hidden field; pretend success and send nothing
+        if (formData.get('telefono_secundario')) {
+            setStatus({ loading: false, submitted: true, error: false });
+            return;
+        }
+
+        setStatus({ loading: true, submitted: false, error: false });
+        try {
+            await fetch(FORM_ENDPOINT, { method: 'POST', body: new URLSearchParams(formData), mode: 'no-cors' });
+            setStatus({ loading: false, submitted: true, error: false });
+            e.target.reset();
+        } catch (error) {
+            setStatus({ loading: false, submitted: false, error: true });
+        }
+    };
+
+    if (status.submitted) {
+        return (
+            <div className="p-12 text-center bg-white/80 rounded-3xl max-w-2xl mx-auto border border-green-100 animate-fade-in">
+                <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                <h3 className="text-2xl font-black text-gray-900 mb-2">¡RECIBIDO!</h3>
+                <p className="text-gray-500 font-medium">Nos pondremos en contacto con usted a la brevedad.</p>
+                <button onClick={() => setStatus({ ...status, submitted: false })} className="mt-8 text-blue-600 font-bold hover:underline">Enviar otro mensaje</button>
+            </div>
+        );
+    }
+
+    // Field names must stay exactly as they are: the Google Sheet columns use them.
+    const FIELDS = [
+        { label: 'NOMBRE', name: 'NOMBRE', type: 'text', placeholder: 'Nombre completo' },
+        { label: 'ORGANIZACIÓN', name: 'ORGANIZACIÓN', type: 'text', placeholder: 'Nombre de su empresa' },
+        { label: 'TELÉFONO', name: 'TELÉFONO', type: 'tel', placeholder: '+52...' },
+        { label: 'EMAIL', name: 'EMAIL', type: 'email', placeholder: 'correo@ejemplo.com' },
+    ];
+    const TECHNOLOGIES = [
+        'ENTRETENIMIENTO INTERACTIVO',
+        'CRM & DATA MANAGEMENT',
+        'CYBERSECURITY',
+        'React Development',
+        'API Cloud Integrations',
+        'SQL DB',
+        'System Technology Consulting',
+    ];
+    const inputClass = "w-full px-5 py-4 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
+
+    return (
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5 text-left">
+            {/* Honeypot: hidden from people, visible to bots */}
+            <div className="absolute left-[-9999px] top-[-9999px]" aria-hidden="true">
+                <input type="text" name="telefono_secundario" tabIndex="-1" autoComplete="off" />
+            </div>
+
+            {FIELDS.map(f => (
+                <div key={f.name}>
+                    <label htmlFor={`field-${f.type}-${f.name.length}`} className="block text-sm font-bold text-gray-700 mb-2">{f.label} *</label>
+                    <input id={`field-${f.type}-${f.name.length}`} type={f.type} name={f.name} placeholder={f.placeholder} required className={inputClass} />
+                </div>
+            ))}
+
+            <div className="md:col-span-2">
+                <label htmlFor="field-tecnologia" className="block text-sm font-bold text-gray-700 mb-2">TECNOLOGÍA *</label>
+                <select id="field-tecnologia" name="TECNOLOGÍA" required defaultValue="" className={inputClass + ' appearance-none cursor-pointer'}>
+                    <option value="" disabled>Seleccione una opción...</option>
+                    {TECHNOLOGIES.map(t => <option key={t} value={t}>{t}</option>)}
+                </select>
+            </div>
+
+            {status.error && (
+                <p className="md:col-span-2 text-sm font-bold text-red-600">No se pudo enviar. Inténtelo de nuevo o escríbanos a {CONTACT_EMAIL}.</p>
+            )}
+
+            <div className="md:col-span-2 mt-2">
+                <button
+                    type="submit"
+                    disabled={status.loading}
+                    className={`w-full py-5 text-white font-black rounded-full shadow-xl transition-all ${status.loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700 hover:scale-[1.01]'}`}
+                >
+                    {status.loading ? 'PROCESANDO...' : 'SOLICITAR INFORMACIÓN'}
+                </button>
+            </div>
+        </form>
+    );
+};
+
+// Section with id="form-section": the target of every REGISTER button.
+const ContactSection = ({ title = 'Hablemos de su proyecto', text = 'Complete el formulario y nuestro equipo de expertos se pondrá en contacto con usted.' }) => (
+    <section id="form-section" className="scroll-mt-32 py-32 px-2 md:px-8 relative z-20">
+        <div className="max-w-4xl mx-auto glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-white">
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter text-center mb-4">{title}</h2>
+            <p className="text-gray-500 font-medium text-center mb-10 max-w-xl mx-auto">{text}</p>
+            <ContactForm />
+        </div>
+    </section>
+);
+
 // --- SHARED BUILDING BLOCKS ---
 
 // Hero at the top of each inner page
@@ -169,8 +281,8 @@ const SectionTitle = ({ kicker, children, dark }) => (
     </div>
 );
 
-// Call to action at the bottom of inner pages
-const RegisterCTA = ({ title = '¿Listo para construir?', text = 'Cuéntenos su proyecto y le responderemos por correo.' }) => (
+// Call to action at the bottom of pages without a form
+const RegisterCTA = ({ title = '¿Listo para construir?', text = 'Cuéntenos su proyecto y le responderemos a la brevedad.' }) => (
     <section className="py-24 px-4 relative z-20">
         <div className="max-w-5xl mx-auto rounded-[3rem] bg-slate-900 p-12 md:p-20 text-center shadow-2xl">
             <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">{title}</h2>
@@ -185,7 +297,7 @@ const RegisterCTA = ({ title = '¿Listo para construir?', text = 'Cuéntenos su 
     </section>
 );
 
-// --- TECH STACK (used on home and /pages/stack) ---
+// --- TECH STACK (home page and /pages/stack/) ---
 const TECH_STACK = [
     { name: 'JavaScript', slug: 'javascript', category: 'frontend' },
     { name: 'React', slug: 'react', category: 'frontend' },
