@@ -1,0 +1,75 @@
+body {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background-color: #ffffff;
+    color: #1a202c;
+    overflow-x: hidden;
+}
+
+/* Discrete Grey Circuit Pattern */
+.circuit-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background-color: #fcfdfe;
+
+    /* Major and Minor Grid Lines */
+    background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
+        linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
+
+    background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+
+    /* Radial fade so it doesn't clash with the edges of the screen */
+    mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+}
+
+/* The "Nodes" or solder points at intersections */
+.circuit-bg::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(circle, rgba(59, 130, 246, 0.2) 2px, transparent 2px);
+    background-size: 80px 80px;
+    background-position: -1px -1px;
+}
+
+/* Glassmorphism */
+.glass {
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Scrollbar hiding */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Title reveal */
+.reveal-blur {
+    opacity: 0;
+    filter: blur(12px);
+    transform: translateY(24px);
+    transition: opacity 0.9s ease-out, filter 0.9s ease-out, transform 0.9s ease-out;
+}
+.reveal-blur.reveal-active {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+}
+
+@keyframes fade-in {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .reveal-blur { opacity: 1; filter: none; transform: none; transition: none; }
+    .animate-fade-in { animation: none; }
+}
