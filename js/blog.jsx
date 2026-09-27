@@ -1,8 +1,162 @@
-// Shared by /blog (dashboard) and every /blog/<post>/ page.
-// Load after /assets/layout.jsx.
+// Shared by /blog/ (dashboard) and every /blog/<Entry>/ page.
+// Everything the blog needs lives in the /blog folder: blog.css, blog.jsx and one folder per entry.
 //
-// To add a post: create /blog/<Folder_Name>/index.html (copy an existing post),
-// then add an entry to BLOG_POSTS below. The dashboard picks it up automatically.
+// HOW TO ADD AN ENTRY
+//   1. Copy an existing entry folder, e.g. /blog/Rate_Limiting/ -> /blog/My_New_Entry/
+//   2. Edit its index.html: CONTROLS (checklist), the Content, and the path passed to renderPost()
+//   3. Add a matching object to BLOG_POSTS below (same path). The dashboard lists it automatically.
+const { useState, useEffect, useRef } = React;
+
+// --- HEADER / FOOTER (same as the main index.html; links go back to its hash routes) ---
+const NAV_LINKS = [
+    { href: '/#/development', label: 'Development' },
+    { href: '/#/components', label: 'Components' },
+    { href: '/#/community', label: 'Community' },
+    { href: '/#/stack', label: 'Stack' },
+    { href: '/blog/', label: 'Blog' },
+];
+
+const isActive = (href) => href.startsWith('/blog') && window.location.pathname.startsWith('/blog');
+
+const Layout = ({ children }) => {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+    const toggleMenu = () => setIsMobileMenuOpen(prev => !prev);
+
+    // The contact form lives on the main page
+    const handleRegisterClick = () => {
+        window.location.href = '/#form-section';
+    };
+
+    return (
+        <div className="relative min-h-screen">
+            {/* Background Circuit Pattern */}
+            <div className="circuit-bg"></div>
+
+            {/* Top Banner */}
+            <div className="fixed top-0 w-full h-10 bg-[#0f172a] z-[60] flex items-center justify-between px-8 overflow-hidden">
+                <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap flex items-center gap-2">
+                    SUSTENTABILIDAD CORPORATIVA & ESG
+                </span>
+                <div className="flex items-center space-x-4 md:space-x-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 overflow-x-auto no-scrollbar">
+                    {['ODS 6', 'ODS 11', 'ODS 13', 'AGENDA 2030', 'ESG COMPLIANT'].map((cert, index) => (
+                        <div key={index} className="flex items-center space-x-1 flex-shrink-0">
+                            <div className="w-1 h-3 bg-blue-500"></div>
+                            <span className="text-[9px] font-bold text-white tracking-widest uppercase">{cert}</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            {/* Navigation */}
+            <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+                <a href="/#/" className="block z-50">
+                    <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer Logo" className="h-10 md:h-12 w-auto object-contain" />
+                </a>
+
+                {/* Desktop Links */}
+                <div className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase">
+                    {NAV_LINKS.map(link => (
+                        <a
+                            key={link.href}
+                            href={link.href}
+                            aria-current={isActive(link.href) ? 'page' : undefined}
+                            className={`transition-colors hover:text-blue-600 ${isActive(link.href) ? 'text-blue-600' : 'opacity-60 hover:opacity-100'}`}
+                        >
+                            {link.label}
+                        </a>
+                    ))}
+                </div>
+
+                <div className="flex items-center space-x-4">
+                    <button
+                        onClick={handleRegisterClick}
+                        className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-md"
+                    >
+                        REGISTER
+                    </button>
+
+                    {/* Mobile Hamburger Button */}
+                    <button
+                        onClick={toggleMenu}
+                        className="md:hidden p-2 text-gray-900 focus:outline-none"
+                        aria-label="Abrir menú"
+                    >
+                        <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
+                    </button>
+                </div>
+            </nav>
+
+            {/* Mobile Menu Overlay */}
+            <div className={`fixed inset-0 bg-white/95 backdrop-blur-xl z-[100] md:hidden flex flex-col items-center justify-center space-y-8 transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
+
+                {/* Close Button */}
+                <button
+                    onClick={toggleMenu}
+                    className="absolute top-10 right-8 p-4 text-gray-900 hover:text-blue-600 transition-colors focus:outline-none z-[110]"
+                    aria-label="Cerrar menú"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+
+                {NAV_LINKS.map(link => (
+                    <a
+                        key={link.href}
+                        href={link.href}
+                        onClick={() => setIsMobileMenuOpen(false)}
+                        className={`text-3xl font-black tracking-tight hover:text-blue-600 transition-colors ${isActive(link.href) ? 'text-blue-600' : 'text-gray-900'}`}
+                    >
+                        {link.label}
+                    </a>
+                ))}
+                <button
+                    onClick={handleRegisterClick}
+                    className="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mt-4"
+                >
+                    REGISTER
+                </button>
+            </div>
+
+            <main className="pt-32 px-4 md:px-8">
+                {children}
+            </main>
+
+            <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">
+                &copy; 2026 LAMEYER® EU. TODOS LOS DERECHOS RESERVADOS.
+            </footer>
+        </div>
+    );
+};
+
+// Call to action at the bottom of blog pages
+const RegisterCTA = ({ title, text }) => (
+    <section className="py-24 px-4 relative z-20">
+        <div className="max-w-5xl mx-auto rounded-[3rem] bg-slate-900 p-12 md:p-20 text-center shadow-2xl">
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-6">{title}</h2>
+            <p className="text-slate-400 text-lg font-medium mb-10 max-w-xl mx-auto">{text}</p>
+            <a
+                href="/#form-section"
+                className="inline-block px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs"
+            >
+                Register
+            </a>
+        </div>
+    </section>
+);
+
+const renderPage = (Page) => {
+    ReactDOM.createRoot(document.getElementById('root')).render(
+        <Layout>
+            <Page />
+        </Layout>
+    );
+};
+
+// --- BLOG ---
 
 // The five layers of the Cloudflare defense model, in the order a request crosses them.
 const BLOG_TYPES = [
