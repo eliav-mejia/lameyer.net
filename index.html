@@ -106,12 +106,23 @@
         // Change this to the address that should receive the contact form messages.
         const CONTACT_EMAIL = 'contacto@lameyer.net';
 
-        // Hash routes: everything is served by this single index.html (GitHub Pages).
+        // Hash routes are served by this index.html (GitHub Pages).
+        // The blog is a real folder (/blog/), with its own index.html and one folder per entry.
         const NAV_LINKS = [
             { href: '#/development', label: 'Development' },
             { href: '#/components', label: 'Components' },
             { href: '#/community', label: 'Community' },
             { href: '#/stack', label: 'Stack' },
+            { href: '/blog/', label: 'Blog' },
+        ];
+
+        // Latest blog entries shown on the home page. Paths match the folders inside /blog/.
+        const BLOG_HIGHLIGHTS = [
+            { layer: '01', label: 'Edge Layer (DDoS & DNS)', href: '/blog/Edge_Layer_(DDoS_&_DNS)/' },
+            { layer: '02', label: 'WAF & Bot Layer (Layer 7)', href: '/blog/WAF_&_Bot_Layer_(Layer_7)/' },
+            { layer: '03', label: 'API Endpoint Protection', href: '/blog/API_Endpoint_Protection/' },
+            { layer: '04', label: 'Rate Limiting', href: '/blog/Rate_Limiting/' },
+            { layer: '05', label: 'Cloudflare Tunnel', href: '/blog/Cloudflare_Tunnel/' },
         ];
 
         // --- ROUTER ---
@@ -497,6 +508,44 @@
             </section>
         );
 
+        // --- BLOG TEASER (links into the /blog/ folder) ---
+        const BlogSection = () => (
+            <section className="py-32 px-4 md:px-8 relative z-20">
+                <div className="max-w-6xl mx-auto">
+                    <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
+                        <div>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Blog · API Security</p>
+                            <h3 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
+                                Defensa en capas<br/><span className="text-blue-600">para APIs headless</span>
+                            </h3>
+                        </div>
+                        <a
+                            href="/blog/"
+                            className="self-start md:self-auto inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full shadow-xl hover:scale-105 transition-all uppercase tracking-widest text-xs"
+                        >
+                            Ver el blog
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                            </svg>
+                        </a>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                        {BLOG_HIGHLIGHTS.map(post => (
+                            <a
+                                key={post.href}
+                                href={post.href}
+                                className="group p-6 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-lg shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300"
+                            >
+                                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500 mb-3">Layer {post.layer}</span>
+                                <span className="block font-black text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">{post.label}</span>
+                            </a>
+                        ))}
+                    </div>
+                </div>
+            </section>
+        );
+
         // --- CONTACT FORM (target of the REGISTER buttons) ---
         const ContactSection = () => {
             const [form, setForm] = useState({ name: '', email: '', message: '' });
@@ -556,10 +605,22 @@
             </section>
         );
 
+        // #/blog lives in its own folder, so send the visitor there
+        const BlogRedirect = () => {
+            useEffect(() => { window.location.replace('/blog/'); }, []);
+            return <PlaceholderPage title="Blog" />;
+        };
+
         const HomePage = () => {
             useEffect(() => {
                 gsap.registerPlugin(ScrollTrigger);
                 gsap.from("#hero-content", { duration: 1.5, y: 50, opacity: 0, ease: "power4.out" });
+
+                // Arriving from a blog page's REGISTER button (/#form-section):
+                // the form only exists after React renders, so scroll to it here.
+                if (window.location.hash === '#form-section') {
+                    setTimeout(() => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                }
             }, []);
 
             return (
@@ -590,6 +651,8 @@
 
                     <StackSection />
 
+                    <BlogSection />
+
                     <ContactSection />
                 </>
             );
@@ -600,6 +663,7 @@
             components: () => <PlaceholderPage title="Components" />,
             community: () => <PlaceholderPage title="Community" />,
             stack: () => <StackSection />,
+            blog: BlogRedirect,
         };
 
         const App = () => {
