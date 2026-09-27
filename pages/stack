@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stack - Lameyer</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/assets/layout.jsx"></script>
+    <script type="text/babel">
+        // Categories match the `category` field of TECH_STACK in /assets/layout.jsx
+        const CATEGORIES = [
+            { id: 'frontend', label: 'Frontend', desc: 'Interfaces rápidas, accesibles y consistentes con el sistema de diseño.' },
+            { id: 'backend', label: 'Backend', desc: 'Lógica de negocio, APIs y servicios con tipado y pruebas automatizadas.' },
+            { id: 'cloud', label: 'Cloud & DevOps', desc: 'Contenedores, infraestructura administrada y despliegues continuos en el edge.' },
+            { id: 'ai', label: 'Inteligencia Artificial', desc: 'Modelos de lenguaje integrados en productos y en nuestro flujo de desarrollo.' },
+            { id: 'design', label: 'Diseño', desc: 'Prototipos y sistemas de diseño colaborativos antes de escribir código.' },
+        ];
+
+        const PRINCIPLES = [
+            { title: 'El problema elige la herramienta', desc: 'Seleccionamos cada tecnología por lo que el proyecto necesita, no por tendencia.' },
+            { title: 'Estándares abiertos', desc: 'Preferimos tecnologías con comunidades sólidas para evitar dependencia de un solo proveedor.' },
+            { title: 'Portabilidad', desc: 'Contenedores e infraestructura como código: el sistema puede moverse entre nubes.' },
+            { title: 'Seguridad por defecto', desc: 'Dependencias auditadas, secretos gestionados y principios Zero Trust desde el inicio.' },
+        ];
+
+        const StackPage = () => {
+            const [filter, setFilter] = useState('all');
+
+            const visibleCategories = filter === 'all' ? CATEGORIES : CATEGORIES.filter(c => c.id === filter);
+
+            const chipClass = (active) =>
+                `px-5 py-2 rounded-full text-xs font-bold uppercase tracking-widest transition-colors border ${active
+                    ? 'bg-blue-600 border-blue-600 text-white'
+                    : 'bg-slate-800/50 border-slate-700 text-slate-400 hover:text-white hover:border-blue-500/50'}`;
+
+            return (
+                <>
+                    <PageHero
+                        eyebrow="STACK"
+                        title="Nuestro"
+                        accent="Stack Tecnológico"
+                        intro="Las herramientas con las que diseñamos, construimos y operamos sistemas web y de datos."
+                    />
+
+                    {/* Stack by category */}
+                    <section className="py-32 -mx-4 md:-mx-8 px-4 md:px-8 bg-slate-900 relative z-20">
+                        <div className="max-w-7xl mx-auto">
+                            <div className="flex flex-wrap justify-center gap-3 mb-20" role="group" aria-label="Filtrar por categoría">
+                                <button onClick={() => setFilter('all')} aria-pressed={filter === 'all'} className={chipClass(filter === 'all')}>Todo</button>
+                                {CATEGORIES.map(c => (
+                                    <button key={c.id} onClick={() => setFilter(c.id)} aria-pressed={filter === c.id} className={chipClass(filter === c.id)}>
+                                        {c.label}
+                                    </button>
+                                ))}
+                            </div>
+
+                            <div className="space-y-20">
+                                {visibleCategories.map(category => (
+                                    <div key={category.id} className="animate-fade-in">
+                                        <div className="mb-8 text-center md:text-left">
+                                            <h2 className="text-3xl md:text-4xl font-black text-white tracking-tighter mb-2">{category.label}</h2>
+                                            <p className="text-slate-400 font-medium">{category.desc}</p>
+                                        </div>
+                                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
+                                            {TECH_STACK.filter(t => t.category === category.id).map(tech => (
+                                                <TechTile key={tech.name} tech={tech} />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    {/* Principles */}
+                    <section className="py-32 relative z-20">
+                        <div className="max-w-6xl mx-auto">
+                            <SectionTitle kicker="Criterios">Cómo elegimos</SectionTitle>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                {PRINCIPLES.map((p, i) => (
+                                    <div key={p.title} className="flex gap-6 p-8 rounded-[2rem] bg-white/90 border border-gray-100 shadow-lg shadow-gray-200/40">
+                                        <span className="text-4xl font-black text-blue-600/20">{String(i + 1).padStart(2, '0')}</span>
+                                        <div>
+                                            <h3 className="text-lg font-black text-gray-900 mb-2">{p.title}</h3>
+                                            <p className="text-sm text-gray-500 font-medium leading-relaxed">{p.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </section>
+
+                    <RegisterCTA title="¿Qué stack necesita su proyecto?" text="Le ayudamos a elegir la arquitectura adecuada desde el primer día." />
+                </>
+            );
+        };
+
+        renderPage(StackPage);
+    </script>
+</body>
+</html>
