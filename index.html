@@ -484,30 +484,6 @@
             );
         };
 
-        const StackSection = () => (
-            <section className="py-40 bg-slate-900 px-4 relative z-20">
-                <div className="max-w-7xl mx-auto text-center">
-                    <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-20">
-                        Stack Tecnológico
-                    </h3>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
-                        {TECH_STACK.map((tech) => (
-                            <div
-                                key={tech.name}
-                                className="group p-8 bg-slate-800/50 border border-slate-700 rounded-3xl hover:bg-slate-800 hover:border-blue-500/50 transition-all duration-300 flex flex-col items-center justify-center gap-4"
-                            >
-                                <TechIcon tech={tech} />
-                                <span className="text-slate-400 text-xs font-bold uppercase tracking-widest group-hover:text-white transition-colors">
-                                    {tech.name}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-        );
-
         // --- BLOG TEASER (links into the /blog/ folder) ---
         const BlogSection = () => (
             <section className="py-32 px-4 md:px-8 relative z-20">
