@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Layer (DDoS & DNS) - Lameyer Blog</title>
+    <meta name="description" content="How Cloudflare's Anycast network absorbs Layer 3/4 DDoS attacks and DNS floods before they reach your API.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Proxy every API DNS record (orange cloud)',
+            'Enable DNSSEC on the zone',
+            'Remove unproxied records that point at the origin',
+            'Rotate the origin IP if it was ever public',
+            'Review DDoS alerts and managed ruleset sensitivity',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Operating a headless API without a frontend leaves your keys and backend data exposed to scraping,
+                    brute force and direct origin attacks. Cloudflare answers with a layered defense model that filters
+                    malicious traffic at several checkpoints between the client and your servers. The edge is the first
+                    and outermost of those checkpoints.
+                </P>
+
+                <H2>Anycast: one address, hundreds of data centers</H2>
+                <P>
+                    Cloudflare announces the same IP addresses from every data center in its global network. With Anycast
+                    routing, each packet lands at the data center closest to its source. A botnet spread across the world
+                    therefore has its traffic split across the whole network instead of converging on a single link, and each
+                    location only has to absorb its local share of the attack.
+                </P>
+
+                <H2>Volumetric Layer 3 and Layer 4 attacks</H2>
+                <P>
+                    Network-layer attacks try to exhaust bandwidth or connection state rather than exploit your application.
+                    Cloudflare mitigates them automatically, without you writing any rules:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">SYN floods</strong> that fill connection tables with half-open TCP handshakes.</>,
+                    <><strong className="text-gray-900">UDP floods</strong> that saturate links with junk datagrams.</>,
+                    <><strong className="text-gray-900">Reflection and amplification</strong> attacks that abuse open DNS, NTP or memcached servers to multiply traffic toward a victim.</>,
+                ]} />
+                <P>
+                    For a proxied hostname, Cloudflare only forwards HTTP(S) requests to your origin. Raw packet floods aimed
+                    at that hostname stop at the edge and never consume your server's bandwidth.
+                </P>
+
+                <H2>DNS: the perimeter nobody watches</H2>
+                <P>
+                    Cloudflare's authoritative DNS runs on the same Anycast network, so DNS query floods are absorbed the same
+                    way. Two DNS settings matter most for an API:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Proxied records.</strong> A proxied (orange cloud) record resolves to Cloudflare's IPs, not yours. A DNS-only (grey cloud) record publishes your origin IP to anyone who asks.</>,
+                    <><strong className="text-gray-900">DNSSEC.</strong> Signs your zone so resolvers can detect forged answers that would redirect API clients elsewhere.</>,
+                ]} />
+
+                <Callout title="The most common leak">
+                    A single unproxied record, such as <Code>direct.api.example.com</Code> or a mail record on the same server,
+                    reveals the origin IP and lets attackers skip every layer described in this series. Historical DNS
+                    databases may also remember an IP you used before moving behind Cloudflare. If the origin was ever public,
+                    change its IP.
+                </Callout>
+
+                <H2>Where the edge stops</H2>
+                <P>
+                    The edge is excellent at volume, but a well-formed HTTP request carrying a SQL injection looks perfectly
+                    normal at the network layer. Inspecting request content is the job of the next checkpoint, the{' '}
+                    <a href="/blog/waf-bot-layer-layer-7.html" className="text-blue-600 font-bold hover:underline">WAF & Bot Layer</a>.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/edge-layer-ddos-dns.html', CONTROLS, Content);
+    </script>
+</body>
+</html>

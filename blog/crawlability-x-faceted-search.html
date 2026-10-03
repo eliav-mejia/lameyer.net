@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crawlability × Faceted Search - Lameyer Blog</title>
+    <meta name="description" content="Faceted filter URLs without crawl traps: deciding in code which facets get indexable landing pages, and canonicalizing or blocking the rest.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Count how many filter URLs your site can produce',
+            'Give each facet an explicit indexing policy',
+            'Turn valuable facets into real, static paths',
+            'Canonicalize parameter variations to the base page',
+            'Block free-text search parameters in robots.txt',
+            'List only canonical URLs in the sitemap',
+        ];
+
+        const POLICIES = [
+            { facet: 'type', value: 'One per stage', policy: 'Landing page', why: 'Each stage already has a post that serves as its page.' },
+            { facet: 'series', value: '2', policy: 'Landing page', why: 'Worth a real path such as /blog/search/.' },
+            { facet: 'zone, kind', value: 'A few each', policy: 'Canonical → /blog/', why: 'Useful to people, adds nothing new for search.' },
+            { facet: 'threats', value: 'Any combination', policy: 'Canonical → /blog/', why: 'Combinations multiply fast.' },
+            { facet: 'sort', value: '3', policy: 'Canonical → /blog/', why: 'Same content, different order.' },
+            { facet: 'q', value: 'Unlimited', policy: 'Block in robots.txt', why: 'Free text creates infinite URLs.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    The dashboard of this blog keeps its filters in the URL: <Code>/blog/?series=search&type=crawl&threats=Duplicate+URLs</Code>.
+                    That is good for people, because any view can be bookmarked or shared. For crawlers it is a risk. Every combination of
+                    filters is a distinct URL that shows a subset of the same posts, and the number of combinations grows very quickly.
+                </P>
+
+                <H2>Doing the math</H2>
+                <P>
+                    With 9 types (plus "all"), 2 zones (plus "all"), 3 formats, 3 sort orders and any subset of its 26 problems, the search series
+                    alone can produce billions of distinct URLs. Almost all of them are near-duplicates. A crawler that follows them
+                    wastes time it could spend on your real pages, and the duplicates compete with each other in the index. That is a{' '}
+                    <strong className="text-gray-900">crawl trap</strong>.
+                </P>
+                <P>
+                    Crawlers do find these URLs: the type and problem chips on every post link to filtered dashboard views. Those links are
+                    useful to readers, so the fix is not to remove them but to tell crawlers what to do with them.
+                </P>
+
+                <H2>A policy per facet, written as code</H2>
+                <P>
+                    Decide once, for each filter, what should happen to it, and record the decision next to the facet definitions. That is{' '}
+                    <A href="/blog/search-as-code-sac.html">Search as Code</A> applied to a public site:
+                </P>
+                <Table
+                    columns={[{ key: 'facet', label: 'Facet', mono: true }, { key: 'value', label: 'Values' }, { key: 'policy', label: 'Policy', accent: true }, { key: 'why', label: 'Why' }]}
+                    rows={POLICIES}
+                />
+                <CodeBlock title="facets.config.js">{`// One entry per URL parameter the dashboard writes.
+export const FACET_POLICY = {
+  series:  'landing',     // build a real path per value
+  type:    'landing',
+  zone:    'canonical',   // keep crawlable, point canonical at /blog/
+  kind:    'canonical',
+  threats: 'canonical',
+  sort:    'canonical',
+  q:       'block',       // Disallow in robots.txt
+};`}</CodeBlock>
+
+                <H2>Landing: make valuable facets real pages</H2>
+                <P>
+                    A static host ignores the query string, so <Code>/blog/?series=search</Code> is always the same file. A facet worth
+                    indexing needs a real path, generated at build time with its own title, description and pre-rendered list of posts
+                    (see <A href="/blog/ssr-static-generation.html">SSR & Static Generation</A>). On this blog, each stage's main post
+                    already plays that role for the <Code>type</Code> facet.
+                </P>
+
+                <H2>Canonical: one address for everything else</H2>
+                <P>
+                    Because the dashboard is a single <Code>index.html</Code>, one tag covers every parameter combination:
+                </P>
+                <CodeBlock title="/blog/index.html head">{`<link rel="canonical" href="https://lameyer.net/blog/">`}</CodeBlock>
+                <P>
+                    A canonical is a strong hint, not a command, but for pages that are clearly subsets of the base page search engines
+                    generally follow it.
+                </P>
+
+                <H2>Block: only for unbounded parameters</H2>
+                <CodeBlock title="/robots.txt">{`User-agent: *
+Disallow: /*?q=
+Disallow: /*&q=
+
+Sitemap: https://lameyer.net/sitemap.xml`}</CodeBlock>
+                <Callout title="Don't block what you canonicalize">
+                    A crawler can't read the canonical tag of a URL it is not allowed to fetch. Use robots.txt only for parameters with
+                    unlimited values, such as free-text search, and let the canonical tag handle the rest. See{' '}
+                    <A href="/blog/crawlability-indexing.html">Crawlability & Indexing</A> for why <Code>Disallow</Code> doesn't remove
+                    pages from the index.
+                </Callout>
+
+                <H2>Sitemaps list canonical URLs only</H2>
+                <P>
+                    Generate the sitemap from the same configuration: every post, every landing path, and no parameter URLs. When the
+                    policy and the sitemap come from one file, they can't contradict each other.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/crawlability-x-faceted-search.html', CONTROLS, Content);
+    </script>
+</body>
+</html>

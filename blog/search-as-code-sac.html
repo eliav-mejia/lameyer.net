@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search as Code (SaC) - Lameyer Blog</title>
+    <meta name="description" content="Search as Code: keeping analyzers, synonyms, boosts, filters and saved queries in git, reviewed in pull requests and deployed by CI.">
+    <link rel="canonical" href="https://lameyer.net/blog/search-as-code-sac.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Move every search setting out of admin UIs into git',
+            'Tokenize identifiers on camelCase and snake_case',
+            'Keep synonyms in a reviewed text file',
+            'Version the embedding model with the config',
+            'Store saved queries next to the code they audit',
+            'Deploy search config only through CI',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Search quality usually degrades through small edits nobody remembers making: a synonym added in an admin console,
+                    a boost changed to fix one complaint, an index rebuilt with a different analyzer. <strong className="text-gray-900">Search
+                    as Code</strong> applies the infrastructure-as-code idea to search. Every setting that changes which results appear,
+                    or in what order, lives in a file in git, goes through a pull request and is deployed by a pipeline.
+                </P>
+
+                <H2>What belongs in the repository</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Index definition:</strong> fields, types and analyzers.</>,
+                    <><strong className="text-gray-900">Vocabulary:</strong> synonyms, stop words and abbreviations specific to your codebase.</>,
+                    <><strong className="text-gray-900">Ranking:</strong> field boosts, recency decay, the hybrid keyword/vector weighting and the reranker.</>,
+                    <><strong className="text-gray-900">Embedding settings:</strong> model name and version, chunking rules and the chunk header format.</>,
+                    <><strong className="text-gray-900">Facets and filters:</strong> which metadata users can filter by and which values are allowed.</>,
+                    <><strong className="text-gray-900">Saved queries:</strong> the searches your team runs again and again, such as security audits.</>,
+                ]} />
+                <CodeBlock title="Repository layout">{`search/
+├── index.json          # mappings + analyzers
+├── synonyms.txt        # one rule per line, reviewed like code
+├── ranking.yaml        # boosts, hybrid weights, reranker
+├── embedding.yaml      # model, version, chunking rules
+├── queries/            # saved queries, run on a schedule
+│   └── security.yaml
+└── benchmark/          # queries + expected results
+    └── queries.jsonl`}</CodeBlock>
+
+                <H2>Analyzers that understand identifiers</H2>
+                <P>
+                    A standard text analyzer treats <Code>reattemptCharge</Code> as one token, so a search for "charge" misses it. The
+                    fix is a one-time analyzer change, and because it lives in a file, the reason for it is in the commit history.
+                    In Elasticsearch or OpenSearch, a <Code>word_delimiter_graph</Code> filter splits identifiers while keeping the original:
+                </P>
+                <CodeBlock title="search/index.json (excerpt)">{`"analysis": {
+  "filter": {
+    "code_parts": {
+      "type": "word_delimiter_graph",
+      "split_on_case_change": true,
+      "split_on_numerics": true,
+      "preserve_original": true
+    }
+  },
+  "analyzer": {
+    "code": {
+      "tokenizer": "whitespace",
+      "filter": ["code_parts", "lowercase", "flatten_graph"]
+    }
+  }
+}`}</CodeBlock>
+                <P>
+                    Now <Code>reattemptCharge</Code>, <Code>reattempt_charge</Code> and "reattempt charge" all match each other.
+                </P>
+
+                <H2>Synonyms are code too</H2>
+                <P>
+                    Every team has its own vocabulary: "PSP" means payment service provider, "ledger" and "journal" mean the same table.
+                    Synonyms close that gap for keyword search, but a bad rule can flood results with noise. Keeping them in a reviewed file
+                    means someone has to explain each rule:
+                </P>
+                <CodeBlock title="search/synonyms.txt">{`# Payments team vocabulary (owner: @acme/payments)
+retry, reattempt, backoff
+psp, payment service provider
+ledger, journal
+# One-way: a search for "k8s" also finds "kubernetes", not the reverse
+k8s => k8s, kubernetes`}</CodeBlock>
+
+                <H2>Saved queries as scheduled checks</H2>
+                <P>
+                    Some searches are really audits: "where do we still call the deprecated client?", "who disables TLS verification?".
+                    Write them down once and run them on a schedule. With the GitHub CLI, a saved query is a single command:
+                </P>
+                <CodeBlock title="search/queries/security.yaml">{`# Our own format, read by a small nightly script that calls gh
+- name: tls-verification-disabled
+  owner: "@acme/security"
+  query: "verify=False language:python"
+  args: ["--owner", "acme", "--json", "repository,path,url"]
+  expect: 0            # any hit fails the nightly job
+
+- name: legacy-payments-client
+  owner: "@acme/payments"
+  query: "LegacyPspClient"
+  args: ["--owner", "acme", "--json", "repository,path"]
+  expect_max: 12       # migration in progress; must only go down`}</CodeBlock>
+                <CodeBlock title="Running one query">{`gh search code "verify=False language:python" --owner acme --json repository,path,url`}</CodeBlock>
+
+                <H2>The deployment pipeline</H2>
+                <P>
+                    A pull request that changes anything under <Code>search/</Code> should validate the files, build a temporary index,
+                    and run the benchmark against it. Merging deploys the new config by creating a new index and switching an alias to it,
+                    so a revert is also a rollback. The benchmark step is what turns this from tidy config management into actual quality
+                    control. <A href="/blog/benchmarks-x-search-as-code.html">Benchmarks × Search as Code</A> walks through that CI job.
+                </P>
+
+                <Callout title="Config without measurement is still guesswork">
+                    Version control tells you <em>what</em> changed. Only a benchmark tells you whether it was an improvement. Build one from
+                    real queries with the method in <A href="/blog/benchmark-curation-reap-harvest.html">Benchmark Curation</A>.
+                </Callout>
+
+                <H2>Facets are search config, too</H2>
+                <P>
+                    The same idea applies to the filters on a public site, such as the type and topic filters on this blog. Defining facets
+                    in code lets you decide, in one reviewed place, which filter combinations deserve their own indexable page and which should
+                    stay out of search engines. That is the subject of <A href="/blog/crawlability-x-faceted-search.html">Crawlability ×
+                    Faceted Search</A>.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/search-as-code-sac.html', CONTROLS, Content);
+    </script>
+</body>
+</html>
