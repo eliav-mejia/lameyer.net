@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semantic & Vector Search - Lameyer Blog</title>
+    <meta name="description" content="Semantic and vector search over code repositories: syntax-aware chunking, embeddings, HNSW indexes, metadata filters and hybrid keyword + vector ranking.">
+    <link rel="canonical" href="https://lameyer.net/blog/semantic-vector-search.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Chunk code by function and class, not by line count',
+            'Prefix every chunk with its path and enclosing symbol',
+            'Embed queries and chunks with the same model version',
+            'Store repo, language and path next to each vector',
+            'Combine keyword and vector results with RRF',
+            'Rerank only the top candidates',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Keyword search answers "where does this string appear?". Developers usually ask something else: "where do we retry
+                    failed payments?" The function that does it may be called <Code>reattempt_charge</Code> and never use the word
+                    "retry". Semantic search closes that gap by comparing <em>meaning</em> instead of characters.
+                </P>
+
+                <H2>How it works</H2>
+                <P>
+                    An embedding model turns a piece of text or code into a vector: a list of a few hundred to a few thousand numbers.
+                    Inputs with similar meaning end up close together, usually measured with cosine similarity. A search then has five steps:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Chunk</strong> the repository into units small enough to embed.</>,
+                    <><strong className="text-gray-900">Embed</strong> each chunk and store the vector with its metadata.</>,
+                    <><strong className="text-gray-900">Index</strong> the vectors for approximate nearest-neighbour (ANN) lookup, typically with HNSW.</>,
+                    <><strong className="text-gray-900">Query:</strong> embed the question with the same model and fetch the nearest chunks.</>,
+                    <><strong className="text-gray-900">Rerank</strong> the top results with a slower, more precise model.</>,
+                ]} />
+
+                <H2>Chunking: follow the syntax tree</H2>
+                <P>
+                    Splitting a file every 50 lines cuts functions in half, so neither half embeds well. A parser such as tree-sitter
+                    gives you the syntax tree, so you can chunk at function, method and class boundaries and only split a unit when it is
+                    too long for the model. Then add a short header to each chunk with context the code itself doesn't carry:
+                </P>
+                <CodeBlock title="One chunk, as sent to the embedding model">{`# repo: acme/payments-ledger-api
+# path: src/payments/retry.py
+# symbol: PaymentRetrier.reattempt_charge
+# language: python
+def reattempt_charge(self, charge_id: str, attempt: int) -> Charge:
+    """Retry a failed card charge with exponential backoff."""
+    delay = min(2 ** attempt, 300)
+    ...`}</CodeBlock>
+                <P>
+                    The header helps twice. The model sees that this is payments code, and you can show the path and symbol in results
+                    without a second lookup.
+                </P>
+
+                <H2>Storing vectors next to metadata</H2>
+                <P>
+                    You don't need a dedicated vector database to start. PostgreSQL with the pgvector extension keeps vectors, metadata
+                    and filters in one place:
+                </P>
+                <CodeBlock title="PostgreSQL + pgvector">{`CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE code_chunks (
+    id         bigserial PRIMARY KEY,
+    repo       text NOT NULL,
+    path       text NOT NULL,
+    language   text NOT NULL,
+    symbol     text,
+    content    text NOT NULL,
+    model      text NOT NULL,          -- embedding model + version
+    embedding  vector(1024) NOT NULL
+);
+
+CREATE INDEX ON code_chunks USING hnsw (embedding vector_cosine_ops);
+
+-- $1 is the query embedding; <=> is cosine distance
+SELECT repo, path, symbol
+FROM code_chunks
+WHERE language = 'python' AND repo LIKE 'acme/payments-%'
+ORDER BY embedding <=> $1
+LIMIT 20;`}</CodeBlock>
+                <Callout title="Filters and ANN indexes">
+                    An HNSW index finds the nearest vectors first and applies the <Code>WHERE</Code> clause afterwards, so a narrow
+                    filter can return fewer rows than your <Code>LIMIT</Code>. Recent pgvector versions offer iterative index scans to
+                    keep searching until enough rows match. For very selective filters, partial indexes per repository or language also help.
+                </Callout>
+
+                <H2>Hybrid search: keep the keywords</H2>
+                <P>
+                    Vectors are weak exactly where keywords are strong: identifiers, error codes and version strings. A search for{' '}
+                    <Code>ERR_IDEMPOTENCY_CONFLICT</Code> should return the line that contains it, not something "about conflicts".
+                    So run a keyword search (BM25) and a vector search in parallel and merge the two rankings. Reciprocal rank fusion (RRF)
+                    is a simple merge that needs no score normalization:
+                </P>
+                <CodeBlock title="rrf.py">{`def rrf(*rankings, k=60):
+    """Merge ranked lists of ids. Items ranked high in any list rise to the top."""
+    scores = {}
+    for ranking in rankings:
+        for rank, doc_id in enumerate(ranking, start=1):
+            scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank)
+    return sorted(scores, key=scores.get, reverse=True)
+
+results = rrf(bm25_ids, vector_ids)[:50]   # then rerank these 50`}</CodeBlock>
+
+                <H2>Reranking: spend compute where it counts</H2>
+                <P>
+                    The first retrieval stage optimizes for recall: get the right chunk somewhere in the top 50. A cross-encoder reranker
+                    reads the query and each candidate together and scores them much more precisely, but it is too slow to run on the whole
+                    corpus. Running it only on the merged top 50 gives you most of the precision for a fraction of the cost.
+                </P>
+
+                <H2>Where semantic search stops</H2>
+                <P>
+                    Each choice above (chunk size, header format, model, <Code>k</Code>, reranker) changes the results, and none of it is
+                    obviously right. Your filters and ranking settings should live in version control
+                    (<A href="/blog/search-as-code-sac.html">Search as Code</A>), and every change should be measured against real
+                    queries (<A href="/blog/benchmark-curation-reap-harvest.html">Benchmark Curation</A>). If you index documentation as
+                    well as code, <A href="/blog/static-generation-x-vector-search.html">Static Generation × Vector Search</A> shows
+                    how to build the index from the same build that publishes the site.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/semantic-vector-search.html', CONTROLS, Content);
+    </script>
+</body>
+</html>

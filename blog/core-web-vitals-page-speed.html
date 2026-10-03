@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Web Vitals & Page Speed - Lameyer Blog</title>
+    <meta name="description" content="Core Web Vitals for documentation and developer sites: LCP, INP and CLS thresholds, field vs lab data, and the usual causes of slow pages.">
+    <link rel="canonical" href="https://lameyer.net/blog/core-web-vitals-page-speed.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Judge pages by field data at the 75th percentile',
+            'Make the LCP element part of the initial HTML',
+            'Build CSS and JS ahead of time',
+            'Preconnect to font and asset origins',
+            'Give images and embeds explicit dimensions',
+            'Break long main-thread tasks into smaller ones',
+        ];
+
+        const VITALS = [
+            { metric: 'LCP', name: 'Largest Contentful Paint', good: '≤ 2.5 s', poor: '> 4 s', measures: 'When the main content (largest image or text block) appears.' },
+            { metric: 'INP', name: 'Interaction to Next Paint', good: '≤ 200 ms', poor: '> 500 ms', measures: 'How quickly the page responds to clicks, taps and key presses.' },
+            { metric: 'CLS', name: 'Cumulative Layout Shift', good: '≤ 0.1', poor: '> 0.25', measures: 'How much visible content moves unexpectedly.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Developer documentation is read in a hurry, often on a laptop tethered to a phone. A page that shows a blank screen for
+                    three seconds or jumps around while loading loses readers, and page experience is one of many signals search engines
+                    consider. Core Web Vitals are Google's three metrics for that experience.
+                </P>
+
+                <H2>The three metrics</H2>
+                <Table
+                    columns={[{ key: 'metric', label: 'Metric', accent: true }, { key: 'measures', label: 'What it measures' }, { key: 'good', label: 'Good', accent: true }, { key: 'poor', label: 'Poor' }]}
+                    rows={VITALS}
+                />
+                <P>
+                    A page passes when at least 75% of real visits are "good" on all three. INP replaced First Input Delay (FID) as a Core
+                    Web Vital in March 2024. Unlike FID, it considers every interaction during the visit, not just the first one.
+                </P>
+
+                <H2>Field data versus lab data</H2>
+                <P>
+                    Lighthouse runs a single simulated load on one device. It is useful for debugging but it is not what users experience.
+                    Field data comes from real visits: the Chrome UX Report (CrUX), shown in PageSpeed Insights and Search Console, or your
+                    own measurements with the <Code>web-vitals</Code> library:
+                </P>
+                <CodeBlock title="Reporting field data">{`import { onLCP, onINP, onCLS } from 'web-vitals';
+
+function send(metric) {
+  // name, value, rating ("good" | "needs-improvement" | "poor"), id ...
+  navigator.sendBeacon('/vitals', JSON.stringify(metric));
+}
+
+onLCP(send);
+onINP(send);
+onCLS(send);`}</CodeBlock>
+
+                <H2>LCP: shorten the chain to the first paint</H2>
+                <P>
+                    On this blog, the largest element is the article title. Before it can appear, the browser has to download React, React
+                    DOM, Babel and the Tailwind runtime, then download and compile two JSX files, and only then render. Each step waits for the
+                    one before. Typical fixes, in order of impact:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Ship HTML, not instructions to build it.</strong> Prerendering puts the title in the first response (<A href="/blog/ssr-static-generation.html">SSR & Static Generation</A>).</>,
+                    <><strong className="text-gray-900">Build assets ahead of time.</strong> The Tailwind Play CDN and in-browser Babel are designed for prototyping. A build step produces a small static CSS file and precompiled JavaScript.</>,
+                    <><strong className="text-gray-900">Connect early.</strong> Add <Code>{'<link rel="preconnect">'}</Code> for font and CDN origins so connection setup overlaps with HTML parsing.</>,
+                    <><strong className="text-gray-900">Prioritize the hero image</strong>, if there is one, with <Code>fetchpriority="high"</Code>, and never lazy-load it.</>,
+                ]} />
+
+                <H2>INP: keep the main thread free</H2>
+                <P>
+                    Slow interactions almost always come from long JavaScript tasks. A click handler that filters a large list and re-renders
+                    everything blocks the next paint until it finishes. Keep handlers small, update the visible part first and defer the rest.
+                    Heavy work such as searching an index can move to a Web Worker. The crossover{' '}
+                    <A href="/blog/core-web-vitals-x-site-search.html">Core Web Vitals × Site Search</A> applies this to a search box.
+                </P>
+
+                <H2>CLS: reserve space before content arrives</H2>
+                <P>
+                    Layout shift happens when something appears and pushes existing content down: an image without dimensions, a late web
+                    font with different metrics, a banner injected at the top. Give images <Code>width</Code> and <Code>height</Code> attributes
+                    (or an <Code>aspect-ratio</Code>), use <Code>font-display: swap</Code> with a fallback font of similar size, and reserve
+                    space for anything that loads later.
+                </P>
+
+                <Callout title="Speed affects crawling, too">
+                    Faster responses let crawlers fetch more pages in the same time. On large documentation sites this has a direct effect
+                    on how quickly new pages are discovered. See{' '}
+                    <A href="/blog/crawlability-indexing.html">Crawlability & Indexing</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost('/blog/core-web-vitals-page-speed.html', CONTROLS, Content);
+    </script>
+</body>
+</html>
