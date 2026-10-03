@@ -112,7 +112,6 @@
             { href: '#/development', label: 'Development' },
             { href: '#/components', label: 'Components' },
             { href: '#/community', label: 'Community' },
-            { href: '#/stack', label: 'Stack' },
             { href: '/blog/', label: 'Blog' },
         ];
 
@@ -401,14 +400,6 @@
                                     <p className="opacity-80">
                                         From microservices architectures to high-fidelity user interfaces, our solutions are built to handle global traffic while maintaining minimal latency and impenetrable security.
                                     </p>
-                                    <div className="pt-6">
-                                        <a href="#/stack" className="inline-flex items-center gap-3 font-bold text-blue-600 group transition-all">
-                                            VER STACK TECNOLÓGICO
-                                            <svg className="w-5 h-5 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                                            </svg>
-                                        </a>
-                                    </div>
                                 </div>
                             </div>
                             <div className="order-1 lg:order-2 relative">
@@ -430,57 +421,6 @@
                         </div>
                     </div>
                 </section>
-            );
-        };
-
-        // --- TECH STACK ---
-        const TECH_STACK = [
-            { name: 'JavaScript', slug: 'javascript' },
-            { name: 'Java', slug: 'openjdk' },
-            { name: 'Python', slug: 'python' },
-            { name: 'Docker', slug: 'docker' },
-            { name: 'React', slug: 'react' },
-            { name: 'Django', slug: 'django' },
-            { name: 'Vercel', slug: 'vercel' },
-            { name: 'AWS', slug: null, short: 'AWS' },   // Simple Icons no longer ships an AWS logo -> text badge
-            { name: 'Gemini', slug: 'googlegemini' },
-            { name: 'Google Cloud', slug: 'googlecloud' },
-            { name: 'Claude Code', slug: 'claude' },
-            { name: 'Figma', slug: 'figma' },
-            { name: 'Tailwind', slug: 'tailwindcss' },
-            { name: 'HTML5', slug: 'html5' },
-            { name: 'CSS3', slug: 'css' },
-        ];
-
-        // Grey icon by default, white on hover. If an icon fails to load (or has no slug),
-        // a text badge is shown instead of a broken image.
-        const TechIcon = ({ tech }) => {
-            const [failed, setFailed] = useState(!tech.slug);
-
-            if (failed) {
-                return (
-                    <div className="w-14 h-14 rounded-2xl border border-slate-600 flex items-center justify-center text-sm font-black tracking-tight text-slate-400 group-hover:text-white group-hover:border-blue-500/60 transition-colors duration-500">
-                        {tech.short || tech.name.slice(0, 3)}
-                    </div>
-                );
-            }
-
-            return (
-                <div className="relative w-14 h-14">
-                    {/* Grey baseline icon */}
-                    <img
-                        src={`https://cdn.simpleicons.org/${tech.slug}/94a3b8`}
-                        alt=""
-                        onError={() => setFailed(true)}
-                        className="absolute inset-0 w-full h-full object-contain transition-opacity duration-500 group-hover:opacity-0"
-                    />
-                    {/* Highlighted icon (appears on hover) */}
-                    <img
-                        src={`https://cdn.simpleicons.org/${tech.slug}/ffffff`}
-                        alt={`${tech.name} logo`}
-                        className="absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-                    />
-                </div>
             );
         };
 
@@ -625,8 +565,6 @@
 
                     <SoftwareSection />
 
-                    <StackSection />
-
                     <BlogSection />
 
                     <ContactSection />
@@ -638,7 +576,6 @@
             development: () => <PlaceholderPage title="Development" />,
             components: () => <PlaceholderPage title="Components" />,
             community: () => <PlaceholderPage title="Community" />,
-            stack: () => <StackSection />,
             blog: BlogRedirect,
         };
 
@@ -657,3 +594,4 @@
     </script>
 </body>
 </html>
+
