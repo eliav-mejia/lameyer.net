@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Web Vitals × Site Search - Lameyer Blog</title>
+    <meta name="description" content="Adding client-side and semantic search to a site without hurting LCP, INP or CLS: on-demand index loading, Web Workers and reserved result space.">
+    <link rel="canonical" href="https://lameyer.net/blog/core-web-vitals-x-site-search.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Never load the search index with the page',
+            'Warm it up on focus, not on first keystroke',
+            'Search in a Web Worker for large indexes',
+            'Ignore results for outdated queries',
+            'Show results in an overlay or reserved box',
+            'Wrap the form in the search element',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    A search box is one of the most useful things on a documentation site, and one of the easiest ways to ruin its{' '}
+                    <A href="/blog/core-web-vitals-page-speed.html">Core Web Vitals</A>. A large index downloaded on page load delays LCP. Searching
+                    on the main thread with every keystroke hurts INP. A results list that pushes the page down causes CLS. Each has a
+                    simple fix.
+                </P>
+
+                <H2>LCP: the index is not part of the page</H2>
+                <P>
+                    Most visitors never use search, so they should never pay for it. Don't import the index in your main bundle or fetch it
+                    on load. Start loading it when the user shows intent: focusing the search box, or pressing the keyboard shortcut. By the
+                    time they finish typing the first word, it is usually there.
+                </P>
+
+                <H2>INP: keep typing instant</H2>
+                <P>
+                    INP measures the time from a key press to the next frame. If the input handler searches thousands of entries before
+                    returning, every letter feels sticky. Move the search into a Web Worker so the main thread only updates the input and
+                    renders results when they arrive:
+                </P>
+                <CodeBlock title="js/search-worker.js">{`let index = null;
+
+self.onmessage = async ({ data }) => {
+  if (!index) index = await fetch('/search-index.json').then(r => r.json());
+  if (!data.q) return;                       // warm-up message
+  self.postMessage({ q: data.q, hits: search(index, data.q).slice(0, 10) });
+};`}</CodeBlock>
+                <CodeBlock title="Main thread">{`const worker = new Worker('/js/search-worker.js');
+const input = document.querySelector('#site-search');
+
+input.addEventListener('focus', () => worker.postMessage({ q: '' }), { once: true });
+input.addEventListener('input', () => worker.postMessage({ q: input.value }));
+
+worker.onmessage = ({ data }) => {
+  if (data.q !== input.value) return;        // a newer query is already on its way
+  renderHits(data.hits);
+};`}</CodeBlock>
+                <P>
+                    In React, <Code>useDeferredValue</Code> gives a similar effect for smaller lists: the input updates immediately and the
+                    filtered results render at lower priority. The filters on this blog's dashboard work on a few dozen posts, which is fast
+                    enough to run directly.
+                </P>
+
+                <H2>Semantic search adds a network round trip</H2>
+                <P>
+                    <A href="/blog/semantic-vector-search.html">Vector search</A> needs the query embedded by a model, usually behind an
+                    API. That takes longer than a local lookup, but it does not have to hurt INP: the request runs in the background and
+                    the page stays responsive. A good pattern is to show instant keyword results from the local index, then add or reorder
+                    results when the semantic response arrives. Cancel stale requests with an <Code>AbortController</Code> so a slow
+                    response for "retr" never overwrites the results for "retry payment".
+                </P>
+
+                <H2>CLS: give results a place to go</H2>
+                <P>
+                    Layout shift is measured on content that moves without the user causing it. Results that open in an overlay, a dialog or
+                    an absolutely positioned panel don't move anything else. If results are shown inline, reserve their space with a{' '}
+                    <Code>min-height</Code> before the first result appears, and keep the box the same height while results update.
+                </P>
+
+                <H2>Markup for the search form</H2>
+                <CodeBlock title="Semantic search form">{`<search>
+  <form action="/search/" role="search">
+    <label for="site-search">Search the docs</label>
+    <input id="site-search" name="q" type="search" autocomplete="off">
+  </form>
+</search>`}</CodeBlock>
+                <P>
+                    The <Code>{'<search>'}</Code> element is a landmark for assistive technology, and modern browsers support it. The{' '}
+                    <Code>role="search"</Code> on the form keeps the landmark in older browsers. The <Code>action</Code> attribute means
+                    the form still works if JavaScript fails, which is good{' '}
+                    <A href="/blog/semantic-html-markup.html">semantic HTML</A> practice in general.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/core-web-vitals-x-site-search.html', CONTROLS, Content);
+    </script>
+</body>
+</html>

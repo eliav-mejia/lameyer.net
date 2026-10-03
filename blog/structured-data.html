@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Structured Data - Lameyer Blog</title>
+    <meta name="description" content="Structured data with JSON-LD: BlogPosting, TechArticle and BreadcrumbList markup generated from your post metadata, and how to validate it.">
+    <link rel="canonical" href="https://lameyer.net/blog/structured-data.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Use JSON-LD in the page head',
+            'Generate it from the same data as the page',
+            'Only describe content that is visible on the page',
+            'Add BreadcrumbList for the blog hierarchy',
+            'Put the JSON-LD in the static HTML',
+            'Validate with the Rich Results Test',
+        ];
+
+        const TYPES = [
+            { type: 'BlogPosting', use: 'Each post. Headline, dates, author, image.', google: 'Article rich results' },
+            { type: 'TechArticle', use: 'How-to and reference content. Adds proficiencyLevel and dependencies.', google: 'Treated as Article' },
+            { type: 'BreadcrumbList', use: 'Where the page sits: Home › Blog › Post.', google: 'Breadcrumb trail in results' },
+            { type: 'SoftwareSourceCode', use: 'A code project or snippet: repository, language, license.', google: 'No dedicated rich result; read by other consumers' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    <A href="/blog/semantic-html-markup.html">Semantic HTML</A> tells a machine how a page is structured. Structured data tells
+                    it what the page <em>is</em>: a blog post titled X, written by Y, published on Z, part of series W. It uses the shared
+                    schema.org vocabulary, which search engines and many other tools understand.
+                </P>
+
+                <H2>JSON-LD: data next to the page, not woven into it</H2>
+                <P>
+                    There are three syntaxes (JSON-LD, Microdata and RDFa). JSON-LD is the one Google recommends and the easiest to maintain,
+                    because it is a single script block instead of attributes spread across the markup:
+                </P>
+                <CodeBlock title="BlogPosting for this post">{`<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Structured Data: Describing Pages with JSON-LD",
+  "description": "Adding schema.org BlogPosting, BreadcrumbList and TechArticle markup...",
+  "datePublished": "2026-10-02",
+  "dateModified": "2026-10-02",
+  "inLanguage": "en",
+  "author": { "@type": "Organization", "name": "Lameyer", "url": "https://lameyer.net/" },
+  "publisher": { "@type": "Organization", "name": "Lameyer", "url": "https://lameyer.net/" },
+  "mainEntityOfPage": "https://lameyer.net/blog/structured-data.html",
+  "isPartOf": { "@type": "Blog", "name": "Lameyer Blog", "url": "https://lameyer.net/blog/" },
+  "keywords": ["JSON-LD", "schema.org", "BlogPosting", "TechArticle"]
+}
+<\/script>`}</CodeBlock>
+
+                <H2>Which types to use</H2>
+                <Table
+                    columns={[{ key: 'type', label: 'Type', mono: true }, { key: 'use', label: 'Use for' }, { key: 'google', label: 'In Google Search' }]}
+                    rows={TYPES}
+                />
+                <P>
+                    Schema.org has hundreds of types, and Google shows rich results for only a subset. Markup for other types is still worth
+                    adding when it describes the page accurately: other search engines, AI systems and internal tools read it as well.
+                </P>
+
+                <H2>Breadcrumbs</H2>
+                <CodeBlock title="BreadcrumbList">{`{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://lameyer.net/" },
+    { "@type": "ListItem", "position": 2, "name": "Blog", "item": "https://lameyer.net/blog/" },
+    { "@type": "ListItem", "position": 3, "name": "Structured Data" }
+  ]
+}`}</CodeBlock>
+
+                <H2>Generate it, don't hand-write it</H2>
+                <P>
+                    Every post on this blog already has a title, summary, date and tags in <Code>BLOG_POSTS</Code>. Building the JSON-LD from
+                    that object guarantees it always matches the visible page, which is also one of Google's guidelines: structured data must
+                    describe content the reader can see.
+                </P>
+                <CodeBlock title="jsonLdFor(post)">{`const SITE = 'https://lameyer.net';
+
+const jsonLdFor = (post) => ({
+  '@context': 'https://schema.org',
+  '@type': isCross(post) ? 'TechArticle' : 'BlogPosting',
+  headline: post.title,
+  description: post.summary,
+  datePublished: post.published,
+  inLanguage: 'en',
+  keywords: post.tags,
+  author: { '@type': 'Organization', name: 'Lameyer', url: SITE + '/' },
+  mainEntityOfPage: SITE + encodeURI(post.path),
+  isPartOf: { '@type': 'Blog', name: 'Lameyer Blog', url: SITE + '/blog/' },
+});`}</CodeBlock>
+
+                <Callout title="Static beats injected">
+                    Google can read JSON-LD added by JavaScript after rendering, but many other consumers only read the raw HTML. Write the
+                    script block into the page at build time, as described in{' '}
+                    <A href="/blog/ssr-static-generation.html">SSR & Static Generation</A>.
+                </Callout>
+
+                <H2>Validate before you ship</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Rich Results Test</strong> shows which Google rich results a page is eligible for and flags missing required fields.</>,
+                    <><strong className="text-gray-900">Schema Markup Validator</strong> (validator.schema.org) checks any schema.org type, including ones Google doesn't use.</>,
+                    <><strong className="text-gray-900">Search Console</strong> reports structured data errors across the whole site after indexing.</>,
+                ]} />
+
+                <H2>Beyond blog posts</H2>
+                <P>
+                    The same approach can describe code projects themselves, with <Code>SoftwareSourceCode</Code> on their landing pages and a{' '}
+                    <Code>codemeta.json</Code> file in the repository. That crossover is covered in{' '}
+                    <A href="/blog/structured-data-x-repositories.html">Structured Data × Repositories</A>.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/structured-data.html', CONTROLS, Content);
+    </script>
+</body>
+</html>
