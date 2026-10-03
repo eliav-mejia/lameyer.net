@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SSR & Static Generation - Lameyer Blog</title>
+    <meta name="description" content="Server-side rendering and static generation: why client-only pages are fragile for search and AI crawlers, and how to prerender a React site at build time.">
+    <link rel="canonical" href="https://lameyer.net/blog/ssr-static-generation.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Check what curl returns, not what the browser shows',
+            'Prerender content pages at build time',
+            'Compile JSX at build time, not in the browser',
+            'Hydrate instead of rendering from scratch',
+            'Put title, description and canonical in the HTML',
+            'Verify with URL Inspection in Search Console',
+        ];
+
+        const MODES = [
+            { mode: 'CSR', html: 'An empty shell; JavaScript builds the page', when: 'Logged-in apps and dashboards that should not be indexed' },
+            { mode: 'SSR', html: 'Full HTML rendered on each request', when: 'Content that changes per request or very often' },
+            { mode: 'SSG', html: 'Full HTML rendered once, at build time', when: 'Blogs, docs and landing pages' },
+            { mode: 'Incremental / on-demand', html: 'Static HTML, rebuilt per page when content changes', when: 'Large catalogs where full rebuilds are slow' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Open this page, then view its source. You will find <Code>{'<div id="root"></div>'}</Code> and a few script tags.
+                    Everything you are reading was built in your browser: Babel compiled the JSX, then React rendered it. That works for
+                    you, but for anything that reads raw HTML, this page is nearly empty. This blog is our own case study.
+                </P>
+
+                <H2>Who sees the empty shell</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Google</strong> does run JavaScript, but in a separate rendering step after crawling. Rendering can be delayed, and if a script fails or times out, the content is never seen.</>,
+                    <><strong className="text-gray-900">Many other crawlers</strong>, including many AI crawlers and some search engines, read only the HTML they download and do not execute JavaScript.</>,
+                    <><strong className="text-gray-900">Link previews</strong> on chat apps and social networks read Open Graph tags from the raw HTML. Tags added by JavaScript are not seen.</>,
+                    <><strong className="text-gray-900">Embedding pipelines</strong> that fetch pages to build a search index usually get the shell too, unless they run a headless browser.</>,
+                ]} />
+                <P>Testing this takes one command. If the text of your article is not in the output, crawlers that don't run JavaScript won't see it either:</P>
+                <CodeBlock title="What a non-rendering crawler sees">{`curl -s https://lameyer.net/blog/ssr-static-generation.html | grep -c "Who sees the empty shell"
+# 0  -> the heading only exists after JavaScript runs`}</CodeBlock>
+
+                <H2>The rendering options</H2>
+                <Table
+                    columns={[{ key: 'mode', label: 'Mode', accent: true }, { key: 'html', label: 'First HTML response' }, { key: 'when', label: 'Good fit' }]}
+                    rows={MODES}
+                />
+                <P>
+                    A blog has no per-user content, so static generation is the natural choice. The server stays a plain file host (GitHub
+                    Pages, Cloudflare Pages, an S3 bucket) and every page arrives complete.
+                </P>
+
+                <H2>Prerendering an existing React site</H2>
+                <P>
+                    You don't need to rewrite components to adopt a framework. The same components can be rendered to a string in Node at
+                    build time. A minimal build has three steps: compile the JSX once, render each route to HTML, and write the files.
+                </P>
+                <CodeBlock title="scripts/prerender.mjs (sketch)">{`import { build } from 'esbuild';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+
+// 1. Compile JSX once at build time instead of in every visitor's browser
+await build({ entryPoints: ['src/client.jsx'], bundle: true, minify: true, outfile: 'dist/js/blog.js' });
+await build({ entryPoints: ['src/server.jsx'], bundle: true, platform: 'node', format: 'esm', outfile: 'build/server.mjs' });
+
+// 2. Render every post to HTML (server.jsx calls renderToString from react-dom/server)
+const { BLOG_POSTS, renderPostToString } = await import('../build/server.mjs');
+const template = await readFile('src/template.html', 'utf8');
+
+// 3. Write one complete index.html per post
+for (const post of BLOG_POSTS) {
+  await mkdir('dist' + post.path, { recursive: true });
+  const html = template.replace('<!--app-->', renderPostToString(post.path));
+  await writeFile('dist' + post.path + 'index.html', html);
+}`}</CodeBlock>
+                <P>
+                    In the browser, call <Code>hydrateRoot</Code> instead of <Code>createRoot</Code>. React attaches event handlers to the
+                    HTML that is already there instead of rebuilding it, so interactive parts such as the blog filters keep working.
+                </P>
+                <Callout title="A bonus for speed">
+                    Compiling JSX at build time also removes the in-browser Babel compiler, which is meant for prototyping, not production.
+                    That is a large download and a lot of main-thread work you no longer pay for on every page view. See{' '}
+                    <A href="/blog/core-web-vitals-page-speed.html">Core Web Vitals & Page Speed</A>.
+                </Callout>
+
+                <H2>Put the metadata in the HTML, too</H2>
+                <P>
+                    The <Code>{'<title>'}</Code>, meta description, canonical link, Open Graph tags and JSON-LD all belong in the generated
+                    HTML. This blog writes the title and description into each file's head by hand, which is why they survive. Anything set
+                    from an effect, such as <Code>document.title</Code>, is too late for a crawler that doesn't render.
+                </P>
+
+                <H2>Where rendering stops</H2>
+                <P>
+                    Server-rendered HTML is only useful if it is meaningful HTML. Headings, landmarks and real links are covered in{' '}
+                    <A href="/blog/semantic-html-markup.html">Semantic HTML Markup</A>. And if you are already generating every page at build
+                    time, you can build a search index from the same output:{' '}
+                    <A href="/blog/static-generation-x-vector-search.html">Static Generation × Vector Search</A>.
+                </P>
+            </>
+        );
+
+        renderPost('/blog/ssr-static-generation.html', CONTROLS, Content);
+    </script>
+</body>
+</html>

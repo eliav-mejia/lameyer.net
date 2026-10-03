@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serverless Workflow Automation - Lameyer Blog</title>
+    <meta name="description" content="Connecting workflows with serverless logic: webhooks, queues and durable steps that link forms, CRMs, spreadsheets and payments to a modular core, with retries and idempotency.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless-workflow-automation.html">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Verify every webhook signature',
+            'Acknowledge fast, process in a queue',
+            'Give every job an idempotency key',
+            'Retry with backoff, then dead-letter',
+            'Split long flows into durable steps',
+            'Alert on the dead-letter queue, not on every retry',
+        ];
+
+        const CASES = [
+            { case: 'A contact form should create a CRM lead and send a welcome email', solution: 'Form webhook → queue → two independent steps' },
+            { case: 'A paid order should issue an invoice and update a spreadsheet', solution: 'Payment webhook → durable workflow calling the core' },
+            { case: 'The payment provider sends the same webhook twice', solution: 'Idempotency key stored before processing' },
+            { case: 'The CRM API is down for an hour', solution: 'Queue retries with backoff, nothing is lost' },
+            { case: 'Every night, sync stock levels from a supplier', solution: 'Cron trigger → queue → batch steps' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Most business workflows are still someone copying data from one tool to another: a form into a CRM, an order into a
+                    spreadsheet, a payment into an invoice. <strong className="text-gray-900">Serverless logic</strong> connects those
+                    tools without a server running all day. An event arrives, a function reacts, the{' '}
+                    <A href="/blog/modular-core-architecture.html">modular core</A> applies the business rules, and integrations deliver
+                    the outcome.
+                </P>
+
+                <H2>Developer use cases</H2>
+                <Table
+                    columns={[{ key: 'case', label: 'Workflow' }, { key: 'solution', label: 'Serverless solution', accent: true }]}
+                    rows={CASES}
+                />
+
+                <H2>The shape of a reliable workflow</H2>
+                <P>
+                    Every workflow follows the same path: <strong className="text-gray-900">trigger → queue → steps → outcome</strong>.
+                    The trigger (a webhook, a form, a schedule) must answer quickly, so it only verifies the request and puts a message
+                    on a queue. The consumer does the slow work, and the queue retries it when an external API fails.
+                </P>
+                <CodeBlock title="src/webhook.ts">{`export default {
+  async fetch(request, env) {
+    const body = await request.text();
+    if (!(await verifySignature(body, request.headers.get('x-signature'), env.WEBHOOK_SECRET))) {
+      return new Response('Bad signature', { status: 401 });
+    }
+    const event = JSON.parse(body);
+    await env.ORDERS_QUEUE.send({ id: event.id, type: event.type, data: event.data });
+    return new Response('Accepted', { status: 202 });
+  },
+
+  async queue(batch, env) {
+    for (const msg of batch.messages) {
+      if (await env.PROCESSED.get(msg.body.id)) { msg.ack(); continue; }  // already done
+      try {
+        await handleOrder(msg.body, env);  // core: invoice, CRM, email
+        await env.PROCESSED.put(msg.body.id, '1', { expirationTtl: 7 * 86400 });
+        msg.ack();
+      } catch {
+        msg.retry({ delaySeconds: 30 });  // after max retries it goes to the dead-letter queue
+      }
+    }
+  },
+};`}</CodeBlock>
+
+                <H2>The four rules</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Verify.</strong> Check the HMAC signature on every webhook. An unauthenticated webhook URL is an open door into your core.</>,
+                    <><strong className="text-gray-900">Acknowledge fast.</strong> Providers time out and resend after a few seconds. Return <Code>202</Code> and do the work in the queue.</>,
+                    <><strong className="text-gray-900">Be idempotent.</strong> Delivery is at least once, so the same event will arrive twice. Record an idempotency key before acting on it.</>,
+                    <><strong className="text-gray-900">Retry, then dead-letter.</strong> Back off between retries, and after the last one move the message to a dead-letter queue that someone is alerted about.</>,
+                ]} />
+
+                <H2>When a queue is not enough: durable workflows</H2>
+                <P>
+                    A flow with many steps, waits ("send a reminder in three days") or human approvals is better written as a durable
+                    workflow, such as Cloudflare Workflows, AWS Step Functions or Temporal. Each step's result is saved, so a failure
+                    in step four retries step four, not the whole flow.
+                </P>
+
+                <Callout title="How it connects to the rest of MC-SE">
+                    Triggers run on the <A href="/blog/serverless-edge-architecture.html">Serverless Edge</A>, business rules live in
+                    the <A href="/blog/modular-core-architecture.html">Modular Core</A>, and the public webhook endpoints are protected by
+                    the <A href="/blog/?series=security">API Security</A> layers, especially rate limiting and schema validation.
+                </Callout>
+            </>
+        );
+
+        renderPost('/blog/serverless-workflow-automation.html', CONTROLS, Content);
+    </script>
+</body>
+</html>
