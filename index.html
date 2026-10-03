@@ -4,91 +4,28 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lameyer - Firma Tecnológica</title>
+    <meta name="description" content="Lameyer: soluciones web y manejo de datos. Conecta tus flujos de trabajo con lógica Serverless: Modular Core + Serverless Edge (MC-SE).">
+    <link rel="canonical" href="https://lameyer.net/">
+
+    <script>
+        // Old hash links (lameyer.net/#/development, ...) now live in real folders
+        (function () {
+            var legacy = {
+                '#/development': '/pages/development/',
+                '#/components': '/pages/components/',
+                '#/community': '/pages/community/',
+                '#/stack': '/pages/stack/',
+                '#/blog': '/blog/'
+            };
+            var target = legacy[window.location.hash.replace(/\/$/, '')];
+            if (target) window.location.replace(target);
+        })();
+    </script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
 
-    <style>
-        html { scroll-behavior: smooth; }
-
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            background-color: #ffffff;
-            color: #1a202c;
-            overflow-x: hidden;
-        }
-
-        /* Discrete Grey Circuit Pattern */
-        .circuit-bg {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            background-color: #fcfdfe;
-
-            /* Major and Minor Grid Lines */
-            background-image:
-                linear-gradient(to right, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
-                linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
-                linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-                linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-
-            background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
-
-            /* Radial fade so it doesn't clash with the edges of the screen */
-            mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
-            -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
-        }
-
-        /* The "Nodes" or solder points at intersections */
-        .circuit-bg::after {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background-image: radial-gradient(circle, rgba(59, 130, 246, 0.2) 2px, transparent 2px);
-            background-size: 80px 80px;
-            background-position: -1px -1px;
-        }
-
-        /* Glassmorphism */
-        .glass {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            border: 1px solid rgba(0, 0, 0, 0.05);
-        }
-
-        /* Scrollbar hiding */
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-
-        /* Title reveal (used by SoftwareSection) */
-        .reveal-blur {
-            opacity: 0;
-            filter: blur(12px);
-            transform: translateY(24px);
-            transition: opacity 0.9s ease-out, filter 0.9s ease-out, transform 0.9s ease-out;
-        }
-        .reveal-blur.reveal-active {
-            opacity: 1;
-            filter: blur(0);
-            transform: translateY(0);
-        }
-
-        @keyframes fade-in {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
-
-        @media (prefers-reduced-motion: reduce) {
-            html { scroll-behavior: auto; }
-            .reveal-blur { opacity: 1; filter: none; transform: none; transition: none; }
-            .animate-fade-in { animation: none; }
-        }
-    </style>
-
-    <!-- React + Babel from cdnjs (also works inside sandboxed previews) -->
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
@@ -100,160 +37,16 @@
 
     <div id="root"></div>
 
+    <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel">
-        const { useState, useEffect, useLayoutEffect, useRef } = React;
-
-        // Change this to the address that should receive the contact form messages.
-        const CONTACT_EMAIL = 'contacto@lameyer.net';
-
-        // Hash routes are served by this index.html (GitHub Pages).
-        // The blog is a real folder (/blog/), with its own index.html and one folder per entry.
-        const NAV_LINKS = [
-            { href: '#/development', label: 'Development' },
-            { href: '#/components', label: 'Components' },
-            { href: '#/community', label: 'Community' },
-            { href: '/blog/', label: 'Blog' },
-        ];
-
-        // Latest blog entries shown on the home page. Paths match the folders inside /blog/.
+        // One card per blog series (the five MC-SE categories); keep in sync with SERIES in /js/blog.jsx.
         const BLOG_HIGHLIGHTS = [
-            { layer: '01', label: 'Edge Layer (DDoS & DNS)', href: '/blog/Edge_Layer_(DDoS_&_DNS)/' },
-            { layer: '02', label: 'WAF & Bot Layer (Layer 7)', href: '/blog/WAF_&_Bot_Layer_(Layer_7)/' },
-            { layer: '03', label: 'API Endpoint Protection', href: '/blog/API_Endpoint_Protection/' },
-            { layer: '04', label: 'Rate Limiting', href: '/blog/Rate_Limiting/' },
-            { layer: '05', label: 'Cloudflare Tunnel', href: '/blog/Cloudflare_Tunnel/' },
+            { num: '01', label: 'Modular Core', text: 'Módulos y contratos para tu lógica de negocio', href: '/blog/?series=core' },
+            { num: '02', label: 'Serverless Edge', text: 'Funciones, caché y cron cerca del usuario', href: '/blog/?series=serverless' },
+            { num: '03', label: 'Workflow Automation', text: 'Webhooks, colas y flujos fiables', href: '/blog/?series=workflows' },
+            { num: '04', label: 'API Security', text: 'Defensa en capas para APIs headless', href: '/blog/?series=security' },
+            { num: '05', label: 'Code Search & Discoverability', text: 'Código y páginas fáciles de encontrar', href: '/blog/?series=search' },
         ];
-
-        // --- ROUTER ---
-        const getRoute = () => window.location.hash.replace(/^#\/?/, '') || 'home';
-
-        const useRoute = () => {
-            const [route, setRoute] = useState(getRoute());
-            useEffect(() => {
-                const onChange = () => { setRoute(getRoute()); window.scrollTo(0, 0); };
-                window.addEventListener('hashchange', onChange);
-                return () => window.removeEventListener('hashchange', onChange);
-            }, []);
-            return route;
-        };
-
-        // --- LAYOUT COMPONENT (must be capitalized to be used as <Layout>) ---
-        const Layout = ({ children }) => {
-            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-
-            const toggleMenu = () => setIsMobileMenuOpen(prev => !prev);
-
-            const handleRegisterClick = () => {
-                const scrollToForm = () => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' });
-
-                if (document.getElementById('form-section')) {
-                    // We are on the page with the form
-                    scrollToForm();
-                } else {
-                    // Go back home (where the form lives), then scroll to it
-                    window.location.hash = '#/';
-                    setTimeout(scrollToForm, 100);
-                }
-
-                if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-            };
-
-            return (
-                <div className="relative min-h-screen">
-                    {/* Background Circuit Pattern */}
-                    <div className="circuit-bg"></div>
-
-                    {/* Top Banner */}
-                    <div className="fixed top-0 w-full h-10 bg-[#0f172a] z-[60] flex items-center justify-between px-8 overflow-hidden">
-                        <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap flex items-center gap-2">
-                            SUSTENTABILIDAD CORPORATIVA & ESG
-                        </span>
-                        <div className="flex items-center space-x-4 md:space-x-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 overflow-x-auto no-scrollbar">
-                            {['ODS 6', 'ODS 11', 'ODS 13', 'AGENDA 2030', 'ESG COMPLIANT'].map((cert, index) => (
-                                <div key={index} className="flex items-center space-x-1 flex-shrink-0">
-                                    <div className="w-1 h-3 bg-blue-500"></div>
-                                    <span className="text-[9px] font-bold text-white tracking-widest uppercase">{cert}</span>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
-                        <a href="#/" className="block z-50">
-                            <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer Logo" className="h-10 md:h-12 w-auto object-contain" />
-                        </a>
-
-                        {/* Desktop Links */}
-                        <div className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase opacity-60">
-                            {NAV_LINKS.map(link => (
-                                <a key={link.href} href={link.href} className="hover:text-blue-600 transition-colors">{link.label}</a>
-                            ))}
-                        </div>
-
-                        <div className="flex items-center space-x-4">
-                            <button
-                                onClick={handleRegisterClick}
-                                className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-md"
-                            >
-                                REGISTER
-                            </button>
-
-                            {/* Mobile Hamburger Button */}
-                            <button
-                                onClick={toggleMenu}
-                                className="md:hidden p-2 text-gray-900 focus:outline-none"
-                                aria-label="Abrir menú"
-                            >
-                                <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                                </svg>
-                            </button>
-                        </div>
-                    </nav>
-
-                    {/* Mobile Menu Overlay */}
-                    <div className={`fixed inset-0 bg-white/95 backdrop-blur-xl z-[100] md:hidden flex flex-col items-center justify-center space-y-8 transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
-
-                        {/* Close Button */}
-                        <button
-                            onClick={toggleMenu}
-                            className="absolute top-10 right-8 p-4 text-gray-900 hover:text-blue-600 transition-colors focus:outline-none z-[110]"
-                            aria-label="Cerrar menú"
-                        >
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                            </svg>
-                        </button>
-
-                        {NAV_LINKS.map(link => (
-                            <a
-                                key={link.href}
-                                href={link.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className="text-3xl font-black tracking-tight text-gray-900 hover:text-blue-600 transition-colors"
-                            >
-                                {link.label}
-                            </a>
-                        ))}
-                        <button
-                            onClick={handleRegisterClick}
-                            className="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mt-4"
-                        >
-                            REGISTER
-                        </button>
-                    </div>
-
-                    <main className="pt-32 px-4 md:px-8">
-                        {children}
-                    </main>
-
-                    <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">
-                        &copy; 2026 LAMEYER® EU. TODOS LOS DERECHOS RESERVADOS.
-                    </footer>
-                </div>
-            );
-        };
 
         const ContentCard = ({ title, desc, align, active, icon }) => {
             return (
@@ -395,11 +188,19 @@
                                 </h2>
                                 <div className="space-y-6 text-lg text-gray-600 leading-relaxed max-w-xl">
                                     <p>
-                                        At <span className="font-bold text-gray-900">Lameyer</span>, software development is not just about writing code; it is precision engineering. We design robust digital ecosystems that act as your company's nervous system.
+                                        En <span className="font-bold text-gray-900">Lameyer</span>, el desarrollo de software no es solo escribir código; es ingeniería de precisión. Diseñamos ecosistemas digitales robustos que actúan como el sistema nervioso de su empresa.
                                     </p>
                                     <p className="opacity-80">
-                                        From microservices architectures to high-fidelity user interfaces, our solutions are built to handle global traffic while maintaining minimal latency and impenetrable security.
+                                        Desde arquitecturas de microservicios hasta interfaces de usuario de alta fidelidad, nuestras soluciones están construidas para soportar el tráfico global mientras mantienen una latencia mínima y una seguridad impenetrable.
                                     </p>
+                                    <div className="pt-6">
+                                        <a href="/pages/stack/" className="inline-flex items-center gap-3 font-bold text-blue-600 group transition-all">
+                                            VER STACK TECNOLÓGICO
+                                            <svg className="w-5 h-5 transform group-hover:translate-x-2 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                            </svg>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <div className="order-1 lg:order-2 relative">
@@ -430,9 +231,9 @@
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Blog · API Security</p>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Blog · Casos y soluciones MC-SE</p>
                             <h3 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
-                                Defensa en capas<br/><span className="text-blue-600">para APIs headless</span>
+                                Conecta tus flujos<br/><span className="text-blue-600">con lógica Serverless</span>
                             </h3>
                         </div>
                         <a
@@ -453,8 +254,9 @@
                                 href={post.href}
                                 className="group p-6 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-lg shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300"
                             >
-                                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500 mb-3">Layer {post.layer}</span>
-                                <span className="block font-black text-gray-900 leading-tight group-hover:text-blue-600 transition-colors">{post.label}</span>
+                                <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500 mb-3">Categoría {post.num}</span>
+                                <span className="block font-black text-gray-900 leading-tight group-hover:text-blue-600 transition-colors mb-2">{post.label}</span>
+                                <span className="block text-xs text-gray-500 font-medium leading-snug">{post.text}</span>
                             </a>
                         ))}
                     </div>
@@ -462,77 +264,12 @@
             </section>
         );
 
-        // --- CONTACT FORM (target of the REGISTER buttons) ---
-        const ContactSection = () => {
-            const [form, setForm] = useState({ name: '', email: '', message: '' });
-
-            const update = (field) => (e) => setForm({ ...form, [field]: e.target.value });
-
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                const subject = encodeURIComponent(`Contacto web - ${form.name}`);
-                const body = encodeURIComponent(`${form.message}\n\n${form.name}\n${form.email}`);
-                window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
-            };
-
-            const inputClass = "w-full px-5 py-4 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
-
-            return (
-                <section id="form-section" className="scroll-mt-32 py-32 px-6 md:px-8 bg-white relative z-20">
-                    <div className="max-w-2xl mx-auto text-center">
-                        <h3 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter mb-4">
-                            Hablemos de su proyecto
-                        </h3>
-                        <p className="text-gray-500 font-medium mb-12">
-                            Cuéntenos qué necesita y le responderemos por correo.
-                        </p>
-
-                        <form onSubmit={handleSubmit} className="space-y-4 text-left">
-                            <div>
-                                <label htmlFor="contact-name" className="block text-sm font-bold text-gray-700 mb-2">Nombre</label>
-                                <input id="contact-name" type="text" required value={form.name} onChange={update('name')} className={inputClass} />
-                            </div>
-                            <div>
-                                <label htmlFor="contact-email" className="block text-sm font-bold text-gray-700 mb-2">Correo</label>
-                                <input id="contact-email" type="email" required value={form.email} onChange={update('email')} className={inputClass} />
-                            </div>
-                            <div>
-                                <label htmlFor="contact-message" className="block text-sm font-bold text-gray-700 mb-2">Mensaje</label>
-                                <textarea id="contact-message" rows="5" required value={form.message} onChange={update('message')} className={inputClass}></textarea>
-                            </div>
-                            <button
-                                type="submit"
-                                className="w-full sm:w-auto px-10 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full shadow-xl transition-all transform hover:scale-105"
-                            >
-                                Enviar mensaje
-                            </button>
-                        </form>
-                    </div>
-                </section>
-            );
-        };
-
-        // --- PAGES ---
-        // Placeholder until each page has real content
-        const PlaceholderPage = ({ title }) => (
-            <section className="min-h-[70vh] flex flex-col items-center justify-center text-center relative z-20">
-                <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6">{title}</h1>
-                <p className="text-gray-500 font-medium">Próximamente.</p>
-            </section>
-        );
-
-        // #/blog lives in its own folder, so send the visitor there
-        const BlogRedirect = () => {
-            useEffect(() => { window.location.replace('/blog/'); }, []);
-            return <PlaceholderPage title="Blog" />;
-        };
-
         const HomePage = () => {
             useEffect(() => {
                 gsap.registerPlugin(ScrollTrigger);
                 gsap.from("#hero-content", { duration: 1.5, y: 50, opacity: 0, ease: "power4.out" });
 
-                // Arriving from a blog page's REGISTER button (/#form-section):
+                // Arriving from another page's REGISTER button (/#form-section):
                 // the form only exists after React renders, so scroll to it here.
                 if (window.location.hash === '#form-section') {
                     setTimeout(() => document.getElementById('form-section')?.scrollIntoView({ behavior: 'smooth' }), 100);
@@ -547,13 +284,13 @@
                                 ESPAÑA 2027 | FIRMA TECNOLÓGICA
                             </div>
                             <h1 className="text-6xl md:text-[10rem] font-black text-gray-900 tracking-tighter mb-10 leading-[0.85]">
-                                WEB SOLUTIONS<br/><span className="text-blue-600">DATA MANAGEMENT</span>
+                                SOLUCIONES WEB &<br/><span className="text-blue-600">MANEJO DE DATOS</span>
                             </h1>
                             <p className="text-xl md:text-2xl text-gray-500 max-w-3xl mx-auto mb-16 font-medium">
-                                Connect your workflows with serverless logic: Modular Core + Serverless Edge (MC-SE).
+                                Conecta tus flujos de trabajo con lógica Serverless: Modular Core + Serverless Edge (MC-SE).
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-                                <button className="px-10 py-5 bg-blue-600 text-white font-black rounded-full shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs">Explore</button>
+                                <a href="/pages/development/" className="px-10 py-5 bg-blue-600 text-white font-black rounded-full shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs">Explorar Soluciones</a>
                             </div>
                         </div>
                         <div className="absolute bottom-10 animate-bounce opacity-20">
@@ -565,6 +302,8 @@
 
                     <SoftwareSection />
 
+                    <StackSection />
+
                     <BlogSection />
 
                     <ContactSection />
@@ -572,26 +311,7 @@
             );
         };
 
-        const PAGES = {
-            development: () => <PlaceholderPage title="Development" />,
-            components: () => <PlaceholderPage title="Components" />,
-            community: () => <PlaceholderPage title="Community" />,
-            blog: BlogRedirect,
-        };
-
-        const App = () => {
-            const route = useRoute();
-            const Page = PAGES[route] || HomePage;
-            return (
-                <Layout>
-                    <Page />
-                </Layout>
-            );
-        };
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
+        renderPage(HomePage);
     </script>
 </body>
 </html>
-
