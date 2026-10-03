@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - Lameyer</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel">
+        // Edit these links to point at your real channels.
+        const CHANNELS = [
+            {
+                name: 'GitHub',
+                slug: 'github',
+                desc: 'Código abierto, plantillas y ejemplos del equipo.',
+                href: 'https://github.com/cypher-the-meyer',
+                cta: 'Ver repositorios',
+            },
+            {
+                name: 'Correo',
+                slug: null,
+                short: '@',
+                desc: 'Propuestas de colaboración, charlas o alianzas.',
+                href: `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Comunidad Lameyer')}`,
+                cta: 'Escribirnos',
+            },
+        ];
+
+        const PILLARS = [
+            {
+                icon: '🧩',
+                title: 'Open Source',
+                desc: 'Publicamos componentes, utilidades y plantillas que usamos en proyectos reales para que otros equipos avancen más rápido.',
+            },
+            {
+                icon: '🎓',
+                title: 'Talleres & Mentoría',
+                desc: 'Sesiones prácticas sobre arquitectura web, datos y despliegue en la nube para estudiantes y equipos de desarrollo.',
+            },
+            {
+                icon: '📝',
+                title: 'Conocimiento compartido',
+                desc: 'Guías técnicas y casos de estudio sobre la estrategia MC-SE y la evolución hacia modelos As-a-Service.',
+            },
+            {
+                icon: '🌱',
+                title: 'Tecnología con impacto',
+                desc: 'Proyectos alineados con la Agenda 2030 y los ODS: agua, ciudades sostenibles y acción climática.',
+            },
+        ];
+
+        const ChannelIcon = ({ channel }) => channel.slug ? (
+            <img src={`https://cdn.simpleicons.org/${channel.slug}/0f172a`} alt="" className="w-10 h-10 object-contain" />
+        ) : (
+            <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black">{channel.short}</div>
+        );
+
+        const NewsletterSection = () => {
+            const [email, setEmail] = useState('');
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                const subject = encodeURIComponent('Suscripción a novedades');
+                const body = encodeURIComponent(`Quiero recibir novedades de la comunidad Lameyer.\n\n${email}`);
+                window.location.href = `mailto:${CONTACT_EMAIL}?subject=${subject}&body=${body}`;
+            };
+
+            return (
+                <section className="py-24 -mx-4 md:-mx-8 px-4 md:px-8 bg-slate-900 relative z-20">
+                    <div className="max-w-2xl mx-auto text-center">
+                        <SectionTitle kicker="Novedades" dark>Manténgase al día</SectionTitle>
+                        <p className="text-slate-400 font-medium -mt-8 mb-10">
+                            Reciba anuncios de talleres, lanzamientos open source y nuevas guías.
+                        </p>
+                        <form onSubmit={handleSubmit} className="flex flex-col sm:flex-row gap-3">
+                            <label htmlFor="newsletter-email" className="sr-only">Correo</label>
+                            <input
+                                id="newsletter-email"
+                                type="email"
+                                required
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="nombre@empresa.com"
+                                className="flex-1 px-6 py-4 rounded-full bg-slate-800 border border-slate-700 text-white placeholder-slate-500 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                            />
+                            <button type="submit" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full transition-all hover:scale-105">
+                                Suscribirme
+                            </button>
+                        </form>
+                    </div>
+                </section>
+            );
+        };
+
+        const CommunityPage = () => (
+            <>
+                <PageHero
+                    eyebrow="COMMUNITY"
+                    title="Construimos"
+                    accent="en Comunidad"
+                    intro="Compartimos lo que aprendemos construyendo software: código abierto, talleres y tecnología con impacto social y ambiental."
+                />
+
+                {/* Pillars */}
+                <section className="py-24 relative z-20">
+                    <div className="max-w-7xl mx-auto">
+                        <SectionTitle kicker="Qué hacemos">Cómo participamos</SectionTitle>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            {PILLARS.map(pillar => (
+                                <div key={pillar.title} className="group p-8 rounded-[2.5rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 transition-all duration-300">
+                                    <div className="mb-6 w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gray-100 group-hover:bg-blue-600 transition-colors">
+                                        {pillar.icon}
+                                    </div>
+                                    <h3 className="text-lg font-black text-gray-900 mb-3">{pillar.title}</h3>
+                                    <p className="text-sm text-gray-500 font-medium leading-relaxed">{pillar.desc}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                {/* Channels */}
+                <section className="py-24 relative z-20">
+                    <div className="max-w-4xl mx-auto">
+                        <SectionTitle kicker="Canales">Conecte con nosotros</SectionTitle>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {CHANNELS.map(channel => (
+                                <a
+                                    key={channel.name}
+                                    href={channel.href}
+                                    target={channel.href.startsWith('http') ? '_blank' : undefined}
+                                    rel="noopener noreferrer"
+                                    className="group flex items-start gap-6 p-8 rounded-[2rem] bg-white/90 border border-gray-100 shadow-lg shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300"
+                                >
+                                    <ChannelIcon channel={channel} />
+                                    <div>
+                                        <h3 className="text-lg font-black text-gray-900 mb-1">{channel.name}</h3>
+                                        <p className="text-sm text-gray-500 font-medium mb-4">{channel.desc}</p>
+                                        <span className="text-xs font-bold uppercase tracking-widest text-blue-600 group-hover:underline">{channel.cta} →</span>
+                                    </div>
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                </section>
+
+                <NewsletterSection />
+
+                <RegisterCTA title="¿Quiere colaborar?" text="Si su organización comparte nuestra visión, construyamos algo juntos." />
+            </>
+        );
+
+        renderPage(CommunityPage);
+    </script>
+</body>
+</html>
