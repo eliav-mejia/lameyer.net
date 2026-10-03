@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Endpoint Protection - Lameyer Blog</title>
+    <meta name="description" content="Protecting API business logic with Cloudflare API Shield: endpoint discovery, schema validation and mTLS.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Review discovered endpoints and add them to Endpoint Management',
+            'Retire or document every shadow API',
+            'Upload an OpenAPI v3 schema',
+            'Run schema validation in log mode, then block',
+            'Issue mTLS client certificates to known API clients',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    The <a href="/blog/security/waf-bot-layer-layer-7/" className="text-blue-600 font-bold hover:underline">WAF</a> knows
+                    what attacks look like in general. It doesn't know that your <Code>/v1/orders</Code> endpoint only accepts
+                    a JSON body with a numeric <Code>quantity</Code>. Cloudflare API Shield fills that gap. It is a set of
+                    defenses built specifically for programmatic traffic, and it judges each request against how <em>your</em> API
+                    is supposed to behave.
+                </P>
+
+                <H2>Discovery: you can't protect what you don't know exists</H2>
+                <P>
+                    APIs accumulate endpoints over time: old versions nobody removed, debug routes, and internal endpoints that
+                    were exposed by accident. These undocumented <strong className="text-gray-900">shadow APIs</strong> are
+                    often the least protected part of a system.
+                </P>
+                <P>
+                    API Discovery analyzes the traffic flowing through Cloudflare and builds a catalog of the endpoints actually
+                    being called, including ones missing from your documentation. Saving them to Endpoint Management gives you
+                    per-endpoint analytics and a place to attach the protections below.
+                </P>
+
+                <H2>Schema validation: drop anything that doesn't fit</H2>
+                <P>
+                    Upload an OpenAPI v3 schema that describes each endpoint's allowed methods, parameters and request body.
+                    Cloudflare then checks every request against it and can log or block anything that doesn't match. For example:
+                </P>
+                <CodeBlock title="openapi.yaml (excerpt)">{`paths:
+  /v1/orders:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [product_id, quantity]
+              additionalProperties: false
+              properties:
+                product_id: { type: string, maxLength: 36 }
+                quantity:   { type: integer, minimum: 1, maximum: 100 }`}</CodeBlock>
+                <P>
+                    With this schema, a request that sends <Code>quantity: -5</Code>, a 10,000-character <Code>product_id</Code>,
+                    or an extra <Code>is_admin</Code> field never reaches your code. That is how schema validation blocks
+                    attacks on business logic and stops attempts to extract data through unexpected parameters.
+                </P>
+
+                <H2>mTLS: prove who the client is</H2>
+                <P>
+                    API keys can leak. Mutual TLS adds a second factor that lives in the client itself: each trusted client gets a
+                    certificate issued by a Cloudflare-managed certificate authority, and requests without a valid certificate are
+                    rejected before any application logic runs.
+                </P>
+                <CodeBlock title="Custom rule · action: Block">{`(http.host eq "api.example.com"
+ and not cf.tls_client_auth.cert_verified)`}</CodeBlock>
+                <P>
+                    mTLS works best when you control the clients: mobile apps, partner servers and IoT devices. It is not suitable
+                    for a public API that anyone can sign up for.
+                </P>
+
+                <Callout title="Plan availability">
+                    API Shield features are available on different plans, and several are Enterprise add-ons. Check the Security
+                    section of your Cloudflare dashboard to see which ones your zone includes.
+                </Callout>
+
+                <H2>Where API Shield stops</H2>
+                <P>
+                    A request can be perfectly valid and still be abusive if it arrives thousands of times a minute. Controlling
+                    volume per client is the job of{' '}
+                    <a href="/blog/security/rate-limiting/" className="text-blue-600 font-bold hover:underline">Rate Limiting</a>.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WAF & Bot Layer (Layer 7) - Lameyer Blog</title>
+    <meta name="description" content="Blocking SQL injection, XSS, scraping and credential stuffing against a headless API with Cloudflare WAF and bot controls.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Deploy the Cloudflare Managed Ruleset',
+            'Add the OWASP Core Ruleset and tune its threshold',
+            'Block unexpected HTTP methods on the API host',
+            'Block requests missing your auth header',
+            'Use Block, not Challenge, on API hostnames',
+            'Log first, then enforce',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Once traffic passes the <a href="/blog/security/edge-layer-ddos-dns/" className="text-blue-600 font-bold hover:underline">edge</a>,
+                    it arrives as complete HTTP/S requests. Layer 7 is where Cloudflare reads those requests: their paths,
+                    headers and bodies. Two systems work side by side here. The Web Application Firewall (WAF) looks for
+                    malicious payloads, and bot controls look for malicious automation.
+                </P>
+
+                <H2>Managed rulesets: known attacks, maintained for you</H2>
+                <P>
+                    The WAF inspects each request against rulesets that Cloudflare's security team keeps up to date:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Cloudflare Managed Ruleset.</strong> Signatures for SQL injection, cross-site scripting (XSS), remote code execution and newly disclosed vulnerabilities in popular software.</>,
+                    <><strong className="text-gray-900">OWASP Core Ruleset.</strong> A scoring model: each suspicious trait adds points, and the request is blocked once it crosses the threshold you choose.</>,
+                ]} />
+                <P>
+                    Both rulesets require a Pro plan or higher. Free plans get a smaller Free Managed Ruleset that covers
+                    the most widespread vulnerabilities.
+                </P>
+                <P>
+                    Start both in log mode, watch Security Events for a few days, and switch to block once you are confident
+                    legitimate API calls are not being flagged.
+                </P>
+
+                <H2>Custom rules: describe what normal looks like</H2>
+                <P>
+                    A headless API has a very predictable shape, which makes it easy to block everything that doesn't fit.
+                    Custom rules are written in Cloudflare's rules language. Two useful starting points:
+                </P>
+                <CodeBlock title="Block unexpected methods · action: Block">{`(http.host eq "api.example.com"
+ and not http.request.method in {"GET" "POST" "PUT" "PATCH" "DELETE"})`}</CodeBlock>
+                <CodeBlock title="Block requests without an API key header · action: Block">{`(http.host eq "api.example.com"
+ and not any(len(http.request.headers["x-api-key"][*]) > 0))`}</CodeBlock>
+                <P>
+                    The second rule does not validate the key (your backend still has to do that), but it drops anonymous noise before it
+                    costs you a database lookup.
+                </P>
+
+                <H2>Bots: the real threat to exposed keys</H2>
+                <P>
+                    Most attacks on a headless API are automated: scrapers harvesting data, and credential stuffing tools
+                    replaying leaked username and password lists. Cloudflare's bot detection combines behavioral heuristics,
+                    machine learning and threat intelligence from across its network. On plans with Bot Management, every
+                    request carries a bot score from 1 (almost certainly automated) to 99 (almost certainly human), which you
+                    can use in rules such as <Code>cf.bot_management.score lt 30</Code>.
+                </P>
+
+                <Callout title="Challenges don't work on APIs">
+                    Managed and JavaScript challenges assume a browser that can run a script. A legitimate API client cannot
+                    solve them, so a challenge on an API hostname breaks your integrations. Use Block for API traffic instead.
+                    Also be careful with Bot Fight Mode on an API-only zone: it cannot be skipped per path, so test it before
+                    enabling it.
+                </Callout>
+
+                <H2>Where the WAF stops</H2>
+                <P>
+                    The WAF catches payloads that look malicious in general. It does not know what <em>your</em> API is supposed
+                    to accept. Validating requests against your own schema is the job of{' '}
+                    <a href="/blog/security/api-endpoint-protection/" className="text-blue-600 font-bold hover:underline">API Endpoint Protection</a>.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>
