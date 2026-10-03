@@ -234,7 +234,7 @@ const ZONES = [
 const BLOG_POSTS = [
     {
         type: 'edge',
-        path: '/blog/Edge_Layer_(DDoS_&_DNS)/',
+        path: '/blog/edge-layer-ddos-dns.html',
         title: 'Edge Layer: Absorbing DDoS and DNS Floods at the Perimeter',
         summary: "How Cloudflare's global Anycast network soaks up volumetric Layer 3/4 attacks and DNS query floods before they ever reach your API.",
         threats: ['DDoS', 'DNS floods', 'Origin IP exposure'],
@@ -244,7 +244,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'waf',
-        path: '/blog/WAF_&_Bot_Layer_(Layer_7)/',
+        path: '/blog/waf-bot-layer-layer-7.html',
         title: 'WAF & Bot Layer: Filtering Malicious Requests at Layer 7',
         summary: 'Blocking SQL injection, XSS and automated scraping of a headless API with managed rulesets, custom rules and bot signals.',
         threats: ['SQL injection', 'XSS', 'Scraping', 'Credential stuffing'],
@@ -254,7 +254,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'api',
-        path: '/blog/API_Endpoint_Protection/',
+        path: '/blog/api-endpoint-protection.html',
         title: 'API Endpoint Protection with API Shield',
         summary: 'Discovering shadow APIs, enforcing schema validation and authenticating clients with mTLS to protect API business logic.',
         threats: ['Shadow APIs', 'Malformed payloads', 'Data exfiltration', 'Key abuse'],
@@ -264,7 +264,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'rate',
-        path: '/blog/Rate_Limiting/',
+        path: '/blog/rate-limiting.html',
         title: 'Rate Limiting: Stopping Brute Force and API Abuse',
         summary: 'Capping how many requests each client can make per time window, keyed by IP, API key, cookie or header.',
         threats: ['Brute force', 'Credential stuffing', 'Scraping', 'Key abuse'],
@@ -274,7 +274,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'tunnel',
-        path: '/blog/Cloudflare_Tunnel/',
+        path: '/blog/cloudflare-tunnel.html',
         title: 'Cloudflare Tunnel: Hiding the Origin and Closing Inbound Ports',
         summary: 'Securing the last mile with an outbound-only connection from your backend to Cloudflare, so attackers cannot bypass the other layers.',
         threats: ['Origin IP exposure', 'Direct origin attacks', 'DDoS'],
@@ -286,7 +286,7 @@ const BLOG_POSTS = [
     // --- Code Search & Discoverability ---
     {
         type: 'hub',
-        path: '/blog/Code_Search_&_Repository_Organization/',
+        path: '/blog/code-search-repository-organization.html',
         title: 'Organizing, Filtering and Semantically Searching Code',
         summary: 'A map of the whole series: structure repositories so filters work, add semantic search on top, measure it, and publish pages people and crawlers can find.',
         threats: ['Repository sprawl', 'Unfindable code', 'Keyword-only search'],
@@ -296,7 +296,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'semantic',
-        path: '/blog/Semantic_&_Vector_Search/',
+        path: '/blog/semantic-vector-search.html',
         title: 'Semantic & Vector Search over Code Repositories',
         summary: 'Chunking code along syntax boundaries, embedding it, and combining vector similarity with keyword search so "where do we retry payments?" finds the right function.',
         threats: ['Keyword-only search', 'Vocabulary mismatch', 'Unfindable code'],
@@ -306,7 +306,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'sac',
-        path: '/blog/Search_as_Code_(SaC)/',
+        path: '/blog/search-as-code-sac.html',
         title: 'Search as Code: Versioning Queries, Filters and Ranking',
         summary: 'Treating search configuration like infrastructure: analyzers, synonyms, boosts and saved queries live in git, are reviewed in pull requests and deployed by CI.',
         threats: ['Config drift', 'Silent ranking regressions', 'Repository sprawl'],
@@ -316,7 +316,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'bench',
-        path: '/blog/Benchmark_Curation_(REAP_&_Harvest)/',
+        path: '/blog/benchmark-curation-reap-harvest.html',
         title: 'Benchmark Curation: Harvesting and Reaping Real Search Tasks',
         summary: 'Mining queries and tasks from repository history (Harvest), then filtering them into a trustworthy benchmark (REAP) to measure code search with Recall@k, MRR and nDCG.',
         threats: ['Untested relevance', 'Benchmark contamination', 'Silent ranking regressions'],
@@ -326,7 +326,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'ssr',
-        path: '/blog/SSR_&_Static_Generation/',
+        path: '/blog/ssr-static-generation.html',
         title: 'SSR & Static Generation: Shipping HTML Crawlers Can Read',
         summary: 'Why pages rendered only in the browser are fragile for search and AI crawlers, and how prerendering at build time or rendering on the server fixes it.',
         threats: ['Empty initial HTML', 'Delayed indexing', 'Invisible content'],
@@ -336,7 +336,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'html',
-        path: '/blog/Semantic_HTML_Markup/',
+        path: '/blog/semantic-html-markup.html',
         title: 'Semantic HTML: Markup That Machines Understand',
         summary: 'Using landmarks, a real heading outline, <time>, <code> and real links so browsers, screen readers, crawlers and chunkers all read the page the same way.',
         threats: ['Div soup', 'Broken outline', 'Inaccessible navigation'],
@@ -346,7 +346,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'cwv',
-        path: '/blog/Core_Web_Vitals_&_Page_Speed/',
+        path: '/blog/core-web-vitals-page-speed.html',
         title: 'Core Web Vitals & Page Speed for Documentation Sites',
         summary: 'What LCP, INP and CLS measure, the thresholds to hit at the 75th percentile, and the usual causes of slow, janky developer sites.',
         threats: ['Slow LCP', 'Poor INP', 'Layout shift'],
@@ -356,7 +356,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'crawl',
-        path: '/blog/Crawlability_&_Indexing/',
+        path: '/blog/crawlability-indexing.html',
         title: 'Crawlability & Indexing: Getting Every Page Discovered',
         summary: 'robots.txt, sitemaps, canonical URLs, status codes and real links: the plumbing that decides whether a page can be found, fetched and kept in the index.',
         threats: ['Orphan pages', 'Hash-only routes', 'Duplicate URLs', 'Soft 404s'],
@@ -366,7 +366,7 @@ const BLOG_POSTS = [
     },
     {
         type: 'sd',
-        path: '/blog/Structured_Data/',
+        path: '/blog/structured-data.html',
         title: 'Structured Data: Describing Pages with JSON-LD',
         summary: 'Adding schema.org BlogPosting, BreadcrumbList and TechArticle markup so search engines understand what a page is, who wrote it and where it sits.',
         threats: ['Ambiguous content', 'Missing rich results', 'Unattributed content'],
@@ -380,7 +380,7 @@ const BLOG_POSTS = [
         type: 'bench',
         crosses: ['sac', 'semantic'],
         label: 'Benchmarks × Search as Code',
-        path: '/blog/Benchmarks_x_Search_as_Code/',
+        path: '/blog/benchmarks-x-search-as-code.html',
         title: 'Benchmarks as Regression Tests for Search as Code',
         summary: 'Running the curated benchmark in CI on every search-config pull request, so a synonym or a new embedding model cannot ship if relevance drops.',
         threats: ['Silent ranking regressions', 'Config drift', 'Untested relevance'],
@@ -392,7 +392,7 @@ const BLOG_POSTS = [
         type: 'ssr',
         crosses: ['html', 'semantic'],
         label: 'Static Generation × Vector Search',
-        path: '/blog/Static_Generation_x_Vector_Search/',
+        path: '/blog/static-generation-x-vector-search.html',
         title: 'One Build, Two Audiences: Static Pages and a Vector Index',
         summary: 'Using the static build step to emit crawlable HTML and, from the same semantic headings, the chunks that feed a vector index.',
         threats: ['Empty initial HTML', 'Vocabulary mismatch', 'Stale search index'],
@@ -404,7 +404,7 @@ const BLOG_POSTS = [
         type: 'sd',
         crosses: ['crawl', 'hub'],
         label: 'Structured Data × Repositories',
-        path: '/blog/Structured_Data_x_Repositories/',
+        path: '/blog/structured-data-x-repositories.html',
         title: 'Making Repositories Machine-Readable: SoftwareSourceCode and CodeMeta',
         summary: 'Describing code projects with schema.org SoftwareSourceCode on their landing pages and codemeta.json in the repository, so both crawlers and code-search tools can filter by them.',
         threats: ['Ambiguous content', 'Repository sprawl', 'Unattributed content'],
@@ -416,7 +416,7 @@ const BLOG_POSTS = [
         type: 'cwv',
         crosses: ['semantic', 'html'],
         label: 'Core Web Vitals × Site Search',
-        path: '/blog/Core_Web_Vitals_x_Site_Search/',
+        path: '/blog/core-web-vitals-x-site-search.html',
         title: 'Search Boxes That Don\'t Hurt Core Web Vitals',
         summary: 'Loading a search index on demand, keeping typing responsive for INP, and reserving space for results so client-side search never shifts the layout.',
         threats: ['Poor INP', 'Layout shift', 'Slow LCP'],
@@ -428,7 +428,7 @@ const BLOG_POSTS = [
         type: 'crawl',
         crosses: ['sac', 'ssr'],
         label: 'Crawlability × Faceted Search',
-        path: '/blog/Crawlability_x_Faceted_Search/',
+        path: '/blog/crawlability-x-faceted-search.html',
         title: 'Faceted Filters without Crawl Traps',
         summary: 'Filter URLs like ?type=…&threats=… multiply fast. Decide in code which facets deserve indexable pages, and keep the rest out of the crawl.',
         threats: ['Duplicate URLs', 'Crawl budget waste', 'Orphan pages'],
@@ -453,15 +453,18 @@ const byStep = (a, b) => (typeOf(a).layer - typeOf(b).layer) || (isCross(a) - is
 const linkClass = 'text-blue-600 font-bold hover:underline';
 
 // --- FLOW DIAGRAM ---
-// Start -> the series' types -> end. Highlights `active` (one id or a list); clickable when `onSelect` is given.
+// Start -> the series' types -> end, as a grid that wraps (stacks) instead of scrolling sideways.
+// Highlights `active` (one id or a list); clickable when `onSelect` is given.
+// Full class names so the Tailwind CDN generates them; one row on large screens.
+const FLOW_COLS = { 5: 'lg:grid-cols-5', 9: 'lg:grid-cols-9' };
+
 const LayerFlow = ({ series, active, onSelect, dark }) => {
     const s = seriesById(series);
     const activeIds = [].concat(active);
     const types = BLOG_TYPES.filter(t => t.series === series);
-    const compact = types.length > 6;
     const node = (t) => {
         const isOn = activeIds.includes(t.id);
-        const base = `flex-1 ${compact ? 'min-w-[92px] p-3' : 'min-w-[120px] p-4'} rounded-2xl border text-left transition-all duration-300`;
+        const base = `min-w-0 p-3 md:p-4 rounded-2xl border text-left transition-all duration-300`;
         const tone = isOn
             ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105'
             : dark
@@ -480,17 +483,17 @@ const LayerFlow = ({ series, active, onSelect, dark }) => {
         );
     };
 
-    const endpoint = (label) => (
-        <div className={`hidden md:flex items-center justify-center px-4 rounded-2xl border border-dashed text-[10px] font-bold uppercase tracking-[0.2em] ${dark ? 'border-slate-600 text-slate-400' : 'border-gray-300 text-gray-400'}`}>
-            {label}
-        </div>
-    );
+    const muted = dark ? 'text-slate-400' : 'text-gray-400';
 
     return (
-        <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-2 px-1" aria-label={`${s.flowLabel} from ${s.from} to ${s.to}`}>
-            {endpoint(s.from)}
-            {types.map(node)}
-            {endpoint(s.to)}
+        <div aria-label={`${s.flowLabel} from ${s.from} to ${s.to}`}>
+            <div className={`flex justify-between mb-2 px-1 text-[10px] font-bold uppercase tracking-[0.2em] ${muted}`}>
+                <span>{s.from} ↓</span>
+                <span>→ {s.to}</span>
+            </div>
+            <div className={`grid grid-cols-2 sm:grid-cols-3 ${FLOW_COLS[types.length] || 'lg:grid-cols-6'} gap-3`}>
+                {types.map(node)}
+            </div>
         </div>
     );
 };
@@ -587,13 +590,6 @@ const PostCard = ({ post }) => {
     );
 };
 
-const StatTile = ({ value, label }) => (
-    <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-50 flex items-center gap-4">
-        <div className="min-w-10 h-10 px-2 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold">{value}</div>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{label}</p>
-    </div>
-);
-
 const BlogDashboard = () => {
     const [filters, setFilters] = useState(readParams);
     const set = (patch) => setFilters(f => ({ ...f, ...patch }));
@@ -643,8 +639,7 @@ const BlogDashboard = () => {
             {/* Series switch */}
             <nav className="pt-12 flex flex-wrap justify-center gap-2 relative z-10" aria-label="Blog series">
                 {SERIES.map(x => (
-                    <Chip key={x.id} active={x.id === s.id} onClick={() => switchSeries(x.id)}
-                        count={BLOG_POSTS.filter(p => typeOf(p).series === x.id).length}>
+                    <Chip key={x.id} active={x.id === s.id} onClick={() => switchSeries(x.id)}>
                         {x.label}
                     </Chip>
                 ))}
@@ -664,19 +659,9 @@ const BlogDashboard = () => {
             </section>
 
             {/* Flow (click a step to filter) */}
-            <section className="max-w-6xl mx-auto mb-12 relative z-10">
+            <section className="max-w-6xl mx-auto mb-16 relative z-10">
                 <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">{s.flowLabel} · click a {s.step.toLowerCase()} to filter</p>
                 <LayerFlow series={s.id} active={filters.type} onSelect={(type) => set({ type })} />
-            </section>
-
-            {/* Stats */}
-            <section className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mb-16 relative z-10">
-                <StatTile value={posts.length} label="Articles" />
-                <StatTile value={types.length} label={s.typesLabel} />
-                {crossCount
-                    ? <StatTile value={crossCount} label="Crossovers" />
-                    : <StatTile value={allThreats.length} label={s.facetsLabel} />}
-                <StatTile value={results.length} label="Matching now" />
             </section>
 
             {/* Filters + results */}
