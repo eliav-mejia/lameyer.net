@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página no encontrada - Lameyer</title>
+    <meta name="robots" content="noindex">
+
+    <script>
+        // GitHub Pages serves this file for every missing URL.
+        // Old blog addresses (flat .html files and the first folder names) redirect to /blog/<series>/<slug>/.
+        // When you rename or move an entry, add its old path here.
+        (function () {
+            var moved = {
+                '/blog/api-endpoint-protection.html': '/blog/security/api-endpoint-protection/',
+                '/blog/benchmark-curation-reap-harvest.html': '/blog/search/benchmark-curation-reap-harvest/',
+                '/blog/benchmarks-x-search-as-code.html': '/blog/search/benchmarks-x-search-as-code/',
+                '/blog/cloudflare-tunnel.html': '/blog/security/cloudflare-tunnel/',
+                '/blog/code-search-repository-organization.html': '/blog/search/code-search-repository-organization/',
+                '/blog/core-web-vitals-page-speed.html': '/blog/search/core-web-vitals-page-speed/',
+                '/blog/core-web-vitals-x-site-search.html': '/blog/search/core-web-vitals-x-site-search/',
+                '/blog/crawlability-indexing.html': '/blog/search/crawlability-indexing/',
+                '/blog/crawlability-x-faceted-search.html': '/blog/search/crawlability-x-faceted-search/',
+                '/blog/edge-layer-ddos-dns.html': '/blog/security/edge-layer-ddos-dns/',
+                '/blog/modular-core-architecture.html': '/blog/core/modular-core-architecture/',
+                '/blog/rate-limiting.html': '/blog/security/rate-limiting/',
+                '/blog/search-as-code-sac.html': '/blog/search/search-as-code-sac/',
+                '/blog/semantic-html-markup.html': '/blog/search/semantic-html-markup/',
+                '/blog/semantic-vector-search.html': '/blog/search/semantic-vector-search/',
+                '/blog/serverless-edge-architecture.html': '/blog/serverless/serverless-edge-architecture/',
+                '/blog/serverless-workflow-automation.html': '/blog/workflows/serverless-workflow-automation/',
+                '/blog/ssr-static-generation.html': '/blog/search/ssr-static-generation/',
+                '/blog/static-generation-x-vector-search.html': '/blog/search/static-generation-x-vector-search/',
+                '/blog/structured-data.html': '/blog/search/structured-data/',
+                '/blog/structured-data-x-repositories.html': '/blog/search/structured-data-x-repositories/',
+                '/blog/waf-bot-layer-layer-7.html': '/blog/security/waf-bot-layer-layer-7/',
+                '/blog/Edge_Layer_(DDoS_&_DNS)/': '/blog/security/edge-layer-ddos-dns/',
+                '/blog/WAF_&_Bot_Layer_(Layer_7)/': '/blog/security/waf-bot-layer-layer-7/',
+                '/blog/API_Endpoint_Protection/': '/blog/security/api-endpoint-protection/',
+                '/blog/Rate_Limiting/': '/blog/security/rate-limiting/',
+                '/blog/Cloudflare_Tunnel/': '/blog/security/cloudflare-tunnel/'
+            };
+            var path = decodeURIComponent(window.location.pathname);
+            var target = moved[path] || moved[path.replace(/index\.html$/, '')] || moved[path.replace(/\/?$/, '/')];
+            if (target) window.location.replace(target + window.location.search + window.location.hash);
+        })();
+    </script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel">
+        const NotFoundPage = () => (
+            <section className="min-h-[70vh] flex flex-col items-center justify-center text-center relative z-20">
+                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Error 404</p>
+                <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6">Página no encontrada</h1>
+                <div className="flex flex-wrap justify-center gap-4">
+                    <a href="/" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs">Inicio</a>
+                    <a href="/blog/" className="px-8 py-4 border border-gray-200 hover:border-blue-500 text-gray-700 font-black rounded-full uppercase tracking-widest text-xs">Blog</a>
+                </div>
+            </section>
+        );
+
+        renderPage(NotFoundPage);
+    </script>
+</body>
+</html>
