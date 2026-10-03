@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Search & Repository Organization - Lameyer Blog</title>
+    <meta name="description" content="Organizing, filtering and semantically searching code and repositories: structure, metadata, qualifiers, vector search and publishing pages that can be found.">
+    <link rel="canonical" href="https://lameyer.net/blog/search/code-search-repository-organization/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Pick one layout convention and document it in the README',
+            'Add CODEOWNERS so every path has an owner',
+            'Tag repositories with topics, language and status',
+            'Teach the team the code search qualifiers',
+            'Add semantic search only after filters work',
+            'Measure search quality with a benchmark',
+        ];
+
+        const STAGES = [
+            { stage: 'Organize', question: 'Where does this code live, and who owns it?', post: 'This post, below' },
+            { stage: 'Filter', question: 'Narrow millions of lines to a few hundred candidates.', post: <A href="/blog/search/search-as-code-sac/">Search as Code</A> },
+            { stage: 'Search by meaning', question: 'Find code that does X, whatever it is called.', post: <A href="/blog/search/semantic-vector-search/">Semantic & Vector Search</A> },
+            { stage: 'Measure', question: 'Did the last change make results better or worse?', post: <A href="/blog/search/benchmark-curation-reap-harvest/">Benchmark Curation</A> },
+            { stage: 'Publish', question: 'Can people outside the repo find the docs?', post: <A href="/blog/search/ssr-static-generation/">SSR & Static Generation</A> },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Most teams don't have a search problem. They have an <strong className="text-gray-900">organization problem</strong> that
+                    shows up as a search problem. When code is spread across dozens of repositories with inconsistent names, no owners and
+                    no metadata, no search engine can rank it well, semantic or not. This series follows the path from a well-organized
+                    repository to a page that people, crawlers and AI assistants can find.
+                </P>
+
+                <H2>The path in five steps</H2>
+                <Table
+                    columns={[{ key: 'stage', label: 'Step', accent: true }, { key: 'question', label: 'Question it answers' }, { key: 'post', label: 'Read' }]}
+                    rows={STAGES}
+                />
+                <P>
+                    The first four steps are about <em>retrieval</em> inside your organization. The last one is about <em>discovery</em> on
+                    the open web, and it splits into five topics of its own: rendering, markup, speed, crawlability and structured data.
+                </P>
+
+                <H2>Organize: structure before search</H2>
+                <P>
+                    Whether you choose a monorepo or many repositories matters less than being consistent. A predictable layout lets
+                    a path filter do most of the work: if every service keeps its HTTP handlers under <Code>src/handlers/</Code>, then{' '}
+                    <Code>path:src/handlers</Code> is already a precise query.
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Naming.</strong> Use one scheme for repository names, for example <Code>team-domain-kind</Code> (<Code>payments-ledger-api</Code>).</>,
+                    <><strong className="text-gray-900">Ownership.</strong> A <Code>CODEOWNERS</Code> file maps paths to teams. It drives review requests and answers "who do I ask about this?".</>,
+                    <><strong className="text-gray-900">Metadata.</strong> GitHub topics, a description, the license and the primary language are all filterable. Archive repositories you no longer maintain so they can be excluded.</>,
+                    <><strong className="text-gray-900">READMEs.</strong> The first paragraph of a README is often the best single summary of a repository. It is also what search engines and embedding models read first.</>,
+                ]} />
+                <CodeBlock title=".github/CODEOWNERS">{`# Last matching pattern wins
+*                    @acme/platform
+/src/payments/       @acme/payments
+/src/search/         @acme/search-relevance
+/docs/               @acme/devrel`}</CodeBlock>
+
+                <H2>Filter: the cheapest relevance you will ever get</H2>
+                <P>
+                    Before any ranking model runs, filters remove everything that cannot be the answer. GitHub code search, for example,
+                    supports qualifiers such as <Code>org:</Code>, <Code>repo:</Code>, <Code>language:</Code>, <Code>path:</Code> and{' '}
+                    <Code>symbol:</Code>, plus boolean operators and regular expressions:
+                </P>
+                <CodeBlock title="GitHub code search">{`org:acme language:python path:src/payments symbol:retry_charge
+org:acme /idempotency[_-]?key/ NOT path:test`}</CodeBlock>
+                <P>
+                    Filters only work when the metadata is there, which is why organization comes first. Writing these queries down,
+                    reviewing them and reusing them is the idea behind <A href="/blog/search/search-as-code-sac/">Search as Code</A>.
+                </P>
+
+                <H2>Search by meaning: when keywords fail</H2>
+                <P>
+                    Keyword search fails when the person searching uses different words from the person who wrote the code. A search for
+                    "retry failed payments" will not match a function called <Code>reattempt_charge</Code>. Embedding models map both to
+                    nearby points in a vector space, so <A href="/blog/search/semantic-vector-search/">semantic search</A> can find it.
+                    In practice the best systems combine both: keywords for exact identifiers, vectors for intent.
+                </P>
+
+                <H2>Measure: relevance you can prove</H2>
+                <P>
+                    Every change to chunking, filters, synonyms or the embedding model changes results. Without a fixed set of real queries
+                    and known correct answers, you can't tell whether things got better.{' '}
+                    <A href="/blog/search/benchmark-curation-reap-harvest/">Benchmark curation</A> covers how to build that set from your
+                    own repository history.
+                </P>
+
+                <H2>Publish: being found outside the repository</H2>
+                <P>
+                    Documentation, changelogs and project pages are how most people meet your code. They need HTML that exists before
+                    JavaScript runs (<A href="/blog/search/ssr-static-generation/">SSR & Static Generation</A>), meaningful
+                    markup (<A href="/blog/search/semantic-html-markup/">Semantic HTML</A>), good
+                    performance (<A href="/blog/search/core-web-vitals-page-speed/">Core Web Vitals</A>), URLs crawlers can
+                    reach (<A href="/blog/search/crawlability-indexing/">Crawlability & Indexing</A>) and a machine-readable
+                    description (<A href="/blog/search/structured-data/">Structured Data</A>).
+                </P>
+
+                <Callout title="Where the stages meet">
+                    The most useful lessons sit between stages, so this series also has crossover posts. For example,{' '}
+                    <A href="/blog/search/structured-data-x-repositories/">Structured Data × Repositories</A> applies the same metadata
+                    you use for internal filters to public pages, and{' '}
+                    <A href="/blog/search/benchmarks-x-search-as-code/">Benchmarks × Search as Code</A> turns your benchmark into a CI gate.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>
