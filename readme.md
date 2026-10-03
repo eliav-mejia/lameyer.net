@@ -1,2 +1,0 @@
-LaMeyer.net
-/* Sitio Web */
