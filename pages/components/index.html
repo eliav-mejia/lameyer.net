@@ -234,3 +234,448 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Componentes y repuestos electrónicos en Madrid - Lameyer</title>
+    <meta name="description" content="Tienda de componentes y repuestos electrónicos en Madrid: baterías, pantallas, memorias, redes y gaming para los dispositivos más vendidos. Devolución en 30 días.">
+    <link rel="canonical" href="https://lameyer.net/pages/components/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/tienda.jsx"></script>
+    <script type="text/babel">
+        const CATEGORIES = [
+            { id: 'oficina', label: 'Oficina', icon: '💼', desc: 'Portátiles corporativos y puesto de trabajo' },
+            { id: 'estudiante', label: 'Estudiante', icon: '🎓', desc: 'Portátiles y móviles de uso diario' },
+            { id: 'dev', label: 'Dev', icon: '⌨️', desc: 'Memoria, almacenamiento y rendimiento' },
+            { id: 'redes', label: 'Redes', icon: '🌐', desc: 'Cableado, Wi-Fi y conectividad' },
+            { id: 'gamer', label: 'Gamer', icon: '🎮', desc: 'Consolas, mandos y periféricos' },
+            { id: 'otros', label: 'Otros', icon: '🔧', desc: 'Móviles, herramientas y accesorios' },
+        ];
+
+        // Grades: 'estandar' = compatible part, tested; 'premium' = OEM-grade components.
+        const GRADES = {
+            estandar: { label: 'Estándar', className: 'bg-gray-100 text-gray-600' },
+            premium: { label: 'Calidad premium', className: 'bg-blue-50 text-blue-600' },
+        };
+
+        // Prices in EUR, VAT included. Edit this list to manage the catalogue.
+        const PRODUCTS = [
+            // Oficina
+            { id: 'of-kb-hp840', cat: 'oficina', name: 'Teclado español retroiluminado', compat: 'HP EliteBook 840 G5 / G6', price: 34.90, grade: 'estandar' },
+            { id: 'of-bat-t480', cat: 'oficina', name: 'Batería 72 Wh', compat: 'Lenovo ThinkPad T480 / T470', price: 49.90, grade: 'premium' },
+            { id: 'of-usbc-65', cat: 'oficina', name: 'Cargador USB-C PD 65 W', compat: 'Portátiles USB-C (Dell, HP, Lenovo, Apple)', price: 24.90, grade: 'premium' },
+            { id: 'of-hinge-5490', cat: 'oficina', name: 'Bisagras de pantalla (par)', compat: 'Dell Latitude 5490 / 5480', price: 19.90, grade: 'estandar' },
+            { id: 'of-fan-450', cat: 'oficina', name: 'Ventilador de CPU', compat: 'HP ProBook 450 G7 / G8', price: 17.90, grade: 'estandar' },
+
+            // Estudiante
+            { id: 'es-lcd-156', cat: 'estudiante', name: 'Pantalla 15,6" FHD IPS 30 pines', compat: 'Portátiles 15,6" con conector eDP', price: 79.90, grade: 'premium' },
+            { id: 'es-bat-a1466', cat: 'estudiante', name: 'Batería 54 Wh', compat: 'MacBook Air 13" (A1466 / A1369)', price: 59.90, grade: 'premium' },
+            { id: 'es-kb-aspire5', cat: 'estudiante', name: 'Teclado español', compat: 'Acer Aspire 5 (A515)', price: 32.90, grade: 'estandar' },
+            { id: 'es-usbc-45', cat: 'estudiante', name: 'Cargador USB-C 45 W', compat: 'Chromebooks y portátiles USB-C', price: 21.90, grade: 'estandar' },
+            { id: 'es-oled-ip13', cat: 'estudiante', name: 'Pantalla OLED completa', compat: 'iPhone 13', price: 89.90, grade: 'premium' },
+
+            // Dev
+            { id: 'dv-ddr4-16', cat: 'dev', name: 'Memoria RAM DDR4 SO-DIMM 16 GB 3200 MHz', compat: 'Portátiles y mini PC con DDR4', price: 39.90, grade: 'premium' },
+            { id: 'dv-ddr5-32', cat: 'dev', name: 'Memoria RAM DDR5 SO-DIMM 32 GB 5600 MHz', compat: 'Portátiles y mini PC con DDR5', price: 89.90, grade: 'premium' },
+            { id: 'dv-nvme-1tb', cat: 'dev', name: 'SSD NVMe M.2 2280 1 TB PCIe 4.0', compat: 'Ranura M.2 NVMe (PCIe 3.0 / 4.0)', price: 74.90, grade: 'premium' },
+            { id: 'dv-m2-usbc', cat: 'dev', name: 'Caja externa M.2 NVMe a USB-C 10 Gbps', compat: 'SSD M.2 NVMe 2230–2280', price: 22.90, grade: 'estandar' },
+            { id: 'dv-thermal', cat: 'dev', name: 'Kit pasta térmica + thermal pads', compat: 'CPU, GPU y SSD', price: 9.90, grade: 'estandar' },
+
+            // Redes
+            { id: 'rd-ax210', cat: 'redes', name: 'Tarjeta Wi-Fi 6E + Bluetooth 5.3 M.2', compat: 'Ranura M.2 2230 (Key E)', price: 24.90, grade: 'premium' },
+            { id: 'rd-sfp-10g', cat: 'redes', name: 'Módulo SFP+ 10G SR multimodo', compat: 'Switches y NAS con puertos SFP+', price: 19.90, grade: 'estandar' },
+            { id: 'rd-cat6-3m', cat: 'redes', name: 'Cable de red Cat6 UTP 3 m (pack 3)', compat: 'Router, switch, PC y consola', price: 9.90, grade: 'estandar' },
+            { id: 'rd-rj45-kit', cat: 'redes', name: 'Kit crimpadora + 50 conectores RJ45 Cat6', compat: 'Cable Cat5e / Cat6', price: 18.90, grade: 'estandar' },
+            { id: 'rd-psu-12v', cat: 'redes', name: 'Fuente de alimentación 12 V 1,5 A', compat: 'Routers, ONT y switches domésticos', price: 11.90, grade: 'estandar' },
+
+            // Gamer
+            { id: 'gm-stick-ds5', cat: 'gamer', name: 'Joystick Hall Effect (par)', compat: 'Mando DualSense (PS5)', price: 14.90, grade: 'premium' },
+            { id: 'gm-joycon', cat: 'gamer', name: 'Joystick de repuesto (pack 2)', compat: 'Joy-Con de Nintendo Switch', price: 12.90, grade: 'estandar' },
+            { id: 'gm-fan-ps5', cat: 'gamer', name: 'Ventilador de refrigeración', compat: 'PlayStation 5 (todas las revisiones)', price: 24.90, grade: 'premium' },
+            { id: 'gm-xbox-bat', cat: 'gamer', name: 'Batería recargable + cable USB-C', compat: 'Mando Xbox Series X|S', price: 16.90, grade: 'estandar' },
+            { id: 'gm-switches', cat: 'gamer', name: 'Switches mecánicos lineales (pack 70)', compat: 'Teclados hot-swap de 3 / 5 pines', price: 19.90, grade: 'estandar' },
+
+            // Otros
+            { id: 'ot-bat-ip12', cat: 'otros', name: 'Batería', compat: 'iPhone 12 / 12 Pro', price: 29.90, grade: 'premium' },
+            { id: 'ot-bat-ip13', cat: 'otros', name: 'Batería', compat: 'iPhone 13', price: 34.90, grade: 'premium' },
+            { id: 'ot-oled-a54', cat: 'otros', name: 'Pantalla OLED con marco', compat: 'Samsung Galaxy A54 5G', price: 69.90, grade: 'premium' },
+            { id: 'ot-port-s21', cat: 'otros', name: 'Placa de carga USB-C', compat: 'Samsung Galaxy S21', price: 14.90, grade: 'estandar' },
+            { id: 'ot-tools-64', cat: 'otros', name: 'Kit de destornilladores de precisión (64 piezas)', compat: 'Móviles, portátiles y consolas', price: 19.90, grade: 'estandar' },
+        ];
+
+        const SORTS = [
+            { id: 'featured', label: 'Destacados' },
+            { id: 'price-asc', label: 'Precio: menor a mayor' },
+            { id: 'price-desc', label: 'Precio: mayor a menor' },
+            { id: 'name', label: 'Nombre' },
+        ];
+
+        const productById = (id) => PRODUCTS.find(p => p.id === id);
+        const categoryById = (id) => CATEGORIES.find(c => c.id === id);
+        const eur = (n) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(n);
+
+        // Category from the URL (?cat=dev) so each category can be linked directly.
+        const initialCategory = () => {
+            const cat = new URLSearchParams(window.location.search).get('cat');
+            return CATEGORIES.some(c => c.id === cat) ? cat : 'todos';
+        };
+
+        // --- Product card ---
+        const ProductCard = ({ product, money, onAdd, inCart }) => {
+            const cat = categoryById(product.cat);
+            const grade = GRADES[product.grade];
+            const foreign = money.currency.code !== 'EUR';
+
+            return (
+                <article className="group flex flex-col rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md p-6 shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300">
+                    <div className="flex items-start justify-between gap-3 mb-5">
+                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gray-100 group-hover:bg-blue-600 transition-colors" aria-hidden="true">{cat.icon}</div>
+                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${grade.className}`}>{grade.label}</span>
+                    </div>
+
+                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-2">{cat.label}</p>
+                    <h3 className="text-lg font-black text-gray-900 leading-snug mb-1">{product.name}</h3>
+                    <p className="text-sm text-gray-500 font-medium mb-6 flex-1">Compatible con {product.compat}</p>
+
+                    <div className="mb-5">
+                        <p className="text-2xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price)}</p>
+                        <p className="text-[11px] text-gray-400 font-semibold">
+                            {foreign ? `Se cobra ${eur(product.price)} · IVA incl.` : 'IVA incluido'}
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={() => onAdd(product.id)}
+                        className="w-full py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest shadow-md hover:scale-[1.02] transition-all"
+                    >
+                        {inCart ? `Añadir otro (${inCart} en el carrito)` : 'Añadir al carrito'}
+                    </button>
+                    <a href={`${TERMS_URL}#devoluciones`} className="mt-3 text-center text-[11px] font-semibold text-gray-400 hover:text-blue-600 transition-colors">
+                        Devolución en {RETURN_DAYS} días · Ver términos
+                    </a>
+                </article>
+            );
+        };
+
+        // --- Cart drawer with WhatsApp checkout ---
+        const CartDrawer = ({ open, onClose, cart, setQty, money }) => {
+            const [name, setName] = useState('');
+            const [delivery, setDelivery] = useState('envio');
+            const [postal, setPostal] = useState('');
+            const [accepted, setAccepted] = useState(false);
+            const closeRef = useRef(null);
+
+            useEffect(() => {
+                if (!open) return;
+                closeRef.current && closeRef.current.focus();
+                const onKey = (e) => { if (e.key === 'Escape') onClose(); };
+                document.addEventListener('keydown', onKey);
+                return () => document.removeEventListener('keydown', onKey);
+            }, [open]);
+
+            const lines = Object.entries(cart).map(([id, qty]) => ({ product: productById(id), qty })).filter(l => l.product);
+            const total = lines.reduce((sum, l) => sum + l.product.price * l.qty, 0);
+            const foreign = money.currency.code !== 'EUR';
+            const validPostal = /^\d{5}$/.test(postal.trim());
+            const ready = lines.length > 0 && accepted && name.trim() && (delivery === 'recogida' || validPostal);
+
+            const message = [
+                'Hola Lameyer, quiero hacer este pedido:',
+                '',
+                ...lines.map(l => `• ${l.qty} × ${l.product.name} (${l.product.compat}) — ${eur(l.product.price * l.qty)}`),
+                '',
+                `Total: ${eur(total)} (IVA incluido)` + (foreign ? ` · ≈ ${money.format(total)}` : ''),
+                `Nombre: ${name.trim()}`,
+                delivery === 'envio' ? `Entrega: envío a domicilio · CP ${postal.trim()}` : 'Entrega: recogida en Madrid',
+                '',
+                `He leído y acepto los Términos y Condiciones: https://lameyer.net${TERMS_URL}`,
+            ].join('\n');
+            const href = `https://wa.me/${SELLER.whatsapp}?text=${encodeURIComponent(message)}`;
+
+            const inputClass = 'w-full px-4 py-3 rounded-2xl border border-gray-200 bg-white text-sm text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all';
+
+            return (
+                <div className={`fixed inset-0 z-[95] ${open ? '' : 'pointer-events-none invisible'}`}>
+                    <div onClick={onClose} className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${open ? 'opacity-100' : 'opacity-0'}`}></div>
+                    <aside
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="cart-title"
+                        className={`absolute right-0 top-0 h-full w-full max-w-md bg-white shadow-2xl flex flex-col transition-transform duration-300 ${open ? 'translate-x-0' : 'translate-x-full'}`}
+                    >
+                        <div className="flex items-center justify-between px-6 py-5 bg-slate-900 text-white">
+                            <h2 id="cart-title" className="text-lg font-black tracking-tight">Tu carrito</h2>
+                            <button ref={closeRef} onClick={onClose} className="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10" aria-label="Cerrar carrito">
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="flex-1 overflow-y-auto px-6 py-6">
+                            {lines.length === 0 ? (
+                                <p className="text-sm text-gray-500 font-medium text-center py-16">Tu carrito está vacío.</p>
+                            ) : (
+                                <ul className="divide-y divide-gray-100 mb-6">
+                                    {lines.map(({ product, qty }) => (
+                                        <li key={product.id} className="py-4 flex gap-4">
+                                            <div className="w-10 h-10 flex-none rounded-xl bg-gray-100 flex items-center justify-center text-xl" aria-hidden="true">{categoryById(product.cat).icon}</div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-bold text-gray-900 leading-snug">{product.name}</p>
+                                                <p className="text-xs text-gray-400 font-medium truncate">{product.compat}</p>
+                                                <div className="mt-2 flex items-center gap-2">
+                                                    <button onClick={() => setQty(product.id, qty - 1)} className="w-7 h-7 rounded-full border border-gray-200 hover:border-blue-500 text-sm font-bold" aria-label={`Quitar uno: ${product.name}`}>−</button>
+                                                    <span className="w-6 text-center text-sm font-bold">{qty}</span>
+                                                    <button onClick={() => setQty(product.id, qty + 1)} className="w-7 h-7 rounded-full border border-gray-200 hover:border-blue-500 text-sm font-bold" aria-label={`Añadir uno: ${product.name}`}>+</button>
+                                                    <button onClick={() => setQty(product.id, 0)} className="ml-auto text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-600">Quitar</button>
+                                                </div>
+                                            </div>
+                                            <p className="text-sm font-black text-gray-900 whitespace-nowrap">{money.format(product.price * qty)}</p>
+                                        </li>
+                                    ))}
+                                </ul>
+                            )}
+
+                            {lines.length > 0 && (
+                                <div className="space-y-4">
+                                    <div>
+                                        <label htmlFor="co-name" className="block text-xs font-bold text-gray-700 mb-1.5">Nombre *</label>
+                                        <input id="co-name" value={name} onChange={e => setName(e.target.value)} autoComplete="name" className={inputClass} />
+                                    </div>
+                                    <fieldset>
+                                        <legend className="block text-xs font-bold text-gray-700 mb-1.5">Entrega *</legend>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            {[['envio', 'Envío en España'], ['recogida', 'Recogida en Madrid']].map(([id, label]) => (
+                                                <label key={id} className={`cursor-pointer px-3 py-3 rounded-2xl border text-xs font-bold text-center transition-colors focus-within:ring-2 focus-within:ring-blue-500/40 ${delivery === id ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-200 text-gray-600 hover:border-blue-500'}`}>
+                                                    <input type="radio" name="delivery" value={id} checked={delivery === id} onChange={() => setDelivery(id)} className="sr-only" />
+                                                    {label}
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </fieldset>
+                                    {delivery === 'envio' && (
+                                        <div>
+                                            <label htmlFor="co-cp" className="block text-xs font-bold text-gray-700 mb-1.5">Código postal *</label>
+                                            <input id="co-cp" value={postal} onChange={e => setPostal(e.target.value.replace(/\D/g, ''))} inputMode="numeric" autoComplete="postal-code" maxLength="5" placeholder="28001" className={inputClass} />
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+
+                        {lines.length > 0 && (
+                            <div className="border-t border-gray-100 px-6 py-5 space-y-4 bg-white">
+                                <div className="flex items-baseline justify-between">
+                                    <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Total</span>
+                                    <span className="text-2xl font-black text-gray-900">{foreign && '≈ '}{money.format(total)}</span>
+                                </div>
+                                <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
+                                    {foreign ? `Se cobra ${eur(total)} (IVA incluido). El importe en ${money.currency.code} es orientativo. ` : 'IVA incluido. '}
+                                    Los gastos de envío se confirman por WhatsApp antes del pago.
+                                </p>
+                                <label className="flex items-start gap-3 text-xs text-gray-600 font-medium cursor-pointer">
+                                    <input type="checkbox" checked={accepted} onChange={e => setAccepted(e.target.checked)} className="mt-0.5 w-4 h-4 accent-blue-600" />
+                                    <span>He leído y acepto los <a href={TERMS_URL} target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:underline">Términos y Condiciones</a> y la <a href={`${TERMS_URL}#devoluciones`} target="_blank" rel="noopener noreferrer" className="font-bold text-blue-600 hover:underline">política de devoluciones</a>.</span>
+                                </label>
+                                <a
+                                    href={ready ? href : undefined}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-disabled={!ready}
+                                    className={`flex items-center justify-center gap-2 w-full py-4 rounded-full text-xs font-black uppercase tracking-widest transition-all ${ready ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:scale-[1.01]' : 'bg-gray-200 text-gray-400 cursor-not-allowed'}`}
+                                >
+                                    Enviar pedido por WhatsApp
+                                </a>
+                                {!ready && (
+                                    <p className="text-[11px] text-center text-gray-400 font-medium">Completa los datos y acepta los términos para continuar.</p>
+                                )}
+                            </div>
+                        )}
+                    </aside>
+                </div>
+            );
+        };
+
+        // --- Page ---
+        const ShopPage = () => {
+            const money = useCurrency();
+            const [category, setCategory] = useState(initialCategory);
+            const [query, setQuery] = useState('');
+            const [sort, setSort] = useState('featured');
+            const [cart, setCart] = useState(() => {
+                const saved = store.get('lm-cart', {});
+                return Object.fromEntries(Object.entries(saved || {}).filter(([id, q]) => productById(id) && q > 0));
+            });
+            const [cartOpen, setCartOpen] = useState(false);
+
+            useEffect(() => { store.set('lm-cart', cart); }, [cart]);
+
+            const chooseCategory = (id) => {
+                setCategory(id);
+                const url = new URL(window.location.href);
+                if (id === 'todos') url.searchParams.delete('cat'); else url.searchParams.set('cat', id);
+                window.history.replaceState(null, '', url);
+            };
+
+            const setQty = (id, qty) => setCart(prev => {
+                const next = { ...prev };
+                if (qty > 0) next[id] = Math.min(qty, 99); else delete next[id];
+                return next;
+            });
+            const add = (id) => setCart(prev => ({ ...prev, [id]: Math.min((prev[id] || 0) + 1, 99) }));
+            const count = Object.values(cart).reduce((a, b) => a + b, 0);
+
+            const q = query.trim().toLowerCase();
+            const visible = PRODUCTS
+                .filter(p => category === 'todos' || p.cat === category)
+                .filter(p => !q || `${p.name} ${p.compat}`.toLowerCase().includes(q));
+            if (sort === 'price-asc') visible.sort((a, b) => a.price - b.price);
+            if (sort === 'price-desc') visible.sort((a, b) => b.price - a.price);
+            if (sort === 'name') visible.sort((a, b) => a.name.localeCompare(b.name, 'es'));
+
+            const activeCat = categoryById(category);
+            const chip = (active) => `flex-none px-5 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-colors ${active ? 'bg-blue-600 text-white shadow-md' : 'bg-white border border-gray-200 text-gray-600 hover:border-blue-500 hover:text-blue-600'}`;
+
+            return (
+                <>
+                    <PageHero
+                        eyebrow="COMPONENTES · MADRID"
+                        title="Repuestos y"
+                        accent="Componentes"
+                        intro="Piezas estándar y de calidad premium para los dispositivos más vendidos. Envío en España y recogida en Madrid."
+                    />
+
+                    {/* Trust strip */}
+                    <section className="relative z-20 mb-16">
+                        <div className="max-w-6xl mx-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            {[
+                                ['📦', 'Envío desde Madrid', 'A toda España'],
+                                ['↩️', `Devolución ${RETURN_DAYS} días`, 'Sujeta a revisión'],
+                                ['🛡️', 'Garantía legal 3 años', 'Productos nuevos'],
+                                ['💱', 'Precios en 5 divisas', 'Cobro en EUR'],
+                            ].map(([icon, title, text]) => (
+                                <div key={title} className="bg-white p-5 rounded-3xl shadow-xl border border-gray-50 flex items-center gap-4">
+                                    <div className="w-10 h-10 flex-none bg-blue-50 rounded-xl flex items-center justify-center text-lg" aria-hidden="true">{icon}</div>
+                                    <div>
+                                        <p className="text-sm font-black text-gray-900 leading-tight">{title}</p>
+                                        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight mt-1">{text}</p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
+
+                    <section className="pb-32 relative z-20">
+                        <div className="max-w-6xl mx-auto">
+                            {/* Toolbar */}
+                            <div className="sticky top-[120px] z-30 -mx-4 md:mx-0 px-4 md:px-6 py-4 mb-10 glass md:rounded-[2rem] shadow-sm">
+                                <nav className="flex gap-2 overflow-x-auto no-scrollbar pb-3" aria-label="Categorías">
+                                    <button onClick={() => chooseCategory('todos')} aria-pressed={category === 'todos'} className={chip(category === 'todos')}>Todos</button>
+                                    {CATEGORIES.map(c => (
+                                        <button key={c.id} onClick={() => chooseCategory(c.id)} aria-pressed={category === c.id} className={chip(category === c.id)}>
+                                            <span aria-hidden="true">{c.icon}</span> {c.label}
+                                        </button>
+                                    ))}
+                                </nav>
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <label className="relative flex-1">
+                                        <span className="sr-only">Buscar</span>
+                                        <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.2"><circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" /></svg>
+                                        <input
+                                            type="search"
+                                            value={query}
+                                            onChange={e => setQuery(e.target.value)}
+                                            placeholder="Buscar pieza o modelo (ThinkPad, iPhone 13, DDR5…)"
+                                            className="w-full pl-11 pr-4 py-3 rounded-full border border-gray-200 bg-white text-sm text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                                        />
+                                    </label>
+                                    <div className="flex gap-3">
+                                        <label className="relative inline-flex items-center flex-1 sm:flex-none">
+                                            <span className="sr-only">Ordenar</span>
+                                            <select value={sort} onChange={e => setSort(e.target.value)} className="w-full appearance-none cursor-pointer pl-5 pr-10 py-3 rounded-full border border-gray-200 bg-white text-xs font-bold uppercase tracking-widest text-gray-700 hover:border-blue-500 focus:outline-none focus:border-blue-500 transition-colors">
+                                                {SORTS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}
+                                            </select>
+                                            <svg className="pointer-events-none absolute right-4 w-3 h-3 text-gray-400" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 4l4 4 4-4" /></svg>
+                                        </label>
+                                        <CurrencySelect value={money.currency.code} onChange={money.setCurrency} className="flex-1 sm:flex-none" />
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Category heading */}
+                            <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+                                <div>
+                                    <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter">{activeCat ? activeCat.label : 'Todo el catálogo'}</h2>
+                                    <p className="text-gray-500 font-medium mt-2">{activeCat ? activeCat.desc : 'Repuestos para oficina, estudio, desarrollo, redes y gaming.'}</p>
+                                </div>
+                                <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{visible.length} productos</p>
+                            </div>
+
+                            {visible.length === 0 ? (
+                                <div className="text-center py-20 rounded-[2.5rem] border border-dashed border-gray-200 bg-white/70">
+                                    <p className="text-gray-500 font-medium mb-4">No encontramos esa pieza en el catálogo.</p>
+                                    <a href={`https://wa.me/${SELLER.whatsapp}?text=${encodeURIComponent(`Hola Lameyer, busco: ${query}`)}`} target="_blank" rel="noopener noreferrer" className="inline-block px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest rounded-full shadow-md transition-colors">
+                                        Pedir por WhatsApp
+                                    </a>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {visible.map(p => <ProductCard key={p.id} product={p} money={money} onAdd={add} inCart={cart[p.id]} />)}
+                                </div>
+                            )}
+
+                            {/* Legal notes */}
+                            <div className="mt-16 grid md:grid-cols-3 gap-4 text-sm">
+                                <a href={`${TERMS_URL}#precios`} className="p-6 rounded-3xl bg-white/80 border border-gray-100 hover:border-blue-500 transition-colors">
+                                    <p className="font-black text-gray-900 mb-1">Precios y divisas</p>
+                                    <p className="text-gray-500 font-medium">Precios en EUR con IVA. Otras divisas, orientativas{money.ratesDate ? ` (tipo BCE del ${money.ratesDate.split('-').reverse().join('/')})` : ''}.</p>
+                                </a>
+                                <a href={`${TERMS_URL}#devoluciones`} className="p-6 rounded-3xl bg-white/80 border border-gray-100 hover:border-blue-500 transition-colors">
+                                    <p className="font-black text-gray-900 mb-1">Devoluciones en {RETURN_DAYS} días</p>
+                                    <p className="text-gray-500 font-medium">Envía el producto a nuestra dirección en España o en Madrid para su revisión.</p>
+                                </a>
+                                <a href={`${TERMS_URL}#garantia`} className="p-6 rounded-3xl bg-white/80 border border-gray-100 hover:border-blue-500 transition-colors">
+                                    <p className="font-black text-gray-900 mb-1">Garantía</p>
+                                    <p className="text-gray-500 font-medium">3 años de garantía legal de conformidad para productos nuevos.</p>
+                                </a>
+                            </div>
+                            <p className="mt-6 text-[11px] text-gray-400 font-medium text-center max-w-3xl mx-auto">
+                                Las marcas y modelos se citan solo para indicar compatibilidad y pertenecen a sus titulares. Salvo indicación expresa, los repuestos son compatibles y no originales del fabricante.
+                                Consulta los <a href={TERMS_URL} className="font-bold text-blue-600 hover:underline">Términos y Condiciones</a>.
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* Floating cart button */}
+                    <button
+                        onClick={() => setCartOpen(true)}
+                        className="fixed right-6 bottom-6 z-[80] flex items-center gap-3 pl-5 pr-6 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-blue-600/40 hover:scale-105 transition-all"
+                        aria-label={`Abrir carrito, ${count} artículos`}
+                    >
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6" /><circle cx="10" cy="20" r="1.3" /><circle cx="17" cy="20" r="1.3" /></svg>
+                        Carrito
+                        <span className="min-w-[1.5rem] h-6 px-1.5 rounded-full bg-white text-blue-600 flex items-center justify-center">{count}</span>
+                    </button>
+
+                    <CartDrawer open={cartOpen} onClose={() => setCartOpen(false)} cart={cart} setQty={setQty} money={money} />
+                </>
+            );
+        };
+
+        renderPage(ShopPage);
+    </script>
+</body>
+</html>
