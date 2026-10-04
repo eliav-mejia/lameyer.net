@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contract Testing & Versioning - Lameyer Blog</title>
+    <meta name="description" content="Catching breaking API changes in CI with OpenAPI diffs and consumer-driven contract tests, semantic versioning for contracts, and retiring old versions with Deprecation and Sunset headers.">
+    <link rel="canonical" href="https://lameyer.net/blog/core/contract-testing-versioning/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Diff every OpenAPI change against main in CI',
+            'Let consumers publish the contracts they rely on',
+            'Fail the build on any unapproved breaking change',
+            'Version events in the topic name',
+            'Announce removals with Deprecation and Sunset',
+            'Remove old versions only when usage is zero',
+        ];
+
+        const CHANGES = [
+            { change: 'Add an optional request field', kind: 'Minor', note: 'Old callers simply don\'t send it.' },
+            { change: 'Add a response field', kind: 'Minor', note: 'Only if clients ignore unknown fields. Say so in the contract.' },
+            { change: 'Add a value to a response enum', kind: 'Major*', note: 'Breaks clients with exhaustive switches. Treat as breaking unless documented.' },
+            { change: 'Make an optional field required', kind: 'Major', note: 'Old callers start getting 422.' },
+            { change: 'Rename or remove a field', kind: 'Major', note: 'Use expand-and-contract: add new, deprecate old.' },
+            { change: 'Fix a typo in a description', kind: 'Patch', note: 'No behavior change.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    The previous steps gave every module a typed contract and private data. That makes the contract the one thing the rest of
+                    the system depends on. An edge function deployed last week, a workflow that is still retrying messages from yesterday, a
+                    customer's integration: all of them assume the contract they were built against. This last step is about changing the core
+                    every day <strong className="text-gray-900">without breaking any of them</strong>, and proving it in CI rather than in production.
+                </P>
+
+                <H2>What counts as breaking</H2>
+                <Table
+                    columns={[{ key: 'change', label: 'Change' }, { key: 'kind', label: 'Semver', accent: true }, { key: 'note', label: 'Why' }]}
+                    rows={CHANGES}
+                />
+
+                <H2>Layer 1: diff the schema on every pull request</H2>
+                <P>
+                    Because the OpenAPI document is generated and committed (see <A href="/blog/core/contracts-typed-apis/">Contracts &
+                    Typed APIs</A>), CI can compare it against <Code>main</Code>. <Code>oasdiff</Code> classifies each difference and
+                    fails when a breaking change appears without a major version bump.
+                </P>
+                <CodeBlock title=".github/workflows/contracts.yml (excerpt)">{`- name: Generate contracts
+  run: pnpm turbo run gen:openapi
+
+- name: Check for breaking changes
+  run: |
+    git show origin/main:contracts/billing.openapi.yaml > /tmp/base.yaml
+    oasdiff breaking /tmp/base.yaml contracts/billing.openapi.yaml \\
+      --fail-on ERR`}</CodeBlock>
+                <P>
+                    This catches structural breaks: removed fields, changed types, new required parameters. It cannot catch a change in
+                    <em> behavior</em> that keeps the same shape, such as a total that is now returned in cents instead of dollars.
+                </P>
+
+                <H2>Layer 2: consumer-driven contract tests</H2>
+                <P>
+                    A schema says what the core <em>allows</em>. Consumers know what they actually <em>use</em>. With consumer-driven contract
+                    testing (Pact is the common tool), each consumer writes a small test describing the requests it sends and the parts of
+                    the response it relies on. Those expectations are published to a broker, and the core's CI replays them against the real
+                    implementation.
+                </P>
+                <CodeBlock title="edge-api/tests/billing.pact.test.ts">{`await provider
+  .given('customer c-42 exists')
+  .uponReceiving('a request to create an invoice')
+  .withRequest({ method: 'POST', path: '/invoices', body: {
+    customerId: 'c-42', lines: [{ sku: 'A1', quantity: 2,
+      unitPrice: { amount: 1500, currency: 'USD' } }], idempotencyKey: like('k-123456'),
+  }})
+  .willRespondWith({ status: 201, body: {
+    id: uuid(), status: 'issued', total: { amount: 3000, currency: 'USD' },
+  }})
+  .executeTest(async (mock) => {
+    const res = await createInvoice(mock.url, input);
+    expect(res.total.amount).toBe(3000);
+  });`}</CodeBlock>
+                <CodeBlock title="Before deploying the core">{`pact-broker can-i-deploy --pacticipant core-billing \\
+  --version $GIT_SHA --to-environment production`}</CodeBlock>
+                <P>
+                    <Code>can-i-deploy</Code> answers the question that matters: does this build of the core satisfy every consumer
+                    currently running in production? It also gives you something a schema never will: a list of who uses which field.
+                </P>
+                <Callout title="Unknown consumers are the real risk">
+                    Contract tests only protect consumers that publish contracts. For external integrations, use edge analytics: log the
+                    API key and contract version on every request at the <A href="/blog/serverless/serverless-edge-architecture/">edge</A>, so
+                    you know who still calls an old version before you remove it.
+                </Callout>
+
+                <H2>Versioning the contract</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">In-process callers</strong> get versions through the contract package (<Code>@contracts/billing@2.x</Code>), managed with changesets.</>,
+                    <><strong className="text-gray-900">HTTP callers</strong> get the major version in the path (<Code>/v2/invoices</Code>). Minor changes ship without a new path.</>,
+                    <><strong className="text-gray-900">Events</strong> put the version in the topic (<Code>billing.invoice_issued.v2</Code>). During a migration the outbox publishes both versions.</>,
+                ]} />
+                <P>
+                    Keep at most two major versions alive. Inside the core, <Code>v1</Code> should be a thin adapter that translates to{' '}
+                    <Code>v2</Code>, not a second copy of the business logic.
+                </P>
+
+                <H2>Retiring a version</H2>
+                <P>
+                    Announce removals in the response itself, so every client sees them, not just people who read the changelog. The{' '}
+                    <Code>Deprecation</Code> and <Code>Sunset</Code> HTTP headers are standardized for this (RFC 9745 and RFC 8594):
+                </P>
+                <CodeBlock title="Response from /v1/invoices">{`HTTP/1.1 201 Created
+Deprecation: @1798761600
+Sunset: Wed, 30 Jun 2027 23:59:59 GMT
+Link: <https://lameyer.net/docs/billing/v2-migration>; rel="deprecation"`}</CodeBlock>
+                <P>
+                    Then watch the usage numbers fall. Remove <Code>v1</Code> when traffic reaches zero, or when the sunset date passes and the
+                    remaining callers have been contacted, not before.
+                </P>
+
+                <H2>Measuring it</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Breaking changes caught in CI vs. found in production</strong>: the ratio should rise until production finds none.</>,
+                    <><strong className="text-gray-900">Deploy frequency of the core</strong>: should increase once teams stop fearing deploys.</>,
+                    <><strong className="text-gray-900">Traffic on deprecated versions</strong>: should trend to zero before each sunset date.</>,
+                ]} />
+
+                <Callout title="The whole path">
+                    Modules give the core its shape, contracts give it doors, packages share what must stay identical, private data keeps the
+                    modules apart, and contract tests let all of it change safely. Back to the overview:{' '}
+                    <A href="/blog/core/modular-core-architecture/">Modular Core Architecture</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

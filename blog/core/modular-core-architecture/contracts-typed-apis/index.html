@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contracts & Typed APIs - Lameyer Blog</title>
+    <meta name="description" content="Defining module contracts once as schemas, then generating TypeScript types, runtime validation and OpenAPI documents that edge functions and workflows build clients from.">
+    <link rel="canonical" href="https://lameyer.net/blog/core/contracts-typed-apis/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Write one schema per input, output and error',
+            'Derive types from the schema, never by hand',
+            'Validate at every boundary that crosses a network',
+            'Return expected errors as values, not exceptions',
+            'Publish OpenAPI for every HTTP-facing module',
+            'Generate edge and workflow clients in CI',
+        ];
+
+        const CALLERS = [
+            { caller: 'Another module (same process)', form: 'TypeScript import from index.ts', check: 'Compile time' },
+            { caller: 'Edge function (Worker)', form: 'Generated client from OpenAPI', check: 'Compile time + schema at the edge' },
+            { caller: 'Workflow / queue consumer', form: 'Message schema (JSON Schema)', check: 'Validation on consume' },
+            { caller: 'External integration', form: 'OpenAPI document + API Shield', check: 'Schema validation at Cloudflare' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    A module boundary says <em>where</em> the door is. A <strong className="text-gray-900">contract</strong> says exactly what
+                    can pass through it: which inputs are accepted, what comes back, and which errors can happen. In a modular core, the same
+                    contract has to serve very different callers: other modules in the same process, edge functions over HTTP, workflows
+                    reading from a queue. The goal is to write it once and generate everything else.
+                </P>
+
+                <H2>One schema, four kinds of caller</H2>
+                <Table
+                    columns={[{ key: 'caller', label: 'Caller' }, { key: 'form', label: 'Contract form' }, { key: 'check', label: 'Checked at', accent: true }]}
+                    rows={CALLERS}
+                />
+
+                <H2>Schema first, types second</H2>
+                <P>
+                    Hand-written TypeScript interfaces disappear at runtime, so they cannot validate a request from the network. A schema
+                    library such as Zod (or Valibot, TypeBox, JSON Schema) gives you both: a runtime validator and a static type derived from it.
+                </P>
+                <CodeBlock title="core/billing/contract.ts">{`import { z } from 'zod';
+
+export const InvoiceLine = z.object({
+  sku: z.string().min(1),
+  quantity: z.number().int().positive(),
+  unitPrice: z.object({ amount: z.number().int(), currency: z.enum(['USD', 'EUR', 'MXN']) }),
+});
+
+export const CreateInvoiceInput = z.object({
+  customerId: z.string().uuid(),
+  lines: z.array(InvoiceLine).min(1).max(500),
+  idempotencyKey: z.string().min(8),
+});
+
+export const Invoice = CreateInvoiceInput.omit({ idempotencyKey: true }).extend({
+  id: z.string().uuid(),
+  status: z.enum(['draft', 'issued', 'void']),
+  total: InvoiceLine.shape.unitPrice,
+});
+
+export type CreateInvoiceInput = z.infer<typeof CreateInvoiceInput>;
+export type Invoice = z.infer<typeof Invoice>;`}</CodeBlock>
+                <P>
+                    Note the <Code>idempotencyKey</Code>: anything a workflow may retry should be safe to call twice. The contract is the
+                    right place to make that a requirement instead of a convention.
+                </P>
+
+                <H2>Errors are part of the contract</H2>
+                <P>
+                    If a caller can only learn about <Code>CUSTOMER_BLOCKED</Code> by reading the implementation, it isn't part of the
+                    contract. Expected business failures should be typed return values. Exceptions are for bugs and outages.
+                </P>
+                <CodeBlock title="core/billing/contract.ts (continued)">{`export const BillingError = z.discriminatedUnion('code', [
+  z.object({ code: z.literal('CUSTOMER_NOT_FOUND'), customerId: z.string() }),
+  z.object({ code: z.literal('CUSTOMER_BLOCKED'), reason: z.string() }),
+  z.object({ code: z.literal('CURRENCY_MISMATCH') }),
+]);
+
+export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+
+export interface Billing {
+  createInvoice(input: CreateInvoiceInput): Promise<Result<Invoice, z.infer<typeof BillingError>>>;
+}`}</CodeBlock>
+                <P>
+                    Over HTTP, each error code maps to a status (<Code>404</Code>, <Code>409</Code>, <Code>422</Code>) and a{' '}
+                    <Code>application/problem+json</Code> body, so edge functions can handle them without guessing.
+                </P>
+
+                <H2>From schema to OpenAPI</H2>
+                <P>
+                    For modules the edge or integrations call over HTTP, generate an OpenAPI document from the same schemas, for example with{' '}
+                    <Code>zod-to-openapi</Code>, or with your framework's built-in support (Hono, Fastify, NestJS). The document is a build
+                    output committed to the repository, so every change to it shows up in code review.
+                </P>
+                <CodeBlock title="Build step">{`pnpm --filter @core/billing gen:openapi   # writes contracts/billing.openapi.yaml
+pnpm --filter @edge/api gen:client        # openapi-typescript -> typed fetch client`}</CodeBlock>
+                <CodeBlock title="edge/api/src/invoices.ts">{`import createClient from 'openapi-fetch';
+import type { paths } from '@contracts/billing';
+
+const core = createClient<paths>({ baseUrl: env.CORE_URL });
+
+const { data, error } = await core.POST('/invoices', {
+  body: { customerId, lines, idempotencyKey: crypto.randomUUID() },
+});
+// Renaming "lines" in the core now breaks this build, not production.`}</CodeBlock>
+
+                <H2>The same document protects the API</H2>
+                <P>
+                    The OpenAPI file has a second job. Upload it to Cloudflare <A href="/blog/security/api-endpoint-protection/">API Shield
+                    schema validation</A>, and requests that don't match the contract are rejected at the edge before they reach the core.
+                    One file now drives types, documentation, client generation and security.
+                </P>
+
+                <H2>Keep contracts small</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Expose intent, not tables.</strong> <Code>issueInvoice(id)</Code>, not <Code>updateInvoice({'{ status }'})</Code>. Callers shouldn't need to know the state machine.</>,
+                    <><strong className="text-gray-900">Return what callers need.</strong> Every extra field is one more thing you can never remove without a major version.</>,
+                    <><strong className="text-gray-900">No internal IDs or flags.</strong> Database sequence numbers and feature flags leak implementation and freeze it.</>,
+                ]} />
+
+                <Callout title="Where contracts live">
+                    Schemas and generated clients are shared by several deployables, so they belong in workspace packages, covered next in{' '}
+                    <A href="/blog/core/shared-packages-workspaces/">Shared Packages & Workspaces</A>. How to change a contract without
+                    breaking its callers is the subject of <A href="/blog/core/contract-testing-versioning/">Contract Testing & Versioning</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

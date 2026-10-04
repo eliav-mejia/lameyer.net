@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Packages & Workspaces - Lameyer Blog</title>
+    <meta name="description" content="Moving shared code into workspace packages with explicit exports and owners, using pnpm workspaces and Turborepo to build only what a change touched.">
+    <link rel="canonical" href="https://lameyer.net/blog/core/shared-packages-workspaces/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Delete the utils/ folder, one package at a time',
+            'Give every package a single purpose and an owner',
+            'Declare public entry points in the exports field',
+            'Use workspace:* for internal dependencies',
+            'Build and test only affected packages in CI',
+            'Record changes with changesets',
+        ];
+
+        const KINDS = [
+            { pkg: '@acme/kernel', holds: 'Money, IDs, dates, Result type', rule: 'Tiny and stable. Changes need architect review.' },
+            { pkg: '@contracts/billing', holds: 'Schemas + generated OpenAPI types', rule: 'Owned by the billing module team.' },
+            { pkg: '@acme/logger', holds: 'Structured logging with request IDs', rule: 'Runs in Node and in Workers.' },
+            { pkg: '@acme/config', holds: 'ESLint, tsconfig, dependency rules', rule: 'Dev-only. Never imported at runtime.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Every codebase eventually grows a <Code>utils/</Code> or <Code>common/</Code> folder. It starts with a date formatter and
+                    ends as the most-imported, least-owned code in the system, where a change to one helper redeploys everything.
+                    In a modular core, shared code still exists, but it lives in <strong className="text-gray-900">workspace packages</strong>:
+                    small, named, owned units with an explicit public API, versioned in the same repository as the modules that use them.
+                </P>
+
+                <H2>What deserves to be a package</H2>
+                <P>
+                    Share code only when two or more deployables (the core, an edge Worker, a workflow consumer) genuinely need the same
+                    behavior. Typical packages in an MC-SE repository:
+                </P>
+                <Table
+                    columns={[{ key: 'pkg', label: 'Package', mono: true }, { key: 'holds', label: 'Holds' }, { key: 'rule', label: 'Rule' }]}
+                    rows={KINDS}
+                />
+                <Callout title="Duplication is cheaper than the wrong abstraction">
+                    Two modules with similar-looking code are not a reason for a package. If the code changes for different business reasons,
+                    keep the copies. Share only what must stay identical, such as money rounding or a contract schema.
+                </Callout>
+
+                <H2>Workspace layout</H2>
+                <CodeBlock title="Repository">{`.
+├── pnpm-workspace.yaml
+├── turbo.json
+├── apps/
+│   ├── core/              # the modular monolith (billing, catalog, accounts...)
+│   ├── edge-api/          # Cloudflare Worker in front of the core
+│   └── workflows/         # queue consumers and durable workflows
+└── packages/
+    ├── kernel/
+    ├── logger/
+    ├── config/
+    └── contracts/
+        ├── billing/
+        └── catalog/`}</CodeBlock>
+                <CodeBlock title="pnpm-workspace.yaml">{`packages:
+  - "apps/*"
+  - "packages/*"
+  - "packages/contracts/*"`}</CodeBlock>
+
+                <H2>Explicit exports keep packages honest</H2>
+                <P>
+                    The <Code>exports</Code> field in <Code>package.json</Code> does for packages what <Code>index.ts</Code> does for
+                    modules: anything not listed cannot be imported, by Node, bundlers or TypeScript (with{' '}
+                    <Code>moduleResolution: "bundler"</Code> or <Code>"node16"</Code>).
+                </P>
+                <CodeBlock title="packages/kernel/package.json">{`{
+  "name": "@acme/kernel",
+  "version": "1.4.0",
+  "type": "module",
+  "exports": {
+    ".":       { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+    "./money": { "types": "./dist/money.d.ts", "default": "./dist/money.js" }
+  },
+  "sideEffects": false
+}`}</CodeBlock>
+                <CodeBlock title="apps/edge-api/package.json (excerpt)">{`"dependencies": {
+  "@acme/kernel": "workspace:*",
+  "@contracts/billing": "workspace:*"
+}`}</CodeBlock>
+                <P>
+                    <Code>workspace:*</Code> links the local package, so a change to a contract and the edge code that uses it can land in one
+                    pull request. Edge Workers have strict bundle-size limits, so <Code>sideEffects: false</Code> and small entry points let
+                    the bundler drop everything the Worker doesn't use.
+                </P>
+
+                <H2>Build only what changed</H2>
+                <P>
+                    The usual objection to one repository is slow CI. A task runner like Turborepo (or Nx) knows the dependency graph and caches
+                    results, so a change to <Code>packages/logger</Code> rebuilds and tests only the packages and apps that depend on it.
+                </P>
+                <CodeBlock title="turbo.json">{`{
+  "tasks": {
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**"] },
+    "test":  { "dependsOn": ["build"] },
+    "lint":  {}
+  }
+}`}</CodeBlock>
+                <CodeBlock title="CI">{`pnpm turbo run lint test build --filter="...[origin/main]"`}</CodeBlock>
+                <P>
+                    The <Code>...[origin/main]</Code> filter means "everything changed since main, plus everything that depends on it". On
+                    a typical pull request that is a few packages, not the whole repository.
+                </P>
+
+                <H2>Versions and changelogs</H2>
+                <P>
+                    Internal packages consumed only inside the repository don't strictly need version numbers, but contract packages do:
+                    deployed edge functions and external integrations depend on a specific version. <Code>changesets</Code> asks each pull
+                    request to declare which packages changed and whether the change is a patch, minor or major, and generates changelogs from that.
+                </P>
+                <CodeBlock title=".changeset/brave-invoices-sing.md">{`---
+"@contracts/billing": minor
+---
+Add optional \`dueDate\` to CreateInvoiceInput.`}</CodeBlock>
+
+                <H2>Measuring progress</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">CI time per pull request</strong>: should drop as affected builds replace full builds.</>,
+                    <><strong className="text-gray-900">Lines left in utils/</strong>: should reach zero.</>,
+                    <><strong className="text-gray-900">Duplicated validation code</strong>: should be replaced by one contract package per module.</>,
+                ]} />
+
+                <Callout title="Next step">
+                    Packages share code, but they must never share tables. <A href="/blog/core/data-ownership-migrations/">Data Ownership &
+                    Migrations</A> covers how each module owns its data and how other modules get to it.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>
