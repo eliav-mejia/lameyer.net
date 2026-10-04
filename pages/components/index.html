@@ -82,6 +82,67 @@
             { id: 'ot-tools-64', cat: 'otros', name: 'Kit de destornilladores de precisión (64 piezas)', compat: 'Móviles, portátiles y consolas', price: 19.90, grade: 'estandar' },
         ];
 
+        // Product photos: /img/productos/<id>-400.webp and -800.webp (white background, square).
+        // Taken from Wikimedia Commons; CC BY / CC BY-SA require the credit shown at the bottom of the page.
+        // A product without an entry here shows its category icon instead.
+        const IMAGE_CREDITS = {
+            'of-kb-hp840': { author: "Alberto Garcia", license: 'CC BY-SA 2.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/', source: "https://commons.wikimedia.org/wiki/File:ThinkPad_USB_keyboard_(3829537325).jpg" },
+            'of-bat-t480': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Acer_AC10D31_Li-ion_battery_pack-3588.jpg" },
+            'of-usbc-65': { author: "Evan-Amos", license: 'Public domain', licenseUrl: '', source: "https://commons.wikimedia.org/wiki/File:Notebook-Computer-AC-Adapter.jpg" },
+            'of-fan-450': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Apple_TV,_1st_generation_-_Delta_Electronics_BFB0605LB_cooling_fan-3154.jpg" },
+            'es-lcd-156': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Lenovo_G500s_laptop-2905.jpg" },
+            'es-bat-a1466': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Dell_Li-Ion_Battery_YRDD6-1339.jpg" },
+            'es-kb-aspire5': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Lenovo_G500s_laptop-2903.jpg" },
+            'es-usbc-45': { author: "Evan-Amos", license: 'Public domain', licenseUrl: '', source: "https://commons.wikimedia.org/wiki/File:Notebook-Computer-AC-Adapter.jpg" },
+            'es-oled-ip13': { author: "Fairphone", license: 'CC BY-SA 2.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/', source: "https://commons.wikimedia.org/wiki/File:Fairphone_2_ELEVATION_transparent.jpg" },
+            'dv-ddr4-16': { author: "D-Kuru", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:DDR_4_RAM_SO-DIMM_16GB_by_Micron-top_back_PNr%C2%B00841.jpg" },
+            'dv-ddr5-32': { author: "D-Kuru", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:RAM_SO-DIMM_8GB_by_Kingston-top_back_PNr%C2%B00565.jpg" },
+            'dv-nvme-1tb': { author: "D-Kuru", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Samsung_980_PRO_PCIe_4.0_NVMe_SSD_1TB-bottom_PNr%C2%B00916.jpg" },
+            'dv-m2-usbc': { author: "Jacek Halicki", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:2023_Obudowa_dysku_twardego_Blueendless_M6N_(3).jpg" },
+            'dv-thermal': { author: "Suyash Dwivedi", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Hutixi_HT-GY260_thermal_paste.jpg" },
+            'rd-ax210': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Intel_Centrino_Wireless-N_2230-2109.jpg" },
+            'rd-sfp-10g': { author: "Dmitry Nosachev", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:LR-Link_10GBASE-SR_SFP%2B_transceiver.jpg" },
+            'rd-cat6-3m': { author: "Raimond Spekking", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:CAT8_Ethernet_Cable-0319.jpg" },
+            'rd-rj45-kit': { author: "Magma", license: 'CC BY-SA 3.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0/', source: "https://commons.wikimedia.org/wiki/File:Crimpt%C3%A5ng_f%C3%B6r_modul%C3%A4r_kontakt_RJ11_och_RJ45_Crimping_pliers.jpg" },
+            'rd-psu-12v': { author: "Evan-Amos", license: 'Public domain', licenseUrl: '', source: "https://commons.wikimedia.org/wiki/File:Wall-Wart-AC-Adapter.jpg" },
+            'gm-stick-ds5': { author: "Alex Cochrane", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Playstation_DualSense_Controller.png" },
+            'gm-joycon': { author: "Crisco 1492", license: 'CC BY-SA 4.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/4.0/', source: "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_2_Joy-Con_2_Blue_and_Orange.jpg" },
+            'gm-fan-ps5': { author: "User Smial on de.wikipedia", license: 'CC BY-SA 2.0 de', licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/de/', source: "https://commons.wikimedia.org/wiki/File:Radialluefter.jpg" },
+            'gm-xbox-bat': { author: "Serhio Magpie", license: 'CC BY 4.0', licenseUrl: 'https://creativecommons.org/licenses/by/4.0/', source: "https://commons.wikimedia.org/wiki/File:Xbox_Series_Controller_Gold_Shadow_Special_Edition_(angled).jpg" },
+            'gm-switches': { author: "Daniel Beardsmore", license: 'CC0', licenseUrl: 'https://creativecommons.org/publicdomain/zero/1.0/', source: "https://commons.wikimedia.org/wiki/File:Cherry_MX_Blue_switch_(front_angle).jpg" },
+            'ot-bat-ip12': { author: "MarcoTangerino", license: 'Public domain', licenseUrl: '', source: "https://commons.wikimedia.org/wiki/File:CAT-B25-Battery.jpg" },
+            'ot-bat-ip13': { author: "MarcoTangerino", license: 'Public domain', licenseUrl: '', source: "https://commons.wikimedia.org/wiki/File:CAT-B25-Battery.jpg" },
+            'ot-oled-a54': { author: "Fairphone", license: 'CC BY-SA 2.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/', source: "https://commons.wikimedia.org/wiki/File:Fairphone_2_ELEVATION_transparent.jpg" },
+            'ot-port-s21': { author: "SparkFun Electronics from Boulder, USA", license: 'CC BY 2.0', licenseUrl: 'https://creativecommons.org/licenses/by/2.0/', source: "https://commons.wikimedia.org/wiki/File:USB_Female_Type_C_Connector_(46356532451).jpg" },
+            'ot-tools-64': { author: "oomlout", license: 'CC BY-SA 2.0', licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/', source: "https://commons.wikimedia.org/wiki/File:Precision_Screwdriver_Set_1.jpg" },
+        };
+
+        const ProductImage = ({ product, size = 'card', eager = false }) => {
+            const cat = categoryById(product.cat);
+            if (!IMAGE_CREDITS[product.id]) {
+                return size === 'card'
+                    ? <div className="aspect-square w-full rounded-[1.5rem] bg-gray-50 flex items-center justify-center text-6xl" aria-hidden="true">{cat.icon}</div>
+                    : <div className="w-14 h-14 flex-none rounded-xl bg-gray-100 flex items-center justify-center text-xl" aria-hidden="true">{cat.icon}</div>;
+            }
+            const base = `/img/productos/${product.id}`;
+            return size === 'card' ? (
+                <img
+                    src={`${base}-400.webp`}
+                    srcSet={`${base}-400.webp 400w, ${base}-800.webp 800w`}
+                    sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 90vw"
+                    width="400"
+                    height="400"
+                    loading={eager ? 'eager' : 'lazy'}
+                    fetchpriority={eager ? 'high' : undefined}
+                    decoding="async"
+                    alt={`${product.name} compatible con ${product.compat}`}
+                    className="aspect-square w-full rounded-[1.5rem] bg-white object-contain transition-transform duration-500 group-hover:scale-105"
+                />
+            ) : (
+                <img src={`${base}-400.webp`} width="56" height="56" loading="lazy" decoding="async" alt="" className="w-14 h-14 flex-none rounded-xl bg-white border border-gray-100 object-contain" />
+            );
+        };
+
         const SORTS = [
             { id: 'featured', label: 'Destacados' },
             { id: 'price-asc', label: 'Precio: menor a mayor' },
@@ -100,38 +161,40 @@
         };
 
         // --- Product card ---
-        const ProductCard = ({ product, money, onAdd, inCart }) => {
+        const ProductCard = ({ product, money, onAdd, inCart, eager }) => {
             const cat = categoryById(product.cat);
             const grade = GRADES[product.grade];
             const foreign = money.currency.code !== 'EUR';
 
             return (
-                <article className="group flex flex-col rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md p-6 shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300">
-                    <div className="flex items-start justify-between gap-3 mb-5">
-                        <div className="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl bg-gray-100 group-hover:bg-blue-600 transition-colors" aria-hidden="true">{cat.icon}</div>
-                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest ${grade.className}`}>{grade.label}</span>
+                <article className="group flex flex-col rounded-[2rem] border border-gray-100 bg-white p-4 shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:shadow-blue-500/10 transition-all duration-300">
+                    <div className="relative mb-5 overflow-hidden rounded-[1.5rem]">
+                        <ProductImage product={product} eager={eager} />
+                        <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest shadow-sm ${grade.className}`}>{grade.label}</span>
                     </div>
 
-                    <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-2">{cat.label}</p>
-                    <h3 className="text-lg font-black text-gray-900 leading-snug mb-1">{product.name}</h3>
-                    <p className="text-sm text-gray-500 font-medium mb-6 flex-1">Compatible con {product.compat}</p>
+                    <div className="flex flex-col flex-1 px-2 pb-2">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-2">{cat.label}</p>
+                        <h3 className="text-lg font-black text-gray-900 leading-snug mb-1">{product.name}</h3>
+                        <p className="text-sm text-gray-500 font-medium mb-6 flex-1">Compatible con {product.compat}</p>
 
-                    <div className="mb-5">
-                        <p className="text-2xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price)}</p>
-                        <p className="text-[11px] text-gray-400 font-semibold">
-                            {foreign ? `Se cobra ${eur(product.price)} · IVA incl.` : 'IVA incluido'}
-                        </p>
+                        <div className="mb-5">
+                            <p className="text-2xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price)}</p>
+                            <p className="text-[11px] text-gray-400 font-semibold">
+                                {foreign ? `Se cobra ${eur(product.price)} · IVA incl.` : 'IVA incluido'}
+                            </p>
+                        </div>
+
+                        <button
+                            onClick={() => onAdd(product.id)}
+                            className="w-full py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest shadow-md hover:scale-[1.02] transition-all"
+                        >
+                            {inCart ? `Añadir otro (${inCart} en el carrito)` : 'Añadir al carrito'}
+                        </button>
+                        <a href={`${TERMS_URL}#devoluciones`} className="mt-3 text-center text-[11px] font-semibold text-gray-400 hover:text-blue-600 transition-colors">
+                            Devolución en {RETURN_DAYS} días · Ver términos
+                        </a>
                     </div>
-
-                    <button
-                        onClick={() => onAdd(product.id)}
-                        className="w-full py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-black uppercase tracking-widest shadow-md hover:scale-[1.02] transition-all"
-                    >
-                        {inCart ? `Añadir otro (${inCart} en el carrito)` : 'Añadir al carrito'}
-                    </button>
-                    <a href={`${TERMS_URL}#devoluciones`} className="mt-3 text-center text-[11px] font-semibold text-gray-400 hover:text-blue-600 transition-colors">
-                        Devolución en {RETURN_DAYS} días · Ver términos
-                    </a>
                 </article>
             );
         };
@@ -196,7 +259,7 @@
                                 <ul className="divide-y divide-gray-100 mb-6">
                                     {lines.map(({ product, qty }) => (
                                         <li key={product.id} className="py-4 flex gap-4">
-                                            <div className="w-10 h-10 flex-none rounded-xl bg-gray-100 flex items-center justify-center text-xl" aria-hidden="true">{categoryById(product.cat).icon}</div>
+                                            <ProductImage product={product} size="thumb" />
                                             <div className="flex-1 min-w-0">
                                                 <p className="text-sm font-bold text-gray-900 leading-snug">{product.name}</p>
                                                 <p className="text-xs text-gray-400 font-medium truncate">{product.compat}</p>
@@ -397,7 +460,7 @@
                                 </div>
                             ) : (
                                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {visible.map(p => <ProductCard key={p.id} product={p} money={money} onAdd={add} inCart={cart[p.id]} />)}
+                                    {visible.map((p, i) => <ProductCard key={p.id} product={p} money={money} onAdd={add} inCart={cart[p.id]} eager={i < 3} />)}
                                 </div>
                             )}
 
@@ -418,8 +481,25 @@
                             </div>
                             <p className="mt-6 text-[11px] text-gray-400 font-medium text-center max-w-3xl mx-auto">
                                 Las marcas y modelos se citan solo para indicar compatibilidad y pertenecen a sus titulares. Salvo indicación expresa, los repuestos son compatibles y no originales del fabricante.
+                                Las imágenes son ilustrativas y pueden no corresponder con la marca o el modelo exacto de la pieza.
                                 Consulta los <a href={TERMS_URL} className="font-bold text-blue-600 hover:underline">Términos y Condiciones</a>.
                             </p>
+
+                            {/* Image credits (required by the CC BY / CC BY-SA licences) */}
+                            <details className="mt-6 max-w-3xl mx-auto text-[11px] text-gray-400 font-medium">
+                                <summary className="cursor-pointer text-center font-bold uppercase tracking-widest hover:text-blue-600">Créditos de imágenes</summary>
+                                <ul className="mt-4 grid sm:grid-cols-2 gap-x-6 gap-y-1">
+                                    {PRODUCTS.filter(p => IMAGE_CREDITS[p.id]).map(p => {
+                                        const c = IMAGE_CREDITS[p.id];
+                                        return (
+                                            <li key={p.id}>
+                                                <span className="text-gray-500">{p.name} ({p.compat})</span>: <a href={c.source} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">{c.author}</a>,{' '}
+                                                {c.licenseUrl ? <a href={c.licenseUrl} target="_blank" rel="noopener noreferrer" className="hover:text-blue-600 underline">{c.license}</a> : c.license}, vía Wikimedia Commons (recortada y con fondo blanco)
+                                            </li>
+                                        );
+                                    })}
+                                </ul>
+                            </details>
                         </div>
                     </section>
 
