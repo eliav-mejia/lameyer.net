@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Términos y Condiciones - Lameyer</title>
+    <meta name="description" content="Términos y condiciones de compra de la tienda de componentes Lameyer: precios y divisas, envíos, devoluciones en 30 días y garantía legal.">
+    <link rel="canonical" href="https://lameyer.net/pages/terminos/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/tienda.jsx"></script>
+    <script type="text/babel">
+        // Business days to inspect a returned product once it arrives.
+        const REVIEW_DAYS = 7;
+
+        const SECTIONS = [
+            { id: 'vendedor', title: 'Datos del vendedor' },
+            { id: 'objeto', title: 'Objeto y aceptación' },
+            { id: 'productos', title: 'Productos' },
+            { id: 'precios', title: 'Precios y divisas' },
+            { id: 'pedidos', title: 'Pedidos y pago' },
+            { id: 'envios', title: 'Envíos y recogida' },
+            { id: 'devoluciones', title: 'Devoluciones (30 días)' },
+            { id: 'garantia', title: 'Garantía legal' },
+            { id: 'datos', title: 'Protección de datos' },
+            { id: 'ley', title: 'Ley aplicable y reclamaciones' },
+            { id: 'formulario', title: 'Formulario de desistimiento' },
+        ];
+
+        // Unfilled "[...]" values are highlighted so they are easy to spot before publishing.
+        const Fill = ({ children }) => (
+            typeof children === 'string' && children.startsWith('[')
+                ? <mark className="px-1 rounded bg-amber-100 text-amber-800">{children}</mark>
+                : <>{children}</>
+        );
+
+        const Section = ({ id, n, title, children }) => (
+            <section id={id} className="scroll-mt-40 pt-10 first:pt-0">
+                <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-2">{String(n).padStart(2, '0')}</p>
+                <h2 className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight mb-4">{title}</h2>
+                <div className="space-y-4 text-gray-600 font-medium leading-relaxed">{children}</div>
+            </section>
+        );
+
+        const AddressCard = ({ address }) => (
+            <div className="p-6 rounded-3xl border border-gray-100 bg-white shadow-xl shadow-gray-200/40">
+                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-3">{address.label}</p>
+                <address className="not-italic text-gray-900 font-bold leading-relaxed">
+                    {address.lines.map((line, i) => <div key={i}><Fill>{line}</Fill></div>)}
+                </address>
+            </div>
+        );
+
+        const TermsPage = () => (
+            <>
+                <PageHero
+                    eyebrow="TIENDA · LEGAL"
+                    title="Términos y"
+                    accent="Condiciones"
+                    intro={`Condiciones de compra de la tienda de componentes Lameyer. Devolución en ${RETURN_DAYS} días y garantía legal de 3 años.`}
+                />
+
+                <section className="pb-32 relative z-20">
+                    <div className="max-w-6xl mx-auto grid lg:grid-cols-[260px_minmax(0,1fr)] gap-10 items-start">
+                        {/* Index */}
+                        <nav className="lg:sticky lg:top-[136px] p-6 rounded-[2rem] glass shadow-sm" aria-label="Índice">
+                            <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">Contenido</p>
+                            <ol className="space-y-2 text-sm">
+                                {SECTIONS.map((s, i) => (
+                                    <li key={s.id}>
+                                        <a href={`#${s.id}`} className="flex gap-3 font-semibold text-gray-600 hover:text-blue-600 transition-colors">
+                                            <span className="text-gray-300 font-bold tabular-nums">{String(i + 1).padStart(2, '0')}</span>{s.title}
+                                        </a>
+                                    </li>
+                                ))}
+                            </ol>
+                            <a href="/pages/components/" className="mt-6 block text-center px-5 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-black uppercase tracking-widest transition-colors">
+                                Volver a la tienda
+                            </a>
+                        </nav>
+
+                        <article className="p-8 md:p-12 rounded-[2.5rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 divide-y divide-gray-100 [&>section]:pb-10 [&>section:last-child]:pb-0">
+                            <Section id="vendedor" n={1} title="Datos del vendedor">
+                                <p>En cumplimiento de la Ley 34/2002, de servicios de la sociedad de la información y de comercio electrónico (LSSI-CE), se informa de que esta tienda es operada por:</p>
+                                <ul className="grid sm:grid-cols-2 gap-3 text-sm">
+                                    <li className="p-4 rounded-2xl bg-gray-50"><span className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">Titular</span><span className="text-gray-900 font-bold"><Fill>{SELLER.name}</Fill></span></li>
+                                    <li className="p-4 rounded-2xl bg-gray-50"><span className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">NIF / CIF</span><span className="text-gray-900 font-bold"><Fill>{SELLER.nif}</Fill></span></li>
+                                    <li className="p-4 rounded-2xl bg-gray-50 sm:col-span-2"><span className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">Domicilio</span><span className="text-gray-900 font-bold"><Fill>{SELLER.address}</Fill></span></li>
+                                    <li className="p-4 rounded-2xl bg-gray-50"><span className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">Correo</span><a href={`mailto:${SELLER.email}`} className="text-blue-600 font-bold hover:underline">{SELLER.email}</a></li>
+                                    <li className="p-4 rounded-2xl bg-gray-50"><span className="block text-[10px] font-bold uppercase tracking-widest text-gray-400">WhatsApp</span><a href={`https://wa.me/${SELLER.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline">{SELLER.whatsappLabel}</a></li>
+                                </ul>
+                            </Section>
+
+                            <Section id="objeto" n={2} title="Objeto y aceptación">
+                                <p>Estos términos regulan la venta a distancia de componentes y repuestos electrónicos a través de <strong className="text-gray-900">lameyer.net/pages/components/</strong>. Al confirmar un pedido, el cliente declara haberlos leído y aceptado. Se aplican a compradores consumidores y, en lo que proceda, a profesionales.</p>
+                                <p>Lameyer puede actualizar estos términos; a cada pedido se le aplican los vigentes en la fecha en que se realizó.</p>
+                            </Section>
+
+                            <Section id="productos" n={3} title="Productos">
+                                <p>Los repuestos se ofrecen en dos niveles de calidad:</p>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li><strong className="text-gray-900">Estándar:</strong> piezas compatibles, nuevas y verificadas antes del envío.</li>
+                                    <li><strong className="text-gray-900">Calidad premium:</strong> piezas compatibles fabricadas con componentes y tolerancias equivalentes a las del fabricante original.</li>
+                                </ul>
+                                <p>Salvo que la ficha indique lo contrario, los repuestos <strong className="text-gray-900">no son originales del fabricante del dispositivo</strong>. Las marcas y modelos se mencionan únicamente para indicar compatibilidad y pertenecen a sus respectivos titulares.</p>
+                                <p>Antes de comprar, el cliente debe comprobar que el modelo exacto de su dispositivo coincide con la compatibilidad indicada. Si tiene dudas, puede consultarnos por WhatsApp o correo.</p>
+                            </Section>
+
+                            <Section id="precios" n={4} title="Precios y divisas">
+                                <p>Todos los precios se expresan y se cobran en <strong className="text-gray-900">euros (EUR)</strong> e incluyen el IVA aplicable. Los gastos de envío no están incluidos y se comunican al cliente antes del pago.</p>
+                                <p>El selector de divisa (USD, MXN, GBP, ILS) muestra una <strong className="text-gray-900">conversión orientativa</strong> calculada con los tipos de cambio de referencia publicados por el Banco Central Europeo. Ese importe no es vinculante: el precio del contrato es siempre el importe en EUR. Si el cliente paga con una tarjeta o cuenta en otra divisa, su banco puede aplicar un tipo de cambio y comisiones propios.</p>
+                                <p>Si por un error evidente un producto se publica con un precio manifiestamente incorrecto, Lameyer informará al cliente antes del cobro, y este podrá confirmar el pedido con el precio correcto o cancelarlo sin coste.</p>
+                            </Section>
+
+                            <Section id="pedidos" n={5} title="Pedidos y pago">
+                                <ol className="list-decimal pl-5 space-y-2">
+                                    <li>El cliente añade los productos al carrito, indica su nombre y el método de entrega, acepta estos términos y envía el pedido por WhatsApp.</li>
+                                    <li>Lameyer confirma la disponibilidad, los gastos de envío y el importe total, y facilita los medios de pago.</li>
+                                    <li>El contrato se perfecciona cuando el cliente acepta la confirmación y realiza el pago. Lameyer envía la confirmación del pedido en un soporte duradero (correo electrónico o mensaje).</li>
+                                </ol>
+                            </Section>
+
+                            <Section id="envios" n={6} title="Envíos y recogida">
+                                <p>Los pedidos se preparan en Madrid y se envían a direcciones de España. El plazo y el coste dependen del destino y se indican en la confirmación del pedido. Salvo pacto en contrario, la entrega se realizará en un plazo máximo de 30 días naturales desde la confirmación.</p>
+                                <p>También es posible la <strong className="text-gray-900">recogida en Madrid</strong>, en el lugar y horario que se acuerden al confirmar el pedido.</p>
+                                <p>Al recibir el paquete, el cliente debe comprobar que no presenta daños visibles y, si los hay, indicarlo al transportista y comunicárnoslo lo antes posible.</p>
+                            </Section>
+
+                            <Section id="devoluciones" n={7} title={`Devoluciones: ${RETURN_DAYS} días`}>
+                                <div className="flex gap-3 p-4 rounded-2xl bg-blue-50 border border-blue-100 text-sm text-blue-800 font-medium">
+                                    <span className="w-1 flex-none rounded-full bg-blue-500"></span>
+                                    <span>Dispones de <strong>{RETURN_DAYS} días naturales desde la entrega</strong> para devolver tu compra. Cada devolución queda sujeta a la revisión del producto una vez lo recibamos en una de nuestras direcciones.</span>
+                                </div>
+
+                                <h3 className="text-lg font-black text-gray-900 pt-2">7.1 Derecho legal de desistimiento (14 días)</h3>
+                                <p>Conforme al Real Decreto Legislativo 1/2007 (TRLGDCU), el consumidor puede desistir del contrato durante los <strong className="text-gray-900">14 días naturales</strong> siguientes a la entrega, sin necesidad de justificación. Este derecho no se limita en ningún caso por la revisión descrita más abajo; la revisión solo sirve para determinar si el producto ha sufrido una depreciación por una manipulación distinta a la necesaria para comprobar su naturaleza, características o funcionamiento, en cuyo caso el cliente responde de esa disminución de valor.</p>
+
+                                <h3 className="text-lg font-black text-gray-900 pt-2">7.2 Ampliación comercial hasta {RETURN_DAYS} días</h3>
+                                <p>Lameyer amplía voluntariamente el plazo de devolución hasta los <strong className="text-gray-900">{RETURN_DAYS} días naturales</strong> desde la entrega. Entre el día 15 y el día {RETURN_DAYS}, la devolución se acepta si, tras la revisión, el producto:</p>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li>no ha sido instalado de forma permanente, soldado, cortado ni modificado;</li>
+                                    <li>no presenta golpes, arañazos, humedad ni daños causados por una instalación incorrecta;</li>
+                                    <li>conserva sus accesorios, protectores, precintos y, en lo posible, su embalaje original.</li>
+                                </ul>
+
+                                <h3 className="text-lg font-black text-gray-900 pt-2">7.3 Cómo devolver un producto</h3>
+                                <ol className="list-decimal pl-5 space-y-2">
+                                    <li>Comunícanos tu decisión por <a href={`mailto:${SELLER.email}`} className="text-blue-600 font-bold hover:underline">{SELLER.email}</a> o por <a href={`https://wa.me/${SELLER.whatsapp}`} target="_blank" rel="noopener noreferrer" className="text-blue-600 font-bold hover:underline">WhatsApp</a>, indicando el número de pedido. Puedes usar el <a href="#formulario" className="text-blue-600 font-bold hover:underline">formulario de desistimiento</a>, aunque no es obligatorio.</li>
+                                    <li>Te enviaremos un número de devolución. Embala bien el producto e incluye ese número dentro del paquete.</li>
+                                    <li>Envía el paquete, en un plazo máximo de 14 días naturales desde que nos comunicaste la devolución, a <strong className="text-gray-900">una de estas dos direcciones</strong>:</li>
+                                </ol>
+                                <div className="grid sm:grid-cols-2 gap-4 not-prose">
+                                    {RETURN_ADDRESSES.map(a => <AddressCard key={a.id} address={a} />)}
+                                </div>
+                                <p className="text-sm">No se aceptan paquetes a portes debidos. Te recomendamos un envío con seguimiento y conservar el justificante.</p>
+
+                                <h3 className="text-lg font-black text-gray-900 pt-2">7.4 Revisión y reembolso</h3>
+                                <ul className="list-disc pl-5 space-y-2">
+                                    <li>Revisaremos el producto en un plazo máximo de <strong className="text-gray-900">{REVIEW_DAYS} días hábiles</strong> desde su recepción y te informaremos del resultado.</li>
+                                    <li>Reembolsaremos el importe pagado, incluidos los gastos de envío iniciales estándar, por el mismo medio de pago y en un plazo máximo de <strong className="text-gray-900">14 días naturales</strong> desde que nos comunicaste la devolución. Podemos retener el reembolso hasta recibir el producto o hasta que acredites su envío.</li>
+                                    <li>Si la revisión detecta una depreciación imputable al cliente (apartado 7.1), te informaremos del importe que se descontará y de su motivo. En el periodo ampliado (apartado 7.2), si el producto no cumple las condiciones, te lo devolveremos a tu cargo o lo pondremos a tu disposición en Madrid.</li>
+                                    <li>Los gastos de envío de la devolución corren a cargo del cliente, salvo que el producto sea defectuoso, no sea conforme o no corresponda con lo pedido.</li>
+                                </ul>
+
+                                <h3 className="text-lg font-black text-gray-900 pt-2">7.5 Excepciones</h3>
+                                <p>No procede el desistimiento en productos fabricados o configurados según las especificaciones del cliente, ni en productos precintados que no sean aptos para ser devueltos por razones de protección de la salud o de higiene una vez desprecintados. Estas excepciones se indicarán en la ficha del producto antes de la compra.</p>
+                            </Section>
+
+                            <Section id="garantia" n={8} title="Garantía legal">
+                                <p>Todos los productos nuevos cuentan con la <strong className="text-gray-900">garantía legal de conformidad de 3 años</strong> desde la entrega, conforme al TRLGDCU. Si un producto no es conforme, el cliente puede exigir su reparación o sustitución y, si no son posibles o no se realizan en un plazo razonable, una reducción del precio o la resolución del contrato.</p>
+                                <p>Las faltas de conformidad que se manifiesten en los 2 años siguientes a la entrega se presumen existentes en el momento de la entrega, salvo prueba en contrario. Para tramitar una garantía, contacta con nosotros; el envío del producto seguirá el procedimiento y las direcciones del apartado 7.3, sin coste para el cliente.</p>
+                                <p>No constituyen falta de conformidad los daños causados por una instalación incorrecta, golpes, líquidos, sobretensiones o el uso del repuesto en un dispositivo distinto de los indicados como compatibles.</p>
+                            </Section>
+
+                            <Section id="datos" n={9} title="Protección de datos">
+                                <p>Los datos facilitados al hacer un pedido (nombre, teléfono, dirección, código postal) se tratan para gestionar la compra, el envío, las devoluciones y las garantías, conforme al Reglamento (UE) 2016/679 (RGPD) y la Ley Orgánica 3/2018 (LOPDGDD). La base legal es la ejecución del contrato y el cumplimiento de obligaciones legales. Los datos se conservan durante los plazos legales aplicables.</p>
+                                <p>Los pedidos se gestionan por WhatsApp, servicio prestado por WhatsApp Ireland Ltd., sujeto a su propia política de privacidad. Puedes ejercer tus derechos de acceso, rectificación, supresión, oposición, limitación y portabilidad escribiendo a <a href={`mailto:${SELLER.email}`} className="text-blue-600 font-bold hover:underline">{SELLER.email}</a>, y reclamar ante la Agencia Española de Protección de Datos (aepd.es).</p>
+                            </Section>
+
+                            <Section id="ley" n={10} title="Ley aplicable y reclamaciones">
+                                <p>Estos términos se rigen por la legislación española. Para cualquier controversia con consumidores serán competentes los juzgados y tribunales del domicilio del consumidor.</p>
+                                <p>Antes de acudir a otras vías, te invitamos a escribirnos a <a href={`mailto:${SELLER.email}`} className="text-blue-600 font-bold hover:underline">{SELLER.email}</a>; respondemos en un plazo máximo de un mes. Tienes a tu disposición hojas de reclamaciones y puedes acudir a la Oficina Municipal de Información al Consumidor (OMIC) o a la Junta Arbitral de Consumo de la Comunidad de Madrid.</p>
+                            </Section>
+
+                            <Section id="formulario" n={11} title="Formulario de desistimiento">
+                                <p className="text-sm">Solo debes cumplimentar y enviar este formulario si deseas desistir del contrato. Cópialo en un correo a {SELLER.email}.</p>
+                                <pre className="whitespace-pre-wrap text-sm bg-slate-900 text-slate-200 p-6 rounded-3xl leading-relaxed font-mono">{`A la atención de: ${SELLER.name}, ${SELLER.address}, ${SELLER.email}
+
+Por la presente le comunico que desisto de mi contrato de venta del siguiente bien:
+- Producto(s):
+- Número de pedido:
+- Pedido el / recibido el:
+- Nombre del consumidor:
+- Domicilio del consumidor:
+- Firma (solo si el formulario se presenta en papel):
+- Fecha:`}</pre>
+                            </Section>
+
+                            <p className="pt-10 text-xs text-gray-400 font-semibold uppercase tracking-widest">Última actualización: {TERMS_UPDATED}</p>
+                        </article>
+                    </div>
+                </section>
+            </>
+        );
+
+        renderPage(TermsPage);
+    </script>
+</body>
+</html>
