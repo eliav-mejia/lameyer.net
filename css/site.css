@@ -1,53 +1,112 @@
-/* Styles for /blog/ pages (dashboard + posts). Same rules as /css/blog.css. */
+/* Styles for every page. Tailwind classes in the markup are remapped to the dark navy theme at the end of this file. */
+
+/* Dark navy theme: the negative of the original light theme.
+   Palette: navy #0a192f page, #112240 raised surfaces, off-white #e2e8f0 text,
+   slate #94a3b8 secondary text, sky #38bdf8 accent (links and hover states only). */
+:root {
+    --navy: #0a192f;
+    --navy-raised: #112240;
+    --navy-high: #172a45;
+    --navy-deep: #020c1b;
+    --ink: #e2e8f0;
+    --ink-soft: #cbd5e1;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --line: rgba(255, 255, 255, 0.08);
+    --line-strong: rgba(255, 255, 255, 0.14);
+    --shadow: rgba(2, 12, 27, 0.7);
+    color-scheme: dark;
+}
+
+html { background-color: var(--navy); }
 
 body {
     font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #ffffff;
-    color: #1a202c;
+    background-color: var(--navy);
+    color: var(--ink);
     overflow-x: hidden;
 }
 
-/* Discrete Grey Circuit Pattern */
+::selection { background: rgba(56, 189, 248, 0.25); color: var(--ink); }
+
+/* Circuit-board grid: fixed, full viewport, never interactive. Content sits above it (z-index >= 2). */
 .circuit-bg {
     position: fixed;
     inset: 0;
     z-index: 0;
     pointer-events: none;
-    background-color: #fcfdfe;
+    background-color: var(--navy);
 
-    /* Major and Minor Grid Lines */
+    /* Major lines every 80px, minor lines every 20px */
     background-image:
-        linear-gradient(to right, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
-        linear-gradient(to bottom, rgba(148, 163, 184, 0.15) 1.5px, transparent 1.5px),
-        linear-gradient(to right, rgba(148, 163, 184, 0.05) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(148, 163, 184, 0.05) 1px, transparent 1px);
-
+        linear-gradient(to right, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.18) 1px, transparent 1px),
+        linear-gradient(to right, rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
     background-size: 80px 80px, 80px 80px, 20px 20px, 20px 20px;
 
-    /* Radial fade so it doesn't clash with the edges of the screen */
-    mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
-    -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 90%);
+    /* Fade toward the screen edges: opaque to 70%, transparent at 100% */
+    mask-image: radial-gradient(circle at center, black 70%, transparent 100%);
+    -webkit-mask-image: radial-gradient(circle at center, black 70%, transparent 100%);
 }
 
-/* The "Nodes" or solder points at intersections */
+/* Solder points at each 80px intersection */
 .circuit-bg::after {
     content: '';
     position: absolute;
     inset: 0;
-    background-image: radial-gradient(circle, rgba(59, 130, 246, 0.2) 2px, transparent 2px);
+    background-image: radial-gradient(circle, rgba(203, 213, 225, 0.5) 2.5px, transparent 3px);
     background-size: 80px 80px;
-    background-position: -1px -1px;
+    background-position: -40px -40px;
 }
 
-/* Glassmorphism */
+/* Rising, fading decorative particles (light slate) */
+.particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.particle {
+    position: absolute;
+    bottom: -10px;
+    border-radius: 999px;
+    background: rgba(203, 213, 225, 0.6);
+    opacity: 0;
+    animation: rise linear infinite;
+}
+@keyframes rise {
+    0% { transform: translateY(0) scale(1); opacity: 0; }
+    10% { opacity: 0.6; }
+    90% { opacity: 0.25; }
+    100% { transform: translateY(-110vh) scale(1.2); opacity: 0; }
+}
+
+/* Dark frosted glass */
 .glass {
-    background: rgba(255, 255, 255, 0.7);
+    background: rgba(10, 25, 47, 0.7);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    border: 1px solid var(--line);
 }
 
-/* Scrollbar hiding */
+/* Mobile menu: slides in from the right */
+.mobile-menu { transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* Hamburger: three off-white lines that morph into an X */
+.hamburger { width: 24px; height: 18px; position: relative; display: block; }
+.hamburger span {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--ink);
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease, top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.hamburger span:nth-child(1) { top: 0; }
+.hamburger span:nth-child(2) { top: 8px; }
+.hamburger span:nth-child(3) { top: 16px; }
+.menu-open .hamburger span:nth-child(1) { top: 8px; transform: rotate(45deg); }
+.menu-open .hamburger span:nth-child(2) { opacity: 0; }
+.menu-open .hamburger span:nth-child(3) { top: 8px; transform: rotate(-45deg); }
+
+/* Scrollbar hiding (scroll areas) */
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
@@ -72,6 +131,110 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
+    .particles { display: none; }
+    .mobile-menu, .hamburger span { transition: none; }
     .reveal-blur { opacity: 1; filter: none; transform: none; transition: none; }
     .animate-fade-in { animation: none; }
 }
+
+/* Google Translate (language flags in the header): hide Google's own bar, tooltip and highlight */
+body > .skiptranslate,
+.goog-te-banner-frame,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.VIpgJd-ZVi9od-ORHb-OEVmcd,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf { display: none !important; }
+body { top: 0 !important; }
+.goog-text-highlight { background: none !important; box-shadow: none !important; }
+font[style] { background: transparent !important; box-shadow: none !important; }
+
+/* ------------------------------------------------------------------
+   Tailwind colour classes, remapped to the dark navy theme.
+   "html ." raises specificity above the Tailwind CDN's own rules,
+   so the markup keeps its light-theme class names unchanged.
+   ------------------------------------------------------------------ */
+
+/* Surfaces */
+html .bg-white { background-color: var(--navy-raised); }
+html .bg-white\/95 { background-color: rgba(17, 34, 64, 0.95); }
+html .bg-white\/90 { background-color: rgba(17, 34, 64, 0.9); }
+html .bg-white\/80 { background-color: rgba(17, 34, 64, 0.8); }
+html .bg-white\/70 { background-color: rgba(17, 34, 64, 0.7); }
+html .bg-white\/20 { background-color: rgba(255, 255, 255, 0.06); }
+html .bg-gray-50, html .bg-slate-50 { background-color: var(--navy-raised); }
+html .bg-gray-50\/60, html .bg-slate-50\/50 { background-color: rgba(17, 34, 64, 0.5); }
+html .bg-gray-100, html .bg-slate-100 { background-color: var(--navy-high); }
+html .bg-gray-200 { background-color: #233554; }
+html .bg-slate-900 { background-color: var(--navy-deep); }
+html .bg-slate-900\/40 { background-color: rgba(2, 12, 27, 0.4); }
+html .bg-slate-800 { background-color: var(--navy-high); }
+html .bg-slate-800\/60 { background-color: rgba(23, 42, 69, 0.6); }
+html .bg-slate-800\/50 { background-color: rgba(23, 42, 69, 0.5); }
+
+/* Text */
+html .text-gray-900, html .text-slate-800, html .text-white { color: var(--ink); }
+html .text-slate-200, html .text-slate-300, html .text-gray-300, html .text-gray-700 { color: var(--ink-soft); }
+html .text-gray-600, html .text-gray-500, html .text-gray-400, html .text-slate-400 { color: var(--muted); }
+html input::placeholder, html textarea::placeholder { color: #64748b; }
+
+/* Borders and dividers */
+html .border-gray-50, html .border-gray-100, html .border-gray-200, html .border-white,
+html .border-black\/10, html .divide-gray-100 > :not([hidden]) ~ :not([hidden]) { border-color: var(--line); }
+html .border-gray-300, html .border-slate-600, html .border-slate-700 { border-color: var(--line-strong); }
+
+/* Accent: links, active states, hover states */
+html .text-blue-400, html .text-blue-500, html .text-blue-600, html .text-blue-700,
+html .text-blue-800, html .text-blue-900 { color: var(--accent); }
+html .text-blue-900\/80 { color: rgba(56, 189, 248, 0.8); }
+html .text-blue-600\/20 { color: rgba(56, 189, 248, 0.2); }
+html .text-blue-100 { color: var(--ink-soft); }
+html .hover\:text-blue-600:hover, html .group:hover .group-hover\:text-blue-600 { color: var(--accent); }
+html .hover\:text-white:hover, html .group:hover .group-hover\:text-white { color: #f8fafc; }
+html .border-blue-500, html .border-blue-600, html .hover\:border-blue-500:hover,
+html .focus\:border-blue-500:focus { border-color: rgba(56, 189, 248, 0.6); }
+html .hover\:border-blue-500\/60:hover, html .hover\:border-blue-500\/50:hover,
+html .group:hover .group-hover\:border-blue-500\/60 { border-color: rgba(56, 189, 248, 0.45); }
+html .border-blue-100, html .border-blue-200 { border-color: rgba(56, 189, 248, 0.2); }
+html .bg-blue-50, html .bg-blue-50\/50, html .bg-blue-600\/5 { background-color: rgba(56, 189, 248, 0.08); }
+
+/* Primary buttons: raised navy with an accent edge, never a bright block */
+html .bg-blue-600, html .bg-blue-500 {
+    background-color: var(--navy-high);
+    color: var(--ink);
+    box-shadow: inset 0 0 0 1px rgba(56, 189, 248, 0.45);
+}
+html .hover\:bg-blue-700:hover, html .hover\:bg-blue-600:hover, html .group:hover .group-hover\:bg-blue-600 {
+    background-color: #1d3557;
+    color: var(--accent);
+}
+html .bg-blue-400 { background-color: var(--accent); }
+html .hover\:bg-gray-100:hover, html .hover\:bg-blue-50:hover, html .hover\:bg-slate-800:hover { background-color: var(--navy-high); }
+html .hover\:bg-white\/10:hover { background-color: rgba(255, 255, 255, 0.06); }
+
+/* Focus rings */
+html .ring-blue-600, html .ring-blue-500\/20, html .ring-blue-500\/30, html .ring-blue-500\/40,
+html .focus\:ring-blue-500\/20:focus, html .focus\:ring-blue-500\/30:focus,
+html .focus-within\:ring-blue-500\/40:focus-within { --tw-ring-color: rgba(56, 189, 248, 0.35); }
+
+/* Status colours, dimmed for the dark page */
+html .bg-green-100, html .bg-emerald-50 { background-color: rgba(52, 211, 153, 0.12); }
+html .text-green-600, html .text-emerald-700 { color: #6ee7b7; }
+html .border-green-100 { border-color: rgba(52, 211, 153, 0.25); }
+html .bg-red-50 { background-color: rgba(248, 113, 113, 0.1); }
+html .text-red-600, html .hover\:text-red-600:hover { color: #fca5a5; }
+html .border-red-200 { border-color: rgba(248, 113, 113, 0.3); }
+html .bg-amber-50, html .bg-amber-100 { background-color: rgba(251, 191, 36, 0.1); }
+html .text-amber-700, html .text-amber-800 { color: #fcd34d; }
+
+/* Shadows: navy-tinted, never pure black */
+html .shadow-sm { --tw-shadow: 0 1px 2px 0 var(--shadow); }
+html .shadow { --tw-shadow: 0 1px 3px 0 var(--shadow), 0 1px 2px -1px var(--shadow); }
+html .shadow-md { --tw-shadow: 0 4px 6px -1px var(--shadow), 0 2px 4px -2px var(--shadow); }
+html .shadow-lg { --tw-shadow: 0 10px 15px -3px var(--shadow), 0 4px 6px -4px var(--shadow); }
+html .shadow-xl { --tw-shadow: 0 20px 25px -5px var(--shadow), 0 8px 10px -6px var(--shadow); }
+html .shadow-2xl { --tw-shadow: 0 25px 50px -12px var(--shadow); }
+html .shadow-gray-200\/40, html .shadow-blue-500\/5, html .shadow-blue-500\/10,
+html .shadow-blue-600\/30, html .shadow-blue-600\/40 { --tw-shadow-color: var(--shadow); }
+
+/* Ring offsets sit on the navy page, not on white */
+html .ring-offset-1 { --tw-ring-offset-color: var(--navy); }

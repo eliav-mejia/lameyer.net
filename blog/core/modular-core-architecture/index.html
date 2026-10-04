@@ -32,11 +32,11 @@
         ];
 
         const CASES = [
-            { case: 'A change to invoicing breaks login', fix: 'Domain modules with enforced boundaries', step: 'Modules' },
-            { case: 'Edge functions and workflows call internal functions directly', fix: 'A typed contract (OpenAPI or a TypeScript interface) per module', step: 'Contracts' },
-            { case: 'The same validation code is copied into five repos', fix: 'Shared packages in one workspace', step: 'Packages' },
-            { case: 'Three modules write to the same table', fix: 'One owner per table, others read through the contract', step: 'Data' },
-            { case: 'A deploy breaks a consumer nobody knew about', fix: 'Contract tests and semantic versioning', step: 'Versioning' },
+            { case: 'A change to invoicing breaks login', fix: 'Domain modules with enforced boundaries', step: <A href="/blog/core/domain-modules-boundaries/">Modules</A> },
+            { case: 'Edge functions and workflows call internal functions directly', fix: 'A typed contract (OpenAPI or a TypeScript interface) per module', step: <A href="/blog/core/contracts-typed-apis/">Contracts</A> },
+            { case: 'The same validation code is copied into five repos', fix: 'Shared packages in one workspace', step: <A href="/blog/core/shared-packages-workspaces/">Packages</A> },
+            { case: 'Three modules write to the same table', fix: 'One owner per table, others read through the contract', step: <A href="/blog/core/data-ownership-migrations/">Data</A> },
+            { case: 'A deploy breaks a consumer nobody knew about', fix: 'Contract tests and semantic versioning', step: <A href="/blog/core/contract-testing-versioning/">Versioning</A> },
         ];
 
         const Content = () => (

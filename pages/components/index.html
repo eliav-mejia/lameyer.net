@@ -131,7 +131,7 @@
                                     <h2 className="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter">{activeCat ? activeCat.label : 'Todo el catálogo'}</h2>
                                     <p className="text-gray-500 font-medium mt-2">{activeCat ? activeCat.description : 'Repuestos para oficina, estudio, desarrollo, redes y gaming.'}</p>
                                 </div>
-                                {catalog.status === 'ready' && <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{visible.length} productos</p>}
+                                {catalog.status === 'ready' && <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400"><span translate="no">{visible.length}</span> productos</p>}
                             </div>
 
                             {catalog.status !== 'ready' ? (

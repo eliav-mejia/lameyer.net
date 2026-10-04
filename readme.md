@@ -49,7 +49,12 @@ lameyer.net/
     ├── index.html                /blog/  filter dashboard (?series=core, ?series=security, ...)
     │
     ├── core/                     Modular Core
-    │   └── modular-core-architecture/
+    │   ├── modular-core-architecture/        overview
+    │   ├── domain-modules-boundaries/
+    │   ├── contracts-typed-apis/
+    │   ├── shared-packages-workspaces/
+    │   ├── data-ownership-migrations/
+    │   └── contract-testing-versioning/
     ├── serverless/               Serverless Edge
     │   ├── serverless-edge-architecture/     overview
     │   ├── edge-functions-workers/
@@ -120,8 +125,22 @@ Do not redeclare anything from `layout.jsx` in another file: the later copy sile
 - **Contact form fields / Google Apps Script URL**: `ContactForm` and `FORM_ENDPOINT` in `js/layout.jsx`.
   Field names (`NOMBRE`, `ORGANIZACIÓN`, `TELÉFONO`, `EMAIL`, `TECNOLOGÍA`) must match the Google Sheet columns.
 - **Email address**: `CONTACT_EMAIL` in `js/layout.jsx`.
+- **Languages (flags in the header)**: `LOCALES` in `js/layout.jsx`. Spanish ↔ English only: US → English + USD,
+  Spain → Spanish + EUR. Translation is Google Translate (automatic, machine translated):
+  each page is translated from its own `<html lang>` (`es` for home/shop/terms, `en` for the blog). Wrap numbers or names
+  that must not be translated in `translate="no"`. Google's bar and tooltips are hidden in `css/site.css`.
+- **WhatsApp widget**: `NUMBER` and `STRINGS` in `index.html` (and `whatsapp-chat-snippet.html`). Spain only
+  (+34 602 55 76 85), bilingual ES/EN support; no region picker.
+- **Login / sign up pop-up**: `AuthModal` and `auth` in `js/layout.jsx`, opened from the header (and mobile menu).
+  STAGING: accounts are stored only in the visitor's browser (`lm-users`, salted SHA-256; session in `lm-session`).
+  Swap the `auth` functions for a real backend before launch. Pop-up text: `UI_TEXT` (follows the page's `<html lang>`).
+- **Cookie pop-up**: `CookieConsent` in `js/layout.jsx`. Choice in `lm-cookies` / `window.LM_COOKIES`
+  (`all` or `necessary`); load analytics only when `hasCookieConsent()` is true.
 - **Tech stack**: `TECH_STACK` in `js/layout.jsx` (home page and `/pages/stack/`).
 - **Styles**: `css/site.css`. Everything else is Tailwind classes in the markup.
+  The site uses a dark navy theme (`--navy`, `--ink`, `--muted`, `--accent` at the top of `css/site.css`). Markup keeps
+  light-theme class names (`bg-white`, `text-gray-900`, `text-blue-600`...); the end of `css/site.css` remaps each one
+  to the navy palette. A colour class not listed there shows in its original light colour, so add it to that list.
 - **Home blog cards**: `BLOG_HIGHLIGHTS` in `index.html` (one card per series).
 - **Shop catalogue (products, prices, stock, categories)**: `public/db/productos.json` and `public/db/categorias.json`.
   Schema and workflow in `public/db/README.md`. Price/stock/text changes need no other edit.
@@ -169,6 +188,20 @@ so old links keep working.
 Always link with a trailing slash (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
 ## Versions
+
+### 1.0.7 — 2026-10-04 · Login / sign up + cookie consent
+- Login / sign up pop-up on every page (header button, mobile menu); staging accounts stored in the browser only.
+- Cookie consent pop-up on the first visit ("Accept all" / "Necessary only"), remembered across pages.
+- Languages limited to Spanish ↔ English (🇪🇸 / 🇺🇸); Mexico and Netherlands removed.
+- WhatsApp widget: region picker code removed; Spain-only, bilingual ES/EN support.
+
+### 1.0.6 — 2026-10-04 · Languages + WhatsApp Spain only
+- Flags in the header of every page (desktop and mobile menu): 🇺🇸 English, 🇪🇸 Español (España), 🇲🇽 Español (México), 🇳🇱 Nederlands.
+  Google Translate translates the whole site automatically; the choice is remembered across pages (`lm-locale`) and also sets
+  the shop currency (USD, EUR, MXN, EUR). Google's script loads only when a translation is active.
+- React guard in `js/layout.jsx` so Google's DOM changes can't crash the React pages; prices and counters in the shop are
+  `translate="no"` so they keep updating.
+- WhatsApp widget: Israel, US and Mexico removed; only the Spain number remains (region picker hidden).
 
 ### 1.0.5 — 2026-10-04 · Serverless Edge: four new categories
 - Serverless series extended from 5 to 9 steps (`BLOG_TYPES` in `js/blog.jsx`), each with its own folder and `index.html`

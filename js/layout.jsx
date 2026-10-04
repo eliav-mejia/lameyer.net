@@ -20,9 +20,368 @@ const NAV_LINKS = [
 
 const isActive = (href) => window.location.pathname.startsWith(href.replace(/\/$/, ''));
 
+// --- LANGUAGES (Google Translate): Spanish <-> English only ---
+// Pages are written in Spanish (<html lang="es">) or English (blog, lang="en"). Picking a flag stores the locale,
+// sets Google's "googtrans" cookie and reloads; Google Translate then translates the page on load.
+// The locale also picks the shop currency (read by useCurrency in js/tienda.jsx).
+const FlagUS = () => (
+    <svg viewBox="0 0 30 20" aria-hidden="true">
+        <rect width="30" height="20" fill="#b22234" />
+        {[1, 3, 5, 7, 9, 11].map(i => <rect key={i} y={i * 20 / 13} width="30" height={20 / 13} fill="#fff" />)}
+        <rect width="13" height={20 * 7 / 13} fill="#3c3b6e" />
+        {[0, 1, 2, 3].map(r => [0, 1, 2, 3, 4].map(c => <circle key={`${r}-${c}`} cx={1.6 + c * 2.45 + (r % 2) * 1.2} cy={1.5 + r * 2.5} r="0.55" fill="#fff" />))}
+    </svg>
+);
+const FlagES = () => (
+    <svg viewBox="0 0 30 20" aria-hidden="true">
+        <rect width="30" height="20" fill="#aa151b" />
+        <rect y="5" width="30" height="10" fill="#f1bf00" />
+    </svg>
+);
+const LOCALES = [
+    { id: 'en-US', lang: 'en', currency: 'USD', label: 'English', Flag: FlagUS },
+    { id: 'es-ES', lang: 'es', currency: 'EUR', label: 'Español (España)', Flag: FlagES },
+];
+const PAGE_LANG = (document.documentElement.lang || 'es').slice(0, 2);
+
+const readLocale = () => {
+    try { return LOCALES.find(l => l.id === localStorage.getItem('lm-locale')) || null; } catch (e) { return null; }
+};
+
+const setTranslateCookie = (value) => {
+    const expires = value ? '' : '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    const host = window.location.hostname;
+    // Google reads the cookie on the host and on the parent domain; clear or set both.
+    [`; path=/`, host.includes('.') ? `; path=/; domain=.${host.replace(/^www\./, '')}` : null]
+        .filter(Boolean)
+        .forEach(scope => { document.cookie = `googtrans=${value || ''}${scope}${expires}`; });
+};
+
+// Runs once per page load, before React renders.
+const ACTIVE_LOCALE = readLocale();
+const TRANSLATING = Boolean(ACTIVE_LOCALE && ACTIVE_LOCALE.lang !== PAGE_LANG);
+(() => {
+    if (!TRANSLATING) { setTranslateCookie(null); return; }
+    setTranslateCookie(`/${PAGE_LANG}/${ACTIVE_LOCALE.lang}`);
+
+    // Google replaces text nodes with its own <font> tags; without this, React crashes when it later
+    // removes or moves one of those nodes ("The node to be removed is not a child of this node").
+    const removeChild = Node.prototype.removeChild;
+    Node.prototype.removeChild = function (child) {
+        return child.parentNode === this ? removeChild.call(this, child) : child;
+    };
+    const insertBefore = Node.prototype.insertBefore;
+    Node.prototype.insertBefore = function (node, ref) {
+        return ref && ref.parentNode !== this ? node : insertBefore.call(this, node, ref);
+    };
+
+    const holder = document.createElement('div');
+    holder.id = 'google_translate_element';
+    holder.style.display = 'none';
+    document.body.appendChild(holder);
+    window.googleTranslateElementInit = () => {
+        new google.translate.TranslateElement({ pageLanguage: PAGE_LANG, includedLanguages: 'en,es', autoDisplay: false }, 'google_translate_element');
+    };
+    const script = document.createElement('script');
+    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
+    script.async = true;
+    document.body.appendChild(script);
+})();
+
+const chooseLocale = (locale) => {
+    try {
+        localStorage.setItem('lm-locale', locale.id);
+        localStorage.setItem('lm-currency', JSON.stringify(locale.currency));
+    } catch (e) {}
+    setTranslateCookie(locale.lang === PAGE_LANG ? null : `/${PAGE_LANG}/${locale.lang}`);
+    window.location.reload();
+};
+
+// The page's own language counts as active when nothing has been picked yet.
+const isLocaleActive = (locale) => (ACTIVE_LOCALE ? ACTIVE_LOCALE.id === locale.id : locale.id === (PAGE_LANG === 'en' ? 'en-US' : 'es-ES'));
+
+const LanguageSwitcher = ({ withLabels = false }) => (
+    <div translate="no" className={`notranslate flex items-center ${withLabels ? 'flex-wrap justify-center gap-3' : 'gap-1.5'}`} role="group" aria-label="Idioma / Language">
+        {LOCALES.map(locale => {
+            const active = isLocaleActive(locale);
+            return (
+                <button
+                    key={locale.id}
+                    onClick={() => !active && chooseLocale(locale)}
+                    aria-pressed={active}
+                    title={locale.label}
+                    aria-label={locale.label}
+                    className={withLabels
+                        ? `flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold transition-colors ${active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-700 hover:border-blue-500'}`
+                        : `p-0.5 rounded-md transition-all ${active ? 'ring-2 ring-blue-600 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
+                >
+                    <span className="block w-6 h-4 rounded-[3px] overflow-hidden shadow-sm border border-black/10 [&>svg]:w-full [&>svg]:h-full"><locale.Flag /></span>
+                    {withLabels && locale.label}
+                </button>
+            );
+        })}
+    </div>
+);
+
+// --- POP-UP TEXT (Spanish pages / English pages; Google Translate covers the other language) ---
+const UI_TEXT = {
+    es: {
+        login: 'Iniciar sesión', signup: 'Crear cuenta', account: 'Mi cuenta', logout: 'Cerrar sesión', close: 'Cerrar',
+        name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 8 caracteres',
+        loginIntro: 'Accede a tu cuenta de Lameyer.', signupIntro: 'Crea tu cuenta para guardar tus pedidos y proyectos.',
+        noAccount: '¿No tienes cuenta?', haveAccount: '¿Ya tienes cuenta?', loggedInAs: 'Has iniciado sesión como',
+        errWrong: 'Email o contraseña incorrectos.', errExists: 'Ya existe una cuenta con ese email.', errShort: 'La contraseña debe tener al menos 8 caracteres.',
+        errStorage: 'Tu navegador bloquea el almacenamiento local; no se puede iniciar sesión.', errCrypto: 'Abre la web por https para iniciar sesión.',
+        working: 'Procesando...',
+        cookiesTitle: 'Usamos cookies',
+        cookiesText: 'Usamos cookies necesarias para que la web funcione (idioma, carrito, sesión). Con tu permiso, también usaremos cookies para medir y mejorar la web.',
+        cookiesAccept: 'Aceptar todas', cookiesReject: 'Solo necesarias', cookiesMore: 'Más información',
+    },
+    en: {
+        login: 'Log in', signup: 'Sign up', account: 'My account', logout: 'Log out', close: 'Close',
+        name: 'Name', email: 'Email', password: 'Password', passwordHint: 'At least 8 characters',
+        loginIntro: 'Access your Lameyer account.', signupIntro: 'Create an account to keep your orders and projects.',
+        noAccount: "Don't have an account?", haveAccount: 'Already have an account?', loggedInAs: 'You are logged in as',
+        errWrong: 'Wrong email or password.', errExists: 'An account with that email already exists.', errShort: 'Password must be at least 8 characters.',
+        errStorage: 'Your browser blocks local storage; logging in is not possible.', errCrypto: 'Open the site over https to log in.',
+        working: 'Working...',
+        cookiesTitle: 'We use cookies',
+        cookiesText: 'We use necessary cookies to make the site work (language, cart, session). With your permission we will also use cookies to measure and improve the site.',
+        cookiesAccept: 'Accept all', cookiesReject: 'Necessary only', cookiesMore: 'Learn more',
+    },
+};
+const TXT = UI_TEXT[PAGE_LANG] || UI_TEXT.es;
+
+// --- ACCOUNTS (login / sign up) ---
+// STAGING: there is no server yet, so accounts live only in this browser's localStorage ('lm-users'), with salted
+// SHA-256 password hashes, and the session in 'lm-session'. Replace the three functions in `auth` with calls to a real
+// backend (Workers + D1, Supabase...) before launch; the pop-up does not need to change.
+const authStore = {
+    read: (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
+    write: (key, value) => { localStorage.setItem(key, JSON.stringify(value)); },   // throws if storage is blocked
+};
+
+const hashPassword = async (password, salt) => {
+    if (!window.crypto || !crypto.subtle) throw new Error(TXT.errCrypto);
+    const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${password}`));
+    return Array.from(new Uint8Array(bytes), b => b.toString(16).padStart(2, '0')).join('');
+};
+
+const auth = {
+    current: () => {
+        const email = authStore.read('lm-session', null);
+        const user = email && authStore.read('lm-users', {})[email];
+        return user ? { name: user.name, email } : null;
+    },
+    signup: async ({ name, email, password }) => {
+        if (password.length < 8) throw new Error(TXT.errShort);
+        const users = authStore.read('lm-users', {});
+        if (users[email]) throw new Error(TXT.errExists);
+        const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+        users[email] = { name, salt, hash: await hashPassword(password, salt), created: new Date().toISOString() };
+        try { authStore.write('lm-users', users); authStore.write('lm-session', email); } catch (e) { throw new Error(TXT.errStorage); }
+        return { name, email };
+    },
+    login: async ({ email, password }) => {
+        const user = authStore.read('lm-users', {})[email];
+        if (!user || user.hash !== await hashPassword(password, user.salt)) throw new Error(TXT.errWrong);
+        try { authStore.write('lm-session', email); } catch (e) { throw new Error(TXT.errStorage); }
+        return { name: user.name, email };
+    },
+    logout: () => { try { localStorage.removeItem('lm-session'); } catch (e) {} },
+};
+
+const UserIcon = ({ className = 'w-4 h-4' }) => (
+    <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+        <circle cx="12" cy="8" r="4" /><path d="M4 21a8 8 0 0 1 16 0" />
+    </svg>
+);
+
+// Pop-up window with "Log in" and "Sign up" tabs; shows the account (and Log out) once logged in.
+const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
+    const [error, setError] = useState('');
+    const [busy, setBusy] = useState(false);
+    const dialogRef = useRef(null);
+
+    useEffect(() => {
+        const opener = document.activeElement;
+        const onKey = (e) => {
+            if (e.key === 'Escape') onClose();
+            if (e.key !== 'Tab' || !dialogRef.current) return;
+            // Keep keyboard focus inside the pop-up
+            const items = dialogRef.current.querySelectorAll('button, input, a[href]');
+            const first = items[0], last = items[items.length - 1];
+            if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
+            else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
+        };
+        document.addEventListener('keydown', onKey);
+        const overflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.removeEventListener('keydown', onKey);
+            document.body.style.overflow = overflow;
+            if (opener && opener.focus) opener.focus();
+        };
+    }, []);
+
+    useEffect(() => { setError(''); }, [mode]);
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const form = new FormData(e.target);
+        const data = {
+            name: (form.get('name') || '').trim(),
+            email: (form.get('email') || '').trim().toLowerCase(),
+            password: form.get('password') || '',
+        };
+        setBusy(true);
+        setError('');
+        try {
+            onUser(mode === 'signup' ? await auth.signup(data) : await auth.login(data));
+            onClose();
+        } catch (err) {
+            setError(err.message);
+            setBusy(false);
+        }
+    };
+
+    const inputClass = "w-full px-5 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
+    const tabClass = (on) => `flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors ${on ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-blue-600'}`;
+
+    return (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#020c1b]/80 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+            <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="auth-title" className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-8">
+                <button type="button" onClick={onClose} aria-label={TXT.close} className="absolute top-5 right-5 p-2 rounded-xl text-gray-500 hover:text-blue-600 transition-colors">
+                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                </button>
+
+                {user ? (
+                    <div className="text-center pt-2">
+                        <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl font-black">
+                            {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-2">{TXT.account}</h2>
+                        <p className="text-sm text-gray-500 font-medium mb-1">{TXT.loggedInAs}</p>
+                        <p className="text-gray-900 font-bold mb-8 break-all">{user.name} · {user.email}</p>
+                        <button type="button" autoFocus onClick={() => { auth.logout(); onUser(null); onClose(); }} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs transition-all">
+                            {TXT.logout}
+                        </button>
+                    </div>
+                ) : (
+                    <>
+                        <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-2 pr-10">{mode === 'signup' ? TXT.signup : TXT.login}</h2>
+                        <p className="text-sm text-gray-500 font-medium mb-6">{mode === 'signup' ? TXT.signupIntro : TXT.loginIntro}</p>
+
+                        <div className="flex gap-1 p-1 mb-6 rounded-full border border-gray-200" role="tablist">
+                            <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => setMode('login')} className={tabClass(mode === 'login')}>{TXT.login}</button>
+                            <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => setMode('signup')} className={tabClass(mode === 'signup')}>{TXT.signup}</button>
+                        </div>
+
+                        <form key={mode} onSubmit={handleSubmit} className="space-y-4">
+                            {mode === 'signup' && (
+                                <div>
+                                    <label htmlFor="auth-name" className="block text-sm font-bold text-gray-700 mb-2">{TXT.name}</label>
+                                    <input id="auth-name" name="name" type="text" required autoComplete="name" autoFocus className={inputClass} />
+                                </div>
+                            )}
+                            <div>
+                                <label htmlFor="auth-email" className="block text-sm font-bold text-gray-700 mb-2">{TXT.email}</label>
+                                <input id="auth-email" name="email" type="email" required autoComplete="email" autoFocus={mode === 'login'} className={inputClass} />
+                            </div>
+                            <div>
+                                <label htmlFor="auth-password" className="block text-sm font-bold text-gray-700 mb-2">{TXT.password}</label>
+                                <input id="auth-password" name="password" type="password" required minLength={mode === 'signup' ? 8 : undefined}
+                                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} className={inputClass} />
+                                {mode === 'signup' && <p className="mt-2 text-xs text-gray-500 font-medium">{TXT.passwordHint}</p>}
+                            </div>
+
+                            {error && <p role="alert" className="text-sm font-bold text-red-600">{error}</p>}
+
+                            <button type="submit" disabled={busy} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs transition-all disabled:opacity-60">
+                                {busy ? TXT.working : (mode === 'signup' ? TXT.signup : TXT.login)}
+                            </button>
+                        </form>
+
+                        <p className="mt-6 text-center text-sm text-gray-500 font-medium">
+                            {mode === 'signup' ? TXT.haveAccount : TXT.noAccount}{' '}
+                            <button type="button" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')} className="font-bold text-blue-600 hover:underline">
+                                {mode === 'signup' ? TXT.login : TXT.signup}
+                            </button>
+                        </p>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
+// --- COOKIE CONSENT ---
+// Pop-up on the first visit to any page. The choice is stored in localStorage 'lm-cookies' ("all" or "necessary")
+// and in window.LM_COOKIES. Load any analytics/marketing script only when hasCookieConsent() is true.
+const COOKIE_KEY = 'lm-cookies';
+const readCookieChoice = () => { try { return JSON.parse(localStorage.getItem(COOKIE_KEY)); } catch (e) { return null; } };
+window.LM_COOKIES = (readCookieChoice() || {}).choice || null;
+const hasCookieConsent = () => window.LM_COOKIES === 'all';
+
+const CookieConsent = () => {
+    const [open, setOpen] = useState(!window.LM_COOKIES);
+    if (!open) return null;
+
+    const choose = (choice) => {
+        window.LM_COOKIES = choice;
+        try { localStorage.setItem(COOKIE_KEY, JSON.stringify({ choice, date: new Date().toISOString() })); } catch (e) {}
+        window.dispatchEvent(new CustomEvent('lm-cookies', { detail: choice }));
+        setOpen(false);
+    };
+
+    return (
+        <div role="dialog" aria-modal="false" aria-labelledby="cookies-title" aria-describedby="cookies-text"
+            className="fixed z-[95] left-4 right-4 bottom-4 sm:left-6 sm:right-auto sm:bottom-6 sm:max-w-md bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-6 animate-fade-in">
+            <h2 id="cookies-title" className="text-lg font-black text-gray-900 tracking-tight mb-2">{TXT.cookiesTitle}</h2>
+            <p id="cookies-text" className="text-sm text-gray-500 font-medium leading-relaxed mb-5">
+                {TXT.cookiesText}{' '}
+                <a href="/pages/terminos/" className="font-bold text-blue-600 hover:underline">{TXT.cookiesMore}</a>
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3">
+                <button type="button" onClick={() => choose('necessary')} className="flex-1 py-3 rounded-full border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-500 font-black uppercase tracking-widest text-[11px] transition-colors">
+                    {TXT.cookiesReject}
+                </button>
+                <button type="button" onClick={() => choose('all')} className="flex-1 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black uppercase tracking-widest text-[11px] transition-all">
+                    {TXT.cookiesAccept}
+                </button>
+            </div>
+        </div>
+    );
+};
+
+// Decorative particles rising behind the content: [left %, size px, duration s, delay s]
+const PARTICLES = [
+    [6, 2, 18, 0], [14, 3, 24, 6], [23, 2, 20, 12], [31, 2, 26, 3], [42, 3, 22, 9],
+    [51, 2, 19, 15], [60, 2, 25, 4], [68, 3, 21, 11], [77, 2, 23, 7], [86, 2, 27, 1], [94, 3, 20, 13],
+];
+
+const Particles = () => (
+    <div className="particles" aria-hidden="true">
+        {PARTICLES.map(([left, size, duration, delay]) => (
+            <span
+                key={left}
+                className="particle"
+                style={{ left: `${left}%`, width: size, height: size, animationDuration: `${duration}s`, animationDelay: `${delay}s` }}
+            />
+        ))}
+    </div>
+);
+
 // --- LAYOUT: top banner, header, mobile menu, footer ---
 const Layout = ({ children }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [user, setUser] = useState(auth.current);
+    const [authMode, setAuthMode] = useState(null);   // null (closed), 'login' or 'signup'
+
+    const openAuth = (mode = 'login') => {
+        setAuthMode(mode);
+        if (isMobileMenuOpen) setIsMobileMenuOpen(false);
+    };
 
     const toggleMenu = () => setIsMobileMenuOpen(prev => !prev);
 
@@ -44,9 +403,10 @@ const Layout = ({ children }) => {
         <div className="relative min-h-screen">
             {/* Background Circuit Pattern */}
             <div className="circuit-bg"></div>
+            <Particles />
 
             {/* Top Banner */}
-            <div className="fixed top-0 w-full h-10 bg-[#0f172a] z-[60] flex items-center justify-between px-8 overflow-hidden">
+            <div className="fixed top-0 w-full h-10 bg-[#020c1b] border-b border-white/5 z-[60] flex items-center justify-between px-8 overflow-hidden">
                 <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap flex items-center gap-2">
                     SUSTENTABILIDAD CORPORATIVA & ESG
                 </span>
@@ -61,7 +421,7 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Navigation */}
-            <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'menu-open' : ''}`}>
                 <a href="/" className="block z-50">
                     <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer Logo" className="h-10 md:h-12 w-auto object-contain" />
                 </a>
@@ -80,7 +440,16 @@ const Layout = ({ children }) => {
                     ))}
                 </div>
 
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-3 md:space-x-4">
+                    <LanguageSwitcher />
+                    <button
+                        onClick={() => openAuth()}
+                        aria-label={user ? `${TXT.account}: ${user.name}` : TXT.login}
+                        className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-sm font-bold text-gray-700 hover:text-blue-600 hover:border-blue-500 transition-colors"
+                    >
+                        <UserIcon />
+                        <span className="max-w-[8rem] truncate">{user ? user.name.split(' ')[0] : TXT.login.toUpperCase()}</span>
+                    </button>
                     <button
                         onClick={handleRegisterClick}
                         className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-md"
@@ -88,32 +457,21 @@ const Layout = ({ children }) => {
                         REGISTER
                     </button>
 
-                    {/* Mobile Hamburger Button */}
+                    {/* Mobile Hamburger Button: its three lines morph into an X while the menu is open */}
                     <button
                         onClick={toggleMenu}
-                        className="md:hidden p-2 text-gray-900 focus:outline-none"
-                        aria-label="Abrir menú"
+                        className="md:hidden p-3 focus:outline-none"
+                        aria-label={isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'}
+                        aria-expanded={isMobileMenuOpen}
+                        aria-controls="mobile-menu"
                     >
-                        <svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-                        </svg>
+                        <span className="hamburger" aria-hidden="true"><span></span><span></span><span></span></span>
                     </button>
                 </div>
             </nav>
 
-            {/* Mobile Menu Overlay */}
-            <div className={`fixed inset-0 bg-white/95 backdrop-blur-xl z-[100] md:hidden flex flex-col items-center justify-center space-y-8 transition-all duration-500 ease-in-out ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
-
-                {/* Close Button */}
-                <button
-                    onClick={toggleMenu}
-                    className="absolute top-10 right-8 p-4 text-gray-900 hover:text-blue-600 transition-colors focus:outline-none z-[110]"
-                    aria-label="Cerrar menú"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
+            {/* Mobile Menu: off-canvas panel sliding in from the right, under the header so the X stays visible */}
+            <div id="mobile-menu" className={`mobile-menu fixed inset-0 pt-36 pb-12 bg-[#0a192f]/95 backdrop-blur-xl z-[65] md:hidden flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
 
                 {NAV_LINKS.map(link => (
                     <a
@@ -131,16 +489,27 @@ const Layout = ({ children }) => {
                 >
                     REGISTER
                 </button>
+                <button
+                    onClick={() => openAuth()}
+                    className="flex items-center gap-2 px-8 py-3 rounded-full border border-gray-200 text-lg font-bold text-gray-700 hover:text-blue-600 transition-colors"
+                >
+                    <UserIcon className="w-5 h-5" />
+                    {user ? user.name.split(' ')[0] : `${TXT.login} / ${TXT.signup}`}
+                </button>
+                <LanguageSwitcher withLabels />
             </div>
 
-            <main className="pt-32 px-4 md:px-8">
+            <main className="relative z-[2] pt-32 px-4 md:px-8">
                 {children}
             </main>
 
-            <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">
+            <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-[#020c1b] relative z-20">
                 &copy; 2026 LAMEYER® EU. TODOS LOS DERECHOS RESERVADOS.
                 <a href="/pages/terminos/" className="block mt-3 text-xs hover:text-blue-600 transition-colors">TÉRMINOS Y CONDICIONES</a>
             </footer>
+
+            {authMode && <AuthModal mode={authMode} setMode={setAuthMode} user={user} onUser={setUser} onClose={() => setAuthMode(null)} />}
+            <CookieConsent />
         </div>
     );
 };

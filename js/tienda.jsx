@@ -238,7 +238,7 @@ const ProductCard = ({ product, catalog, money, onAdd, inCart, eager }) => {
                 <p className="text-sm text-gray-500 font-medium mb-6 flex-1">Compatible con {product.compat}</p>
 
                 <div className="mb-5">
-                    <p className="text-2xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price_eur)}</p>
+                    <p translate="no" className="text-2xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price_eur)}</p>
                     <p className="text-[11px] text-gray-400 font-semibold">
                         {foreign ? `Se cobra ${eur(product.price_eur)} · IVA incl.` : 'IVA incluido'}
                     </p>
@@ -328,12 +328,12 @@ const CartDrawer = ({ cartState, catalog, money }) => {
                                         <p className="text-xs text-gray-400 font-medium truncate">{product.compat}</p>
                                         <div className="mt-2 flex items-center gap-2">
                                             <button onClick={() => setQty(product.id, qty - 1)} className="w-7 h-7 rounded-full border border-gray-200 hover:border-blue-500 text-sm font-bold" aria-label={`Quitar uno: ${product.name}`}>−</button>
-                                            <span className="w-6 text-center text-sm font-bold">{qty}</span>
+                                            <span translate="no" className="w-6 text-center text-sm font-bold">{qty}</span>
                                             <button onClick={() => setQty(product.id, qty + 1)} className="w-7 h-7 rounded-full border border-gray-200 hover:border-blue-500 text-sm font-bold" aria-label={`Añadir uno: ${product.name}`}>+</button>
                                             <button onClick={() => setQty(product.id, 0)} className="ml-auto text-[11px] font-bold uppercase tracking-widest text-gray-400 hover:text-red-600">Quitar</button>
                                         </div>
                                     </div>
-                                    <p className="text-sm font-black text-gray-900 whitespace-nowrap">{money.format(product.price_eur * qty)}</p>
+                                    <p translate="no" className="text-sm font-black text-gray-900 whitespace-nowrap">{money.format(product.price_eur * qty)}</p>
                                 </li>
                             ))}
                         </ul>
@@ -370,7 +370,7 @@ const CartDrawer = ({ cartState, catalog, money }) => {
                     <div className="border-t border-gray-100 px-6 py-5 space-y-4 bg-white">
                         <div className="flex items-baseline justify-between">
                             <span className="text-xs font-bold uppercase tracking-widest text-gray-500">Total</span>
-                            <span className="text-2xl font-black text-gray-900">{foreign && '≈ '}{money.format(total)}</span>
+                            <span translate="no" className="text-2xl font-black text-gray-900">{foreign && '≈ '}{money.format(total)}</span>
                         </div>
                         <p className="text-[11px] text-gray-400 font-medium leading-relaxed">
                             {foreign ? `Se cobra ${eur(total)} (IVA incluido). El importe en ${money.currency.code} es orientativo. ` : 'IVA incluido. '}
@@ -407,7 +407,7 @@ const CartButton = ({ cartState }) => (
     >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6" /><circle cx="10" cy="20" r="1.3" /><circle cx="17" cy="20" r="1.3" /></svg>
         Carrito
-        <span className="min-w-[1.5rem] h-6 px-1.5 rounded-full bg-white text-blue-600 flex items-center justify-center">{cartState.count}</span>
+        <span translate="no" className="min-w-[1.5rem] h-6 px-1.5 rounded-full bg-white text-blue-600 flex items-center justify-center">{cartState.count}</span>
     </button>
 );
 
@@ -534,7 +534,7 @@ const ProductPage = () => {
                         <div className="p-6 md:p-8 rounded-[2rem] glass shadow-xl mb-6">
                             <div className="flex flex-wrap items-end justify-between gap-4 mb-6">
                                 <div>
-                                    <p className="text-4xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price_eur)}</p>
+                                    <p translate="no" className="text-4xl font-black text-gray-900 tracking-tight">{foreign && '≈ '}{money.format(product.price_eur)}</p>
                                     <p className="text-xs text-gray-400 font-semibold mt-1">
                                         {foreign ? `Se cobra ${eur(product.price_eur)} · IVA incluido` : 'IVA incluido · envío no incluido'}
                                     </p>
@@ -546,7 +546,7 @@ const ProductPage = () => {
                                 <div className="flex flex-col sm:flex-row gap-3">
                                     <div className="flex items-center justify-between sm:justify-start gap-2 px-2 py-2 rounded-full border border-gray-200 bg-white">
                                         <button onClick={() => setQty(q => Math.max(1, q - 1))} className="w-9 h-9 rounded-full hover:bg-gray-100 font-black" aria-label="Menos">−</button>
-                                        <span className="w-8 text-center font-black" aria-live="polite">{qty}</span>
+                                        <span translate="no" className="w-8 text-center font-black" aria-live="polite">{qty}</span>
                                         <button onClick={() => setQty(q => Math.min(maxQty, q + 1))} className="w-9 h-9 rounded-full hover:bg-gray-100 font-black" aria-label="Más">+</button>
                                     </div>
                                     <button onClick={() => addToCart(false)} className="flex-1 py-4 rounded-full border-2 border-blue-600 text-blue-600 hover:bg-blue-50 text-xs font-black uppercase tracking-widest transition-colors">
