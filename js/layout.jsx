@@ -139,6 +139,7 @@ const Layout = ({ children }) => {
 
             <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">
                 &copy; 2026 LAMEYER® EU. TODOS LOS DERECHOS RESERVADOS.
+                <a href="/pages/terminos/" className="block mt-3 text-xs hover:text-blue-600 transition-colors">TÉRMINOS Y CONDICIONES</a>
             </footer>
         </div>
     );
