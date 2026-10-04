@@ -1,0 +1,97 @@
+/* Lameyer release documentation: white + blue, small print. Rendered to PDF with headless Chrome. */
+@page { size: A4; margin: 16mm 15mm 18mm; }
+
+:root {
+    --blue: #1d4ed8;
+    --blue-mid: #2563eb;
+    --blue-soft: #eff6ff;
+    --blue-line: #bfdbfe;
+    --ink: #0f172a;
+    --muted: #64748b;
+    --line: #e2e8f0;
+    --warn: #b45309;
+    --warn-soft: #fffbeb;
+}
+
+* { box-sizing: border-box; }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body {
+    margin: 0;
+    background: #ffffff;
+    color: var(--ink);
+    font: 8.6pt/1.5 'Segoe UI', 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+/* --- Cover band --- */
+.band {
+    border-top: 5px solid var(--blue);
+    padding: 10px 0 12px;
+    margin-bottom: 14px;
+    border-bottom: 1px solid var(--blue-line);
+}
+.band .kicker { font-size: 7pt; letter-spacing: .22em; text-transform: uppercase; color: var(--blue-mid); font-weight: 700; }
+.band h1 { margin: 4px 0 2px; font-size: 18pt; line-height: 1.15; color: var(--ink); letter-spacing: -.01em; }
+.band h1 .v { color: var(--blue); }
+.band .sub { color: var(--muted); font-size: 8.4pt; }
+
+.meta { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin: 0 0 14px; }
+.meta div { background: var(--blue-soft); border: 1px solid var(--blue-line); border-radius: 4px; padding: 5px 7px; }
+.meta b { display: block; font-size: 6.6pt; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); }
+.meta span { font-size: 8pt; }
+
+/* --- Headings --- */
+h2 {
+    font-size: 10.5pt; color: var(--blue); margin: 16px 0 6px; padding-bottom: 3px;
+    border-bottom: 1px solid var(--blue-line); break-after: avoid;
+}
+h2 .n { display: inline-block; min-width: 18px; color: var(--blue-mid); font-weight: 400; }
+h3 { font-size: 9pt; margin: 10px 0 4px; color: var(--ink); break-after: avoid; }
+p { margin: 0 0 6px; }
+ul, ol { margin: 0 0 6px; padding-left: 16px; }
+li { margin: 1px 0; }
+a { color: var(--blue-mid); text-decoration: none; }
+strong { color: var(--ink); }
+
+/* --- Code --- */
+code, pre { font-family: 'Cascadia Mono', Consolas, 'Courier New', monospace; }
+code { font-size: 7.6pt; background: var(--blue-soft); color: var(--blue); padding: 0 3px; border-radius: 2px; }
+pre {
+    font-size: 7.1pt; line-height: 1.45; margin: 4px 0 8px; padding: 7px 9px;
+    background: #f8fafc; border: 1px solid var(--line); border-left: 3px solid var(--blue-mid); border-radius: 3px;
+    white-space: pre-wrap; word-break: break-word; break-inside: avoid;
+}
+pre code { background: none; color: var(--ink); padding: 0; font-size: inherit; }
+pre .c { color: var(--muted); }
+pre .k { color: var(--blue); font-weight: 600; }
+.file { font-size: 6.8pt; color: var(--muted); margin: 6px 0 -2px; font-family: Consolas, monospace; }
+
+/* --- Tables --- */
+table { width: 100%; border-collapse: collapse; margin: 4px 0 8px; font-size: 7.8pt; break-inside: auto; }
+th { text-align: left; background: var(--blue); color: #fff; font-weight: 600; padding: 4px 6px; font-size: 7.2pt; letter-spacing: .03em; }
+td { padding: 3.5px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+tr:nth-child(even) td { background: #f8fbff; }
+tr { break-inside: avoid; }
+td code { font-size: 7.2pt; }
+
+/* --- Callouts --- */
+.note, .warn, .gap {
+    border-radius: 3px; padding: 6px 9px; margin: 6px 0 8px; font-size: 8pt; break-inside: avoid;
+}
+.note { background: var(--blue-soft); border: 1px solid var(--blue-line); }
+.warn { background: var(--warn-soft); border: 1px solid #fde68a; }
+.warn b:first-child { color: var(--warn); }
+.gap { background: #fff; border: 1px solid var(--blue-mid); }
+
+.tag { display: inline-block; font-size: 6.4pt; font-weight: 700; letter-spacing: .08em; text-transform: uppercase;
+       padding: 0 5px; border-radius: 2px; line-height: 1.6; }
+.t-block { background: #fee2e2; color: #b91c1c; }
+.t-high { background: #dbeafe; color: var(--blue); }
+.t-med { background: #e0f2fe; color: #0369a1; }
+.t-low { background: #f1f5f9; color: var(--muted); }
+
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+footer.doc-foot {
+    margin-top: 18px; padding-top: 6px; border-top: 1px solid var(--blue-line);
+    font-size: 6.8pt; color: var(--muted); display: flex; justify-content: space-between;
+}

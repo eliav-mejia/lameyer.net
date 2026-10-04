@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.3 — Product photos</title>
+<link rel="stylesheet" href="doc.css">
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Software development documentation</div>
+    <h1>Release <span class="v">1.0.3</span> — Product photos</h1>
+    <div class="sub">Responsive WebP photos for 29 of the 30 shop products, licence credits, and the “images are illustrative” notice.</div>
+</header>
+
+<div class="meta">
+    <div><b>Version</b><span>1.0.3</span></div>
+    <div><b>Date</b><span>2026-10-03</span></div>
+    <div><b>Assets</b><span>58 WebP files · ~0.97 MB</span></div>
+    <div><b>Depends on</b><span>1.0.2 shop</span></div>
+</div>
+
+<h2><span class="n">1</span>Summary</h2>
+<p>
+    Each product card now shows a square photo on a white background instead of its category emoji. Photos are served in two
+    widths and chosen by the browser, load lazily below the first row, and reserve their space so the grid does not shift.
+    All photos come from Wikimedia Commons; the CC BY / CC BY-SA licences require attribution, so the shop gains a
+    “Créditos de imágenes” list. Because several photos show a similar rather than the exact part, the shop footer and the
+    terms page (section <em>Productos</em>) state that images are illustrative.
+</p>
+
+<h2><span class="n">2</span>Files</h2>
+<table>
+    <tr><th style="width:36%">File</th><th>Change</th></tr>
+    <tr><td><code>img/productos/&lt;id&gt;-400.webp</code> ×29</td><td>Square, white background, ~80 quality. Measured: 237 KB total, ~8.2 KB average.</td></tr>
+    <tr><td><code>img/productos/&lt;id&gt;-800.webp</code> ×29</td><td>Same image at 800 px. Measured: 759 KB total, ~26 KB average (readme says ~19 KB).</td></tr>
+    <tr><td><code>pages/components/index.html</code> lines 85–144</td><td><code>IMAGE_CREDITS</code> map and <code>ProductImage</code> component; card and cart use it; credits list at the bottom.</td></tr>
+    <tr><td><code>pages/terminos/index.html</code> line 117</td><td>Illustrative-image sentence in <em>Productos</em>.</td></tr>
+</table>
+
+<h2><span class="n">3</span>How it works</h2>
+<h3>3.1 Naming contract</h3>
+<pre><code>/img/productos/<span class="k">&lt;product.id&gt;</span>-400.webp     <span class="c">// card src, cart thumbnail</span>
+/img/productos/<span class="k">&lt;product.id&gt;</span>-800.webp     <span class="c">// 2x / wide screens via srcset</span></code></pre>
+<p>A photo is shown only when <code>IMAGE_CREDITS[product.id]</code> exists. The file name is never checked: a credit entry without files gives a
+    broken image; files without a credit entry are ignored and the emoji stays.</p>
+
+<h3>3.2 <code>ProductImage</code></h3>
+<p class="file">pages/components/index.html · line 120</p>
+<pre><code>&lt;img src={`${base}-400.webp`}
+     srcSet={`${base}-400.webp 400w, ${base}-800.webp 800w`}
+     sizes="(min-width: 1024px) 340px, (min-width: 640px) 45vw, 90vw"
+     width="400" height="400"
+     loading={eager ? 'eager' : 'lazy'} fetchpriority={eager ? 'high' : undefined}
+     decoding="async"
+     alt={`${product.name} compatible con ${product.compat}`} /&gt;</code></pre>
+<ul>
+    <li><strong>Eager first row:</strong> <code>ShopPage</code> passes <code>eager={i &lt; 3}</code>, matching the three-column desktop grid, so the likely LCP image is not lazy.</li>
+    <li><strong>No layout shift:</strong> explicit <code>width</code>/<code>height</code> plus <code>aspect-square</code>.</li>
+    <li><strong>Thumbnail</strong> (<code>size="thumb"</code>): 56×56 in the cart, always the 400 file, empty <code>alt</code> because the name is next to it.</li>
+    <li><strong>Fallback:</strong> no credit entry → category icon in a grey square (currently <code>of-hinge-5490</code>, the hinge pair).</li>
+</ul>
+
+<h3>3.3 Credits</h3>
+<pre><code>'of-kb-hp840': { author: "Alberto Garcia", license: 'CC BY-SA 2.0',
+                 licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/', source: "https://commons.wikimedia.org/wiki/File:…" }</code></pre>
+<p>Rendered in a <code>&lt;details&gt;</code> “Créditos de imágenes” as <em>product (compat): author, licence, vía Wikimedia Commons (recortada y con fondo blanco)</em>.
+    Public-domain entries have an empty <code>licenseUrl</code> and print the licence as text. Licences in use: CC BY-SA 2.0 / 2.0 de / 3.0 / 4.0, CC BY 2.0 / 4.0, CC0, public domain.</p>
+
+<h2><span class="n">4</span>Adding or replacing a photo</h2>
+<ol>
+    <li>Crop square, put on white, export <code>&lt;id&gt;-400.webp</code> and <code>&lt;id&gt;-800.webp</code> at quality ~80 into <code>img/productos/</code>.</li>
+    <li>Add <code>IMAGE_CREDITS['&lt;id&gt;']</code> with author, licence, licence URL and the Commons file page.</li>
+    <li>Check the card, the cart thumbnail and the credits list.</li>
+</ol>
+
+<h2><span class="n">5</span>Known issues and limits</h2>
+<ul>
+    <li><strong>5.1 Manual pipeline.</strong> Cropping, background and WebP export are done by hand; <code>tools/</code> exists but is empty.</li>
+    <li><strong>5.2 Shared stand-in photos.</strong> Three pairs reuse one source image: both USB-C chargers, both iPhone batteries (a CAT B25 battery), and the iPhone 13 / Galaxy A54 screens (a Fairphone 2). Covered by the illustrative notice, but they are the first to replace with real stock photos.</li>
+    <li><strong>5.3 No existence check</strong> between <code>IMAGE_CREDITS</code> and the files on disk.</li>
+    <li><strong>5.4 One format.</strong> WebP only, no AVIF; acceptable for the browsers the site targets.</li>
+</ul>
+
+<div class="warn"><b>5.5 Unreleased data layer already in the folder.</b> After the 1.0.3 entry was written, <code>public/db/productos.json</code> (30 products) and
+    <code>public/db/categorias.json</code> (6 categories), schema <code>lameyer.shop/v1</code>, were added. Nothing loads them yet. They duplicate
+    <code>PRODUCTS</code>, <code>CATEGORIES</code> and <code>IMAGE_CREDITS</code> with extra fields (<code>slug</code>, <code>sku</code>, <code>stock</code>, <code>active</code>,
+    <code>description</code>, <code>specs</code>, <code>compatible_models</code>, <code>image.*</code>). Their <code>_note</code> points to <code>public/db/README.md</code>, which does not exist.
+    Until the page reads them, edits must be made in both places.</div>
+
+<h2><span class="n">6</span>Repository state after 1.0.3</h2>
+<table>
+    <tr><th style="width:32%">Finding</th><th>Detail</th></tr>
+    <tr><td>No version control in this copy</td><td>The OneDrive folder has no <code>.git</code>; versions exist only as readme entries. Releases 1.0.1–1.0.3 cannot be diffed or rolled back.</td></tr>
+    <tr><td>Unused stylesheets</td><td><code>css/layout.css</code> and <code>css/blog.css</code> are not linked by any page; readme says <code>site.css</code> is the only stylesheet. <code>site.css</code>'s header comment still says “Styles for /blog/ pages”.</td></tr>
+    <tr><td>No <code>sitemap.xml</code> / <code>robots.txt</code></td><td>Notable for a site whose blog covers crawlability and structured data.</td></tr>
+    <tr><td>Legacy URL handling</td><td>Hash redirects in <code>index.html</code> and the <code>moved</code> map in <code>404.html</code>; both must survive any build change.</td></tr>
+</table>
+
+<h2><span class="n">7</span>What 1.0.3 is missing for the 1.2.0 JavaScript version</h2>
+<table>
+    <tr><th style="width:4%">#</th><th style="width:27%">Gap</th><th>What 1.2.0 needs</th><th style="width:9%">Priority</th></tr>
+    <tr><td>1</td><td>One catalogue source</td><td>Make <code>public/db/*.json</code> the only source; derive cards, credits list and image paths from <code>product.image</code>. Delete the inline <code>PRODUCTS</code>, <code>CATEGORIES</code>, <code>IMAGE_CREDITS</code>. Write <code>public/db/README.md</code>.</td><td><span class="tag t-block">Blocker</span></td></tr>
+    <tr><td>2</td><td>Schema validation</td><td>A build-time check (e.g. Zod or JSON Schema) that every product has a valid category, price, grade, and either an image with credit or none — and that both image files exist.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>3</td><td>Image script</td><td><code>tools/images.js</code> (Node + <code>sharp</code>): source photo → square, white background, 400/800 WebP; fails if a credit is missing.</td><td><span class="tag t-med">Med</span></td></tr>
+    <tr><td>4</td><td>Git and tagged releases</td><td>Initialise git (or clone the GitHub Pages repo here), tag <code>v1.0.1</code>–<code>v1.0.3</code>, move the readme “Versions” list to <code>CHANGELOG.md</code>, keep the version in <code>package.json</code>.</td><td><span class="tag t-block">Blocker</span></td></tr>
+    <tr><td>5</td><td>Clean-up</td><td>Remove or merge <code>css/layout.css</code> and <code>css/blog.css</code>; fix the <code>site.css</code> comment.</td><td><span class="tag t-low">Low</span></td></tr>
+    <tr><td>6</td><td>Real photos</td><td>Replace the six shared stand-ins (business task).</td><td><span class="tag t-low">Low</span></td></tr>
+</table>
+
+<h3>Suggested path to 1.2.0</h3>
+<table>
+    <tr><th style="width:14%">Step</th><th>Scope</th></tr>
+    <tr><td>Foundation</td><td>git + tags, <code>package.json</code>, Vite/esbuild, Tailwind CLI, GitHub Actions deploy of <code>dist/</code> with <code>CNAME</code> and <code>404.html</code>. Site looks identical.</td></tr>
+    <tr><td>Modules</td><td>Convert <code>layout.jsx</code>, <code>tienda.jsx</code>, <code>blog.jsx</code> to ES modules; port the chat widget (1.0.1) to <code>mountChat()</code>; one contact config.</td></tr>
+    <tr><td>Data</td><td>Shop reads <code>public/db</code>; validation; image script; tests for cart, currency and order message.</td></tr>
+    <tr><td>Output</td><td>Pre-render pages, product JSON-LD, <code>sitemap.xml</code>, <code>robots.txt</code>; cache rates.</td></tr>
+</table>
+<div class="note">If “Foundation” and “Modules” ship separately, they fit a 1.1.x line, leaving 1.2.0 as the release where the shop is data-driven and pre-rendered.</div>
+
+<footer class="doc-foot"><span>Lameyer.net · Release documentation 1.0.3</span><span>Generated 2026-10-03 from the working copy in OneDrive</span></footer>
+</body>
+</html>

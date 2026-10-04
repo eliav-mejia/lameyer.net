@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.1 — WhatsApp chat widget</title>
+<link rel="stylesheet" href="doc.css">
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Software development documentation</div>
+    <h1>Release <span class="v">1.0.1</span> — WhatsApp chat widget</h1>
+    <div class="sub">Floating contact box on the home page that opens a pre-filled <code>wa.me</code> conversation per region.</div>
+</header>
+
+<div class="meta">
+    <div><b>Version</b><span>1.0.1</span></div>
+    <div><b>Date</b><span>2026-10-03</span></div>
+    <div><b>Stack</b><span>Static HTML · vanilla JS (ES5)</span></div>
+    <div><b>Hosting</b><span>GitHub Pages + Cloudflare</span></div>
+</div>
+
+<h2><span class="n">1</span>Summary</h2>
+<p>
+    1.0.1 adds a floating WhatsApp chat launcher to <code>index.html</code>. A visitor opens the panel, picks a region
+    (Mexico or Spain today), edits a pre-written greeting and presses <em>Iniciar chat</em>, which opens
+    <code>https://wa.me/&lt;number&gt;?text=&lt;message&gt;</code> in a new tab. No message passes through any Lameyer server:
+    the widget only builds a link.
+</p>
+<p>
+    It is the only component of the site written as plain JavaScript (an IIFE) rather than JSX, which makes it the easiest
+    piece to move into the 1.2.0 JavaScript codebase, and also the piece most likely to drift because it exists in two copies.
+</p>
+
+<h2><span class="n">2</span>Files</h2>
+<table>
+    <tr><th style="width:34%">File</th><th>Change</th></tr>
+    <tr><td><code>index.html</code> lines 316–511</td><td>Widget block before <code>&lt;/body&gt;</code>: scoped <code>&lt;style&gt;</code> (lines 318–374), markup <code>#lm-chat</code> (from line 376), and the controller script.</td></tr>
+    <tr><td><code>whatsapp-chat-snippet.html</code></td><td>Standalone copy of the same block (196 lines) for pasting into other pages. Identical to the copy in <code>index.html</code> at the time of writing.</td></tr>
+    <tr><td><code>readme.md</code></td><td>Versions entry for 1.0.1.</td></tr>
+</table>
+
+<h2><span class="n">3</span>How it works</h2>
+<h3>3.1 Configuration</h3>
+<p class="file">index.html · widget script</p>
+<pre><code><span class="k">var</span> REGIONS = [
+    { code: 'MX', dial: '+52',  number: '525610074750', text: 'Hola Lameyer, me gustaría información sobre sus servicios.' },
+    { code: 'US', dial: '+1',   number: '',             text: 'Hi Lameyer, I would like information about your services.' },
+    { code: 'ES', dial: '+34',  number: '34602557685',  text: 'Hola Lameyer, me gustaría información sobre sus servicios.' },
+    { code: 'IL', dial: '+972', number: '',             text: 'Hi Lameyer, I would like information about your services.' }
+];
+<span class="k">var</span> VALID = /^[1-9]\d{7,14}$/; <span class="c">// E.164 without "+": 8–15 digits, no leading zero</span></code></pre>
+<ul>
+    <li>Numbers are digits only, international format, no <code>+</code>, spaces or trunk <code>0</code>.</li>
+    <li>A region whose number is empty or fails <code>VALID</code> is dropped. An invalid (non-empty) number logs
+        <code>[lm-chat] Invalid WhatsApp number for …</code> to the console.</li>
+    <li>If no region survives, the widget stays <code>hidden</code> and logs a warning. With one region, the region picker is hidden.</li>
+</ul>
+
+<h3>3.2 Region preselection</h3>
+<p>The default region is guessed from <code>Intl.DateTimeFormat().resolvedOptions().timeZone</code>:</p>
+<table>
+    <tr><th>Time zone pattern</th><th>Region</th></tr>
+    <tr><td><code>Asia/Jerusalem</code>, <code>Asia/Tel_Aviv</code></td><td>IL (hidden until a number is set)</td></tr>
+    <tr><td><code>Europe/Madrid</code>, <code>Atlantic/Canary</code>, <code>Africa/Ceuta</code></td><td>ES</td></tr>
+    <tr><td>12 Mexican <code>America/*</code> zones (Mexico_City, Cancun, Tijuana, …)</td><td>MX</td></tr>
+    <tr><td>Any other <code>America/*</code>, <code>Pacific/Honolulu</code></td><td>US (hidden until a number is set)</td></tr>
+    <tr><td>Anything else, or a hidden region</td><td>First visible region (MX)</td></tr>
+</table>
+
+<h3>3.3 Behaviour</h3>
+<ul>
+    <li><strong>Message:</strong> switching region replaces the text with that region's greeting until the visitor types; after the first
+        <code>input</code> event (<code>edited = true</code>) their text is kept.</li>
+    <li><strong>Link:</strong> <code>link()</code> rebuilds <code>start.href</code> on every change; the text is passed through <code>encodeURIComponent</code>.
+        An empty message produces a bare <code>wa.me/&lt;number&gt;</code> link.</li>
+    <li><strong>Opening:</strong> the anchor uses <code>target="_blank"</code> with <code>rel="noopener noreferrer"</code>.</li>
+    <li><strong>Stacking:</strong> <code>z-index: 90</code> — above page content, below the mobile menu.</li>
+</ul>
+
+<h3>3.4 Accessibility</h3>
+<ul>
+    <li>Launcher exposes <code>aria-expanded</code>, <code>aria-controls="lm-chat-panel"</code> and a label that switches between “Abrir” and “Cerrar”.</li>
+    <li>Regions are a <code>role="radio"</code> group with roving <code>tabIndex</code> and arrow-key navigation.</li>
+    <li><kbd>Esc</kbd> closes the panel; focus moves to the start button on open and back to the launcher on close.</li>
+</ul>
+
+<h2><span class="n">4</span>Operating the widget</h2>
+<table>
+    <tr><th style="width:30%">Task</th><th>Edit</th></tr>
+    <tr><td>Enable US or IL</td><td>Fill <code>number</code> in <code>REGIONS</code> (e.g. US <code>14155552671</code>, IL <code>972501234567</code>) in <strong>both</strong> copies.</td></tr>
+    <tr><td>Change a greeting</td><td>The region's <code>text</code>.</td></tr>
+    <tr><td>Colours</td><td>CSS custom properties on <code>.lm-chat</code>: <code>--lm-blue</code>, <code>--lm-ink</code>, <code>--lm-wa</code>, …</td></tr>
+    <tr><td>Add to another page</td><td>Paste <code>whatsapp-chat-snippet.html</code> before <code>&lt;/body&gt;</code>. See 5.2 for the shop page.</td></tr>
+</table>
+
+<h2><span class="n">5</span>Known issues and limits</h2>
+<div class="warn"><b>5.1 Two copies, two more number sources.</b> The widget code lives in <code>index.html</code> and
+    <code>whatsapp-chat-snippet.html</code>; the Spanish number <code>34602557685</code> is also hard-coded in
+    <code>SELLER.whatsapp</code> in <code>js/tienda.jsx</code> (1.0.2). Changing the number means editing three places.</div>
+<ul>
+    <li><strong>5.2 Home page only.</strong> No other page loads the widget. On <code>/pages/components/</code> it would sit on top of the
+        floating cart button (both are fixed at 24px from the bottom-right corner).</li>
+    <li><strong>5.3 Outside the component system.</strong> The widget does not use <code>layout.jsx</code>, Tailwind or <code>site.css</code>;
+        its ~56 lines of CSS are inline in the page.</li>
+    <li><strong>5.4 <code>innerHTML</code></strong> builds the region buttons from <code>REGIONS</code>. Safe while that list is hand-written config;
+        it must not be fed from user or remote data.</li>
+    <li><strong>5.5 No analytics.</strong> Chats started are not counted, so there is no way to tell which region or page converts.</li>
+</ul>
+
+<h2><span class="n">6</span>What 1.0.1 is missing for the 1.2.0 JavaScript version</h2>
+<table>
+    <tr><th style="width:4%">#</th><th style="width:30%">Gap</th><th>What 1.2.0 needs</th><th style="width:9%">Priority</th></tr>
+    <tr><td>1</td><td>Single source for contact data</td><td>One module (e.g. <code>src/config/contact.js</code>) exporting the WhatsApp numbers, greetings and <code>CONTACT_EMAIL</code>, imported by the widget, the shop checkout and the terms page.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>2</td><td>Module instead of pasted block</td><td>Move the IIFE to <code>src/widgets/chat.js</code> exporting <code>mountChat(el, regions)</code>; delete <code>whatsapp-chat-snippet.html</code>. Markup is created by the module, not copied into HTML.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>3</td><td>Site-wide mounting</td><td>Mount from the shared layout so every page gets it, with an option to offset or hide it where a page has its own floating action (shop cart).</td><td><span class="tag t-med">Med</span></td></tr>
+    <tr><td>4</td><td>Styles in the build</td><td>Move the inline <code>&lt;style&gt;</code> into the bundled stylesheet (or Tailwind classes) so the tokens are shared with the rest of the site.</td><td><span class="tag t-med">Med</span></td></tr>
+    <tr><td>5</td><td>Tests</td><td>Unit tests for the number validator, time-zone guess and link builder (Vitest); one browser test that opens the panel and checks the <code>href</code>.</td><td><span class="tag t-med">Med</span></td></tr>
+    <tr><td>6</td><td>Safer DOM building</td><td>Replace <code>innerHTML</code> with <code>textContent</code>/element creation once the config can come from a JSON file.</td><td><span class="tag t-low">Low</span></td></tr>
+    <tr><td>7</td><td>Missing regions</td><td>US and IL numbers (business input, not code).</td><td><span class="tag t-low">Low</span></td></tr>
+</table>
+<div class="note">Port order: this is the smallest, dependency-free piece, so it is a good first module to prove the 1.2.0 build pipeline (bundle, deploy, test) before touching the shop.</div>
+
+<footer class="doc-foot"><span>Lameyer.net · Release documentation 1.0.1</span><span>Generated 2026-10-03 from the working copy in OneDrive</span></footer>
+</body>
+</html>

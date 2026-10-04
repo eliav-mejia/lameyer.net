@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.2 — Components shop and terms</title>
+<link rel="stylesheet" href="doc.css">
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Software development documentation</div>
+    <h1>Release <span class="v">1.0.2</span> — Components shop + terms</h1>
+    <div class="sub"><code>/pages/components/</code> becomes a spare-parts shop with a WhatsApp checkout; new <code>/pages/terminos/</code> and shared <code>js/tienda.jsx</code>.</div>
+</header>
+
+<div class="meta">
+    <div><b>Version</b><span>1.0.2</span></div>
+    <div><b>Date</b><span>2026-10-03</span></div>
+    <div><b>Stack</b><span>React 18 UMD · Babel standalone · Tailwind CDN</span></div>
+    <div><b>Status</b><span>Pre-launch (placeholders open)</span></div>
+</div>
+
+<h2><span class="n">1</span>Summary</h2>
+<p>
+    The old UI-component library at <code>/pages/components/</code> is replaced by a shop of 30 spare parts in six categories
+    (Oficina, Estudiante, Dev, Redes, Gamer, Otros). Visitors filter, search, sort, add to a cart and send the order as a
+    pre-filled WhatsApp message to <code>+34 602 55 76 85</code>. Prices are stored and charged in EUR (VAT included) and shown
+    for reference in USD, MXN, GBP and ILS using European Central Bank rates. A new terms page covers the seller, returns
+    (30 days), legal withdrawal (14 days), the 3-year guarantee, data protection and a withdrawal form.
+</p>
+
+<h2><span class="n">2</span>Files</h2>
+<table>
+    <tr><th style="width:32%">File</th><th>Role</th></tr>
+    <tr><td><code>pages/components/index.html</code> (525 lines)</td><td>Shop page: <code>CATEGORIES</code>, <code>GRADES</code>, <code>PRODUCTS</code>, <code>ProductCard</code>, <code>CartDrawer</code>, <code>ShopPage</code>. All inline in a <code>text/babel</code> script.</td></tr>
+    <tr><td><code>pages/terminos/index.html</code> (221 lines)</td><td>Terms page: 11 <code>SECTIONS</code>, <code>Fill</code> (highlights unfilled <code>[...]</code> values), <code>REVIEW_DAYS = 7</code>.</td></tr>
+    <tr><td><code>js/tienda.jsx</code> (103 lines, new)</td><td>Shared by both shop pages: <code>SELLER</code>, <code>RETURN_ADDRESSES</code>, <code>RETURN_DAYS</code>, <code>TERMS_URL</code>, <code>CURRENCIES</code>, <code>store</code>, <code>useCurrency()</code>, <code>CurrencySelect</code>.</td></tr>
+    <tr><td><code>js/layout.jsx</code></td><td>Unchanged, but required first: provides <code>React</code> hooks, <code>CONTACT_EMAIL</code>, <code>PageHero</code>, <code>renderPage()</code>.</td></tr>
+</table>
+
+<h3>Load order (both shop pages)</h3>
+<pre><code>react 18.2.0 UMD → react-dom 18.2.0 UMD → babel-standalone 7.23.5
+→ /js/layout.jsx → /js/tienda.jsx → inline &lt;script type="text/babel"&gt; … renderPage(ShopPage)</code></pre>
+<div class="note"><code>tienda.jsx</code> has no imports: it reads <code>useState</code>, <code>useEffect</code> and <code>CONTACT_EMAIL</code> as globals declared by
+    <code>layout.jsx</code>. Loading it first, or alone, throws a <code>ReferenceError</code>.</div>
+
+<h2><span class="n">3</span>Data model</h2>
+<p class="file">pages/components/index.html · line 41</p>
+<pre><code>{ id: 'of-kb-hp840', cat: 'oficina', name: 'Teclado español retroiluminado',
+  compat: 'HP EliteBook 840 G5 / G6', price: 34.90, grade: 'estandar' }</code></pre>
+<table>
+    <tr><th style="width:18%">Field</th><th>Meaning</th></tr>
+    <tr><td><code>id</code></td><td>Stable key: cart storage, image file names (1.0.3). Prefix = category (<code>of-</code>, <code>es-</code>, <code>dv-</code>, <code>rd-</code>, <code>gm-</code>, <code>ot-</code>).</td></tr>
+    <tr><td><code>cat</code></td><td>One of the six <code>CATEGORIES[].id</code>; also the <code>?cat=</code> URL value.</td></tr>
+    <tr><td><code>price</code></td><td>EUR, VAT included. The only price the customer is charged.</td></tr>
+    <tr><td><code>grade</code></td><td><code>estandar</code> (compatible, tested) or <code>premium</code> (OEM-grade). Drives the badge.</td></tr>
+</table>
+
+<h2><span class="n">4</span>Features</h2>
+<h3>4.1 Catalogue view</h3>
+<ul>
+    <li><strong>Category</strong> chips; the choice is written to <code>?cat=&lt;id&gt;</code> with <code>history.replaceState</code>, so categories are linkable. Unknown values fall back to <code>todos</code>.</li>
+    <li><strong>Search</strong> is a case-insensitive substring match on <code>name + compat</code>. No hit shows a “Pedir por WhatsApp” link with the query.</li>
+    <li><strong>Sort</strong>: featured (array order), price ascending/descending, name (<code>localeCompare(…, 'es')</code>).</li>
+</ul>
+
+<h3>4.2 Currencies — <code>useCurrency()</code></h3>
+<pre><code><span class="k">const</span> RATES_URL = 'https://api.frankfurter.dev/v1/latest?base=EUR&amp;symbols=USD,MXN,GBP,ILS';
+<span class="c">// returns { currency, setCurrency, format(eur, target?), ratesDate }</span></code></pre>
+<ul>
+    <li>Starts with fallback rates hard-coded in <code>CURRENCIES</code>, then replaces them with the live ECB rates when the fetch succeeds; any failure keeps the fallbacks silently.</li>
+    <li>Non-EUR amounts are prefixed <code>≈</code> and formatted with the ISO code (<code>MXN 821.17</code>) so pesos and dollars cannot be confused; the EUR charge is always shown beside them.</li>
+    <li>The selected currency persists in <code>localStorage['lm-currency']</code>.</li>
+</ul>
+
+<h3>4.3 Cart and checkout — <code>CartDrawer</code></h3>
+<ul>
+    <li>Cart is <code>{ [productId]: qty }</code>, quantity capped at 99, persisted to <code>localStorage['lm-cart']</code>. On load, ids no longer in <code>PRODUCTS</code> are dropped.</li>
+    <li><code>store.get/set</code> wrap <code>localStorage</code> in <code>try/catch</code>, so private mode or blocked storage only loses persistence.</li>
+    <li>Checkout requires: at least one line, a name, delivery (<em>Envío en España</em> with a 5-digit postcode, or <em>Recogida en Madrid</em>) and the terms checkbox.</li>
+    <li>The order is a text message: lines, EUR total (plus the reference currency), name, delivery and the terms URL, sent to <code>wa.me/${SELLER.whatsapp}</code>. Shipping costs are confirmed in the chat before payment.</li>
+    <li>The drawer is a <code>role="dialog"</code> with <code>aria-modal</code>; focus moves to the close button and <kbd>Esc</kbd> closes it.</li>
+</ul>
+
+<h3>4.4 Terms page</h3>
+<p>Eleven anchored sections (<code>#vendedor</code> … <code>#formulario</code>) linked from each product card, the cart and the footer. Values from
+    <code>SELLER</code> and <code>RETURN_ADDRESSES</code> that still start with <code>[</code> are rendered in an amber <code>&lt;mark&gt;</code> so they are visible before launch.</p>
+
+<h2><span class="n">5</span>Known issues and limits</h2>
+<div class="warn"><b>5.1 Launch blockers.</b> <code>SELLER.name</code>, <code>nif</code>, <code>address</code> and both <code>RETURN_ADDRESSES</code> are still <code>[...]</code>
+    placeholders, and catalogue prices are not final. Spanish consumer law requires the seller's identity on the terms page before selling.</div>
+<ul>
+    <li><strong>5.2 Catalogue in HTML.</strong> <code>PRODUCTS</code> and <code>CATEGORIES</code> are code inside the page. Editing stock or prices means editing JSX; there is no stock field yet.</li>
+    <li><strong>5.3 Client-side only.</strong> Products are rendered by React in the browser, so the delivered HTML contains no product names or prices: weak for search engines and no <code>Product</code> structured data.</li>
+    <li><strong>5.4 In-browser compilation.</strong> Babel standalone transpiles ~1,000 lines of JSX on every page view, and the Tailwind Play CDN generates CSS at runtime. Both are documented as not for production.</li>
+    <li><strong>5.5 Rates request on every visit.</strong> No caching of the ECB rates (they change once per working day).</li>
+    <li><strong>5.6 Orders are not recorded.</strong> The only record of an order is the WhatsApp chat; prices in the message are whatever the client computed.</li>
+    <li><strong>5.7 Postcode check</strong> accepts any 5 digits (e.g. <code>00000</code>, or codes outside Spain's 01–52 provinces).</li>
+</ul>
+
+<h2><span class="n">6</span>What 1.0.2 is missing for the 1.2.0 JavaScript version</h2>
+<table>
+    <tr><th style="width:4%">#</th><th style="width:27%">Gap</th><th>What 1.2.0 needs</th><th style="width:9%">Priority</th></tr>
+    <tr><td>1</td><td>Build step</td><td><code>package.json</code> + a bundler (Vite or esbuild) that precompiles JSX and builds Tailwind with its CLI. Removes <code>babel-standalone</code> and <code>cdn.tailwindcss.com</code> from every page.</td><td><span class="tag t-block">Blocker</span></td></tr>
+    <tr><td>2</td><td>ES modules</td><td>Replace implicit globals with <code>import</code>/<code>export</code>: <code>layout.js</code> exports hooks/components, <code>shop/currency.js</code> exports <code>useCurrency</code>, <code>shop/seller.js</code> exports <code>SELLER</code>. Script order stops mattering.</td><td><span class="tag t-block">Blocker</span></td></tr>
+    <tr><td>3</td><td>Catalogue as data</td><td>Read products and categories from <code>public/db/productos.json</code> and <code>categorias.json</code> (already present, see 1.0.3) instead of the inline arrays; map <code>cat→category_id</code>, <code>price→price_eur</code>.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>4</td><td>Pure, testable logic</td><td>Extract cart reducer, order-message builder, price formatting and postcode validation into plain functions with unit tests.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>5</td><td>Pre-rendered HTML</td><td>Generate the shop (and optionally one page per product using the <code>slug</code> field) at build time, with JSON-LD <code>Product</code>/<code>Offer</code>, plus <code>sitemap.xml</code> and <code>robots.txt</code>.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>6</td><td>Deploy pipeline</td><td>Once source ≠ output, GitHub Pages must serve a build: a GitHub Actions workflow that builds to <code>dist/</code> and deploys, keeping <code>CNAME</code>, <code>404.html</code> redirects and trailing-slash URLs.</td><td><span class="tag t-high">High</span></td></tr>
+    <tr><td>7</td><td>Rates caching</td><td>Cache the ECB response with its date (or fetch at build time) and only refetch when stale.</td><td><span class="tag t-med">Med</span></td></tr>
+    <tr><td>8</td><td>Stock and active flags</td><td>Honour <code>stock</code> and <code>active</code> from the JSON (hide or label out-of-stock parts).</td><td><span class="tag t-med">Med</span></td></tr>
+    <tr><td>9</td><td>Business data</td><td>Seller identity, return addresses, final prices (not code, but they block launch in any version).</td><td><span class="tag t-block">Blocker</span></td></tr>
+</table>
+
+<footer class="doc-foot"><span>Lameyer.net · Release documentation 1.0.2</span><span>Generated 2026-10-03 from the working copy in OneDrive</span></footer>
+</body>
+</html>
