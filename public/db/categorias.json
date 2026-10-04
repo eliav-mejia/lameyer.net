@@ -1,0 +1,49 @@
+{
+  "_schema": "lameyer.shop/v1",
+  "_note": "Base de datos simulada (MVP pre-lanzamiento). Editar a mano; ver public/db/README.md.",
+  "updated_at": "2026-10-03",
+  "categories": [
+    {
+      "id": "oficina",
+      "label": "Oficina",
+      "icon": "💼",
+      "description": "Portátiles corporativos y puesto de trabajo",
+      "sort_order": 1
+    },
+    {
+      "id": "estudiante",
+      "label": "Estudiante",
+      "icon": "🎓",
+      "description": "Portátiles y móviles de uso diario",
+      "sort_order": 2
+    },
+    {
+      "id": "dev",
+      "label": "Dev",
+      "icon": "⌨️",
+      "description": "Memoria, almacenamiento y rendimiento",
+      "sort_order": 3
+    },
+    {
+      "id": "redes",
+      "label": "Redes",
+      "icon": "🌐",
+      "description": "Cableado, Wi-Fi y conectividad",
+      "sort_order": 4
+    },
+    {
+      "id": "gamer",
+      "label": "Gamer",
+      "icon": "🎮",
+      "description": "Consolas, mandos y periféricos",
+      "sort_order": 5
+    },
+    {
+      "id": "otros",
+      "label": "Otros",
+      "icon": "🔧",
+      "description": "Móviles, herramientas y accesorios",
+      "sort_order": 6
+    }
+  ]
+}

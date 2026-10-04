@@ -23,11 +23,24 @@ lameyer.net/
 │   ├── layout.jsx                shared by EVERY page: header, footer, contact form,
 │   │                             PageHero, RegisterCTA, tech stack, renderPage()
 │   ├── blog.jsx                  blog only: SERIES, BLOG_TYPES, BLOG_POSTS, dashboard, article template
-│   └── tienda.jsx                shop only: SELLER, RETURN_ADDRESSES, CURRENCIES, useCurrency()
+│   └── tienda.jsx                shop only: SELLER, RETURN_ADDRESSES, CURRENCIES, data layer (db, useCatalog),
+│                                 cart, ProductCard, ProductPage, renderProduct()
+│
+├── public/
+│   └── db/                       SIMULATED DATABASE (pre-launch, edited by hand) — see public/db/README.md
+│       ├── categorias.json       categories
+│       └── productos.json        products: price, stock, specs, compatibility, image + credit
+│
+├── img/
+│   └── productos/                product photos <product-id>-400.webp / -800.webp
+│
+├── tools/
+│   └── generar-paginas-producto.py   creates pages/components/<slug>/ from public/db/productos.json
 │
 ├── pages/                        one folder per section, served at /pages/<name>/
 │   ├── development/index.html    /pages/development/  (contact form -> Google Sheets)
-│   ├── components/index.html     /pages/components/  shop: CATEGORIES, PRODUCTS, cart -> WhatsApp
+│   ├── components/index.html     /pages/components/  shop: filters, search, cart -> WhatsApp
+│   ├── components/<slug>/        /pages/components/<slug>/  one page per product (generated)
 │   ├── terminos/index.html       /pages/terminos/    terms & conditions (linked in the footer)
 │   ├── community/index.html      /pages/community/
 │   └── stack/index.html          /pages/stack/
@@ -78,6 +91,7 @@ Naming rules (they keep everything searchable):
 | `404.html`                 | ✓            | ✓             |             |               |      |
 | `pages/development/`       | ✓            | ✓             |             |               | ✓    |
 | `pages/components/`        | ✓            | ✓             |             | ✓             |      |
+| `pages/components/<slug>/` | ✓            | ✓             |             | ✓             |      |
 | `pages/terminos/`          | ✓            | ✓             |             | ✓             |      |
 | `pages/community/`         | ✓            | ✓             |             |               |      |
 | `pages/stack/`             | ✓            | ✓             |             |               |      |
@@ -97,16 +111,29 @@ Do not redeclare anything from `layout.jsx` in another file: the later copy sile
 - **Tech stack**: `TECH_STACK` in `js/layout.jsx` (home page and `/pages/stack/`).
 - **Styles**: `css/site.css`. Everything else is Tailwind classes in the markup.
 - **Home blog cards**: `BLOG_HIGHLIGHTS` in `index.html` (one card per series).
-- **Shop catalogue**: `PRODUCTS` and `CATEGORIES` in `pages/components/index.html` (prices in EUR, VAT included).
-- **Product photos**: `img/productos/<product-id>-400.webp` and `-800.webp` (square, white background, WebP ~80 quality).
-  Add the matching entry to `IMAGE_CREDITS` in `pages/components/index.html`; without one the card shows the category icon.
-  Photos from Wikimedia Commons need their author and licence in `IMAGE_CREDITS` (listed under "Créditos de imágenes").
+- **Shop catalogue (products, prices, stock, categories)**: `public/db/productos.json` and `public/db/categorias.json`.
+  Schema and workflow in `public/db/README.md`. Price/stock/text changes need no other edit.
+- **Product photos**: `img/productos/<product-id>-400.webp` and `-800.webp` (square, white background, WebP ~80 quality),
+  referenced from the product's `image` object in `productos.json` together with its author and licence
+  (Wikimedia Commons photos need them; they are listed under "Créditos de imágenes"). `"image": null` shows the category icon.
 - **Seller data, return addresses, WhatsApp, currencies**: top of `js/tienda.jsx`. Unfilled `[...]` values show highlighted on the terms page.
 
 ## Add a page
 
 1. Copy `pages/stack/` to `pages/<new-name>/` and edit its `index.html`.
 2. Add `{ href: '/pages/<new-name>/', label: '...' }` to `NAV_LINKS` in `js/layout.jsx`.
+
+## Add a product (pre-launch manual input)
+
+1. Add an object to `public/db/productos.json` with a new `id`, `slug` and `sku` (fields in `public/db/README.md`).
+2. Add `img/productos/<id>-400.webp` and `-800.webp`, or set `"image": null`.
+3. Run `python tools/generar-paginas-producto.py` to create `pages/components/<slug>/index.html`
+   (or copy an existing product folder and change its `<title>`, description and canonical URL).
+4. Commit and push.
+
+To hide a product set `"active": false`; to show it as sold out set `"stock": 0`.
+Product folders whose slug is no longer in the database are listed by the script; delete them by hand
+and add `'/pages/components/<old-slug>/': '/pages/components/'` to the `moved` list in `404.html`.
 
 ## Add a blog entry
 
@@ -130,6 +157,20 @@ so old links keep working.
 Always link with a trailing slash (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
 ## Versions
+
+### 1.0.4 — 2026-10-03 · Product pages + simulated database · STAGING (pre-launch)
+- Status: **staging / MVP pre-launch manual input test.** Catalogue data, prices, stock and specs are sample data to be
+  checked by hand before launch; seller data and return addresses are still `[...]` placeholders.
+- New `public/db/` simulated database: `categorias.json` and `productos.json` (id, slug, sku, category, compatibility,
+  price, grade, stock, active, description, specs, image + credit). Documented in `public/db/README.md`.
+- `js/tienda.jsx` gains the data layer (`db.catalog()`, `useCatalog()`): the only place to change when moving to a real database.
+  Cart (`useCart`, synced across tabs), `ProductCard`, `CartDrawer`, `CartButton` and `ProductPage` move there too.
+- 30 product pages at `/pages/components/<slug>/` (generated by `tools/generar-paginas-producto.py`): photo with credit,
+  price in 5 currencies, stock status, quantity, add to cart / buy now, specs with SKU, compatible models,
+  related products, links to returns/guarantee/shipping terms, schema.org `Product` data and Open Graph tags.
+- Shop page reads from the database (loading skeleton and error state), searches compatible models and SKU,
+  links every card to its product page and shows "Agotado" for `stock: 0` (sample: Dell Latitude hinges).
+- `IMAGE_CREDITS` removed from the shop page: credits now live in each product's `image` object.
 
 ### 1.0.3 — 2026-10-03 · Product photos
 - 29 product photos in `img/productos/` (`<product-id>-400.webp` / `-800.webp`): square, white background, ~8 KB / ~19 KB each.

@@ -1,0 +1,1017 @@
+{
+  "_schema": "lameyer.shop/v1",
+  "_note": "Base de datos simulada (MVP pre-lanzamiento). Editar a mano; ver public/db/README.md.",
+  "updated_at": "2026-10-03",
+  "products": [
+    {
+      "id": "of-kb-hp840",
+      "slug": "teclado-hp-elitebook-840-g5-g6",
+      "sku": "LM-OFI-001",
+      "category_id": "oficina",
+      "name": "Teclado español retroiluminado",
+      "compat": "HP EliteBook 840 G5 / G6",
+      "compatible_models": [
+        "HP EliteBook 840 G5",
+        "HP EliteBook 840 G6",
+        "HP EliteBook 745 G5",
+        "HP EliteBook 745 G6"
+      ],
+      "price_eur": 34.9,
+      "grade": "estandar",
+      "stock": 12,
+      "active": true,
+      "description": "Teclado de sustitución con distribución española (incluye Ñ) y retroiluminación blanca. Se monta en el chasis superior del portátil y se conecta mediante dos cables flexibles.",
+      "specs": {
+        "Distribución": "Español (QWERTY, con Ñ)",
+        "Retroiluminación": "Sí, blanca",
+        "Puntero": "Con pointing stick",
+        "Conexión": "2 cables flex (teclado y luz)",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/of-kb-hp840-400.webp",
+        "src_800": "/img/productos/of-kb-hp840-800.webp",
+        "author": "Alberto Garcia",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:ThinkPad_USB_keyboard_(3829537325).jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "of-bat-t480",
+      "slug": "bateria-lenovo-thinkpad-t480-t470",
+      "sku": "LM-OFI-002",
+      "category_id": "oficina",
+      "name": "Batería 72 Wh",
+      "compat": "Lenovo ThinkPad T480 / T470",
+      "compatible_models": [
+        "Lenovo ThinkPad T480",
+        "Lenovo ThinkPad T470",
+        "Lenovo ThinkPad T580",
+        "Lenovo ThinkPad T570",
+        "Lenovo ThinkPad A475",
+        "Lenovo ThinkPad A485"
+      ],
+      "price_eur": 49.9,
+      "grade": "premium",
+      "stock": 8,
+      "active": true,
+      "description": "Batería externa trasera de alta capacidad. Sustituye a la batería extraíble del ThinkPad sin herramientas y funciona junto a la batería interna (sistema Power Bridge).",
+      "specs": {
+        "Capacidad": "72 Wh",
+        "Voltaje": "11,25 V",
+        "Química": "Ion de litio, 6 celdas",
+        "Tipo": "Externa trasera (extraíble)",
+        "Protecciones": "Sobrecarga, sobredescarga, cortocircuito",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/of-bat-t480-400.webp",
+        "src_800": "/img/productos/of-bat-t480-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Acer_AC10D31_Li-ion_battery_pack-3588.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "of-usbc-65",
+      "slug": "cargador-usb-c-pd-65w",
+      "sku": "LM-OFI-003",
+      "category_id": "oficina",
+      "name": "Cargador USB-C PD 65 W",
+      "compat": "Portátiles USB-C (Dell, HP, Lenovo, Apple)",
+      "compatible_models": [
+        "Portátiles con carga USB-C Power Delivery",
+        "Dell Latitude (USB-C)",
+        "HP EliteBook / ProBook (USB-C)",
+        "Lenovo ThinkPad (USB-C)",
+        "Apple MacBook Air / Pro (USB-C)"
+      ],
+      "price_eur": 24.9,
+      "grade": "premium",
+      "stock": 25,
+      "active": true,
+      "description": "Cargador de pared USB-C con Power Delivery. Negocia automáticamente el voltaje con el portátil, el móvil o la tableta, por lo que sirve para varios dispositivos.",
+      "specs": {
+        "Potencia máxima": "65 W",
+        "Salidas": "5 V / 9 V / 15 V / 20 V (USB-C PD)",
+        "Entrada": "100–240 V CA, 50/60 Hz",
+        "Cable": "USB-C a USB-C, 1,8 m incluido",
+        "Enchufe": "Tipo C/F (Europa)",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/of-usbc-65-400.webp",
+        "src_800": "/img/productos/of-usbc-65-800.webp",
+        "author": "Evan-Amos",
+        "license": "Public domain",
+        "license_url": null,
+        "source": "https://commons.wikimedia.org/wiki/File:Notebook-Computer-AC-Adapter.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "of-hinge-5490",
+      "slug": "bisagras-dell-latitude-5490-5480",
+      "sku": "LM-OFI-004",
+      "category_id": "oficina",
+      "name": "Bisagras de pantalla (par)",
+      "compat": "Dell Latitude 5490 / 5480",
+      "compatible_models": [
+        "Dell Latitude 5490",
+        "Dell Latitude 5480",
+        "Dell Latitude 5491"
+      ],
+      "price_eur": 19.9,
+      "grade": "estandar",
+      "stock": 0,
+      "active": true,
+      "description": "Par de bisagras izquierda y derecha para la pantalla. Recomendadas cuando la tapa queda floja o la carcasa se abre al plegar la pantalla.",
+      "specs": {
+        "Contenido": "Bisagra izquierda + derecha",
+        "Pantalla": "Versión no táctil",
+        "Material": "Acero",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "of-fan-450",
+      "slug": "ventilador-hp-probook-450-g7-g8",
+      "sku": "LM-OFI-005",
+      "category_id": "oficina",
+      "name": "Ventilador de CPU",
+      "compat": "HP ProBook 450 G7 / G8",
+      "compatible_models": [
+        "HP ProBook 450 G7",
+        "HP ProBook 450 G8",
+        "HP ProBook 455 G7"
+      ],
+      "price_eur": 17.9,
+      "grade": "estandar",
+      "stock": 10,
+      "active": true,
+      "description": "Ventilador de refrigeración de sustitución. Soluciona ruidos, vibraciones y sobrecalentamiento causados por un ventilador desgastado.",
+      "specs": {
+        "Tipo": "Radial (blower)",
+        "Alimentación": "5 V CC",
+        "Conector": "4 pines",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/of-fan-450-400.webp",
+        "src_800": "/img/productos/of-fan-450-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Apple_TV,_1st_generation_-_Delta_Electronics_BFB0605LB_cooling_fan-3154.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "es-lcd-156",
+      "slug": "pantalla-15-6-fhd-ips-30-pines",
+      "sku": "LM-EST-006",
+      "category_id": "estudiante",
+      "name": "Pantalla 15,6\" FHD IPS 30 pines",
+      "compat": "Portátiles 15,6\" con conector eDP",
+      "compatible_models": [
+        "Portátiles de 15,6\" con panel slim de 30 pines eDP",
+        "Acer Aspire 5 (A515)",
+        "Lenovo IdeaPad 3 15\"",
+        "HP 250 G7 / G8",
+        "ASUS VivoBook 15"
+      ],
+      "price_eur": 79.9,
+      "grade": "premium",
+      "stock": 6,
+      "active": true,
+      "description": "Panel LCD IPS Full HD de sustitución con acabado mate antirreflejos. Comprueba el conector (30 pines eDP) y las pestañas de fijación de tu panel original antes de comprar.",
+      "specs": {
+        "Tamaño": "15,6\"",
+        "Resolución": "1920 × 1080 (Full HD)",
+        "Tecnología": "IPS, mate",
+        "Conector": "eDP 30 pines",
+        "Montaje": "Slim, sin pestañas",
+        "Táctil": "No",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/es-lcd-156-400.webp",
+        "src_800": "/img/productos/es-lcd-156-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Lenovo_G500s_laptop-2905.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "es-bat-a1466",
+      "slug": "bateria-macbook-air-13-a1466",
+      "sku": "LM-EST-007",
+      "category_id": "estudiante",
+      "name": "Batería 54 Wh",
+      "compat": "MacBook Air 13\" (A1466 / A1369)",
+      "compatible_models": [
+        "MacBook Air 13\" A1466 (2012–2017)",
+        "MacBook Air 13\" A1369 (2011)"
+      ],
+      "price_eur": 59.9,
+      "grade": "premium",
+      "stock": 7,
+      "active": true,
+      "description": "Batería interna de sustitución para MacBook Air de 13\". Incluye celdas con circuito de protección y se instala con destornilladores pentalobe y Torx.",
+      "specs": {
+        "Capacidad": "54 Wh",
+        "Voltaje": "7,6 V",
+        "Química": "Polímero de litio",
+        "Tipo": "Interna",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/es-bat-a1466-400.webp",
+        "src_800": "/img/productos/es-bat-a1466-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Dell_Li-Ion_Battery_YRDD6-1339.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "es-kb-aspire5",
+      "slug": "teclado-acer-aspire-5-a515",
+      "sku": "LM-EST-008",
+      "category_id": "estudiante",
+      "name": "Teclado español",
+      "compat": "Acer Aspire 5 (A515)",
+      "compatible_models": [
+        "Acer Aspire 5 A515-51",
+        "Acer Aspire 5 A515-52",
+        "Acer Aspire 5 A515-54",
+        "Acer Aspire 5 A515-55"
+      ],
+      "price_eur": 32.9,
+      "grade": "estandar",
+      "stock": 9,
+      "active": true,
+      "description": "Teclado de sustitución con distribución española y teclado numérico. Recomendado para teclas que no responden o derrames de líquido.",
+      "specs": {
+        "Distribución": "Español (QWERTY, con Ñ)",
+        "Teclado numérico": "Sí",
+        "Retroiluminación": "No",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/es-kb-aspire5-400.webp",
+        "src_800": "/img/productos/es-kb-aspire5-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Lenovo_G500s_laptop-2903.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "es-usbc-45",
+      "slug": "cargador-usb-c-45w",
+      "sku": "LM-EST-009",
+      "category_id": "estudiante",
+      "name": "Cargador USB-C 45 W",
+      "compat": "Chromebooks y portátiles USB-C",
+      "compatible_models": [
+        "Chromebooks con carga USB-C",
+        "Portátiles ultraligeros USB-C",
+        "Móviles y tabletas USB-C PD"
+      ],
+      "price_eur": 21.9,
+      "grade": "estandar",
+      "stock": 20,
+      "active": true,
+      "description": "Cargador USB-C Power Delivery compacto para Chromebooks, portátiles ligeros, móviles y tabletas.",
+      "specs": {
+        "Potencia máxima": "45 W",
+        "Salidas": "5 V / 9 V / 15 V / 20 V (USB-C PD)",
+        "Entrada": "100–240 V CA",
+        "Cable": "USB-C a USB-C, 1,5 m incluido",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/es-usbc-45-400.webp",
+        "src_800": "/img/productos/es-usbc-45-800.webp",
+        "author": "Evan-Amos",
+        "license": "Public domain",
+        "license_url": null,
+        "source": "https://commons.wikimedia.org/wiki/File:Notebook-Computer-AC-Adapter.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "es-oled-ip13",
+      "slug": "pantalla-oled-iphone-13",
+      "sku": "LM-EST-010",
+      "category_id": "estudiante",
+      "name": "Pantalla OLED completa",
+      "compat": "iPhone 13",
+      "compatible_models": [
+        "iPhone 13 (A2633, A2482, A2631, A2634, A2635)"
+      ],
+      "price_eur": 89.9,
+      "grade": "premium",
+      "stock": 5,
+      "active": true,
+      "description": "Pantalla OLED completa (panel y táctil ensamblados) con colores y brillo equivalentes al original. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida; no afecta al funcionamiento.",
+      "specs": {
+        "Tamaño": "6,1\"",
+        "Tecnología": "OLED",
+        "Resolución": "2532 × 1170",
+        "Táctil": "Integrado",
+        "True Tone": "Transferible con herramienta de programación",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/es-oled-ip13-400.webp",
+        "src_800": "/img/productos/es-oled-ip13-800.webp",
+        "author": "Fairphone",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Fairphone_2_ELEVATION_transparent.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "dv-ddr4-16",
+      "slug": "ram-ddr4-sodimm-16gb-3200",
+      "sku": "LM-DEV-011",
+      "category_id": "dev",
+      "name": "Memoria RAM DDR4 SO-DIMM 16 GB 3200 MHz",
+      "compat": "Portátiles y mini PC con DDR4",
+      "compatible_models": [
+        "Portátiles con ranura SO-DIMM DDR4",
+        "Mini PC (Intel NUC, Lenovo Tiny, HP Mini…)",
+        "NAS con SO-DIMM DDR4"
+      ],
+      "price_eur": 39.9,
+      "grade": "premium",
+      "stock": 30,
+      "active": true,
+      "description": "Módulo de memoria SO-DIMM DDR4 para ampliar portátiles y mini PC. Funciona a velocidades inferiores (2400/2666/2933 MHz) si tu equipo no admite 3200 MHz.",
+      "specs": {
+        "Capacidad": "16 GB",
+        "Tipo": "DDR4 SO-DIMM, 260 pines",
+        "Velocidad": "3200 MHz (PC4-25600)",
+        "Latencia": "CL22",
+        "Voltaje": "1,2 V",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/dv-ddr4-16-400.webp",
+        "src_800": "/img/productos/dv-ddr4-16-800.webp",
+        "author": "D-Kuru",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:DDR_4_RAM_SO-DIMM_16GB_by_Micron-top_back_PNr%C2%B00841.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "dv-ddr5-32",
+      "slug": "ram-ddr5-sodimm-32gb-5600",
+      "sku": "LM-DEV-012",
+      "category_id": "dev",
+      "name": "Memoria RAM DDR5 SO-DIMM 32 GB 5600 MHz",
+      "compat": "Portátiles y mini PC con DDR5",
+      "compatible_models": [
+        "Portátiles con ranura SO-DIMM DDR5",
+        "Mini PC con DDR5"
+      ],
+      "price_eur": 89.9,
+      "grade": "premium",
+      "stock": 14,
+      "active": true,
+      "description": "Módulo SO-DIMM DDR5 de alta capacidad para entornos de desarrollo, máquinas virtuales y contenedores. Compatible hacia abajo con 4800 y 5200 MHz.",
+      "specs": {
+        "Capacidad": "32 GB",
+        "Tipo": "DDR5 SO-DIMM, 262 pines",
+        "Velocidad": "5600 MHz",
+        "Latencia": "CL46",
+        "Voltaje": "1,1 V",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/dv-ddr5-32-400.webp",
+        "src_800": "/img/productos/dv-ddr5-32-800.webp",
+        "author": "D-Kuru",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:RAM_SO-DIMM_8GB_by_Kingston-top_back_PNr%C2%B00565.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "dv-nvme-1tb",
+      "slug": "ssd-nvme-m2-1tb-pcie4",
+      "sku": "LM-DEV-013",
+      "category_id": "dev",
+      "name": "SSD NVMe M.2 2280 1 TB PCIe 4.0",
+      "compat": "Ranura M.2 NVMe (PCIe 3.0 / 4.0)",
+      "compatible_models": [
+        "Portátiles y PC con ranura M.2 2280 NVMe",
+        "PlayStation 5 (con disipador)",
+        "Mini PC con M.2 NVMe"
+      ],
+      "price_eur": 74.9,
+      "grade": "premium",
+      "stock": 18,
+      "active": true,
+      "description": "SSD NVMe PCIe 4.0 de 1 TB en formato M.2 2280. En ranuras PCIe 3.0 funciona a la velocidad máxima de esa interfaz.",
+      "specs": {
+        "Capacidad": "1 TB",
+        "Formato": "M.2 2280",
+        "Interfaz": "PCIe 4.0 ×4, NVMe",
+        "Lectura secuencial": "Hasta 5000 MB/s",
+        "Escritura secuencial": "Hasta 4200 MB/s",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/dv-nvme-1tb-400.webp",
+        "src_800": "/img/productos/dv-nvme-1tb-800.webp",
+        "author": "D-Kuru",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Samsung_980_PRO_PCIe_4.0_NVMe_SSD_1TB-bottom_PNr%C2%B00916.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "dv-m2-usbc",
+      "slug": "caja-externa-m2-nvme-usb-c",
+      "sku": "LM-DEV-014",
+      "category_id": "dev",
+      "name": "Caja externa M.2 NVMe a USB-C 10 Gbps",
+      "compat": "SSD M.2 NVMe 2230–2280",
+      "compatible_models": [
+        "SSD M.2 NVMe 2230 / 2242 / 2260 / 2280",
+        "SSD M.2 SATA (según modelo de chip)"
+      ],
+      "price_eur": 22.9,
+      "grade": "estandar",
+      "stock": 15,
+      "active": true,
+      "description": "Carcasa de aluminio para convertir un SSD M.2 en un disco externo USB-C. Montaje sin herramientas y disipación pasiva.",
+      "specs": {
+        "Interfaz": "USB 3.2 Gen 2 (10 Gbps)",
+        "Conector": "USB-C",
+        "Tamaños de SSD": "2230, 2242, 2260, 2280",
+        "Material": "Aluminio",
+        "Cables": "USB-C a USB-C y USB-C a USB-A",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/dv-m2-usbc-400.webp",
+        "src_800": "/img/productos/dv-m2-usbc-800.webp",
+        "author": "Jacek Halicki",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:2023_Obudowa_dysku_twardego_Blueendless_M6N_(3).jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "dv-thermal",
+      "slug": "kit-pasta-termica-thermal-pads",
+      "sku": "LM-DEV-015",
+      "category_id": "dev",
+      "name": "Kit pasta térmica + thermal pads",
+      "compat": "CPU, GPU y SSD",
+      "compatible_models": [
+        "CPU y GPU de portátiles y sobremesa",
+        "Consolas (PS4, PS5, Xbox)",
+        "SSD NVMe y VRM"
+      ],
+      "price_eur": 9.9,
+      "grade": "estandar",
+      "stock": 40,
+      "active": true,
+      "description": "Kit de mantenimiento térmico: jeringa de pasta térmica no conductora y láminas de thermal pads recortables para chips de memoria, VRM y SSD.",
+      "specs": {
+        "Pasta térmica": "4 g, no conductora eléctricamente",
+        "Conductividad": "8,5 W/m·K",
+        "Thermal pads": "0,5 / 1,0 / 1,5 mm",
+        "Incluye": "Espátula y toallitas",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/dv-thermal-400.webp",
+        "src_800": "/img/productos/dv-thermal-800.webp",
+        "author": "Suyash Dwivedi",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Hutixi_HT-GY260_thermal_paste.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "rd-ax210",
+      "slug": "tarjeta-wifi-6e-bluetooth-m2",
+      "sku": "LM-RED-016",
+      "category_id": "redes",
+      "name": "Tarjeta Wi-Fi 6E + Bluetooth 5.3 M.2",
+      "compat": "Ranura M.2 2230 (Key E)",
+      "compatible_models": [
+        "Portátiles y PC con ranura M.2 2230 Key E (CNVio no requerido)",
+        "Windows 10 / 11",
+        "Linux (kernel 5.10+)"
+      ],
+      "price_eur": 24.9,
+      "grade": "premium",
+      "stock": 16,
+      "active": true,
+      "description": "Tarjeta inalámbrica Wi-Fi 6E tribanda (2,4 / 5 / 6 GHz) con Bluetooth 5.3. Mejora la velocidad y la latencia respecto a tarjetas Wi-Fi 5.",
+      "specs": {
+        "Estándar": "Wi-Fi 6E (802.11ax)",
+        "Bandas": "2,4 / 5 / 6 GHz",
+        "Velocidad máx.": "2400 Mbps",
+        "Bluetooth": "5.3",
+        "Formato": "M.2 2230, Key E",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/rd-ax210-400.webp",
+        "src_800": "/img/productos/rd-ax210-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Intel_Centrino_Wireless-N_2230-2109.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "rd-sfp-10g",
+      "slug": "modulo-sfp-plus-10g-sr",
+      "sku": "LM-RED-017",
+      "category_id": "redes",
+      "name": "Módulo SFP+ 10G SR multimodo",
+      "compat": "Switches y NAS con puertos SFP+",
+      "compatible_models": [
+        "Switches y routers con puertos SFP+",
+        "NAS y tarjetas de red SFP+",
+        "Codificación configurable para marcas principales (consultar)"
+      ],
+      "price_eur": 19.9,
+      "grade": "estandar",
+      "stock": 22,
+      "active": true,
+      "description": "Transceptor óptico SFP+ 10GBASE-SR para fibra multimodo con conector LC dúplex. Ideal para enlaces dentro del rack o del edificio.",
+      "specs": {
+        "Estándar": "10GBASE-SR",
+        "Longitud de onda": "850 nm",
+        "Fibra": "Multimodo OM3 / OM4",
+        "Alcance": "Hasta 300 m (OM3) / 400 m (OM4)",
+        "Conector": "LC dúplex",
+        "DDM": "Sí",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/rd-sfp-10g-400.webp",
+        "src_800": "/img/productos/rd-sfp-10g-800.webp",
+        "author": "Dmitry Nosachev",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:LR-Link_10GBASE-SR_SFP%2B_transceiver.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "rd-cat6-3m",
+      "slug": "cable-red-cat6-3m-pack-3",
+      "sku": "LM-RED-018",
+      "category_id": "redes",
+      "name": "Cable de red Cat6 UTP 3 m (pack 3)",
+      "compat": "Router, switch, PC y consola",
+      "compatible_models": [
+        "Cualquier puerto Ethernet RJ45"
+      ],
+      "price_eur": 9.9,
+      "grade": "estandar",
+      "stock": 50,
+      "active": true,
+      "description": "Pack de tres latiguillos Cat6 de 3 m con conductores de cobre y protectores de conector. Gigabit garantizado y 10 Gbps en tramos cortos.",
+      "specs": {
+        "Categoría": "Cat6 UTP",
+        "Longitud": "3 m (× 3)",
+        "Conductor": "Cobre 100 %",
+        "Velocidad": "Hasta 10 Gbps (≤ 55 m)",
+        "Conectores": "RJ45 con protector",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/rd-cat6-3m-400.webp",
+        "src_800": "/img/productos/rd-cat6-3m-800.webp",
+        "author": "Raimond Spekking",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:CAT8_Ethernet_Cable-0319.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "rd-rj45-kit",
+      "slug": "kit-crimpadora-rj45-cat6",
+      "sku": "LM-RED-019",
+      "category_id": "redes",
+      "name": "Kit crimpadora + 50 conectores RJ45 Cat6",
+      "compat": "Cable Cat5e / Cat6",
+      "compatible_models": [
+        "Cable Cat5e y Cat6 (UTP / FTP)",
+        "Conectores RJ45, RJ12 y RJ11"
+      ],
+      "price_eur": 18.9,
+      "grade": "estandar",
+      "stock": 11,
+      "active": true,
+      "description": "Kit para fabricar tus propios cables de red: crimpadora con pelacables y cortador, 50 conectores RJ45 Cat6 y 50 capuchones.",
+      "specs": {
+        "Crimpadora": "RJ45 (8P) / RJ12 (6P) / RJ11 (4P)",
+        "Conectores": "50 × RJ45 Cat6",
+        "Capuchones": "50",
+        "Incluye": "Pelacables y cortador integrados",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/rd-rj45-kit-400.webp",
+        "src_800": "/img/productos/rd-rj45-kit-800.webp",
+        "author": "Magma",
+        "license": "CC BY-SA 3.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/3.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Crimpt%C3%A5ng_f%C3%B6r_modul%C3%A4r_kontakt_RJ11_och_RJ45_Crimping_pliers.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "rd-psu-12v",
+      "slug": "fuente-alimentacion-12v-1-5a",
+      "sku": "LM-RED-020",
+      "category_id": "redes",
+      "name": "Fuente de alimentación 12 V 1,5 A",
+      "compat": "Routers, ONT y switches domésticos",
+      "compatible_models": [
+        "Routers y ONT de fibra de 12 V",
+        "Switches domésticos de 12 V",
+        "Cámaras IP y tiras LED de 12 V"
+      ],
+      "price_eur": 11.9,
+      "grade": "estandar",
+      "stock": 24,
+      "active": true,
+      "description": "Fuente de alimentación de sustitución para routers, ONT y switches. Comprueba voltaje, polaridad y tamaño de conector de tu fuente original.",
+      "specs": {
+        "Salida": "12 V CC, 1,5 A (18 W)",
+        "Conector": "Jack 5,5 × 2,1 mm",
+        "Polaridad": "Centro positivo",
+        "Entrada": "100–240 V CA",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/rd-psu-12v-400.webp",
+        "src_800": "/img/productos/rd-psu-12v-800.webp",
+        "author": "Evan-Amos",
+        "license": "Public domain",
+        "license_url": null,
+        "source": "https://commons.wikimedia.org/wiki/File:Wall-Wart-AC-Adapter.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "gm-stick-ds5",
+      "slug": "joystick-hall-effect-dualsense",
+      "sku": "LM-GAM-021",
+      "category_id": "gamer",
+      "name": "Joystick Hall Effect (par)",
+      "compat": "Mando DualSense (PS5)",
+      "compatible_models": [
+        "Mando DualSense (PS5), todas las revisiones de placa",
+        "Mando DualSense Edge (módulo no incluido)"
+      ],
+      "price_eur": 14.9,
+      "grade": "premium",
+      "stock": 13,
+      "active": true,
+      "description": "Par de joysticks con sensores magnéticos Hall Effect que eliminan el drift causado por el desgaste de los potenciómetros. Requiere soldadura.",
+      "specs": {
+        "Tecnología": "Hall Effect (magnética, sin contacto)",
+        "Contenido": "2 joysticks",
+        "Instalación": "Requiere soldadura",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/gm-stick-ds5-400.webp",
+        "src_800": "/img/productos/gm-stick-ds5-800.webp",
+        "author": "Alex Cochrane",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Playstation_DualSense_Controller.png",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "gm-joycon",
+      "slug": "joystick-joy-con-nintendo-switch",
+      "sku": "LM-GAM-022",
+      "category_id": "gamer",
+      "name": "Joystick de repuesto (pack 2)",
+      "compat": "Joy-Con de Nintendo Switch",
+      "compatible_models": [
+        "Joy-Con de Nintendo Switch (izquierdo y derecho)",
+        "Nintendo Switch OLED y Lite"
+      ],
+      "price_eur": 12.9,
+      "grade": "estandar",
+      "stock": 21,
+      "active": true,
+      "description": "Pack de dos joysticks analógicos de sustitución para Joy-Con con drift o stick roto. Instalación sin soldadura con destornillador Y00.",
+      "specs": {
+        "Contenido": "2 joysticks analógicos",
+        "Instalación": "Sin soldadura (cable flex)",
+        "Herramienta": "Destornillador tri-wing Y00 y PH00",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/gm-joycon-400.webp",
+        "src_800": "/img/productos/gm-joycon-800.webp",
+        "author": "Crisco 1492",
+        "license": "CC BY-SA 4.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Nintendo_Switch_2_Joy-Con_2_Blue_and_Orange.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "gm-fan-ps5",
+      "slug": "ventilador-playstation-5",
+      "sku": "LM-GAM-023",
+      "category_id": "gamer",
+      "name": "Ventilador de refrigeración",
+      "compat": "PlayStation 5 (todas las revisiones)",
+      "compatible_models": [
+        "PlayStation 5 estándar y Digital (CFI-10xx, 11xx, 12xx)",
+        "PlayStation 5 Slim (CFI-20xx)"
+      ],
+      "price_eur": 24.9,
+      "grade": "premium",
+      "stock": 6,
+      "active": true,
+      "description": "Ventilador centrífugo de sustitución para PS5. Recomendado si la consola hace ruido excesivo, se sobrecalienta o el ventilador no gira.",
+      "specs": {
+        "Tipo": "Centrífugo, 120 mm",
+        "Alimentación": "12 V CC",
+        "Conector": "4 pines",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/gm-fan-ps5-400.webp",
+        "src_800": "/img/productos/gm-fan-ps5-800.webp",
+        "author": "User Smial on de.wikipedia",
+        "license": "CC BY-SA 2.0 de",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/de/",
+        "source": "https://commons.wikimedia.org/wiki/File:Radialluefter.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "gm-xbox-bat",
+      "slug": "bateria-mando-xbox-series",
+      "sku": "LM-GAM-024",
+      "category_id": "gamer",
+      "name": "Batería recargable + cable USB-C",
+      "compat": "Mando Xbox Series X|S",
+      "compatible_models": [
+        "Mando Xbox Series X|S",
+        "Mando Xbox One (con cable micro-USB no incluido)"
+      ],
+      "price_eur": 16.9,
+      "grade": "estandar",
+      "stock": 19,
+      "active": true,
+      "description": "Batería recargable para el compartimento de pilas del mando. Se carga en el propio mando con el cable USB-C incluido.",
+      "specs": {
+        "Capacidad": "1400 mAh",
+        "Química": "Ni-MH",
+        "Autonomía": "Hasta 30 h",
+        "Cable": "USB-C, 2,7 m",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/gm-xbox-bat-400.webp",
+        "src_800": "/img/productos/gm-xbox-bat-800.webp",
+        "author": "Serhio Magpie",
+        "license": "CC BY 4.0",
+        "license_url": "https://creativecommons.org/licenses/by/4.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Xbox_Series_Controller_Gold_Shadow_Special_Edition_(angled).jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "gm-switches",
+      "slug": "switches-mecanicos-lineales-70",
+      "sku": "LM-GAM-025",
+      "category_id": "gamer",
+      "name": "Switches mecánicos lineales (pack 70)",
+      "compat": "Teclados hot-swap de 3 / 5 pines",
+      "compatible_models": [
+        "Teclados mecánicos hot-swap (3 y 5 pines)",
+        "Teclados con switches tipo MX soldables"
+      ],
+      "price_eur": 19.9,
+      "grade": "estandar",
+      "stock": 17,
+      "active": true,
+      "description": "Pack de 70 switches lineales prelubricados de recorrido suave, para sustituir switches dañados o personalizar tu teclado.",
+      "specs": {
+        "Tipo": "Lineal, prelubricado",
+        "Fuerza de actuación": "45 g",
+        "Recorrido total": "4,0 mm",
+        "Pines": "5 (compatibles con placas de 3 pines)",
+        "Vástago": "Tipo MX",
+        "Contenido": "70 switches",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/gm-switches-400.webp",
+        "src_800": "/img/productos/gm-switches-800.webp",
+        "author": "Daniel Beardsmore",
+        "license": "CC0",
+        "license_url": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Cherry_MX_Blue_switch_(front_angle).jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "ot-bat-ip12",
+      "slug": "bateria-iphone-12",
+      "sku": "LM-OTR-026",
+      "category_id": "otros",
+      "name": "Batería",
+      "compat": "iPhone 12 / 12 Pro",
+      "compatible_models": [
+        "iPhone 12",
+        "iPhone 12 Pro"
+      ],
+      "price_eur": 29.9,
+      "grade": "premium",
+      "stock": 15,
+      "active": true,
+      "description": "Batería de sustitución con celdas de grado A y adhesivos incluidos. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida en el estado de la batería.",
+      "specs": {
+        "Capacidad": "2815 mAh",
+        "Voltaje": "3,83 V",
+        "Química": "Ion de litio",
+        "Incluye": "Adhesivos de montaje",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/ot-bat-ip12-400.webp",
+        "src_800": "/img/productos/ot-bat-ip12-800.webp",
+        "author": "MarcoTangerino",
+        "license": "Public domain",
+        "license_url": null,
+        "source": "https://commons.wikimedia.org/wiki/File:CAT-B25-Battery.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "ot-bat-ip13",
+      "slug": "bateria-iphone-13",
+      "sku": "LM-OTR-027",
+      "category_id": "otros",
+      "name": "Batería",
+      "compat": "iPhone 13",
+      "compatible_models": [
+        "iPhone 13"
+      ],
+      "price_eur": 34.9,
+      "grade": "premium",
+      "stock": 12,
+      "active": true,
+      "description": "Batería de sustitución con celdas de grado A y adhesivos incluidos. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida en el estado de la batería.",
+      "specs": {
+        "Capacidad": "3227 mAh",
+        "Voltaje": "3,88 V",
+        "Química": "Ion de litio",
+        "Incluye": "Adhesivos de montaje",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/ot-bat-ip13-400.webp",
+        "src_800": "/img/productos/ot-bat-ip13-800.webp",
+        "author": "MarcoTangerino",
+        "license": "Public domain",
+        "license_url": null,
+        "source": "https://commons.wikimedia.org/wiki/File:CAT-B25-Battery.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "ot-oled-a54",
+      "slug": "pantalla-oled-samsung-galaxy-a54",
+      "sku": "LM-OTR-028",
+      "category_id": "otros",
+      "name": "Pantalla OLED con marco",
+      "compat": "Samsung Galaxy A54 5G",
+      "compatible_models": [
+        "Samsung Galaxy A54 5G (SM-A546B)"
+      ],
+      "price_eur": 69.9,
+      "grade": "premium",
+      "stock": 4,
+      "active": true,
+      "description": "Pantalla OLED completa montada en marco, con táctil y lector de huellas en pantalla funcional. El marco facilita una instalación más rápida y segura.",
+      "specs": {
+        "Tamaño": "6,4\"",
+        "Tecnología": "OLED",
+        "Resolución": "2340 × 1080",
+        "Marco": "Incluido",
+        "Huella en pantalla": "Compatible",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/ot-oled-a54-400.webp",
+        "src_800": "/img/productos/ot-oled-a54-800.webp",
+        "author": "Fairphone",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Fairphone_2_ELEVATION_transparent.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "ot-port-s21",
+      "slug": "placa-carga-usb-c-galaxy-s21",
+      "sku": "LM-OTR-029",
+      "category_id": "otros",
+      "name": "Placa de carga USB-C",
+      "compat": "Samsung Galaxy S21",
+      "compatible_models": [
+        "Samsung Galaxy S21 5G (SM-G991B)"
+      ],
+      "price_eur": 14.9,
+      "grade": "estandar",
+      "stock": 10,
+      "active": true,
+      "description": "Placa secundaria con conector USB-C y micrófono. Soluciona problemas de carga, conexión con el PC o un conector flojo.",
+      "specs": {
+        "Conector": "USB-C",
+        "Incluye": "Micrófono inferior",
+        "Carga rápida": "Compatible",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/ot-port-s21-400.webp",
+        "src_800": "/img/productos/ot-port-s21-800.webp",
+        "author": "SparkFun Electronics from Boulder, USA",
+        "license": "CC BY 2.0",
+        "license_url": "https://creativecommons.org/licenses/by/2.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:USB_Female_Type_C_Connector_(46356532451).jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    },
+    {
+      "id": "ot-tools-64",
+      "slug": "kit-destornilladores-precision-64",
+      "sku": "LM-OTR-030",
+      "category_id": "otros",
+      "name": "Kit de destornilladores de precisión (64 piezas)",
+      "compat": "Móviles, portátiles y consolas",
+      "compatible_models": [
+        "Móviles y tabletas",
+        "Portátiles",
+        "Consolas y mandos"
+      ],
+      "price_eur": 19.9,
+      "grade": "estandar",
+      "stock": 26,
+      "active": true,
+      "description": "Kit de reparación con mango de aluminio y 56 puntas magnéticas de acero S2 (Phillips, Torx, pentalobe, tri-wing, hexagonal…), más herramientas de apertura.",
+      "specs": {
+        "Puntas": "56, acero S2 magnético",
+        "Tipos": "PH, Torx, pentalobe, tri-wing, hexagonal, plana",
+        "Incluye": "Mango, extensor, ventosa, púas y pinzas",
+        "Estuche": "Sí",
+        "Estado": "Nuevo"
+      },
+      "image": {
+        "src_400": "/img/productos/ot-tools-64-400.webp",
+        "src_800": "/img/productos/ot-tools-64-800.webp",
+        "author": "oomlout",
+        "license": "CC BY-SA 2.0",
+        "license_url": "https://creativecommons.org/licenses/by-sa/2.0/",
+        "source": "https://commons.wikimedia.org/wiki/File:Precision_Screwdriver_Set_1.jpg",
+        "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
+      }
+    }
+  ]
+}
