@@ -138,9 +138,10 @@ Do not redeclare anything from `layout.jsx` in another file: the later copy sile
   (`all` or `necessary`); load analytics only when `hasCookieConsent()` is true.
 - **Tech stack**: `TECH_STACK` in `js/layout.jsx` (home page and `/pages/stack/`).
 - **Styles**: `css/site.css`. Everything else is Tailwind classes in the markup.
-  The site uses a dark navy theme (`--navy`, `--ink`, `--muted`, `--accent` at the top of `css/site.css`). Markup keeps
-  light-theme class names (`bg-white`, `text-gray-900`, `text-blue-600`...); the end of `css/site.css` remaps each one
-  to the navy palette. A colour class not listed there shows in its original light colour, so add it to that list.
+  Palette (tokens at the top of `css/site.css`): 1 white `#ffffff` background · 2 blue `#2563eb` buttons, links, accents ·
+  3 dark blue `#0a192f` headings, main text, top banner, dark sections, button hover · 4 grey `#64748b` captions.
+  The end of `css/site.css` maps Tailwind classes to these (`text-gray-900` → dark blue, `text-gray-500` → grey,
+  `bg-blue-600` → blue, `hover:bg-blue-700` → dark blue). Unlisted classes keep Tailwind's own light colours.
 - **Home blog cards**: `BLOG_HIGHLIGHTS` in `index.html` (one card per series).
 - **Shop catalogue (products, prices, stock, categories)**: `public/db/productos.json` and `public/db/categorias.json`.
   Schema and workflow in `public/db/README.md`. Price/stock/text changes need no other edit.
@@ -188,6 +189,11 @@ so old links keep working.
 Always link with a trailing slash (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
 ## Versions
+
+### 1.0.8 — 2026-10-04 · White theme + four-colour palette
+- Back to a white site: white background, blue secondary, dark blue tertiary, grey for captions (`css/site.css`).
+  Header banner, Stack section and chat header in dark blue; footer and mobile menu white again; chat widget light.
+- Israeli shekel (ILS) removed from the shop currencies and the terms page; reference currencies are USD, MXN and GBP.
 
 ### 1.0.7 — 2026-10-04 · Login / sign up + cookie consent
 - Login / sign up pop-up on every page (header button, mobile menu); staging accounts stored in the browser only.

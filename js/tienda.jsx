@@ -38,7 +38,6 @@ const CURRENCIES = [
     { code: 'USD', label: 'Dólar EE. UU.', locale: 'en-US', rate: 1.1225 },
     { code: 'MXN', label: 'Peso mexicano', locale: 'es-MX', rate: 20.5806 },
     { code: 'GBP', label: 'Libra esterlina', locale: 'en-GB', rate: 0.85033 },
-    { code: 'ILS', label: 'Nuevo séquel', locale: 'en-IL', rate: 3.4408 },
 ];
 const RATES_URL = 'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=' +
     CURRENCIES.filter(c => c.code !== 'EUR').map(c => c.code).join(',');

@@ -249,7 +249,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
     const tabClass = (on) => `flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors ${on ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-blue-600'}`;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#020c1b]/80 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a192f]/60 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
             <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="auth-title" className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-8">
                 <button type="button" onClick={onClose} aria-label={TXT.close} className="absolute top-5 right-5 p-2 rounded-xl text-gray-500 hover:text-blue-600 transition-colors">
                     <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
@@ -406,7 +406,7 @@ const Layout = ({ children }) => {
             <Particles />
 
             {/* Top Banner */}
-            <div className="fixed top-0 w-full h-10 bg-[#020c1b] border-b border-white/5 z-[60] flex items-center justify-between px-8 overflow-hidden">
+            <div className="fixed top-0 w-full h-10 bg-[#0a192f] border-b border-white/5 z-[60] flex items-center justify-between px-8 overflow-hidden">
                 <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap flex items-center gap-2">
                     SUSTENTABILIDAD CORPORATIVA & ESG
                 </span>
@@ -471,7 +471,7 @@ const Layout = ({ children }) => {
             </nav>
 
             {/* Mobile Menu: off-canvas panel sliding in from the right, under the header so the X stays visible */}
-            <div id="mobile-menu" className={`mobile-menu fixed inset-0 pt-36 pb-12 bg-[#0a192f]/95 backdrop-blur-xl z-[65] md:hidden flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
+            <div id="mobile-menu" className={`mobile-menu fixed inset-0 pt-36 pb-12 bg-white/95 backdrop-blur-xl z-[65] md:hidden flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
 
                 {NAV_LINKS.map(link => (
                     <a
@@ -503,7 +503,7 @@ const Layout = ({ children }) => {
                 {children}
             </main>
 
-            <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-[#020c1b] relative z-20">
+            <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">
                 &copy; 2026 LAMEYER® EU. TODOS LOS DERECHOS RESERVADOS.
                 <a href="/pages/terminos/" className="block mt-3 text-xs hover:text-blue-600 transition-colors">TÉRMINOS Y CONDICIONES</a>
             </footer>
