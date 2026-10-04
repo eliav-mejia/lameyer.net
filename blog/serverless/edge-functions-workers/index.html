@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Functions (Workers) - Lameyer Blog</title>
+    <meta name="description" content="How Cloudflare Workers run on V8 isolates, what their limits mean for design, and how service bindings split a platform into small functions that call each other privately.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/edge-functions-workers/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'One Worker per responsibility, not one per endpoint',
+            'Connect Workers with service bindings, not public URLs',
+            'Keep secrets in wrangler secret, never in code',
+            'Stream large bodies instead of buffering them',
+            'Hand slow work to a queue with waitUntil or Queues',
+            'Enable Smart Placement for Workers that talk to one backend',
+        ];
+
+        const MODELS = [
+            { model: 'VM (IaaS)', unit: 'A whole server', start: 'Minutes', you: 'OS, patches, scaling, capacity' },
+            { model: 'Container (PaaS / FaaS)', unit: 'A process image', start: 'Hundreds of ms to seconds', you: 'Image, runtime version, concurrency' },
+            { model: 'Isolate (Workers)', unit: 'A V8 sandbox', start: 'Usually under 5 ms', you: 'Just the code' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Every platform has a front door: the first code that runs when a request, a webhook or a scheduled event arrives. On a
+                    traditional stack that door is a server you rent (IaaS) or a container platform you configure (PaaS). In MC-SE it is an
+                    <strong className="text-gray-900"> edge function</strong>: a small program deployed to every Cloudflare location at
+                    once. This article covers how Workers run, what their limits mean for design, and how to split a platform into
+                    several of them.
+                </P>
+
+                <H2>Isolates, not servers</H2>
+                <P>
+                    A Worker doesn't get its own VM or container. It runs in a V8 isolate, the same sandbox a browser tab uses, and
+                    thousands of isolates share one process. That is why a Worker starts in milliseconds and why there is no capacity to
+                    plan: each request simply gets an isolate in the location closest to the user.
+                </P>
+                <Table
+                    columns={[{ key: 'model', label: 'Model' }, { key: 'unit', label: 'Unit' }, { key: 'start', label: 'Start time', accent: true }, { key: 'you', label: 'You manage' }]}
+                    rows={MODELS}
+                />
+
+                <H2>Limits shape the design</H2>
+                <P>
+                    Isolates trade flexibility for speed. Each request has a CPU time budget (milliseconds on the free plan, configurable
+                    up to minutes on paid plans), around 128 MB of memory, and a cap on outgoing subrequests. There is no local
+                    filesystem and no long-lived process. Check Cloudflare's current limits page before relying on a number. The
+                    design consequences don't change:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Do little per request.</strong> Route, check, transform, forward. Heavy work (PDFs, large imports) goes to a queue.</>,
+                    <><strong className="text-gray-900">Stream, don't buffer.</strong> Pass <Code>request.body</Code> straight through instead of reading a 50 MB upload into memory.</>,
+                    <><strong className="text-gray-900">Keep state outside.</strong> Anything that must survive the request lives in <A href="/blog/serverless/edge-storage-kv-d1-r2/">edge storage</A> or the core.</>,
+                    <><strong className="text-gray-900">Waiting is free.</strong> CPU time counts computation, not time spent waiting on <Code>fetch</Code>, so I/O-heavy integration code is cheap.</>,
+                ]} />
+
+                <H2>A minimal Worker with a router</H2>
+                <P>
+                    For anything beyond one route, a small router such as Hono keeps the code readable. It runs on Workers without adapters
+                    and adds almost nothing to the bundle.
+                </P>
+                <CodeBlock title="src/index.ts">{`import { Hono } from 'hono';
+
+type Env = { CORE: Fetcher; CONFIG: KVNamespace; API_TOKEN: string };
+const app = new Hono<{ Bindings: Env }>();
+
+app.get('/health', (c) => c.json({ ok: true }));
+
+app.get('/v1/products/:id', async (c) => {
+  // Calls the core through a service binding: no public hop.
+  return c.env.CORE.fetch(new Request('https://core/products/' + c.req.param('id')));
+});
+
+app.post('/v1/orders', async (c) => {
+  const res = await c.env.CORE.fetch('https://core/orders', {
+    method: 'POST',
+    body: c.req.raw.body,            // streamed, not buffered
+    headers: { 'content-type': 'application/json' },
+  });
+  return new Response(res.body, res);
+});
+
+export default app;`}</CodeBlock>
+
+                <H2>Split by responsibility with service bindings</H2>
+                <P>
+                    A platform rarely fits in one Worker for long. A <strong className="text-gray-900">service binding</strong> lets one
+                    Worker call another directly, inside Cloudflare, without a public URL, DNS lookup or extra auth. The called Worker
+                    can't even be reached from the internet if you don't give it a route. That makes it a clean way to separate a public
+                    gateway from internal functions.
+                </P>
+                <CodeBlock title="wrangler.jsonc (gateway)">{`{
+  "name": "gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "services": [
+    { "binding": "CORE", "service": "core-adapter" },
+    { "binding": "CRM", "service": "connector-crm" }
+  ],
+  "kv_namespaces": [{ "binding": "CONFIG", "id": "<namespace-id>" }],
+  "placement": { "mode": "smart" },
+  "observability": { "enabled": true }
+}`}</CodeBlock>
+                <Callout title="Smart Placement">
+                    Running at the edge helps only if the function doesn't spend its time talking to a database on another continent. With{' '}
+                    <Code>placement.mode = "smart"</Code>, Cloudflare runs a Worker near the backend it calls most, while users still connect
+                    to the nearest location. Use it for adapters that sit in front of one core or one database.
+                </Callout>
+
+                <H2>What to split, and what not to</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Split</strong> by trust and lifecycle: the public gateway, each third-party connector, admin tools.</>,
+                    <><strong className="text-gray-900">Don't split</strong> per endpoint. Twenty one-route Workers means twenty configs and twenty deploys for one change.</>,
+                    <><strong className="text-gray-900">Keep business rules in the core.</strong> A Worker that calculates prices duplicates the <A href="/blog/core/modular-core-architecture/">modular core</A> and drifts from it.</>,
+                ]} />
+
+                <H2>Measuring it</H2>
+                <P>
+                    Track P50 and P95 wall time per route, CPU time per request (it drives cost), error rate per Worker, and subrequests per
+                    request. A route whose CPU time keeps creeping up is doing work that belongs in the core or in a queue.
+                </P>
+
+                <Callout title="Next step">
+                    A front door needs rules about who gets in. <A href="/blog/serverless/routing-caching-auth-edge/">Routing, Caching & Auth
+                    at the Edge</A> turns this Worker into a gateway. To see the same pattern used to sell integrations, read{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">Functions × Integration PaaS</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

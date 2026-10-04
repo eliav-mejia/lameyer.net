@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Functions × Integration PaaS - Lameyer Blog</title>
+    <meta name="description" content="Building an integration platform from edge functions: one Worker per connector, credentials in secrets, mappings in code and a shared gateway, so adding a system is a deploy, not a server.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/serverless-integration-paas/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'One connector Worker per external system',
+            'All connectors speak one internal event format',
+            'Credentials in secrets, scoped per connector',
+            'Field mappings in versioned files, not in code branches',
+            'Every inbound webhook verified and queued first',
+            'A dead-letter queue and a replay button per connector',
+        ];
+
+        const COMPARE = [
+            { option: 'Point-to-point scripts', cost: 'Low at first, grows with every pair', risk: 'Nobody knows what talks to what' },
+            { option: 'Integration server (IaaS)', cost: 'Fixed monthly, paid even when idle', risk: 'One server to patch, scale and back up' },
+            { option: 'Off-the-shelf iPaaS', cost: 'Per task or per connector, often high', risk: 'Logic locked in a vendor\'s UI' },
+            { option: 'Serverless integration platform', cost: 'Per request and CPU time', risk: 'Needs engineering discipline (this article)' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Our main service is connecting systems: an ERP to a CRM, a store to an accounting package, a form to a spreadsheet and a
+                    billing provider. Done one script at a time, this turns into a tangle nobody can maintain. Done on a rented integration
+                    server, it becomes a machine that costs money all month to work a few minutes an hour. This crossover shows how the
+                    pieces of the Serverless Edge series (<A href="/blog/serverless/edge-functions-workers/">functions</A>,{' '}
+                    <A href="/blog/serverless/routing-caching-auth-edge/">routing</A> and{' '}
+                    <A href="/blog/serverless/edge-storage-kv-d1-r2/">storage</A>) combine into an{' '}
+                    <strong className="text-gray-900">integration platform you run as a service</strong>: a PaaS of your own, without the servers.
+                </P>
+
+                <H2>Why build it serverless</H2>
+                <Table
+                    columns={[{ key: 'option', label: 'Option', accent: true }, { key: 'cost', label: 'Cost model' }, { key: 'risk', label: 'Main risk' }]}
+                    rows={COMPARE}
+                />
+                <P>
+                    Integration traffic is bursty: quiet for hours, then a batch of 5,000 orders at month end. Serverless pricing follows
+                    that shape, and there is no capacity to plan for the peak.
+                </P>
+
+                <H2>The architecture</H2>
+                <CodeBlock title="Platform layout">{`External systems                 Platform (Workers)                    Your core
+─────────────────                ──────────────────────────           ─────────────
+Shopify ──webhook──►  gateway ──► connector-shopify ─┐
+Stripe  ──webhook──►  (verify,    connector-stripe  ─┼─► events queue ─► core-adapter ──► Modular Core
+HubSpot ◄──API─────    route,     connector-hubspot ◄┘        │
+ERP     ◄──Tunnel──    limit)     connector-erp     ◄─────────┘
+                                         │
+                       D1: connector settings · KV: tokens cache · R2: payload archive`}</CodeBlock>
+                <UL items={[
+                    <><strong className="text-gray-900">Gateway.</strong> One public Worker: verifies signatures and tokens, applies limits, routes to the right connector.</>,
+                    <><strong className="text-gray-900">Connectors.</strong> One Worker per external system, reachable only through service bindings. Each one translates between that system and one internal event format.</>,
+                    <><strong className="text-gray-900">Events queue.</strong> Everything inbound becomes an event on a queue, so a slow or failing target never blocks the source.</>,
+                    <><strong className="text-gray-900">Core adapter.</strong> Calls the <A href="/blog/core/contracts-typed-apis/">typed contracts</A> of the modular core. Business rules stay there.</>,
+                ]} />
+
+                <H2>One internal event format</H2>
+                <P>
+                    With N systems, point-to-point integration needs up to N × (N − 1) translations. With one internal format, each
+                    system needs one connector that translates to and from it. That is what keeps the tenth integration as cheap as the
+                    second.
+                </P>
+                <CodeBlock title="packages/contracts/events/order-paid.v1.json (excerpt)">{`{
+  "type": "order.paid.v1",
+  "id": "evt_01J9...",            // idempotency key, unique per event
+  "source": "shopify",
+  "occurredAt": "2026-10-04T15:20:11Z",
+  "tenant": "acme",
+  "data": {
+    "orderId": "1042",
+    "customer": { "email": "ana@example.com", "taxId": "XAXX010101000" },
+    "lines": [{ "sku": "RAM-DDR5-32", "quantity": 2, "unitPrice": { "amount": 189900, "currency": "MXN" } }]
+  }
+}`}</CodeBlock>
+
+                <H2>Mappings as data, credentials as secrets</H2>
+                <P>
+                    Each customer's systems are configured a little differently: a custom field in the CRM, a different tax code in the ERP.
+                    Put those differences in mapping files, versioned in git and loaded per tenant from D1 or KV, instead of{' '}
+                    <Code>if (tenant === 'acme')</Code> branches in the code. Credentials (API keys, OAuth refresh tokens) go in Worker
+                    secrets or an encrypted D1 table, scoped so each connector can read only its own.
+                </P>
+                <CodeBlock title="mappings/acme/hubspot.yaml">{`target: hubspot.deal
+fields:
+  dealname:        "Order {{data.orderId}}"
+  amount:          "{{data.total.amount | cents_to_decimal}}"
+  pipeline:        "default"
+  rfc_cliente:     "{{data.customer.taxId}}"     # custom property in this tenant's CRM
+on_conflict: update_by_external_id`}</CodeBlock>
+
+                <H2>Failures are normal; make them visible</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Retries with backoff</strong> on every queue consumer. Third-party APIs fail every day.</>,
+                    <><strong className="text-gray-900">A dead-letter queue per connector</strong>, so a broken mapping for one system doesn't stop the others.</>,
+                    <><strong className="text-gray-900">An archive in R2</strong> of every inbound payload, so any event can be replayed after a fix.</>,
+                    <><strong className="text-gray-900">Per-connector dashboards</strong> from <A href="/blog/serverless/logs-tracing-cost/">structured logs</A>: events in, events delivered, events failed, age of the oldest pending one.</>,
+                ]} />
+
+                <H2>Adding a system is a deploy</H2>
+                <P>
+                    A new client wants their invoicing system connected. On this platform that is a new connector Worker, a mapping file and a
+                    secret, all through a pull request. No server is provisioned and no existing connector is touched. That is what makes
+                    integrations a product you can sell repeatedly, not a project you rebuild each time.
+                </P>
+
+                <H2>Measuring it</H2>
+                <P>
+                    The numbers clients care about: time to add a new system (target days, not weeks), delivery success rate per connector,
+                    end-to-end latency from source event to target update, and monthly platform cost compared with the integration server or
+                    iPaaS subscription it replaced.
+                </P>
+
+                <Callout title="Related">
+                    The webhook and queue side is covered in depth in <A href="/blog/workflows/serverless-workflow-automation/">Workflow
+                    Automation</A>. Public webhook endpoints are protected by the <A href="/blog/?series=security">API Security</A>{' '}
+                    layers. Systems that only exist on-premises are reached as shown in <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge
+                    × IaaS (Hybrid)</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

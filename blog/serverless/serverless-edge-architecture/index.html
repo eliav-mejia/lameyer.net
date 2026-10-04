@@ -99,6 +99,21 @@
                     while you debug.
                 </P>
 
+                <H2>Go deeper</H2>
+                <UL items={[
+                    <><A href="/blog/serverless/edge-functions-workers/">Edge Functions</A>: how Workers run, their limits, and splitting a platform with service bindings.</>,
+                    <><A href="/blog/serverless/routing-caching-auth-edge/">Routing, Caching & Auth</A>: turning a Worker into the API gateway.</>,
+                    <><A href="/blog/serverless/edge-storage-kv-d1-r2/">Edge Storage</A>: choosing between KV, D1, R2, Durable Objects and Hyperdrive.</>,
+                    <><A href="/blog/serverless/scheduled-jobs-cron-triggers/">Scheduled Jobs</A>: retiring the always-on sync server.</>,
+                    <><A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing & Cost</A>: seeing inside the platform and what each customer costs.</>,
+                ]} />
+                <P>
+                    Three crossovers apply all of this to the platforms we build for clients: an{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">integration PaaS made of edge functions</A>, a{' '}
+                    <A href="/blog/serverless/serverless-in-front-of-iaas/">hybrid path for existing servers (IaaS)</A>, and{' '}
+                    <A href="/blog/serverless/multi-tenant-saas-metering/">multi-tenant SaaS with usage metering</A>.
+                </P>
+
                 <Callout title="How it connects to the rest of MC-SE">
                     The edge is also where the <A href="/blog/?series=security">API Security</A> layers run, from DDoS protection to rate
                     limiting. Background work that should not block a request belongs in{' '}

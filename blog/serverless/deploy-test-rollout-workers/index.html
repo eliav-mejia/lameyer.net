@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deploy, Test & Roll Out - Lameyer Blog</title>
+    <meta name="description" content="A release pipeline for Cloudflare Workers: local runs on the real runtime, Vitest tests, staging and production environments, gradual deployments and one-command rollback.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/deploy-test-rollout-workers/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Run and test locally on workerd, the same runtime as production',
+            'Keep staging and production as named environments in one config',
+            'Deploy only from CI, never from a laptop',
+            'Apply database migrations before the code that needs them',
+            'Release to a small percentage first, then widen',
+            'Know the rollback command before you need it',
+        ];
+
+        const PIPELINE = [
+            { stage: 'Local', command: 'wrangler dev', gate: 'Runs on workerd with local KV, D1 and R2' },
+            { stage: 'Test', command: 'vitest run', gate: 'Unit and integration tests inside the Workers runtime' },
+            { stage: 'Staging', command: 'wrangler deploy --env staging', gate: 'Smoke tests against real bindings' },
+            { stage: 'Canary', command: 'wrangler versions deploy (10 %)', gate: 'Error rate and latency stay flat' },
+            { stage: 'Production', command: 'wrangler versions deploy (100 %)', gate: 'Rollback ready: wrangler rollback' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Serverless removes servers, not mistakes. A bad deploy reaches every Cloudflare location within seconds, which is
+                    great for fixes and terrible for bugs. The answer isn't to deploy less, it is to make every deploy small, tested and
+                    reversible. This article closes the series with the <strong className="text-gray-900">release pipeline</strong> the
+                    other pieces depend on.
+                </P>
+
+                <H2>The pipeline at a glance</H2>
+                <Table
+                    columns={[{ key: 'stage', label: 'Stage' }, { key: 'command', label: 'Command', accent: true }, { key: 'gate', label: 'Gate to pass' }]}
+                    rows={PIPELINE}
+                />
+
+                <H2>Test on the real runtime</H2>
+                <P>
+                    Node.js is not the Workers runtime: some APIs are missing, others behave differently. The Workers Vitest pool runs your
+                    tests inside workerd with real bindings, so a test that passes locally passes in production for the same reasons.
+                </P>
+                <CodeBlock title="test/gateway.test.ts">{`import { SELF, env } from 'cloudflare:test';
+import { describe, it, expect } from 'vitest';
+
+describe('gateway', () => {
+  it('answers health checks', async () => {
+    const res = await SELF.fetch('https://example.com/health');
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects requests without a token', async () => {
+    const res = await SELF.fetch('https://example.com/v1/orders', { method: 'POST' });
+    expect(res.status).toBe(401);
+  });
+
+  it('reads config from KV', async () => {
+    await env.CONFIG.put('maintenance', 'false');
+    const res = await SELF.fetch('https://example.com/v1/status');
+    expect(await res.json()).toMatchObject({ maintenance: false });
+  });
+});`}</CodeBlock>
+
+                <H2>One config, two environments</H2>
+                <P>
+                    Staging and production live in the same <Code>wrangler.jsonc</Code> as named environments, each with its own
+                    bindings. Secrets are set per environment (<Code>wrangler secret put API_TOKEN --env staging</Code>) and never
+                    committed. Because both environments come from one file, they cannot drift apart silently.
+                </P>
+                <CodeBlock title="wrangler.jsonc">{`{
+  "name": "gateway",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "kv_namespaces": [{ "binding": "CONFIG", "id": "<prod-namespace-id>" }],
+  "env": {
+    "staging": {
+      "name": "gateway-staging",
+      "routes": [{ "pattern": "staging-api.example.com", "custom_domain": true }],
+      "kv_namespaces": [{ "binding": "CONFIG", "id": "<staging-namespace-id>" }]
+    }
+  }
+}`}</CodeBlock>
+
+                <H2>Deploy from CI, gradually</H2>
+                <P>
+                    CI is the only place allowed to deploy. On every push to <Code>main</Code> it runs the tests, applies D1 migrations,
+                    deploys to staging, then uploads a new production version without sending it traffic. Gradual deployments split
+                    traffic between the old and new version by percentage, so a bug reaches one user in ten, not all of them.
+                </P>
+                <CodeBlock title=".github/workflows/deploy.yml">{`name: deploy
+on:
+  push:
+    branches: [main]
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: \${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: \${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22 }
+      - run: npm ci
+      - run: npx vitest run
+      - run: npx wrangler d1 migrations apply DB --remote --env staging
+      - run: npx wrangler deploy --env staging
+      - run: npx wrangler d1 migrations apply DB --remote
+      # Upload the new version; promote it in steps (10 % -> 100 %) after checking metrics.
+      - run: npx wrangler versions upload`}</CodeBlock>
+                <Callout title="Migrations first, and backwards compatible">
+                    During a gradual deployment the old and new code run at the same time against the same database. Make every
+                    migration additive (new column, new table) so the old version keeps working; remove the old column in a later
+                    release, once no version uses it. The same rule appears in{' '}
+                    <A href="/blog/core/data-ownership-migrations/">Data Ownership & Migrations</A>.
+                </Callout>
+
+                <H2>Rolling back</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Promote in steps:</strong> <Code>wrangler versions deploy</Code> lets you send 10 %, then 50 %, then 100 % of traffic to the new version.</>,
+                    <><strong className="text-gray-900">Watch the right numbers:</strong> error rate and P95 latency per version, from <A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing & Cost</A>.</>,
+                    <><strong className="text-gray-900">Roll back in one command:</strong> <Code>wrangler rollback</Code> returns traffic to the previous version within seconds.</>,
+                    <><strong className="text-gray-900">Feature flags for the risky parts:</strong> a flag in KV turns a new code path off without any deploy.</>,
+                ]} />
+
+                <H2>Measuring it</H2>
+                <P>
+                    Track the four delivery metrics: deployment frequency, lead time from commit to production, change failure rate and
+                    time to restore. On a healthy serverless platform deploys are daily, lead time is under an hour, and restoring service
+                    is a rollback measured in minutes.
+                </P>
+
+                <Callout title="Back to the map">
+                    That completes the request path and the platform around it. Return to the{' '}
+                    <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge overview</A>, or see the series applied to a
+                    business in <A href="/blog/serverless/serverless-integration-paas/">Integration PaaS</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI at the Edge (Workers AI, Vectorize, AI Gateway) - Lameyer Blog</title>
+    <meta name="description" content="Where inference belongs in a serverless platform: small models and embeddings at the edge, large models behind AI Gateway, and retrieval over your own data with Vectorize.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/ai-at-the-edge-workers-ai/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Route every model call through AI Gateway for caching, limits and logs',
+            'Run embeddings and small classifiers on Workers AI, close to the data',
+            'Ground answers in your own documents with Vectorize, and cite them',
+            'Set a per-tenant budget before launch, not after the first invoice',
+            'Never put secrets or personal data you don\'t need into a prompt',
+            'Validate model output like any other untrusted input',
+        ];
+
+        const PLACEMENT = [
+            { task: 'Embeddings, classification, moderation', where: 'Workers AI (edge)', why: 'Small, fast, called on every request' },
+            { task: 'Short answers, summaries, extraction', where: 'Workers AI or external model via AI Gateway', why: 'Pick by quality needed vs. cost' },
+            { task: 'Complex reasoning, long documents', where: 'External frontier model via AI Gateway', why: 'Quality matters more than latency' },
+            { task: 'Bulk jobs (re-index, translate a catalogue)', where: 'Queue + batch, off the request path', why: 'Users should never wait for it' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Adding AI to a product usually starts with one API key pasted into a backend. A month later there are five
+                    providers, no idea which customer spent what, and a prompt that leaks internal data. In MC-SE, model calls get the
+                    same treatment as any other dependency: they go through the edge, behind a gateway, with limits and logs. This
+                    article covers <strong className="text-gray-900">where inference should run</strong> and how to ground it in your
+                    own data.
+                </P>
+
+                <H2>Put each task where it belongs</H2>
+                <P>
+                    Workers AI runs open models on GPUs inside Cloudflare's network, called through a binding with no keys to manage.
+                    It is ideal for the many small calls a product makes. Frontier models from external providers still win on hard
+                    tasks; route those through AI Gateway rather than calling the provider directly.
+                </P>
+                <Table
+                    columns={[{ key: 'task', label: 'Task' }, { key: 'where', label: 'Run it on', accent: true }, { key: 'why', label: 'Why' }]}
+                    rows={PLACEMENT}
+                />
+
+                <H2>Retrieval over your own data</H2>
+                <P>
+                    A model that answers from its training data invents details about your products. Retrieval-augmented generation
+                    (RAG) fixes that: turn your documents into embeddings, store them in <strong className="text-gray-900">Vectorize</strong>,
+                    find the passages closest to the question and give only those to the model, with an instruction to answer from them.
+                </P>
+                <CodeBlock title="src/ask.ts">{`import { Hono } from 'hono';
+
+type Env = { AI: Ai; DOCS: VectorizeIndex };
+const app = new Hono<{ Bindings: Env }>();
+
+// Model ids change: check the Workers AI catalogue before deploying.
+const EMBED = '@cf/baai/bge-base-en-v1.5';
+const LLM = '@cf/meta/llama-3.1-8b-instruct';
+
+app.post('/v1/ask', async (c) => {
+  const { question } = await c.req.json<{ question: string }>();
+  if (!question || question.length > 500) return c.json({ error: 'invalid question' }, 400);
+
+  const { data } = await c.env.AI.run(EMBED, { text: [question] });
+  const hits = await c.env.DOCS.query(data[0], { topK: 4, returnMetadata: 'all' });
+  const context = hits.matches.map((m) => m.metadata?.text).join('\\n---\\n');
+
+  const answer = await c.env.AI.run(LLM, {
+    messages: [
+      { role: 'system', content: 'Answer only from the context. If it is not there, say you do not know.' },
+      { role: 'user', content: 'Context:\\n' + context + '\\n\\nQuestion: ' + question },
+    ],
+  }, { gateway: { id: 'lameyer-ai' } });     // logged, cached and rate limited by AI Gateway
+
+  return c.json({ answer, sources: hits.matches.map((m) => m.metadata?.url) });
+});
+
+export default app;`}</CodeBlock>
+                <CodeBlock title="wrangler.jsonc">{`{
+  "name": "ask",
+  "main": "src/ask.ts",
+  "compatibility_date": "2026-09-01",
+  "ai": { "binding": "AI" },
+  "vectorize": [{ "binding": "DOCS", "index_name": "docs" }]
+}`}</CodeBlock>
+
+                <H2>AI Gateway: one door for every model</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Caching.</strong> Identical prompts (an FAQ, a product summary) are answered from cache instead of paid twice.</>,
+                    <><strong className="text-gray-900">Rate limits and budgets.</strong> Cap requests per gateway; add per-tenant limits in the Worker, as in <A href="/blog/serverless/multi-tenant-saas-metering/">Multi-tenant SaaS</A>.</>,
+                    <><strong className="text-gray-900">Logs and analytics.</strong> Every prompt, response, latency and token count in one place, across providers.</>,
+                    <><strong className="text-gray-900">Fallbacks.</strong> If one provider fails or is slow, route to another without changing application code.</>,
+                ]} />
+                <Callout title="Treat output as untrusted">
+                    A model can be steered by text inside the documents it reads (prompt injection). Never let its output run commands,
+                    build SQL or call internal APIs without the same validation you apply to a user's input. Keep the system prompt free
+                    of secrets: assume it can be extracted.
+                </Callout>
+
+                <H2>Measuring it</H2>
+                <P>
+                    Track cost per tenant per day, cache hit rate in the gateway, P95 latency per model, and the share of answers that
+                    cite at least one source. Review a sample of answers every week; a falling citation rate usually means the index is
+                    stale, not that the model got worse.
+                </P>
+
+                <Callout title="Next step">
+                    Products are visual as well as textual. <A href="/blog/serverless/images-media-at-the-edge/">Images & Media at the
+                    Edge</A> shows how to serve fast images and video from the same platform.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

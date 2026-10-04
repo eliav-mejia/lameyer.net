@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logs, Tracing & Cost - Lameyer Blog</title>
+    <meta name="description" content="Observability for a serverless platform: request IDs across edge, queues and core, Workers Logs and Logpush, OpenTelemetry traces, and tracking CPU time and cost per customer.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/logs-tracing-cost/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Create one request ID at the edge and pass it everywhere',
+            'Log JSON objects, not sentences',
+            'Include tenant, route and outcome in every log line',
+            'Send logs to long-term storage with Logpush',
+            'Watch CPU time per route, not just request count',
+            'Review cost per tenant every month',
+        ];
+
+        const SIGNALS = [
+            { signal: 'Logs', answers: 'What happened in this request?', tool: 'Workers Logs, wrangler tail, Logpush' },
+            { signal: 'Traces', answers: 'Where did the time go?', tool: 'Workers tracing, OpenTelemetry export' },
+            { signal: 'Metrics', answers: 'Is it getting better or worse?', tool: 'Workers analytics, Analytics Engine' },
+            { signal: 'Cost', answers: 'Who is driving the bill?', tool: 'Requests + CPU time, grouped by tenant' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    On a server, you can log in and look around. On a serverless platform there is nothing to log in to: the function ran
+                    in some location, finished in 30 milliseconds and is gone. If something goes wrong between the edge, a queue and the
+                    core, the only way to see it is through what the code recorded. Observability has to be designed in, and on serverless
+                    it also tells you what the platform costs and <strong className="text-gray-900">which customer</strong> is driving that cost.
+                </P>
+
+                <H2>Four signals, four questions</H2>
+                <Table
+                    columns={[{ key: 'signal', label: 'Signal', accent: true }, { key: 'answers', label: 'Answers' }, { key: 'tool', label: 'On Cloudflare' }]}
+                    rows={SIGNALS}
+                />
+
+                <H2>One request ID, end to end</H2>
+                <P>
+                    Create an ID at the edge, or reuse the <Code>cf-ray</Code> header, and pass it on every hop: to the core as a header,
+                    into queue messages, into workflow steps. Then one search finds the whole story of a request, even when part of it ran
+                    an hour later in a queue consumer.
+                </P>
+                <CodeBlock title="src/log.ts">{`export function logger(request: Request, base: Record<string, unknown> = {}) {
+  const requestId = request.headers.get('x-request-id') ?? request.headers.get('cf-ray') ?? crypto.randomUUID();
+  const log = (level: string, msg: string, extra: Record<string, unknown> = {}) =>
+    console.log(JSON.stringify({ level, msg, requestId, ...base, ...extra, ts: Date.now() }));
+  return { requestId, info: (m, e) => log('info', m, e), error: (m, e) => log('error', m, e) };
+}
+
+// In the gateway
+const log = logger(request, { tenant: user.tenant, route: '/v1/orders' });
+const res = await env.CORE.fetch(url, { headers: { 'x-request-id': log.requestId } });
+log.info('forwarded', { status: res.status });
+
+// In a queue message
+await env.SYNC_QUEUE.send({ requestId: log.requestId, orderId });`}</CodeBlock>
+                <P>
+                    Structured JSON matters. Workers Logs indexes the fields, so you can filter on <Code>tenant = "acme"</Code> and{' '}
+                    <Code>status &gt;= 500</Code> instead of searching text.
+                </P>
+
+                <H2>Where logs go</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">While debugging:</strong> <Code>wrangler tail</Code> streams live logs from production, filtered by status or text.</>,
+                    <><strong className="text-gray-900">Day to day:</strong> enable <Code>observability</Code> in the Worker's config to keep searchable logs in the dashboard for a limited retention period.</>,
+                    <><strong className="text-gray-900">Long term and for audits:</strong> Logpush sends logs to R2 or to your existing log platform. Integration clients often need months of history to answer "did that order ever reach the ERP?".</>,
+                    <><strong className="text-gray-900">Custom processing:</strong> a Tail Worker receives the events of other Workers and can redact, sample or forward them.</>,
+                ]} />
+                <Callout title="Don't log what you must protect">
+                    Integration payloads carry names, addresses and sometimes tax IDs. Log identifiers and outcomes, not full bodies, and
+                    redact in a Tail Worker if a payload must be kept for debugging.
+                </Callout>
+
+                <H2>Traces show where the time goes</H2>
+                <P>
+                    A slow request might be slow at the edge, in a subrequest to a CRM, or in the core's database. Workers can emit traces
+                    automatically for <Code>fetch</Code> calls and bindings, and export them in OpenTelemetry format to the tracing tool you
+                    already use. If the core also speaks OpenTelemetry and receives the trace context headers, you see one trace from the
+                    user's request down to the SQL query.
+                </P>
+
+                <H2>Cost is a metric too</H2>
+                <P>
+                    Serverless pricing is driven mainly by two numbers: requests and CPU milliseconds. Both can be measured per route and
+                    per tenant, which IaaS rarely allows. A VM bill tells you what the server cost. A serverless bill, broken down
+                    properly, tells you what each customer and each feature cost.
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">CPU time per route.</strong> A route whose CPU time doubled after a release is a performance bug and a cost bug.</>,
+                    <><strong className="text-gray-900">Requests per tenant.</strong> The base for usage-based pricing (see <A href="/blog/serverless/multi-tenant-saas-metering/">Metering × Multi-tenant SaaS</A>).</>,
+                    <><strong className="text-gray-900">Subrequests per request.</strong> A loop calling the CRM once per line item shows up here first.</>,
+                    <><strong className="text-gray-900">Storage growth.</strong> R2 and D1 grow quietly. Review them monthly with the bill.</>,
+                ]} />
+
+                <H2>Measuring it</H2>
+                <P>
+                    The test of observability is time: how long does it take to answer "what happened to order 4815?" Aim for minutes, from
+                    one search. Track mean time to detect and mean time to resolve incidents, and the share of incidents found by alerts
+                    rather than by customers.
+                </P>
+
+                <Callout title="Where this leads">
+                    With per-tenant numbers in place, a serverless platform can be sold, not just run. The crossovers show how:{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">Integration PaaS</A>,{' '}
+                    <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge × IaaS</A> and{' '}
+                    <A href="/blog/serverless/multi-tenant-saas-metering/">Multi-tenant SaaS</A>. To keep building on the request path, continue
+                    with <A href="/blog/serverless/realtime-websockets-durable-objects/">Real-Time at the Edge</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

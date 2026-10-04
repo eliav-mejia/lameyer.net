@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge × IaaS (Hybrid) - Lameyer Blog</title>
+    <meta name="description" content="Putting serverless edge functions in front of existing VMs and databases, reaching them privately with Cloudflare Tunnel and Hyperdrive, and migrating route by route without a rewrite.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/serverless-in-front-of-iaas/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Put a Worker in front before changing anything behind it',
+            'Remove public IPs: reach servers through Tunnel',
+            'Connect databases through Hyperdrive, not per request',
+            'Move one route at a time, behind a flag',
+            'Compare old and new responses before switching',
+            'Right-size or retire each server as its routes move',
+        ];
+
+        const STAGES = [
+            { stage: '1. Front', edge: 'Worker proxies everything', iaas: 'Unchanged, now private behind Tunnel', gain: 'Security, caching, one entry point' },
+            { stage: '2. Offload', edge: 'Auth, cache, redirects, cron', iaas: 'Handles only business requests', gain: 'Less load, smaller servers' },
+            { stage: '3. Strangle', edge: 'Route by route, new logic in Workers or the core', iaas: 'Fewer routes each month', gain: 'Modernization without a big bang' },
+            { stage: '4. Settle', edge: 'Edge + modular core', iaas: 'Only what truly needs a server (or nothing)', gain: 'Lower fixed cost' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Most clients don't start from zero. They have infrastructure (IaaS): VMs running an ERP, a PHP application from
+                    2015, a Postgres database with ten years of orders. "Rewrite it all as serverless" is not a plan anyone should accept. The
+                    practical path is <strong className="text-gray-900">hybrid</strong>: put serverless edge functions in front of what exists,
+                    make the servers private, and move responsibilities to the edge one route at a time. This is the strangler fig pattern,
+                    applied with the tools of the <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A> series.
+                </P>
+
+                <H2>Four stages</H2>
+                <Table
+                    columns={[{ key: 'stage', label: 'Stage', accent: true }, { key: 'edge', label: 'Edge (serverless)' }, { key: 'iaas', label: 'Servers (IaaS)' }, { key: 'gain', label: 'Gain' }]}
+                    rows={STAGES}
+                />
+                <P>
+                    Each stage is useful on its own. A client who stops after stage 2 already has a safer, faster and cheaper system.
+                </P>
+
+                <H2>Stage 1: a front door and private servers</H2>
+                <P>
+                    First, the Worker becomes the only public entry point and simply forwards everything. Then the servers lose their public
+                    IPs: a <A href="/blog/security/cloudflare-tunnel/">Cloudflare Tunnel</A> connector on each VM opens an outbound
+                    connection, so nothing needs an open inbound port. Attackers can no longer bypass the edge to hit the origin directly.
+                </P>
+                <CodeBlock title="cloudflared config on the legacy VM">{`tunnel: legacy-app
+credentials-file: /etc/cloudflared/legacy-app.json
+ingress:
+  - hostname: legacy-origin.internal.example.com
+    service: http://localhost:8080
+  - service: http_status:404`}</CodeBlock>
+
+                <H2>Reach the database without opening it</H2>
+                <P>
+                    New edge functions often need the data in the existing database. Hyperdrive pools connections near the database, so
+                    hundreds of short-lived Workers don't exhaust its connection limit, and it can reach a private database through a
+                    Tunnel. The data stays where it is, as the system of record, until there is a reason to move it (see{' '}
+                    <A href="/blog/serverless/edge-storage-kv-d1-r2/">Edge Storage</A>).
+                </P>
+                <CodeBlock title="wrangler.jsonc (excerpt)">{`"hyperdrive": [
+  { "binding": "LEGACY_DB", "id": "<hyperdrive-config-id>" }   // points at Postgres via Tunnel
+]`}</CodeBlock>
+
+                <H2>Stage 3: move one route at a time</H2>
+                <P>
+                    The gateway decides, per route, whether the old server or the new code answers. A flag in KV makes every switch
+                    reversible in seconds, without a deploy.
+                </P>
+                <CodeBlock title="src/index.ts">{`app.all('*', async (c) => {
+  const migrated = (await c.env.CONFIG.get<string[]>('migrated-routes', 'json')) ?? [];
+  const path = new URL(c.req.url).pathname;
+  if (migrated.some((p) => path.startsWith(p))) {
+    return c.env.CORE.fetch(c.req.raw);                    // new: modular core
+  }
+  return fetch('https://legacy-origin.internal.example.com' + path, c.req.raw);   // old: VM via Tunnel
+});`}</CodeBlock>
+                <Callout title="Shadow before you switch">
+                    For read routes, send each request to both the old and the new implementation for a few days, return the old response,
+                    and log any difference (<Code>ctx.waitUntil</Code> keeps this off the user's critical path). Switch when the diff log stays
+                    empty.
+                </Callout>
+
+                <H2>What should stay on servers</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Large stateful systems of record</strong> (the main database, an ERP) are often best left on managed IaaS, reached privately.</>,
+                    <><strong className="text-gray-900">Long-running or heavy compute</strong> (video, large ML jobs) that doesn't fit function limits. Containers or VMs still make sense here.</>,
+                    <><strong className="text-gray-900">Licensed software</strong> that only runs on a specific OS.</>,
+                ]} />
+                <P>
+                    The goal isn't zero servers. It's that every remaining server has a reason to exist, is private, and does only the work
+                    that needs it.
+                </P>
+
+                <H2>Measuring it</H2>
+                <P>
+                    Track routes migrated vs. remaining, requests reaching the legacy origin (should fall each month), public IPs and open
+                    inbound ports (target zero), and the monthly IaaS bill as servers are downsized. Measured in money, the hybrid
+                    migration pays for itself in steps instead of asking for one large budget up front.
+                </P>
+
+                <Callout title="Related">
+                    New logic that replaces old routes belongs in the <A href="/blog/core/modular-core-architecture/">Modular Core</A>, not
+                    in the edge. Integrations with on-premises systems reuse the same Tunnel, as shown in{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">Functions × Integration PaaS</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

@@ -51,7 +51,19 @@ lameyer.net/
     ├── core/                     Modular Core
     │   └── modular-core-architecture/
     ├── serverless/               Serverless Edge
-    │   └── serverless-edge-architecture/
+    │   ├── serverless-edge-architecture/     overview
+    │   ├── edge-functions-workers/
+    │   ├── routing-caching-auth-edge/
+    │   ├── edge-storage-kv-d1-r2/
+    │   ├── scheduled-jobs-cron-triggers/
+    │   ├── logs-tracing-cost/
+    │   ├── realtime-websockets-durable-objects/   step 06 · Real-time
+    │   ├── ai-at-the-edge-workers-ai/             step 07 · Edge AI
+    │   ├── images-media-at-the-edge/              step 08 · Media
+    │   ├── deploy-test-rollout-workers/           step 09 · Deploy
+    │   ├── serverless-integration-paas/      crossover
+    │   ├── serverless-in-front-of-iaas/      crossover
+    │   └── multi-tenant-saas-metering/       crossover
     ├── workflows/                Workflow Automation
     │   └── serverless-workflow-automation/
     ├── security/                 API Security
@@ -157,6 +169,14 @@ so old links keep working.
 Always link with a trailing slash (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
 ## Versions
+
+### 1.0.5 — 2026-10-04 · Serverless Edge: four new categories
+- Serverless series extended from 5 to 9 steps (`BLOG_TYPES` in `js/blog.jsx`), each with its own folder and `index.html`
+  in `blog/serverless/` and an entry in `BLOG_POSTS`:
+  06 Real-Time (WebSockets & Durable Objects), 07 AI at the Edge (Workers AI, Vectorize, AI Gateway),
+  08 Images & Media at the Edge (R2, transformations, Stream), 09 Deploy, Test & Roll Out (Wrangler, Vitest, CI, gradual deployments).
+- New zone `platform` ("Platform (ship & evolve)") for the deploy step; real-time sits in `state`, edge AI and media in `compute`.
+- Articles chain with "Next step" links: 05 → 06 → 07 → 08 → 09 → back to the overview.
 
 ### 1.0.4 — 2026-10-03 · Product pages + simulated database · STAGING (pre-launch)
 - Status: **staging / MVP pre-launch manual input test.** Catalogue data, prices, stock and specs are sample data to be

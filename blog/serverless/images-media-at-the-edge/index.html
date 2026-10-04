@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Images & Media at the Edge - Lameyer Blog</title>
+    <meta name="description" content="Fast images without an image server: originals in R2, resized and converted to AVIF or WebP on request, cached at the edge, uploaded directly from the browser, and video on Stream.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/images-media-at-the-edge/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Store one original per image in R2, never pre-generated sizes',
+            'Allow a fixed list of widths so nobody can request 10,000 variants',
+            'Negotiate AVIF or WebP from the Accept header',
+            'Give every <img> width, height and srcset to avoid layout shift',
+            'Upload straight from the browser to R2 with short-lived presigned URLs',
+            'Send video to Stream instead of transcoding it yourself',
+        ];
+
+        const VARIANTS = [
+            { name: 'thumb', width: '400 px', use: 'Cards, lists, cart', format: 'AVIF / WebP, quality 75–80' },
+            { name: 'card', width: '800 px', use: 'Retina cards, product page on mobile', format: 'AVIF / WebP, quality 75–80' },
+            { name: 'hero', width: '1600 px', use: 'Product page on desktop, banners', format: 'AVIF / WebP, quality 70–75' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Images are usually the heaviest part of a page and the main reason a fast API still feels slow. The classic fix is an
+                    image server that resizes uploads into a dozen sizes and a CDN in front of it. On a serverless platform you need
+                    neither: keep <strong className="text-gray-900">one original</strong> in R2 and let the edge produce, convert and
+                    cache each size the first time a browser asks for it.
+                </P>
+
+                <H2>A small, fixed set of variants</H2>
+                <P>
+                    Pick a handful of widths that match your layout and serve them through <Code>srcset</Code>, so a phone downloads
+                    the 400 px file and a large screen the 1600 px one. A short list also keeps the cache hot: every visitor shares the
+                    same few variants. The <A href="/pages/components/">Lameyer shop</A> uses exactly this pattern, with 400 and 800 px
+                    WebP files on a white background.
+                </P>
+                <Table
+                    columns={[{ key: 'name', label: 'Variant' }, { key: 'width', label: 'Width', accent: true }, { key: 'use', label: 'Used for' }, { key: 'format', label: 'Format' }]}
+                    rows={VARIANTS}
+                />
+
+                <H2>Resize and convert on request</H2>
+                <P>
+                    A Worker in front of the bucket validates the request, picks the best format the browser accepts and asks
+                    Cloudflare's image transformations to do the work. The result is cached at the edge, so the transformation runs once
+                    per variant, not once per visit.
+                </P>
+                <CodeBlock title="src/images.ts">{`const WIDTHS = [400, 800, 1600];
+const ORIGIN = 'https://media.example.com/originals/';   // public R2 bucket on a custom domain
+
+export default {
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+    const key = url.pathname.replace(/^\\/img\\//, '');
+    const width = Number(url.searchParams.get('w')) || 800;
+    if (!key || !WIDTHS.includes(width)) return new Response('Bad image request', { status: 400 });
+
+    const accept = request.headers.get('Accept') || '';
+    const format = accept.includes('image/avif') ? 'avif' : accept.includes('image/webp') ? 'webp' : undefined;
+
+    const res = await fetch(ORIGIN + key, {
+      cf: { image: { width, fit: 'scale-down', quality: 78, format, background: '#ffffff' } },
+    });
+    const out = new Response(res.body, res);
+    out.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    out.headers.set('Vary', 'Accept');
+    return out;
+  },
+};`}</CodeBlock>
+                <Callout title="Version your file names">
+                    The long <Code>immutable</Code> cache is safe only if a changed image gets a new key (<Code>sku-123-v2.jpg</Code>).
+                    Overwriting the same key leaves old copies in browsers and at the edge until they expire.
+                </Callout>
+
+                <H2>Uploads that skip your servers</H2>
+                <P>
+                    Routing a 20 MB upload through a function wastes its memory and CPU budget. Instead, a Worker checks the user and
+                    returns a presigned URL valid for a few minutes; the browser uploads straight to R2 through its S3-compatible API.
+                    The Worker only records the key, so the upload size never touches its limits.
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Check before signing:</strong> who is uploading, which content type, maximum size.</>,
+                    <><strong className="text-gray-900">Expire fast:</strong> five to fifteen minutes is enough for one upload.</>,
+                    <><strong className="text-gray-900">Scan after upload:</strong> a queue consumer validates the file type and size before it is published.</>,
+                    <><strong className="text-gray-900">No egress fees:</strong> R2 doesn't charge for data read out of the bucket, which is what makes on-the-fly variants affordable.</>,
+                ]} />
+
+                <H2>Video is a different job</H2>
+                <P>
+                    Transcoding video needs minutes of CPU and specialised encoders, far beyond what an edge function is for. Upload it to
+                    <strong className="text-gray-900"> Stream</strong>, which encodes adaptive bitrate renditions and delivers them with
+                    its own player or any HLS/DASH player. The platform stores only the video id next to the product or post.
+                </P>
+
+                <H2>Measuring it</H2>
+                <P>
+                    Track image bytes per page view, edge cache hit ratio for the image route, Largest Contentful Paint on mobile and the
+                    number of distinct variants requested per day. A rising variant count means someone is calling the route with widths
+                    outside your list, or the list has grown too long.
+                </P>
+
+                <Callout title="Next step">
+                    Every piece so far is code that has to reach production safely. <A href="/blog/serverless/deploy-test-rollout-workers/">Deploy,
+                    Test & Roll Out</A> closes the series with the release pipeline.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

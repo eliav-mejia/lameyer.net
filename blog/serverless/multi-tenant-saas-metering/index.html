@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Metering × Multi-tenant SaaS - Lameyer Blog</title>
+    <meta name="description" content="Running one serverless platform for many customers: tenant resolution at the edge, isolated storage per tenant, per-tenant limits, and usage metering with Analytics Engine for billing.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/multi-tenant-saas-metering/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Resolve the tenant once, at the edge, from a trusted source',
+            'Never accept a tenant ID from the request body',
+            'Choose an isolation level per data type',
+            'Give each plan its own rate limit',
+            'Record one usage event per billable action',
+            'Reconcile usage with invoices every month',
+        ];
+
+        const ISOLATION = [
+            { level: 'Shared tables, tenant column', how: 'One D1 or Postgres database, tenant_id on every row', fits: 'Many small tenants, low-sensitivity data' },
+            { level: 'Database per tenant', how: 'One D1 database per tenant, chosen at the edge', fits: 'Mid-size tenants, easy export and deletion' },
+            { level: 'Object per tenant', how: 'A Durable Object per tenant for counters and coordination', fits: 'Per-tenant state that must be exact' },
+            { level: 'Code per tenant', how: 'Workers for Platforms: each tenant\'s own script in a dispatch namespace', fits: 'Tenants who run custom logic on your platform' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Building a platform once and selling it to many customers is what turns integration work into a SaaS business. It adds
+                    three requirements a single-client system never has: <strong className="text-gray-900">every customer's data must stay
+                    separate, no customer may degrade the service for others, and usage must be measured accurately enough to bill</strong>.
+                    Serverless helps with all three, because the edge sees every request and can attach a tenant to it before anything else
+                    happens.
+                </P>
+
+                <H2>Resolve the tenant at the edge</H2>
+                <P>
+                    The gateway (see <A href="/blog/serverless/routing-caching-auth-edge/">Routing, Caching & Auth</A>) works out the tenant
+                    once, from a source the client can't forge: a claim in a verified JWT, the API key's record, or the hostname when
+                    customers use their own domain through Cloudflare for SaaS. Everything downstream receives it from the gateway, never
+                    from the request body.
+                </P>
+                <CodeBlock title="src/tenant.ts">{`export async function resolveTenant(request: Request, env: Env, user?: { tenant: string }) {
+  if (user?.tenant) return user.tenant;                         // from a verified JWT
+  const host = new URL(request.url).hostname;                   // api.customer.com
+  const byHost = await env.TENANTS_BY_HOST.get(host);           // KV: hostname -> tenant
+  if (byHost) return byHost;
+  return null;                                                  // unknown: reject with 404
+}`}</CodeBlock>
+
+                <H2>Choose isolation per data type</H2>
+                <Table
+                    columns={[{ key: 'level', label: 'Isolation', accent: true }, { key: 'how', label: 'How' }, { key: 'fits', label: 'Fits' }]}
+                    rows={ISOLATION}
+                />
+                <P>
+                    One platform can mix levels: shared tables for catalog data, a D1 database per tenant for customer records (which makes
+                    "export all my data" and "delete my account" one operation), and a Durable Object per tenant for usage counters.
+                    Whatever the level, test it: an automated check that tries to read tenant B's data with tenant A's credentials, run on
+                    every release.
+                </P>
+
+                <H2>No noisy neighbors</H2>
+                <P>
+                    One customer's month-end import shouldn't slow everyone else down. Per-plan <A href="/blog/serverless/routing-caching-auth-edge/">rate
+                    limits</A> keyed by tenant handle request floods. Queues need the same care: a separate queue, or at least fair
+                    batching, for tenants with heavy background jobs, so their backlog doesn't delay small tenants' events.
+                </P>
+
+                <H2>Metering: one event per billable action</H2>
+                <P>
+                    Rate limits are approximate. Billing must not be. Record a usage event for every billable action: an API call, a synced
+                    record, a generated document. Workers Analytics Engine is built for this: writes are fire-and-forget, don't slow the
+                    request, and can be queried with SQL.
+                </P>
+                <CodeBlock title="Recording usage">{`env.USAGE.writeDataPoint({
+  indexes: [tenant],                         // sampling key: one tenant's data stays together
+  blobs:   [route, plan, connector ?? ''],
+  doubles: [1, cpuMs, recordsSynced],
+});`}</CodeBlock>
+                <CodeBlock title="Monthly usage per tenant (SQL API)">{`SELECT
+  index1 AS tenant,
+  SUM(_sample_interval * double1) AS api_calls,
+  SUM(_sample_interval * double3) AS records_synced
+FROM usage
+WHERE timestamp >= toDateTime('2026-09-01 00:00:00')
+  AND timestamp <  toDateTime('2026-10-01 00:00:00')
+GROUP BY tenant
+ORDER BY api_calls DESC`}</CodeBlock>
+                <Callout title="Sampling and invoices">
+                    Analytics Engine may sample at very high volumes, which is why the query multiplies by <Code>_sample_interval</Code>.
+                    That is fine for dashboards and usage-based tiers. For line items that must be exact to the unit, also increment a
+                    counter in the tenant's Durable Object and invoice from that, using Analytics Engine to cross-check.
+                </Callout>
+
+                <H2>From usage to price</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Pick a unit the customer understands:</strong> records synced, documents generated, active connectors. Not CPU milliseconds.</>,
+                    <><strong className="text-gray-900">Know your own unit cost:</strong> requests and CPU time per unit come from <A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing & Cost</A>, so margins are known, not guessed.</>,
+                    <><strong className="text-gray-900">Show usage in the product:</strong> a usage page with the same numbers as the invoice prevents most billing disputes.</>,
+                    <><strong className="text-gray-900">Warn at 80%:</strong> tenants approaching their plan limit are an upgrade conversation, not a surprise 429.</>,
+                ]} />
+
+                <H2>When tenants bring their own code</H2>
+                <P>
+                    Some platforms let customers add their own logic: a custom transformation, a webhook handler. Workers for Platforms runs
+                    each tenant's script in its own isolate inside a dispatch namespace, with limits you set per script. The customer gets
+                    flexibility, and your platform stays protected from their code.
+                </P>
+
+                <H2>Measuring it</H2>
+                <P>
+                    Cross-tenant access incidents (target zero, verified by tests), P95 latency per tenant (the worst tenant matters, not the
+                    average), revenue and cost per tenant, and the gap between metered usage and invoiced usage (should be zero after
+                    reconciliation).
+                </P>
+
+                <Callout title="Related">
+                    Data ownership inside the core follows the rules in <A href="/blog/core/data-ownership-migrations/">Data Ownership &
+                    Migrations</A>. The connectors that generate most usage events are described in{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">Functions × Integration PaaS</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

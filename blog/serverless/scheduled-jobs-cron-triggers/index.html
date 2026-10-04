@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scheduled Jobs (Cron Triggers) - Lameyer Blog</title>
+    <meta name="description" content="Replacing the always-on sync server with Cloudflare Cron Triggers that fan work out to queues, with locks, checkpoints and alerts for missed runs.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/scheduled-jobs-cron-triggers/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Inventory every crontab and scheduled task first',
+            'Write schedules in UTC and say so',
+            'Let the cron only enqueue; workers do the work',
+            'Store a checkpoint so a rerun resumes, not restarts',
+            'Prevent overlapping runs with a lock',
+            'Alert when a run is missed, not only when it fails',
+        ];
+
+        const INVENTORY = [
+            { job: 'Sync ERP orders to CRM', before: 'crontab on a VM, every 15 min', after: 'Cron → queue per page of orders' },
+            { job: 'Nightly sales report', before: 'Script on the database server', after: 'Cron → core report endpoint → PDF in R2 → email' },
+            { job: 'Expire trial accounts', before: 'Windows Task Scheduler', after: 'Cron → core accounts contract' },
+            { job: 'Exchange-rate refresh', before: 'Cron inside the app container', after: 'Cron → fetch → KV' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Almost every company we work with has one: a server whose only job is to run scheduled scripts. It syncs orders at
+                    night, sends a report at 7:00, and expires trials. It costs money every hour of the month to do a few minutes of work, it
+                    needs patching, and when it quietly stops, nobody notices until the numbers are wrong. <strong className="text-gray-900">Cron
+                    Triggers</strong> run the same schedules on Workers, with no server in between.
+                </P>
+
+                <H2>Start with an inventory</H2>
+                <P>
+                    Before moving anything, list every scheduled task you have: crontabs on every VM, Windows Task Scheduler entries,
+                    database jobs, schedules inside integration tools. This list is usually longer than anyone expects, and it is
+                    the backlog for this migration.
+                </P>
+                <Table
+                    columns={[{ key: 'job', label: 'Job' }, { key: 'before', label: 'Today' }, { key: 'after', label: 'Serverless', accent: true }]}
+                    rows={INVENTORY}
+                />
+
+                <H2>Schedules in configuration</H2>
+                <CodeBlock title="wrangler.jsonc (excerpt)">{`"triggers": {
+  "crons": [
+    "*/15 * * * *",   // ERP → CRM sync
+    "0 6 * * *",      // nightly report (06:00 UTC = 00:00 in Mexico City)
+    "30 3 * * 1"      // weekly cleanup, Monday 03:30 UTC
+  ]
+}`}</CodeBlock>
+                <P>
+                    Cron Triggers always run in UTC. Write the local time next to each schedule, because a report that arrives an hour
+                    late after a daylight-saving change looks like a bug to the person waiting for it.
+                </P>
+
+                <H2>The cron enqueues, workers do the work</H2>
+                <P>
+                    The most common mistake is putting the whole job inside <Code>scheduled()</Code>. If the sync touches 40,000 orders, one
+                    invocation will hit its time limit, and a failure halfway through leaves no trace of where it stopped. Instead, the
+                    scheduled handler only decides <em>what</em> to do and puts it on a queue. Queue consumers do the work in small
+                    batches, with automatic retries.
+                </P>
+                <CodeBlock title="src/index.ts">{`export default {
+  async scheduled(event, env, ctx) {
+    if (event.cron !== '*/15 * * * *') return;
+
+    const since = (await env.STATE.get('erp-sync:checkpoint')) ?? '1970-01-01T00:00:00Z';
+    const pages = await listChangedOrderPages(env, since);      // cheap: IDs only
+
+    await env.SYNC_QUEUE.sendBatch(pages.map((p) => ({ body: { page: p, since } })));
+    ctx.waitUntil(env.STATE.put('erp-sync:last-run', new Date().toISOString()));
+  },
+
+  async queue(batch, env) {
+    for (const msg of batch.messages) {
+      await syncOrderPage(env, msg.body);    // idempotent: safe to retry
+      msg.ack();
+    }
+  },
+};`}</CodeBlock>
+
+                <H2>Checkpoints and locks</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Checkpoint.</strong> After a page succeeds, move the checkpoint forward. A rerun starts where the last one stopped, not from the beginning.</>,
+                    <><strong className="text-gray-900">Lock.</strong> If a run takes longer than its interval, the next one must not start on top of it. A Durable Object makes a reliable lock, because it handles one request at a time.</>,
+                    <><strong className="text-gray-900">Idempotency.</strong> Messages are delivered at least once. Writing to the target with the source record's ID as the key makes a duplicate harmless. The <A href="/blog/workflows/serverless-workflow-automation/">Workflow Automation</A> series covers this in depth.</>,
+                ]} />
+                <Callout title="Long, multi-step jobs">
+                    When a scheduled job has steps that must happen in order and can each take a while (export, transform, upload, notify),
+                    start a durable Workflow from the cron instead of a queue. Each step is retried on its own and the run survives
+                    restarts.
+                </Callout>
+
+                <H2>Alert on silence</H2>
+                <P>
+                    Failures that throw errors are easy to catch. The dangerous case is the job that simply doesn't run. Record the time of
+                    every successful run (above, <Code>erp-sync:last-run</Code>) and check it from somewhere else: a second cron, or an
+                    external heartbeat monitor that alerts when it hasn't been pinged on schedule.
+                </P>
+                <CodeBlock title="A watchdog cron">{`const last = await env.STATE.get('erp-sync:last-run');
+if (!last || Date.now() - Date.parse(last) > 45 * 60 * 1000) {
+  await notify(env, 'ERP sync has not completed in 45 minutes');
+}`}</CodeBlock>
+
+                <H2>Measuring it</H2>
+                <P>
+                    Useful numbers: scheduled servers retired, monthly cost of scheduled work before and after, missed runs per month
+                    (target zero), and data freshness, meaning the age of the newest record synced. Freshness is the one the business
+                    actually feels.
+                </P>
+
+                <Callout title="Next step">
+                    Jobs that run while everyone sleeps need good logs. <A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing &
+                    Cost</A> covers how to see what they did.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

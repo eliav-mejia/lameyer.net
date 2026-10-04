@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edge Storage (KV, D1, R2) - Lameyer Blog</title>
+    <meta name="description" content="Choosing between Cloudflare KV, D1, R2, Durable Objects and Hyperdrive: consistency, latency and when to keep data in your existing database.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/edge-storage-kv-d1-r2/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Pick the store by consistency need first',
+            'Never use KV for counters or balances',
+            'Keep the system of record in one place',
+            'Put files in R2 and hand out signed URLs',
+            'Reach existing databases through Hyperdrive',
+            'Write down which data lives where, and why',
+        ];
+
+        const STORES = [
+            { store: 'KV', is: 'Global key-value', consistency: 'Eventual (changes can take up to about a minute to appear everywhere)', use: 'Config, feature flags, API key lookups, cached lists' },
+            { store: 'D1', is: 'SQLite database', consistency: 'Strong on the primary, optional read replicas', use: 'Edge-owned relational data: tenants, settings, small apps' },
+            { store: 'R2', is: 'S3-compatible objects', consistency: 'Strong per object', use: 'Uploads, exports, invoices as PDF, backups. No egress fees' },
+            { store: 'Durable Objects', is: 'One stateful instance per ID', consistency: 'Strong, single-threaded', use: 'Counters, locks, sessions, per-tenant coordination' },
+            { store: 'Hyperdrive', is: 'Pooled access to your Postgres/MySQL', consistency: 'Your database\'s', use: 'Existing systems of record, IaaS-hosted databases' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Functions are stateless, so every serverless platform ends up asking the same question: <em>where does the data
+                    live?</em> Cloudflare offers several stores, and they are not interchangeable. Picking by habit ("we always use a
+                    database") or by novelty ("KV is fast") is how platforms end up with stale prices or race conditions. Pick by what the
+                    data needs, and consistency comes first.
+                </P>
+
+                <H2>The options at a glance</H2>
+                <Table
+                    columns={[{ key: 'store', label: 'Store', accent: true }, { key: 'is', label: 'What it is' }, { key: 'consistency', label: 'Consistency' }, { key: 'use', label: 'Use it for' }]}
+                    rows={STORES}
+                />
+
+                <H2>A decision path</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Is it a file or a blob?</strong> R2. Store the key in a database, never the bytes.</>,
+                    <><strong className="text-gray-900">Must every reader see the latest write immediately</strong> (stock, balance, a lock)? A Durable Object, D1, or your existing database. Never KV.</>,
+                    <><strong className="text-gray-900">Is it read constantly and changed rarely?</strong> KV, with the system of record somewhere else.</>,
+                    <><strong className="text-gray-900">Does it already live in a database you run today?</strong> Leave it there and connect through Hyperdrive. Move it only with a reason.</>,
+                    <><strong className="text-gray-900">Is it relational data owned by the edge layer itself</strong> (tenants, API keys, settings)? D1.</>,
+                ]} />
+
+                <H2>KV: fast reads, slow agreement</H2>
+                <P>
+                    KV is built for reads. Values are cached in the locations where they are read, so a lookup is usually very fast. The
+                    price is that a write can take a while to show up everywhere. That is fine for an API key lookup or a feature flag, and
+                    dangerous for anything that is incremented or decremented.
+                </P>
+                <CodeBlock title="API key lookup with a fallback">{`let key = await env.API_KEYS.get(hash, 'json');
+if (!key) {
+  // Not in KV yet (new key) or never existed: ask the system of record once.
+  key = await env.DB.prepare('SELECT tenant, plan, revoked FROM api_keys WHERE hash = ?')
+    .bind(hash).first();
+  if (key) ctx.waitUntil(env.API_KEYS.put(hash, JSON.stringify(key), { expirationTtl: 300 }));
+}`}</CodeBlock>
+                <Callout title="Revocation needs a plan">
+                    If a revoked key is cached in KV for five minutes, it keeps working for up to five minutes. Use short TTLs for
+                    security-sensitive values, or check a Durable Object for revocations when the risk justifies the extra call.
+                </Callout>
+
+                <H2>D1 and Durable Objects for data that must agree</H2>
+                <P>
+                    D1 is SQLite managed for you, ideal for the data a platform layer owns: tenants, plans, connector settings. A single D1
+                    database has a size limit (around 10 GB at the time of writing), and it is meant to be split horizontally, for example
+                    one database per tenant. Durable Objects go further: each object is one instance, in one place, handling one request at
+                    a time, which makes counters and locks trivial to get right.
+                </P>
+                <CodeBlock title="A per-tenant counter in a Durable Object">{`export class TenantUsage extends DurableObject {
+  async increment(units: number) {
+    const used = ((await this.ctx.storage.get<number>('used')) ?? 0) + units;
+    await this.ctx.storage.put('used', used);
+    return used;     // no race: requests to one object run one at a time
+  }
+}`}</CodeBlock>
+
+                <H2>R2 for files, without egress fees</H2>
+                <P>
+                    R2 speaks the S3 API, so existing SDKs and tools work unchanged, and it doesn't charge for data transferred out.
+                    For integration platforms that move a lot of exports, invoices and images between systems, that removes one of the
+                    largest line items of a typical IaaS bill. Let clients upload and download directly with presigned URLs, so files
+                    never pass through a Worker's memory.
+                </P>
+
+                <H2>Hyperdrive: keep the database you have</H2>
+                <P>
+                    Many clients already have a Postgres or MySQL database on a VM or a managed cloud service, and it is the system of record
+                    for good reasons. Opening a new database connection from every function invocation would exhaust it quickly.
+                    <strong className="text-gray-900"> Hyperdrive</strong> keeps a pool of connections near the database and lets Workers
+                    use a normal driver against it. Combined with Cloudflare Tunnel, the database doesn't need a public IP at all.
+                    That pattern is covered in <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge × IaaS (Hybrid)</A>.
+                </P>
+                <CodeBlock title="Postgres through Hyperdrive">{`import postgres from 'postgres';
+
+export default {
+  async fetch(request, env) {
+    const sql = postgres(env.HYPERDRIVE.connectionString);
+    const rows = await sql\`SELECT id, name, price FROM catalog.products WHERE active LIMIT 50\`;
+    return Response.json(rows);
+  },
+};`}</CodeBlock>
+
+                <H2>Measuring it</H2>
+                <P>
+                    Track read latency per store, KV hit ratio, Hyperdrive query latency and pool usage, and R2 storage and operations per
+                    tenant. Most important, keep a simple data map: each entity, its system of record, and any copies. Most storage bugs in
+                    serverless platforms come from two places both believing they own the same data, the same rule as{' '}
+                    <A href="/blog/core/data-ownership-migrations/">Data Ownership</A> in the core.
+                </P>
+
+                <Callout title="Next step">
+                    With state in place, the platform can run work on its own schedule. <A href="/blog/serverless/scheduled-jobs-cron-triggers/">Scheduled
+                    Jobs</A> replaces the always-on sync server.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time (WebSockets & Durable Objects) - Lameyer Blog</title>
+    <meta name="description" content="Live dashboards, chat and collaborative editing on serverless: one Durable Object per room coordinates WebSockets, keeps state in SQLite and hibernates when idle.">
+    <link rel="canonical" href="https://lameyer.net/blog/serverless/realtime-websockets-durable-objects/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'One Durable Object per room, document or tenant, never one global object',
+            'Accept sockets with the Hibernation API so idle connections cost nothing',
+            'Persist state in the object\'s SQLite storage, not in memory alone',
+            'Authenticate in the Worker before the request reaches the object',
+            'Use alarms for timeouts and cleanup instead of timers',
+            'Fall back to Server-Sent Events when clients only need to listen',
+        ];
+
+        const OPTIONS = [
+            { option: 'Polling', how: 'Client asks every N seconds', fits: 'Rare updates, simple clients', cost: 'Load grows with users, not with changes' },
+            { option: 'Server-Sent Events', how: 'One-way stream from a Worker', fits: 'Notifications, progress, live prices', cost: 'Low; no client-to-server channel' },
+            { option: 'WebSockets + Durable Object', how: 'Two-way, coordinated per room', fits: 'Chat, presence, co-editing, games', cost: 'Pay per message when hibernating' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Workers are stateless on purpose: any request can land on any machine in any city. That is perfect for an API and
+                    useless for a chat room, where every message must reach everyone currently in the room, in order. Real-time
+                    features need one place that knows who is connected. On Cloudflare that place is a
+                    <strong className="text-gray-900"> Durable Object</strong>: a single instance, addressed by name, with its own
+                    storage, that every request for that name reaches.
+                </P>
+
+                <H2>Pick the lightest channel that works</H2>
+                <P>
+                    Not every "live" screen needs WebSockets. If the browser only listens, a stream of Server-Sent Events from a Worker
+                    is simpler and reconnects by itself. Reach for a Durable Object when clients also send, or when the order of
+                    messages matters.
+                </P>
+                <Table
+                    columns={[{ key: 'option', label: 'Option' }, { key: 'how', label: 'How it works' }, { key: 'fits', label: 'Good for' }, { key: 'cost', label: 'Cost shape', accent: true }]}
+                    rows={OPTIONS}
+                />
+
+                <H2>One object per room</H2>
+                <P>
+                    A Durable Object runs single-threaded, so it never has two requests racing to update the same state. That is the
+                    feature, and also the limit: one object handles one stream of events. Shard by the thing users share (a chat room, a
+                    document, a tenant's dashboard), so thousands of rooms spread across thousands of objects. A single "global" object
+                    becomes the bottleneck of the whole platform.
+                </P>
+                <P>
+                    The Worker stays the front door. It authenticates the user, then forwards the upgrade request to the right object
+                    with <Code>idFromName</Code>, so the same room name always reaches the same instance.
+                </P>
+                <CodeBlock title="src/index.ts">{`import { DurableObject } from 'cloudflare:workers';
+
+type Env = { ROOMS: DurableObjectNamespace<Room> };
+
+export default {
+  async fetch(request: Request, env: Env) {
+    const url = new URL(request.url);
+    const match = url.pathname.match(/^\\/rooms\\/([\\w-]+)\\/ws$/);
+    if (!match) return new Response('Not found', { status: 404 });
+    if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected WebSocket', { status: 426 });
+    // Verify the session here (JWT, cookie) before touching the object.
+    const room = env.ROOMS.get(env.ROOMS.idFromName(match[1]));
+    return room.fetch(request);
+  },
+};
+
+export class Room extends DurableObject<Env> {
+  async fetch(request: Request) {
+    const { 0: client, 1: server } = new WebSocketPair();
+    this.ctx.acceptWebSocket(server);          // Hibernation API: no cost while idle
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
+    // Persist first, then broadcast, so a reconnecting client can catch up.
+    this.ctx.storage.sql.exec('INSERT INTO messages (body, at) VALUES (?, ?)', String(message), Date.now());
+    for (const peer of this.ctx.getWebSockets()) peer.send(String(message));
+  }
+
+  async webSocketClose(ws: WebSocket, code: number) {
+    ws.close(code, 'bye');
+  }
+}`}</CodeBlock>
+                <CodeBlock title="wrangler.jsonc">{`{
+  "name": "realtime",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "durable_objects": { "bindings": [{ "name": "ROOMS", "class_name": "Room" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }]
+}`}</CodeBlock>
+                <Callout title="Hibernation changes the bill">
+                    With <Code>acceptWebSocket</Code> the object can be evicted from memory while its sockets stay open. It wakes up
+                    only when a message arrives, so a room with 200 connected but quiet users costs almost nothing. Without hibernation
+                    you pay for the object's whole lifetime. Create the <Code>messages</Code> table in the constructor with{' '}
+                    <Code>ctx.blockConcurrencyWhile</Code> so it exists before the first message.
+                </Callout>
+
+                <H2>State that survives restarts</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Memory is a cache.</strong> An object can be restarted or moved at any time; anything important goes to <Code>ctx.storage</Code> (SQLite) first.</>,
+                    <><strong className="text-gray-900">Catch-up on reconnect.</strong> Clients send the last message id they saw; the object replies with what they missed from storage.</>,
+                    <><strong className="text-gray-900">Alarms, not timers.</strong> <Code>ctx.storage.setAlarm()</Code> survives restarts, so "close the room after 24 h idle" still happens.</>,
+                    <><strong className="text-gray-900">The core stays the source of truth</strong> for business data. The object holds the live session; finished results go to the <A href="/blog/core/modular-core-architecture/">modular core</A> through a queue.</>,
+                ]} />
+
+                <H2>Measuring it</H2>
+                <P>
+                    Watch concurrent connections per object, message fan-out time (publish to last delivery), reconnect rate and storage
+                    size per room. A single object whose CPU time climbs while others idle is a sharding problem: split that room or
+                    tenant into smaller units.
+                </P>
+
+                <Callout title="Next step">
+                    Live features often end with a question to a model: summarize this thread, suggest a reply.{' '}
+                    <A href="/blog/serverless/ai-at-the-edge-workers-ai/">AI at the Edge</A> covers where that inference should run.
+                    For where else state can live, compare <A href="/blog/serverless/edge-storage-kv-d1-r2/">Edge Storage</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>
