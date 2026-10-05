@@ -1,49 +1,133 @@
 {
   "_schema": "lameyer.shop/v1",
   "_note": "Base de datos simulada (MVP pre-lanzamiento). Editar a mano; ver public/db/README.md.",
-  "updated_at": "2026-10-03",
+  "updated_at": "2026-10-04",
   "categories": [
     {
-      "id": "oficina",
-      "label": "Oficina",
-      "icon": "💼",
-      "description": "Portátiles corporativos y puesto de trabajo",
+      "id": "memoria",
+      "group_id": "componentes",
+      "label": "Memoria RAM",
+      "icon": "💾",
+      "description": "Módulos DDR4 y DDR5 para portátiles y mini PC",
       "sort_order": 1
     },
     {
-      "id": "estudiante",
-      "label": "Estudiante",
-      "icon": "🎓",
-      "description": "Portátiles y móviles de uso diario",
+      "id": "almacenamiento",
+      "group_id": "componentes",
+      "label": "Almacenamiento",
+      "icon": "🗄️",
+      "description": "SSD NVMe y cajas externas",
       "sort_order": 2
     },
     {
-      "id": "dev",
-      "label": "Dev",
-      "icon": "⌨️",
-      "description": "Memoria, almacenamiento y rendimiento",
+      "id": "refrigeracion",
+      "group_id": "componentes",
+      "label": "Refrigeración",
+      "icon": "🌀",
+      "description": "Ventiladores, pasta térmica y thermal pads",
       "sort_order": 3
+    },
+    {
+      "id": "alimentacion",
+      "group_id": "componentes",
+      "label": "Baterías y alimentación",
+      "icon": "🔋",
+      "description": "Baterías, cargadores y fuentes",
+      "sort_order": 4
+    },
+    {
+      "id": "pantallas",
+      "group_id": "componentes",
+      "label": "Pantallas de repuesto",
+      "icon": "📱",
+      "description": "Paneles para portátiles y móviles",
+      "sort_order": 5
+    },
+    {
+      "id": "repuestos",
+      "group_id": "componentes",
+      "label": "Placas y chasis",
+      "icon": "🔩",
+      "description": "Bisagras, placas de carga y piezas internas",
+      "sort_order": 6
+    },
+    {
+      "id": "wifi",
+      "group_id": "redes",
+      "label": "Wi-Fi y Bluetooth",
+      "icon": "📶",
+      "description": "Tarjetas inalámbricas y routers",
+      "sort_order": 7
+    },
+    {
+      "id": "cableado",
+      "group_id": "redes",
+      "label": "Cableado y switches",
+      "icon": "🔌",
+      "description": "Cables, conectores, módulos SFP+ y switches",
+      "sort_order": 8
+    },
+    {
+      "id": "monitores",
+      "group_id": "equipo",
+      "label": "Monitores",
+      "icon": "🖥️",
+      "description": "Monitores para oficina, estudio y juego",
+      "sort_order": 9
+    },
+    {
+      "id": "teclados",
+      "group_id": "equipo",
+      "label": "Teclados y ratones",
+      "icon": "⌨️",
+      "description": "Teclados de portátil, mecánicos, switches y ratones",
+      "sort_order": 10
+    },
+    {
+      "id": "auriculares",
+      "group_id": "equipo",
+      "label": "Auriculares y audio",
+      "icon": "🎧",
+      "description": "Auriculares para juego, estudio y videollamadas",
+      "sort_order": 11
+    },
+    {
+      "id": "mandos",
+      "group_id": "equipo",
+      "label": "Mandos y gaming",
+      "icon": "🎮",
+      "description": "Joysticks y baterías para mandos de consola",
+      "sort_order": 12
+    },
+    {
+      "id": "herramientas",
+      "group_id": "herramientas",
+      "label": "Herramientas",
+      "icon": "🧰",
+      "description": "Herramientas de reparación y montaje",
+      "sort_order": 13
+    }
+  ],
+  "groups": [
+    {
+      "id": "componentes",
+      "label": "Componentes del PC",
+      "sort_order": 1
     },
     {
       "id": "redes",
       "label": "Redes",
-      "icon": "🌐",
-      "description": "Cableado, Wi-Fi y conectividad",
+      "sort_order": 2
+    },
+    {
+      "id": "equipo",
+      "label": "Equipo básico",
+      "sort_order": 3
+    },
+    {
+      "id": "herramientas",
+      "label": "Herramientas",
       "sort_order": 4
-    },
-    {
-      "id": "gamer",
-      "label": "Gamer",
-      "icon": "🎮",
-      "description": "Consolas, mandos y periféricos",
-      "sort_order": 5
-    },
-    {
-      "id": "otros",
-      "label": "Otros",
-      "icon": "🔧",
-      "description": "Móviles, herramientas y accesorios",
-      "sort_order": 6
     }
   ]
 }

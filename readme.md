@@ -28,7 +28,7 @@ lameyer.net/
 │
 ├── public/
 │   └── db/                       SIMULATED DATABASE (pre-launch, edited by hand) — see public/db/README.md
-│       ├── categorias.json       categories
+│       ├── categorias.json       category groups + categories
 │       └── productos.json        products: price, stock, specs, compatibility, image + credit
 │
 ├── img/
@@ -189,6 +189,17 @@ so old links keep working.
 Always link with a trailing slash (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
 ## Versions
+
+### 1.0.9 — 2026-10-04 · Shop layout, accordion filter, special edition
+- Shop (`/pages/components/`): accordion filter (sidebar on desktop, "Filtros" dropdown on mobile/tablet) with four
+  groups — Componentes del PC, Redes, Equipo básico, Herramientas — and 13 part-type categories (memoria, almacenamiento,
+  refrigeración, baterías, pantallas, placas, Wi-Fi, cableado, monitores, teclados y ratones, auriculares, mandos,
+  herramientas) instead of Oficina / Estudiante / Dev / Gamer / Otros. Plus a "Solo productos en stock" option.
+- Standard products in compact cards with a smaller photo: 4 columns × 2 rows on desktop, 2 × 4 on mobile, 8 per page.
+- "Edición especial" list below the grid: no photo; name, description, price, category tag and stock badge.
+  1 unit = wine, 2 units = blue, sold out = grey (also on cards and product pages). 10 sample products added (`LM-EE-*`).
+- Cart quantities are capped at the stock. `edition` field and category `groups` documented in `public/db/README.md`.
+- Header: the login button shows only its icon below 1280 px so the menu fits.
 
 ### 1.0.8 — 2026-10-04 · White theme + four-colour palette
 - Back to a white site: white background, blue secondary, dark blue tertiary, grey for captions (`css/site.css`).

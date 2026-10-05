@@ -448,7 +448,7 @@ const Layout = ({ children }) => {
                         className="hidden sm:flex items-center gap-2 px-4 py-2 rounded-full border border-gray-200 text-sm font-bold text-gray-700 hover:text-blue-600 hover:border-blue-500 transition-colors"
                     >
                         <UserIcon />
-                        <span className="max-w-[8rem] truncate">{user ? user.name.split(' ')[0] : TXT.login.toUpperCase()}</span>
+                        <span className="hidden xl:inline max-w-[8rem] truncate">{user ? user.name.split(' ')[0] : TXT.login.toUpperCase()}</span>
                     </button>
                     <button
                         onClick={handleRegisterClick}

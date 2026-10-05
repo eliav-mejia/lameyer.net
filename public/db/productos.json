@@ -1,13 +1,13 @@
 {
   "_schema": "lameyer.shop/v1",
   "_note": "Base de datos simulada (MVP pre-lanzamiento). Editar a mano; ver public/db/README.md.",
-  "updated_at": "2026-10-03",
+  "updated_at": "2026-10-04",
   "products": [
     {
       "id": "of-kb-hp840",
       "slug": "teclado-hp-elitebook-840-g5-g6",
       "sku": "LM-OFI-001",
-      "category_id": "oficina",
+      "category_id": "teclados",
       "name": "Teclado español retroiluminado",
       "compat": "HP EliteBook 840 G5 / G6",
       "compatible_models": [
@@ -18,6 +18,7 @@
       ],
       "price_eur": 34.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 12,
       "active": true,
       "description": "Teclado de sustitución con distribución española (incluye Ñ) y retroiluminación blanca. Se monta en el chasis superior del portátil y se conecta mediante dos cables flexibles.",
@@ -42,7 +43,7 @@
       "id": "of-bat-t480",
       "slug": "bateria-lenovo-thinkpad-t480-t470",
       "sku": "LM-OFI-002",
-      "category_id": "oficina",
+      "category_id": "alimentacion",
       "name": "Batería 72 Wh",
       "compat": "Lenovo ThinkPad T480 / T470",
       "compatible_models": [
@@ -55,6 +56,7 @@
       ],
       "price_eur": 49.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 8,
       "active": true,
       "description": "Batería externa trasera de alta capacidad. Sustituye a la batería extraíble del ThinkPad sin herramientas y funciona junto a la batería interna (sistema Power Bridge).",
@@ -80,7 +82,7 @@
       "id": "of-usbc-65",
       "slug": "cargador-usb-c-pd-65w",
       "sku": "LM-OFI-003",
-      "category_id": "oficina",
+      "category_id": "alimentacion",
       "name": "Cargador USB-C PD 65 W",
       "compat": "Portátiles USB-C (Dell, HP, Lenovo, Apple)",
       "compatible_models": [
@@ -92,6 +94,7 @@
       ],
       "price_eur": 24.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 25,
       "active": true,
       "description": "Cargador de pared USB-C con Power Delivery. Negocia automáticamente el voltaje con el portátil, el móvil o la tableta, por lo que sirve para varios dispositivos.",
@@ -117,7 +120,7 @@
       "id": "of-hinge-5490",
       "slug": "bisagras-dell-latitude-5490-5480",
       "sku": "LM-OFI-004",
-      "category_id": "oficina",
+      "category_id": "repuestos",
       "name": "Bisagras de pantalla (par)",
       "compat": "Dell Latitude 5490 / 5480",
       "compatible_models": [
@@ -127,6 +130,7 @@
       ],
       "price_eur": 19.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 0,
       "active": true,
       "description": "Par de bisagras izquierda y derecha para la pantalla. Recomendadas cuando la tapa queda floja o la carcasa se abre al plegar la pantalla.",
@@ -142,7 +146,7 @@
       "id": "of-fan-450",
       "slug": "ventilador-hp-probook-450-g7-g8",
       "sku": "LM-OFI-005",
-      "category_id": "oficina",
+      "category_id": "refrigeracion",
       "name": "Ventilador de CPU",
       "compat": "HP ProBook 450 G7 / G8",
       "compatible_models": [
@@ -152,6 +156,7 @@
       ],
       "price_eur": 17.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 10,
       "active": true,
       "description": "Ventilador de refrigeración de sustitución. Soluciona ruidos, vibraciones y sobrecalentamiento causados por un ventilador desgastado.",
@@ -175,7 +180,7 @@
       "id": "es-lcd-156",
       "slug": "pantalla-15-6-fhd-ips-30-pines",
       "sku": "LM-EST-006",
-      "category_id": "estudiante",
+      "category_id": "pantallas",
       "name": "Pantalla 15,6\" FHD IPS 30 pines",
       "compat": "Portátiles 15,6\" con conector eDP",
       "compatible_models": [
@@ -187,6 +192,7 @@
       ],
       "price_eur": 79.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 6,
       "active": true,
       "description": "Panel LCD IPS Full HD de sustitución con acabado mate antirreflejos. Comprueba el conector (30 pines eDP) y las pestañas de fijación de tu panel original antes de comprar.",
@@ -213,7 +219,7 @@
       "id": "es-bat-a1466",
       "slug": "bateria-macbook-air-13-a1466",
       "sku": "LM-EST-007",
-      "category_id": "estudiante",
+      "category_id": "alimentacion",
       "name": "Batería 54 Wh",
       "compat": "MacBook Air 13\" (A1466 / A1369)",
       "compatible_models": [
@@ -222,6 +228,7 @@
       ],
       "price_eur": 59.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 7,
       "active": true,
       "description": "Batería interna de sustitución para MacBook Air de 13\". Incluye celdas con circuito de protección y se instala con destornilladores pentalobe y Torx.",
@@ -246,7 +253,7 @@
       "id": "es-kb-aspire5",
       "slug": "teclado-acer-aspire-5-a515",
       "sku": "LM-EST-008",
-      "category_id": "estudiante",
+      "category_id": "teclados",
       "name": "Teclado español",
       "compat": "Acer Aspire 5 (A515)",
       "compatible_models": [
@@ -257,6 +264,7 @@
       ],
       "price_eur": 32.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 9,
       "active": true,
       "description": "Teclado de sustitución con distribución española y teclado numérico. Recomendado para teclas que no responden o derrames de líquido.",
@@ -280,7 +288,7 @@
       "id": "es-usbc-45",
       "slug": "cargador-usb-c-45w",
       "sku": "LM-EST-009",
-      "category_id": "estudiante",
+      "category_id": "alimentacion",
       "name": "Cargador USB-C 45 W",
       "compat": "Chromebooks y portátiles USB-C",
       "compatible_models": [
@@ -290,6 +298,7 @@
       ],
       "price_eur": 21.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 20,
       "active": true,
       "description": "Cargador USB-C Power Delivery compacto para Chromebooks, portátiles ligeros, móviles y tabletas.",
@@ -314,7 +323,7 @@
       "id": "es-oled-ip13",
       "slug": "pantalla-oled-iphone-13",
       "sku": "LM-EST-010",
-      "category_id": "estudiante",
+      "category_id": "pantallas",
       "name": "Pantalla OLED completa",
       "compat": "iPhone 13",
       "compatible_models": [
@@ -322,6 +331,7 @@
       ],
       "price_eur": 89.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 5,
       "active": true,
       "description": "Pantalla OLED completa (panel y táctil ensamblados) con colores y brillo equivalentes al original. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida; no afecta al funcionamiento.",
@@ -347,7 +357,7 @@
       "id": "dv-ddr4-16",
       "slug": "ram-ddr4-sodimm-16gb-3200",
       "sku": "LM-DEV-011",
-      "category_id": "dev",
+      "category_id": "memoria",
       "name": "Memoria RAM DDR4 SO-DIMM 16 GB 3200 MHz",
       "compat": "Portátiles y mini PC con DDR4",
       "compatible_models": [
@@ -357,6 +367,7 @@
       ],
       "price_eur": 39.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 30,
       "active": true,
       "description": "Módulo de memoria SO-DIMM DDR4 para ampliar portátiles y mini PC. Funciona a velocidades inferiores (2400/2666/2933 MHz) si tu equipo no admite 3200 MHz.",
@@ -382,7 +393,7 @@
       "id": "dv-ddr5-32",
       "slug": "ram-ddr5-sodimm-32gb-5600",
       "sku": "LM-DEV-012",
-      "category_id": "dev",
+      "category_id": "memoria",
       "name": "Memoria RAM DDR5 SO-DIMM 32 GB 5600 MHz",
       "compat": "Portátiles y mini PC con DDR5",
       "compatible_models": [
@@ -391,6 +402,7 @@
       ],
       "price_eur": 89.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 14,
       "active": true,
       "description": "Módulo SO-DIMM DDR5 de alta capacidad para entornos de desarrollo, máquinas virtuales y contenedores. Compatible hacia abajo con 4800 y 5200 MHz.",
@@ -416,7 +428,7 @@
       "id": "dv-nvme-1tb",
       "slug": "ssd-nvme-m2-1tb-pcie4",
       "sku": "LM-DEV-013",
-      "category_id": "dev",
+      "category_id": "almacenamiento",
       "name": "SSD NVMe M.2 2280 1 TB PCIe 4.0",
       "compat": "Ranura M.2 NVMe (PCIe 3.0 / 4.0)",
       "compatible_models": [
@@ -426,6 +438,7 @@
       ],
       "price_eur": 74.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 18,
       "active": true,
       "description": "SSD NVMe PCIe 4.0 de 1 TB en formato M.2 2280. En ranuras PCIe 3.0 funciona a la velocidad máxima de esa interfaz.",
@@ -451,7 +464,7 @@
       "id": "dv-m2-usbc",
       "slug": "caja-externa-m2-nvme-usb-c",
       "sku": "LM-DEV-014",
-      "category_id": "dev",
+      "category_id": "almacenamiento",
       "name": "Caja externa M.2 NVMe a USB-C 10 Gbps",
       "compat": "SSD M.2 NVMe 2230–2280",
       "compatible_models": [
@@ -460,6 +473,7 @@
       ],
       "price_eur": 22.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 15,
       "active": true,
       "description": "Carcasa de aluminio para convertir un SSD M.2 en un disco externo USB-C. Montaje sin herramientas y disipación pasiva.",
@@ -485,7 +499,7 @@
       "id": "dv-thermal",
       "slug": "kit-pasta-termica-thermal-pads",
       "sku": "LM-DEV-015",
-      "category_id": "dev",
+      "category_id": "refrigeracion",
       "name": "Kit pasta térmica + thermal pads",
       "compat": "CPU, GPU y SSD",
       "compatible_models": [
@@ -495,6 +509,7 @@
       ],
       "price_eur": 9.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 40,
       "active": true,
       "description": "Kit de mantenimiento térmico: jeringa de pasta térmica no conductora y láminas de thermal pads recortables para chips de memoria, VRM y SSD.",
@@ -519,7 +534,7 @@
       "id": "rd-ax210",
       "slug": "tarjeta-wifi-6e-bluetooth-m2",
       "sku": "LM-RED-016",
-      "category_id": "redes",
+      "category_id": "wifi",
       "name": "Tarjeta Wi-Fi 6E + Bluetooth 5.3 M.2",
       "compat": "Ranura M.2 2230 (Key E)",
       "compatible_models": [
@@ -529,6 +544,7 @@
       ],
       "price_eur": 24.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 16,
       "active": true,
       "description": "Tarjeta inalámbrica Wi-Fi 6E tribanda (2,4 / 5 / 6 GHz) con Bluetooth 5.3. Mejora la velocidad y la latencia respecto a tarjetas Wi-Fi 5.",
@@ -554,7 +570,7 @@
       "id": "rd-sfp-10g",
       "slug": "modulo-sfp-plus-10g-sr",
       "sku": "LM-RED-017",
-      "category_id": "redes",
+      "category_id": "cableado",
       "name": "Módulo SFP+ 10G SR multimodo",
       "compat": "Switches y NAS con puertos SFP+",
       "compatible_models": [
@@ -564,6 +580,7 @@
       ],
       "price_eur": 19.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 22,
       "active": true,
       "description": "Transceptor óptico SFP+ 10GBASE-SR para fibra multimodo con conector LC dúplex. Ideal para enlaces dentro del rack o del edificio.",
@@ -590,7 +607,7 @@
       "id": "rd-cat6-3m",
       "slug": "cable-red-cat6-3m-pack-3",
       "sku": "LM-RED-018",
-      "category_id": "redes",
+      "category_id": "cableado",
       "name": "Cable de red Cat6 UTP 3 m (pack 3)",
       "compat": "Router, switch, PC y consola",
       "compatible_models": [
@@ -598,6 +615,7 @@
       ],
       "price_eur": 9.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 50,
       "active": true,
       "description": "Pack de tres latiguillos Cat6 de 3 m con conductores de cobre y protectores de conector. Gigabit garantizado y 10 Gbps en tramos cortos.",
@@ -623,7 +641,7 @@
       "id": "rd-rj45-kit",
       "slug": "kit-crimpadora-rj45-cat6",
       "sku": "LM-RED-019",
-      "category_id": "redes",
+      "category_id": "cableado",
       "name": "Kit crimpadora + 50 conectores RJ45 Cat6",
       "compat": "Cable Cat5e / Cat6",
       "compatible_models": [
@@ -632,6 +650,7 @@
       ],
       "price_eur": 18.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 11,
       "active": true,
       "description": "Kit para fabricar tus propios cables de red: crimpadora con pelacables y cortador, 50 conectores RJ45 Cat6 y 50 capuchones.",
@@ -656,7 +675,7 @@
       "id": "rd-psu-12v",
       "slug": "fuente-alimentacion-12v-1-5a",
       "sku": "LM-RED-020",
-      "category_id": "redes",
+      "category_id": "alimentacion",
       "name": "Fuente de alimentación 12 V 1,5 A",
       "compat": "Routers, ONT y switches domésticos",
       "compatible_models": [
@@ -666,6 +685,7 @@
       ],
       "price_eur": 11.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 24,
       "active": true,
       "description": "Fuente de alimentación de sustitución para routers, ONT y switches. Comprueba voltaje, polaridad y tamaño de conector de tu fuente original.",
@@ -690,7 +710,7 @@
       "id": "gm-stick-ds5",
       "slug": "joystick-hall-effect-dualsense",
       "sku": "LM-GAM-021",
-      "category_id": "gamer",
+      "category_id": "mandos",
       "name": "Joystick Hall Effect (par)",
       "compat": "Mando DualSense (PS5)",
       "compatible_models": [
@@ -699,6 +719,7 @@
       ],
       "price_eur": 14.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 13,
       "active": true,
       "description": "Par de joysticks con sensores magnéticos Hall Effect que eliminan el drift causado por el desgaste de los potenciómetros. Requiere soldadura.",
@@ -722,7 +743,7 @@
       "id": "gm-joycon",
       "slug": "joystick-joy-con-nintendo-switch",
       "sku": "LM-GAM-022",
-      "category_id": "gamer",
+      "category_id": "mandos",
       "name": "Joystick de repuesto (pack 2)",
       "compat": "Joy-Con de Nintendo Switch",
       "compatible_models": [
@@ -731,6 +752,7 @@
       ],
       "price_eur": 12.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 21,
       "active": true,
       "description": "Pack de dos joysticks analógicos de sustitución para Joy-Con con drift o stick roto. Instalación sin soldadura con destornillador Y00.",
@@ -754,7 +776,7 @@
       "id": "gm-fan-ps5",
       "slug": "ventilador-playstation-5",
       "sku": "LM-GAM-023",
-      "category_id": "gamer",
+      "category_id": "refrigeracion",
       "name": "Ventilador de refrigeración",
       "compat": "PlayStation 5 (todas las revisiones)",
       "compatible_models": [
@@ -763,6 +785,7 @@
       ],
       "price_eur": 24.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 6,
       "active": true,
       "description": "Ventilador centrífugo de sustitución para PS5. Recomendado si la consola hace ruido excesivo, se sobrecalienta o el ventilador no gira.",
@@ -786,7 +809,7 @@
       "id": "gm-xbox-bat",
       "slug": "bateria-mando-xbox-series",
       "sku": "LM-GAM-024",
-      "category_id": "gamer",
+      "category_id": "mandos",
       "name": "Batería recargable + cable USB-C",
       "compat": "Mando Xbox Series X|S",
       "compatible_models": [
@@ -795,6 +818,7 @@
       ],
       "price_eur": 16.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 19,
       "active": true,
       "description": "Batería recargable para el compartimento de pilas del mando. Se carga en el propio mando con el cable USB-C incluido.",
@@ -819,7 +843,7 @@
       "id": "gm-switches",
       "slug": "switches-mecanicos-lineales-70",
       "sku": "LM-GAM-025",
-      "category_id": "gamer",
+      "category_id": "teclados",
       "name": "Switches mecánicos lineales (pack 70)",
       "compat": "Teclados hot-swap de 3 / 5 pines",
       "compatible_models": [
@@ -828,6 +852,7 @@
       ],
       "price_eur": 19.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 17,
       "active": true,
       "description": "Pack de 70 switches lineales prelubricados de recorrido suave, para sustituir switches dañados o personalizar tu teclado.",
@@ -854,7 +879,7 @@
       "id": "ot-bat-ip12",
       "slug": "bateria-iphone-12",
       "sku": "LM-OTR-026",
-      "category_id": "otros",
+      "category_id": "alimentacion",
       "name": "Batería",
       "compat": "iPhone 12 / 12 Pro",
       "compatible_models": [
@@ -863,6 +888,7 @@
       ],
       "price_eur": 29.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 15,
       "active": true,
       "description": "Batería de sustitución con celdas de grado A y adhesivos incluidos. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida en el estado de la batería.",
@@ -887,7 +913,7 @@
       "id": "ot-bat-ip13",
       "slug": "bateria-iphone-13",
       "sku": "LM-OTR-027",
-      "category_id": "otros",
+      "category_id": "alimentacion",
       "name": "Batería",
       "compat": "iPhone 13",
       "compatible_models": [
@@ -895,6 +921,7 @@
       ],
       "price_eur": 34.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 12,
       "active": true,
       "description": "Batería de sustitución con celdas de grado A y adhesivos incluidos. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida en el estado de la batería.",
@@ -919,7 +946,7 @@
       "id": "ot-oled-a54",
       "slug": "pantalla-oled-samsung-galaxy-a54",
       "sku": "LM-OTR-028",
-      "category_id": "otros",
+      "category_id": "pantallas",
       "name": "Pantalla OLED con marco",
       "compat": "Samsung Galaxy A54 5G",
       "compatible_models": [
@@ -927,6 +954,7 @@
       ],
       "price_eur": 69.9,
       "grade": "premium",
+      "edition": "estandar",
       "stock": 4,
       "active": true,
       "description": "Pantalla OLED completa montada en marco, con táctil y lector de huellas en pantalla funcional. El marco facilita una instalación más rápida y segura.",
@@ -952,7 +980,7 @@
       "id": "ot-port-s21",
       "slug": "placa-carga-usb-c-galaxy-s21",
       "sku": "LM-OTR-029",
-      "category_id": "otros",
+      "category_id": "repuestos",
       "name": "Placa de carga USB-C",
       "compat": "Samsung Galaxy S21",
       "compatible_models": [
@@ -960,6 +988,7 @@
       ],
       "price_eur": 14.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 10,
       "active": true,
       "description": "Placa secundaria con conector USB-C y micrófono. Soluciona problemas de carga, conexión con el PC o un conector flojo.",
@@ -983,7 +1012,7 @@
       "id": "ot-tools-64",
       "slug": "kit-destornilladores-precision-64",
       "sku": "LM-OTR-030",
-      "category_id": "otros",
+      "category_id": "herramientas",
       "name": "Kit de destornilladores de precisión (64 piezas)",
       "compat": "Móviles, portátiles y consolas",
       "compatible_models": [
@@ -993,6 +1022,7 @@
       ],
       "price_eur": 19.9,
       "grade": "estandar",
+      "edition": "estandar",
       "stock": 26,
       "active": true,
       "description": "Kit de reparación con mango de aluminio y 56 puntas magnéticas de acero S2 (Phillips, Torx, pentalobe, tri-wing, hexagonal…), más herramientas de apertura.",
@@ -1012,6 +1042,274 @@
         "source": "https://commons.wikimedia.org/wiki/File:Precision_Screwdriver_Set_1.jpg",
         "note": "Vía Wikimedia Commons, recortada y con fondo blanco. Imagen ilustrativa."
       }
+    },
+    {
+      "id": "ee-mon-27qhd",
+      "slug": "monitor-27-qhd-ips-165hz",
+      "sku": "LM-EE-001",
+      "category_id": "monitores",
+      "name": "Monitor 27\" QHD IPS 165 Hz",
+      "compat": "PC, portátil y consola (HDMI 2.0 / DisplayPort 1.4)",
+      "compatible_models": [
+        "PC con DisplayPort 1.4",
+        "Portátiles con USB-C DisplayPort Alt Mode",
+        "PlayStation 5 y Xbox Series X|S (HDMI)"
+      ],
+      "price_eur": 249.0,
+      "grade": "premium",
+      "edition": "especial",
+      "stock": 2,
+      "active": true,
+      "description": "Monitor de 27 pulgadas 2560 × 1440 con panel IPS de 165 Hz y 1 ms GtG. Serie limitada con peana de aluminio regulable en altura y giro.",
+      "specs": {
+        "Tamaño": "27\"",
+        "Resolución": "2560 × 1440 (QHD)",
+        "Panel": "IPS, 165 Hz, 1 ms GtG",
+        "Conexiones": "2 × HDMI 2.0, DisplayPort 1.4",
+        "Peana": "Aluminio, altura y pivote",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-mon-24fhd",
+      "slug": "monitor-24-fhd-ips-100hz",
+      "sku": "LM-EE-002",
+      "category_id": "monitores",
+      "name": "Monitor 24\" FHD IPS 100 Hz",
+      "compat": "PC, portátil y mini PC (HDMI / VGA)",
+      "compatible_models": [
+        "PC y mini PC con HDMI",
+        "Portátiles con HDMI",
+        "Equipos con salida VGA"
+      ],
+      "price_eur": 119.0,
+      "grade": "estandar",
+      "edition": "especial",
+      "stock": 1,
+      "active": true,
+      "description": "Monitor de oficina y estudio de 24 pulgadas Full HD con panel IPS a 100 Hz, marcos finos y montaje VESA 100 × 100.",
+      "specs": {
+        "Tamaño": "23,8\"",
+        "Resolución": "1920 × 1080 (FHD)",
+        "Panel": "IPS, 100 Hz",
+        "Conexiones": "HDMI 1.4, VGA",
+        "Montaje": "VESA 100 × 100",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-hs-wireless",
+      "slug": "auriculares-gaming-inalambricos",
+      "sku": "LM-EE-003",
+      "category_id": "auriculares",
+      "name": "Auriculares gaming inalámbricos 2,4 GHz + Bluetooth",
+      "compat": "PC, PS5, Switch y móvil",
+      "compatible_models": [
+        "PC con USB-A / USB-C",
+        "PlayStation 5",
+        "Nintendo Switch (modo sobremesa)",
+        "Móviles Bluetooth 5.3"
+      ],
+      "price_eur": 79.9,
+      "grade": "premium",
+      "edition": "especial",
+      "stock": 1,
+      "active": true,
+      "description": "Auriculares cerrados con conexión dual 2,4 GHz de baja latencia y Bluetooth 5.3, micrófono desmontable y hasta 40 horas de batería.",
+      "specs": {
+        "Conexión": "2,4 GHz (receptor USB-C) + Bluetooth 5.3",
+        "Autonomía": "Hasta 40 h",
+        "Micrófono": "Desmontable, cancelación de ruido",
+        "Peso": "285 g",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-hs-studio",
+      "slug": "auriculares-estudio-cerrados",
+      "sku": "LM-EE-004",
+      "category_id": "auriculares",
+      "name": "Auriculares de estudio cerrados",
+      "compat": "Interfaces de audio, PC y móvil (jack 3,5 / 6,3 mm)",
+      "compatible_models": [
+        "Interfaces de audio con salida 6,3 mm",
+        "PC y portátiles con jack 3,5 mm"
+      ],
+      "price_eur": 59.9,
+      "grade": "estandar",
+      "edition": "especial",
+      "stock": 0,
+      "active": true,
+      "description": "Auriculares de monitorización cerrados con respuesta plana para grabación, edición y videollamadas. Cable desmontable.",
+      "specs": {
+        "Tipo": "Circumaurales cerrados",
+        "Impedancia": "32 Ω",
+        "Respuesta": "15 Hz – 25 kHz",
+        "Cable": "Desmontable, 3 m, adaptador 6,3 mm",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-kb-75",
+      "slug": "teclado-mecanico-75-aluminio",
+      "sku": "LM-EE-005",
+      "category_id": "teclados",
+      "name": "Teclado mecánico 75% de aluminio hot-swap",
+      "compat": "Windows, macOS y Linux (USB-C / Bluetooth)",
+      "compatible_models": [
+        "PC con Windows",
+        "Mac con macOS",
+        "Equipos con Linux"
+      ],
+      "price_eur": 129.0,
+      "grade": "premium",
+      "edition": "especial",
+      "stock": 2,
+      "active": true,
+      "description": "Teclado mecánico compacto con carcasa de aluminio, montaje gasket, switches lineales hot-swap de 5 pines y distribución española ISO.",
+      "specs": {
+        "Formato": "75%, ISO español",
+        "Carcasa": "Aluminio CNC",
+        "Switches": "Lineales, hot-swap 5 pines",
+        "Conexión": "USB-C, Bluetooth 5.1, 2,4 GHz",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-mouse-59",
+      "slug": "raton-inalambrico-ligero-59g",
+      "sku": "LM-EE-006",
+      "category_id": "teclados",
+      "name": "Ratón inalámbrico ligero 59 g",
+      "compat": "PC, Mac y portátil (2,4 GHz / USB-C)",
+      "compatible_models": [
+        "PC con USB-A",
+        "Mac y portátiles con USB-C"
+      ],
+      "price_eur": 49.9,
+      "grade": "estandar",
+      "edition": "especial",
+      "stock": 2,
+      "active": true,
+      "description": "Ratón inalámbrico ultraligero con sensor óptico de 26 000 DPI, pies de PTFE y batería recargable por USB-C.",
+      "specs": {
+        "Peso": "59 g",
+        "Sensor": "Óptico, hasta 26 000 DPI",
+        "Conexión": "2,4 GHz + cable USB-C",
+        "Autonomía": "Hasta 70 h",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-sw-25g",
+      "slug": "switch-8-puertos-2-5gbe",
+      "sku": "LM-EE-007",
+      "category_id": "cableado",
+      "name": "Switch 8 puertos 2,5 GbE no gestionable",
+      "compat": "Redes domésticas y de oficina (RJ45)",
+      "compatible_models": [
+        "Routers con puerto 2,5 GbE",
+        "NAS y PC con tarjeta 2,5 GbE",
+        "Equipos Gigabit (compatible hacia abajo)"
+      ],
+      "price_eur": 89.9,
+      "grade": "premium",
+      "edition": "especial",
+      "stock": 1,
+      "active": true,
+      "description": "Switch de sobremesa con ocho puertos RJ45 a 2,5 Gbps, carcasa metálica sin ventilador y conexión plug and play.",
+      "specs": {
+        "Puertos": "8 × RJ45 2,5 GbE",
+        "Gestión": "No gestionable",
+        "Carcasa": "Metálica, sin ventilador",
+        "Consumo": "< 8 W",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-router-be",
+      "slug": "router-wifi-7-tribanda",
+      "sku": "LM-EE-008",
+      "category_id": "wifi",
+      "name": "Router Wi-Fi 7 tribanda",
+      "compat": "Fibra y cable (puerto WAN 2,5 GbE)",
+      "compatible_models": [
+        "Conexiones de fibra con ONT",
+        "Módems de cable en modo puente"
+      ],
+      "price_eur": 199.0,
+      "grade": "premium",
+      "edition": "especial",
+      "stock": 0,
+      "active": true,
+      "description": "Router Wi-Fi 7 (802.11be) tribanda 2,4 / 5 / 6 GHz con puertos de 2,5 GbE, pensado para hogares con muchos dispositivos y juego en línea.",
+      "specs": {
+        "Estándar": "Wi-Fi 7 (802.11be)",
+        "Bandas": "2,4 + 5 + 6 GHz",
+        "Puertos": "1 × WAN 2,5 GbE, 3 × LAN 2,5 GbE",
+        "Malla": "Compatible con EasyMesh",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-ssd-2tb",
+      "slug": "ssd-nvme-2tb-disipador",
+      "sku": "LM-EE-009",
+      "category_id": "almacenamiento",
+      "name": "SSD NVMe M.2 2 TB PCIe 4.0 con disipador",
+      "compat": "PC de sobremesa y PlayStation 5",
+      "compatible_models": [
+        "PlayStation 5 (ranura de expansión M.2)",
+        "Placas base con M.2 PCIe 4.0 / 3.0"
+      ],
+      "price_eur": 139.0,
+      "grade": "premium",
+      "edition": "especial",
+      "stock": 2,
+      "active": true,
+      "description": "SSD de 2 TB con lecturas de hasta 7 000 MB/s y disipador de aluminio de perfil bajo, apto para la ranura de expansión de PS5.",
+      "specs": {
+        "Capacidad": "2 TB",
+        "Interfaz": "PCIe 4.0 x4, NVMe 2.0",
+        "Lectura / escritura": "7 000 / 6 500 MB/s",
+        "Formato": "M.2 2280 con disipador",
+        "Estado": "Nuevo"
+      },
+      "image": null
+    },
+    {
+      "id": "ee-fans-argb",
+      "slug": "kit-ventiladores-argb-120mm",
+      "sku": "LM-EE-010",
+      "category_id": "refrigeracion",
+      "name": "Kit 3 ventiladores ARGB 120 mm",
+      "compat": "Cajas de PC ATX / micro-ATX",
+      "compatible_models": [
+        "Cajas con soportes de 120 mm",
+        "Placas base con cabezal ARGB 5 V 3 pines"
+      ],
+      "price_eur": 39.9,
+      "grade": "estandar",
+      "edition": "especial",
+      "stock": 1,
+      "active": true,
+      "description": "Tres ventiladores de 120 mm con rodamiento hidráulico, iluminación ARGB direccionable y concentrador incluido.",
+      "specs": {
+        "Tamaño": "120 × 120 × 25 mm",
+        "Velocidad": "500 – 1 800 rpm (PWM)",
+        "Iluminación": "ARGB 5 V, 3 pines",
+        "Incluye": "Concentrador y control remoto",
+        "Estado": "Nuevo"
+      },
+      "image": null
     }
   ]
 }

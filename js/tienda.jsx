@@ -113,10 +113,11 @@ const loadJson = (name) =>
 
 let catalogPromise = null;
 const db = {
-    // { categories, products } with inactive products filtered out. Loaded once per page.
+    // { groups, categories, products } with inactive products filtered out. Loaded once per page.
     catalog() {
         if (!catalogPromise) {
             catalogPromise = Promise.all([loadJson('categorias'), loadJson('productos')]).then(([c, p]) => ({
+                groups: [...(c.groups || [])].sort((a, b) => a.sort_order - b.sort_order),
                 categories: [...c.categories].sort((a, b) => a.sort_order - b.sort_order),
                 products: p.products.filter(x => x.active !== false),
             }));
@@ -125,9 +126,9 @@ const db = {
     },
 };
 
-// Catalogue state for components: { status: 'loading' | 'ready' | 'error', categories, products, byId, bySlug, category }
+// Catalogue state for components: { status: 'loading' | 'ready' | 'error', groups, categories, products, byId, bySlug, category }
 const useCatalog = () => {
-    const [state, setState] = useState({ status: 'loading', categories: [], products: [] });
+    const [state, setState] = useState({ status: 'loading', groups: [], categories: [], products: [] });
     useEffect(() => {
         let alive = true;
         db.catalog()
@@ -152,10 +153,15 @@ const GRADES = {
     premium: { label: 'Calidad premium', className: 'bg-blue-50 text-blue-600' },
 };
 
+// Stock colours: 0 grey, 1 wine, 2 blue, 3+ green. `accent` (hex) colours the edge of special-edition rows.
 const stockInfo = (stock) =>
-    stock <= 0 ? { label: 'Agotado', className: 'bg-red-50 text-red-600', canBuy: false }
-    : stock <= 3 ? { label: `Últimas ${stock} unidades`, className: 'bg-amber-50 text-amber-700', canBuy: true }
-    : { label: 'En stock', className: 'bg-emerald-50 text-emerald-700', canBuy: true };
+    stock <= 0 ? { label: 'Agotado', className: 'bg-gray-200 text-gray-600', accent: '#cbd5e1', canBuy: false }
+    : stock === 1 ? { label: 'Última unidad', className: 'bg-[#881337] text-white', accent: '#881337', canBuy: true }
+    : stock === 2 ? { label: 'Solo 2 en stock', className: 'bg-blue-600 text-white', accent: '#2563eb', canBuy: true }
+    : { label: 'En stock', className: 'bg-emerald-50 text-emerald-700', accent: '#10b981', canBuy: true };
+
+// Editions: 'estandar' (default) shows in the shop grid; 'especial' = limited units, listed without photo under "Edición especial".
+const isSpecial = (product) => product.edition === 'especial';
 
 // --- CART (localStorage, shared by the shop and every product page) ---
 const useCart = (catalog) => {
@@ -170,16 +176,26 @@ const useCart = (catalog) => {
         return () => window.removeEventListener('storage', onStorage);
     }, []);
 
+    // Never more than the units in stock (99 at most; 99 while the catalogue is still loading)
+    const maxFor = (id) => {
+        const product = catalog.status === 'ready' && catalog.byId(id);
+        return product ? Math.max(0, Math.min(product.stock, 99)) : 99;
+    };
     const setQty = (id, qty) => setCart(prev => {
         const next = { ...prev };
-        if (qty > 0) next[id] = Math.min(qty, 99); else delete next[id];
+        const n = Math.min(qty, maxFor(id));
+        if (n > 0) next[id] = n; else delete next[id];
         return next;
     });
-    const add = (id, n = 1) => setCart(prev => ({ ...prev, [id]: Math.min((prev[id] || 0) + n, 99) }));
+    const add = (id, n = 1) => setCart(prev => {
+        const qty = Math.min((prev[id] || 0) + n, maxFor(id));
+        return qty > 0 ? { ...prev, [id]: qty } : prev;
+    });
 
     // Drop ids that no longer exist (or are inactive) once the catalogue is loaded
+    // and lines whose stock has run out; quantities above the stock are capped.
     const lines = catalog.status === 'ready'
-        ? Object.entries(cart).map(([id, qty]) => ({ product: catalog.byId(id), qty })).filter(l => l.product && l.qty > 0)
+        ? Object.entries(cart).map(([id, qty]) => ({ product: catalog.byId(id), qty: Math.min(qty, maxFor(id)) })).filter(l => l.product && l.qty > 0)
         : [];
     const count = lines.reduce((a, l) => a + l.qty, 0);
 
@@ -193,6 +209,8 @@ const ProductImage = ({ product, catalog, size = 'card', eager = false }) => {
     if (!img) {
         return size === 'thumb'
             ? <div className="w-14 h-14 flex-none rounded-xl bg-gray-100 flex items-center justify-center text-xl" aria-hidden="true">{cat.icon}</div>
+            : size === 'tile'
+            ? <div className="aspect-[4/3] w-full rounded-2xl bg-gray-50 flex items-center justify-center text-4xl" aria-hidden="true">{cat.icon}</div>
             : <div className="aspect-square w-full rounded-[1.5rem] bg-gray-50 flex items-center justify-center text-7xl" aria-hidden="true">{cat.icon}</div>;
     }
     if (size === 'thumb') {
@@ -202,14 +220,14 @@ const ProductImage = ({ product, catalog, size = 'card', eager = false }) => {
         <img
             src={img.src_400}
             srcSet={`${img.src_400} 400w, ${img.src_800} 800w`}
-            sizes={size === 'hero' ? '(min-width: 1024px) 560px, 92vw' : '(min-width: 1024px) 340px, (min-width: 640px) 45vw, 90vw'}
+            sizes={size === 'hero' ? '(min-width: 1024px) 560px, 92vw' : size === 'tile' ? '(min-width: 1024px) 220px, 45vw' : '(min-width: 1024px) 340px, (min-width: 640px) 45vw, 90vw'}
             width="400"
             height="400"
             loading={eager ? 'eager' : 'lazy'}
             fetchpriority={eager ? 'high' : undefined}
             decoding="async"
             alt={`${product.name} compatible con ${product.compat}`}
-            className="aspect-square w-full rounded-[1.5rem] bg-white object-contain transition-transform duration-500 group-hover:scale-105"
+            className={`${size === 'tile' ? 'aspect-[4/3] rounded-2xl p-2' : 'aspect-square rounded-[1.5rem]'} w-full bg-white object-contain transition-transform duration-500 group-hover:scale-105`}
         />
     );
 };
@@ -245,10 +263,10 @@ const ProductCard = ({ product, catalog, money, onAdd, inCart, eager }) => {
 
                 <button
                     onClick={() => onAdd(product.id)}
-                    disabled={!stock.canBuy}
-                    className={`w-full py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${stock.canBuy ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:scale-[1.02]' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                    disabled={!stock.canBuy || inCart >= product.stock}
+                    className={`w-full py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${stock.canBuy && !(inCart >= product.stock) ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:scale-[1.02]' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
                 >
-                    {!stock.canBuy ? 'Agotado' : inCart ? `Añadir otro (${inCart} en el carrito)` : 'Añadir al carrito'}
+                    {!stock.canBuy ? 'Agotado' : inCart >= product.stock ? `Sin más stock (${inCart} en el carrito)` : inCart ? `Añadir otro (${inCart} en el carrito)` : 'Añadir al carrito'}
                 </button>
                 <div className="mt-3 flex justify-center gap-3 text-[11px] font-semibold text-gray-400">
                     <a href={url} className="hover:text-blue-600 transition-colors">Ver ficha</a>
@@ -261,6 +279,43 @@ const ProductCard = ({ product, catalog, money, onAdd, inCart, eager }) => {
 };
 
 // Cart drawer with WhatsApp checkout
+// Compact card for the shop grid (4 columns on desktop, 2 on mobile): smaller photo, one-line details.
+const ProductTile = ({ product, catalog, money, onAdd, inCart, eager }) => {
+    const cat = catalog.category(product.category_id);
+    const stock = stockInfo(product.stock);
+    const foreign = money.currency.code !== 'EUR';
+    const url = productUrl(product);
+    const full = inCart >= product.stock;
+
+    return (
+        <article className="group flex flex-col rounded-3xl border border-gray-100 bg-white p-3 shadow-lg shadow-gray-200/40 hover:border-blue-500 transition-all duration-300">
+            <a href={url} className="relative mb-3 overflow-hidden rounded-2xl block" tabIndex="-1" aria-hidden="true">
+                <ProductImage product={product} catalog={catalog} size="tile" eager={eager} />
+                {product.grade === 'premium' && <span className="absolute top-2 right-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider bg-blue-50 text-blue-600">Premium</span>}
+                {product.stock <= 2 && <span className={`absolute top-2 left-2 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${stock.className}`}>{stock.label}</span>}
+            </a>
+            <div className="flex flex-col flex-1 px-1">
+                <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-blue-500 mb-1 truncate">{cat.label}</p>
+                <h3 className="text-sm font-black text-gray-900 leading-snug line-clamp-2">
+                    <a href={url} className="hover:text-blue-600 transition-colors">{product.name}</a>
+                </h3>
+                <p className="text-xs text-gray-500 font-medium mt-1 mb-3 line-clamp-1 flex-1" title={product.compat}>{product.compat}</p>
+                <div className="flex items-end justify-between gap-2 mb-3">
+                    <p translate="no" className="text-lg font-black text-gray-900 tracking-tight leading-none">{foreign && '≈ '}{money.format(product.price_eur)}</p>
+                    <p className="text-[9px] text-gray-400 font-semibold uppercase tracking-wider">IVA incl.</p>
+                </div>
+                <button
+                    onClick={() => onAdd(product.id)}
+                    disabled={!stock.canBuy || full}
+                    className={`w-full py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${stock.canBuy && !full ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+                >
+                    {!stock.canBuy ? 'Agotado' : full ? 'Sin más stock' : inCart ? `Añadir (${inCart})` : 'Añadir'}
+                </button>
+            </div>
+        </article>
+    );
+};
+
 const CartDrawer = ({ cartState, catalog, money }) => {
     const { lines, setQty, open, setOpen } = cartState;
     const onClose = () => setOpen(false);
@@ -522,6 +577,9 @@ const ProductPage = () => {
                     {/* Buy box */}
                     <div className="lg:sticky lg:top-[140px]">
                         <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-3"><span aria-hidden="true">{cat.icon}</span> {cat.label}</p>
+                        {isSpecial(product) && (
+                            <p className="inline-block mb-4 px-3 py-1 rounded-full border border-[#881337]/30 text-[#881337] text-[10px] font-bold uppercase tracking-widest">Edición especial · unidades limitadas</p>
+                        )}
                         <h1 className="text-4xl md:text-5xl font-black text-gray-900 tracking-tighter leading-[1.05] mb-3">{product.name}</h1>
                         <p className="text-lg text-gray-500 font-medium mb-6">Compatible con {product.compat}</p>
 

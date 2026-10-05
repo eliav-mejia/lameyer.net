@@ -12,16 +12,28 @@ keep the same field names and nothing else changes.
 
 | File              | "Table"      | Used by                                              |
 |-------------------|--------------|------------------------------------------------------|
-| `categorias.json` | `categories` | shop filters, product breadcrumbs                    |
+| `categorias.json` | `groups`, `categories` | accordion filter in the shop, product breadcrumbs |
 | `productos.json`  | `products`   | shop grid, product pages, cart, image credits        |
 
 Both files carry `_schema`, `_note` and `updated_at` at the top: update `updated_at` when you edit.
+
+## groups
+
+Sections of the accordion filter in the shop: `componentes` (Componentes del PC), `redes` (Redes),
+`equipo` (Equipo básico: monitores, teclados, auriculares, mandos) and `herramientas`.
+
+| Field        | Type   | Notes                          |
+|--------------|--------|--------------------------------|
+| `id`         | string | key used by `categories.group_id` |
+| `label`      | string | accordion section title        |
+| `sort_order` | number | order of the sections          |
 
 ## categories
 
 | Field         | Type   | Notes                                              |
 |---------------|--------|----------------------------------------------------|
 | `id`          | string | key used by `products.category_id` and `?cat=<id>` |
+| `group_id`    | string | one of `groups.id`                                 |
 | `label`       | string | shown in the filters                               |
 | `icon`        | string | one emoji; also the fallback image                 |
 | `description` | string | subtitle under the category heading                |
@@ -40,7 +52,8 @@ Both files carry `_schema`, `_note` and `updated_at` at the top: update `updated
 | `compatible_models` | string[]        | full list on the product page; also searchable                                 |
 | `price_eur`         | number          | EUR, VAT included, dot as decimal separator (`49.9`)                           |
 | `grade`             | string          | `estandar` or `premium`                                                        |
-| `stock`             | number          | `0` = Agotado (no add to cart), `1–3` = "Últimas unidades"                     |
+| `edition`           | string          | `estandar` (shop grid with photo, 8 per page) or `especial` (limited units, "Edición especial" list without photo) |
+| `stock`             | number          | `0` = Agotado, grey (no add to cart) · `1` = "Última unidad", wine · `2` = "Solo 2 en stock", blue · `3+` = En stock. The cart never holds more than the stock. |
 | `active`            | boolean         | `false` hides the product everywhere (page shows "Producto no encontrado")     |
 | `description`       | string          | product page and meta description                                              |
 | `specs`             | object          | `{ "Label": "value" }`, shown in this order                                    |
