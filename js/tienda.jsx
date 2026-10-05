@@ -316,6 +316,39 @@ const ProductTile = ({ product, catalog, money, onAdd, inCart, eager }) => {
     );
 };
 
+const CartIcon = ({ className = 'w-5 h-5' }) => (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6" /><circle cx="10" cy="20" r="1.3" /><circle cx="17" cy="20" r="1.3" /></svg>
+);
+
+// One-line row for special-edition listings: name, price, stock and a cart icon. Left edge follows the stock colour.
+const ProductRow = ({ product, money, onAdd, inCart }) => {
+    const stock = stockInfo(product.stock);
+    const foreign = money.currency.code !== 'EUR';
+    const full = inCart >= product.stock;
+    const canAdd = stock.canBuy && !full;
+
+    return (
+        <li style={{ borderLeftColor: stock.accent }} className={`flex items-center gap-3 rounded-xl border border-gray-100 border-l-4 bg-white pl-3 pr-1.5 py-1.5 hover:border-blue-500 transition-colors ${stock.canBuy ? '' : 'opacity-75'}`}>
+            <h3 className="flex-1 min-w-0 text-sm font-black text-gray-900 truncate">
+                <a href={productUrl(product)} title={product.name} className="hover:text-blue-600 transition-colors">{product.name}</a>
+            </h3>
+            <span className={`hidden sm:inline-block px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider whitespace-nowrap ${stock.className}`}>{stock.label}</span>
+            <span className="sm:hidden w-2.5 h-2.5 flex-none rounded-full" style={{ backgroundColor: stock.accent }} title={stock.label} aria-label={stock.label} role="img" />
+            <p translate="no" className="w-20 sm:w-24 flex-none text-right text-sm font-black text-gray-900 whitespace-nowrap">{foreign && '≈ '}{money.format(product.price_eur)}</p>
+            <button
+                onClick={() => onAdd(product.id)}
+                disabled={!canAdd}
+                aria-label={!stock.canBuy ? `${product.name}: agotado` : full ? `${product.name}: sin más stock` : `Añadir ${product.name} al carrito`}
+                title={!stock.canBuy ? 'Agotado' : full ? 'Sin más stock' : 'Añadir al carrito'}
+                className={`relative w-9 h-9 flex-none rounded-full flex items-center justify-center transition-colors ${canAdd ? 'bg-blue-600 hover:bg-blue-700 text-white' : 'bg-gray-100 text-gray-400 cursor-not-allowed'}`}
+            >
+                <CartIcon className="w-4 h-4" />
+                {inCart > 0 && <span translate="no" className="absolute -top-1 -right-1 min-w-[1.1rem] h-[1.1rem] px-1 rounded-full bg-[#881337] text-white text-[9px] font-black flex items-center justify-center">{inCart}</span>}
+            </button>
+        </li>
+    );
+};
+
 const CartDrawer = ({ cartState, catalog, money }) => {
     const { lines, setQty, open, setOpen } = cartState;
     const onClose = () => setOpen(false);
@@ -459,7 +492,7 @@ const CartButton = ({ cartState }) => (
         className="fixed right-6 bottom-6 z-[80] flex items-center gap-3 pl-5 pr-6 h-14 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-black text-xs uppercase tracking-widest shadow-2xl shadow-blue-600/40 hover:scale-105 transition-all"
         aria-label={`Abrir carrito, ${cartState.count} artículos`}
     >
-        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 4h2l2.4 11.2a2 2 0 0 0 2 1.6h7.7a2 2 0 0 0 2-1.5L21 8H6" /><circle cx="10" cy="20" r="1.3" /><circle cx="17" cy="20" r="1.3" /></svg>
+        <CartIcon />
         Carrito
         <span translate="no" className="min-w-[1.5rem] h-6 px-1.5 rounded-full bg-white text-blue-600 flex items-center justify-center">{cartState.count}</span>
     </button>
