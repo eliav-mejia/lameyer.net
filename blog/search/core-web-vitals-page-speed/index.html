@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Core Web Vitals & Page Speed - Lameyer Blog</title>
-    <meta name="description" content="Core Web Vitals for documentation and developer sites: LCP, INP and CLS thresholds, field vs lab data, and the usual causes of slow pages.">
+    <title>Core Web Vitals y velocidad de página - Blog de Lameyer</title>
+    <meta name="description" content="Core Web Vitals para sitios de documentación y para desarrolladores: umbrales de LCP, INP y CLS, datos de campo frente a datos de laboratorio y las causas habituales de las páginas lentas.">
     <link rel="canonical" href="https://lameyer.net/blog/search/core-web-vitals-page-speed/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,45 +23,47 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Judge pages by field data at the 75th percentile',
-            'Make the LCP element part of the initial HTML',
-            'Build CSS and JS ahead of time',
-            'Preconnect to font and asset origins',
-            'Give images and embeds explicit dimensions',
-            'Break long main-thread tasks into smaller ones',
+            'Juzga las páginas por los datos de campo en el percentil 75',
+            'Haz que el elemento LCP forme parte del HTML inicial',
+            'Construye el CSS y el JS por adelantado',
+            'Usa preconnect hacia los orígenes de fuentes y recursos',
+            'Da dimensiones explícitas a imágenes y embeds',
+            'Divide las tareas largas del hilo principal en otras más pequeñas',
         ];
 
         const VITALS = [
-            { metric: 'LCP', name: 'Largest Contentful Paint', good: '≤ 2.5 s', poor: '> 4 s', measures: 'When the main content (largest image or text block) appears.' },
-            { metric: 'INP', name: 'Interaction to Next Paint', good: '≤ 200 ms', poor: '> 500 ms', measures: 'How quickly the page responds to clicks, taps and key presses.' },
-            { metric: 'CLS', name: 'Cumulative Layout Shift', good: '≤ 0.1', poor: '> 0.25', measures: 'How much visible content moves unexpectedly.' },
+            { metric: 'LCP', name: 'Largest Contentful Paint', good: '≤ 2,5 s', poor: '> 4 s', measures: 'Cuándo aparece el contenido principal (la imagen o el bloque de texto más grande).' },
+            { metric: 'INP', name: 'Interaction to Next Paint', good: '≤ 200 ms', poor: '> 500 ms', measures: 'Lo rápido que responde la página a clics, toques y pulsaciones de teclas.' },
+            { metric: 'CLS', name: 'Cumulative Layout Shift', good: '≤ 0,1', poor: '> 0,25', measures: 'Cuánto se mueve inesperadamente el contenido visible.' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Developer documentation is read in a hurry, often on a laptop tethered to a phone. A page that shows a blank screen for
-                    three seconds or jumps around while loading loses readers, and page experience is one of many signals search engines
-                    consider. Core Web Vitals are Google's three metrics for that experience.
+                    La documentación para desarrolladores se lee con prisa, a menudo en un portátil conectado al móvil. Una página que
+                    muestra una pantalla en blanco durante tres segundos o que salta mientras carga pierde lectores, y la experiencia de
+                    página es una de las muchas señales que tienen en cuenta los buscadores. Las Core Web Vitals son las tres métricas de
+                    Google para esa experiencia.
                 </P>
 
-                <H2>The three metrics</H2>
+                <H2>Las tres métricas</H2>
                 <Table
-                    columns={[{ key: 'metric', label: 'Metric', accent: true }, { key: 'measures', label: 'What it measures' }, { key: 'good', label: 'Good', accent: true }, { key: 'poor', label: 'Poor' }]}
+                    columns={[{ key: 'metric', label: 'Métrica', accent: true }, { key: 'measures', label: 'Qué mide' }, { key: 'good', label: 'Buena', accent: true }, { key: 'poor', label: 'Mala' }]}
                     rows={VITALS}
                 />
                 <P>
-                    A page passes when at least 75% of real visits are "good" on all three. INP replaced First Input Delay (FID) as a Core
-                    Web Vital in March 2024. Unlike FID, it considers every interaction during the visit, not just the first one.
+                    Una página aprueba cuando al menos el 75 % de las visitas reales son «buenas» en las tres. INP sustituyó a First Input
+                    Delay (FID) como Core Web Vital en marzo de 2024. A diferencia de FID, tiene en cuenta todas las interacciones de la
+                    visita, no solo la primera.
                 </P>
 
-                <H2>Field data versus lab data</H2>
+                <H2>Datos de campo frente a datos de laboratorio</H2>
                 <P>
-                    Lighthouse runs a single simulated load on one device. It is useful for debugging but it is not what users experience.
-                    Field data comes from real visits: the Chrome UX Report (CrUX), shown in PageSpeed Insights and Search Console, or your
-                    own measurements with the <Code>web-vitals</Code> library:
+                    Lighthouse ejecuta una única carga simulada en un dispositivo. Es útil para depurar, pero no es lo que viven los
+                    usuarios. Los datos de campo proceden de visitas reales: el Chrome UX Report (CrUX), que muestran PageSpeed Insights y
+                    Search Console, o tus propias mediciones con la librería <Code>web-vitals</Code>:
                 </P>
-                <CodeBlock title="Reporting field data">{`import { onLCP, onINP, onCLS } from 'web-vitals';
+                <CodeBlock title="Enviar datos de campo">{`import { onLCP, onINP, onCLS } from 'web-vitals';
 
 function send(metric) {
   // name, value, rating ("good" | "needs-improvement" | "poor"), id ...
@@ -72,39 +74,40 @@ onLCP(send);
 onINP(send);
 onCLS(send);`}</CodeBlock>
 
-                <H2>LCP: shorten the chain to the first paint</H2>
+                <H2>LCP: acorta la cadena hasta el primer pintado</H2>
                 <P>
-                    On this blog, the largest element is the article title. Before it can appear, the browser has to download React, React
-                    DOM, Babel and the Tailwind runtime, then download and compile two JSX files, and only then render. Each step waits for the
-                    one before. Typical fixes, in order of impact:
+                    En este blog, el elemento más grande es el título del artículo. Antes de que pueda aparecer, el navegador tiene que
+                    descargar React, React DOM, Babel y el runtime de Tailwind, después descargar y compilar dos archivos JSX y solo
+                    entonces renderizar. Cada paso espera al anterior. Las soluciones típicas, por orden de impacto:
                 </P>
                 <UL items={[
-                    <><strong className="text-gray-900">Ship HTML, not instructions to build it.</strong> Prerendering puts the title in the first response (<A href="/blog/search/ssr-static-generation/">SSR & Static Generation</A>).</>,
-                    <><strong className="text-gray-900">Build assets ahead of time.</strong> The Tailwind Play CDN and in-browser Babel are designed for prototyping. A build step produces a small static CSS file and precompiled JavaScript.</>,
-                    <><strong className="text-gray-900">Connect early.</strong> Add <Code>{'<link rel="preconnect">'}</Code> for font and CDN origins so connection setup overlaps with HTML parsing.</>,
-                    <><strong className="text-gray-900">Prioritize the hero image</strong>, if there is one, with <Code>fetchpriority="high"</Code>, and never lazy-load it.</>,
+                    <><strong className="text-gray-900">Sirve HTML, no instrucciones para construirlo.</strong> El prerenderizado pone el título en la primera respuesta (<A href="/blog/search/ssr-static-generation/">SSR y generación estática</A>).</>,
+                    <><strong className="text-gray-900">Construye los recursos por adelantado.</strong> El Play CDN de Tailwind y Babel en el navegador están pensados para prototipos. Un paso de build produce un archivo CSS estático pequeño y JavaScript precompilado.</>,
+                    <><strong className="text-gray-900">Conecta pronto.</strong> Añade <Code>{'<link rel="preconnect">'}</Code> para los orígenes de fuentes y CDN, para que el establecimiento de la conexión se solape con el análisis del HTML.</>,
+                    <><strong className="text-gray-900">Prioriza la imagen principal</strong>, si la hay, con <Code>fetchpriority="high"</Code>, y nunca la cargues de forma diferida.</>,
                 ]} />
 
-                <H2>INP: keep the main thread free</H2>
+                <H2>INP: mantén libre el hilo principal</H2>
                 <P>
-                    Slow interactions almost always come from long JavaScript tasks. A click handler that filters a large list and re-renders
-                    everything blocks the next paint until it finishes. Keep handlers small, update the visible part first and defer the rest.
-                    Heavy work such as searching an index can move to a Web Worker. The crossover{' '}
-                    <A href="/blog/search/core-web-vitals-x-site-search/">Core Web Vitals × Site Search</A> applies this to a search box.
+                    Las interacciones lentas casi siempre vienen de tareas largas de JavaScript. Un manejador de clic que filtra una lista
+                    grande y vuelve a renderizarlo todo bloquea el siguiente pintado hasta que termina. Mantén los manejadores pequeños,
+                    actualiza primero la parte visible y aplaza el resto. El trabajo pesado, como buscar en un índice, puede pasar a un Web
+                    Worker. El cruce{' '}
+                    <A href="/blog/search/core-web-vitals-x-site-search/">Core Web Vitals × búsqueda en el sitio</A> lo aplica a una caja de búsqueda.
                 </P>
 
-                <H2>CLS: reserve space before content arrives</H2>
+                <H2>CLS: reserva espacio antes de que llegue el contenido</H2>
                 <P>
-                    Layout shift happens when something appears and pushes existing content down: an image without dimensions, a late web
-                    font with different metrics, a banner injected at the top. Give images <Code>width</Code> and <Code>height</Code> attributes
-                    (or an <Code>aspect-ratio</Code>), use <Code>font-display: swap</Code> with a fallback font of similar size, and reserve
-                    space for anything that loads later.
+                    El desplazamiento del diseño ocurre cuando algo aparece y empuja hacia abajo el contenido existente: una imagen sin
+                    dimensiones, una fuente web tardía con otras métricas, un banner insertado arriba. Da a las imágenes atributos{' '}
+                    <Code>width</Code> y <Code>height</Code> (o un <Code>aspect-ratio</Code>), usa <Code>font-display: swap</Code> con una
+                    fuente de respaldo de tamaño parecido y reserva espacio para todo lo que se carga más tarde.
                 </P>
 
-                <Callout title="Speed affects crawling, too">
-                    Faster responses let crawlers fetch more pages in the same time. On large documentation sites this has a direct effect
-                    on how quickly new pages are discovered. See{' '}
-                    <A href="/blog/search/crawlability-indexing/">Crawlability & Indexing</A>.
+                <Callout title="La velocidad también afecta al rastreo">
+                    Las respuestas más rápidas permiten a los rastreadores descargar más páginas en el mismo tiempo. En sitios de
+                    documentación grandes, esto influye directamente en lo rápido que se descubren las páginas nuevas. Consulta{' '}
+                    <A href="/blog/search/crawlability-indexing/">Rastreabilidad e indexación</A>.
                 </Callout>
             </>
         );

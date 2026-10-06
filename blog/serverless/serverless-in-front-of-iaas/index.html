@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edge × IaaS (Hybrid) - Lameyer Blog</title>
-    <meta name="description" content="Putting serverless edge functions in front of existing VMs and databases, reaching them privately with Cloudflare Tunnel and Hyperdrive, and migrating route by route without a rewrite.">
+    <title>Edge × IaaS (híbrido) - Blog de Lameyer</title>
+    <meta name="description" content="Poner funciones serverless en el edge delante de las VMs y bases de datos existentes, llegar a ellas de forma privada con Cloudflare Tunnel e Hyperdrive, y migrar ruta a ruta sin reescribir.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/serverless-in-front-of-iaas/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,105 +23,106 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Put a Worker in front before changing anything behind it',
-            'Remove public IPs: reach servers through Tunnel',
-            'Connect databases through Hyperdrive, not per request',
-            'Move one route at a time, behind a flag',
-            'Compare old and new responses before switching',
-            'Right-size or retire each server as its routes move',
+            'Pon un Worker delante antes de cambiar nada detrás',
+            'Elimina las IP públicas: llega a los servidores a través de Tunnel',
+            'Conecta las bases de datos a través de Hyperdrive, no en cada petición',
+            'Mueve una ruta cada vez, detrás de un flag',
+            'Compara las respuestas antiguas y nuevas antes de cambiar',
+            'Redimensiona o retira cada servidor a medida que se mueven sus rutas',
         ];
 
         const STAGES = [
-            { stage: '1. Front', edge: 'Worker proxies everything', iaas: 'Unchanged, now private behind Tunnel', gain: 'Security, caching, one entry point' },
-            { stage: '2. Offload', edge: 'Auth, cache, redirects, cron', iaas: 'Handles only business requests', gain: 'Less load, smaller servers' },
-            { stage: '3. Strangle', edge: 'Route by route, new logic in Workers or the core', iaas: 'Fewer routes each month', gain: 'Modernization without a big bang' },
-            { stage: '4. Settle', edge: 'Edge + modular core', iaas: 'Only what truly needs a server (or nothing)', gain: 'Lower fixed cost' },
+            { stage: '1. Delante', edge: 'El Worker hace de proxy de todo', iaas: 'Sin cambios, ahora privado detrás de Tunnel', gain: 'Seguridad, caché, un único punto de entrada' },
+            { stage: '2. Descargar', edge: 'Autenticación, caché, redirecciones, cron', iaas: 'Solo atiende peticiones de negocio', gain: 'Menos carga, servidores más pequeños' },
+            { stage: '3. Estrangular', edge: 'Ruta a ruta, lógica nueva en Workers o en el núcleo', iaas: 'Menos rutas cada mes', gain: 'Modernizar sin big bang' },
+            { stage: '4. Asentar', edge: 'Edge + núcleo modular', iaas: 'Solo lo que de verdad necesita un servidor (o nada)', gain: 'Menor coste fijo' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Most clients don't start from zero. They have infrastructure (IaaS): VMs running an ERP, a PHP application from
-                    2015, a Postgres database with ten years of orders. "Rewrite it all as serverless" is not a plan anyone should accept. The
-                    practical path is <strong className="text-gray-900">hybrid</strong>: put serverless edge functions in front of what exists,
-                    make the servers private, and move responsibilities to the edge one route at a time. This is the strangler fig pattern,
-                    applied with the tools of the <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A> series.
+                    La mayoría de los clientes no parten de cero. Tienen infraestructura (IaaS): VMs con un ERP, una aplicación PHP de 2015,
+                    una base de datos Postgres con diez años de pedidos. «Reescribirlo todo en serverless» no es un plan que nadie deba
+                    aceptar. El camino práctico es <strong className="text-gray-900">híbrido</strong>: poner funciones serverless en el edge
+                    delante de lo que existe, hacer privados los servidores y mover responsabilidades al edge ruta a ruta. Es el patrón
+                    strangler fig, aplicado con las herramientas de la serie <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A>.
                 </P>
 
-                <H2>Four stages</H2>
+                <H2>Cuatro etapas</H2>
                 <Table
-                    columns={[{ key: 'stage', label: 'Stage', accent: true }, { key: 'edge', label: 'Edge (serverless)' }, { key: 'iaas', label: 'Servers (IaaS)' }, { key: 'gain', label: 'Gain' }]}
+                    columns={[{ key: 'stage', label: 'Etapa', accent: true }, { key: 'edge', label: 'Edge (serverless)' }, { key: 'iaas', label: 'Servidores (IaaS)' }, { key: 'gain', label: 'Beneficio' }]}
                     rows={STAGES}
                 />
                 <P>
-                    Each stage is useful on its own. A client who stops after stage 2 already has a safer, faster and cheaper system.
+                    Cada etapa es útil por sí sola. Un cliente que se detiene tras la etapa 2 ya tiene un sistema más seguro, más rápido y más barato.
                 </P>
 
-                <H2>Stage 1: a front door and private servers</H2>
+                <H2>Etapa 1: una puerta de entrada y servidores privados</H2>
                 <P>
-                    First, the Worker becomes the only public entry point and simply forwards everything. Then the servers lose their public
-                    IPs: a <A href="/blog/security/cloudflare-tunnel/">Cloudflare Tunnel</A> connector on each VM opens an outbound
-                    connection, so nothing needs an open inbound port. Attackers can no longer bypass the edge to hit the origin directly.
+                    Primero, el Worker se convierte en el único punto de entrada público y simplemente lo reenvía todo. Después los servidores
+                    pierden sus IP públicas: un conector de <A href="/blog/security/cloudflare-tunnel/">Cloudflare Tunnel</A> en cada VM abre
+                    una conexión de salida, así que nada necesita un puerto de entrada abierto. Los atacantes ya no pueden saltarse el edge
+                    para atacar directamente el origen.
                 </P>
-                <CodeBlock title="cloudflared config on the legacy VM">{`tunnel: legacy-app
+                <CodeBlock title="Configuración de cloudflared en la VM heredada">{`tunnel: legacy-app
 credentials-file: /etc/cloudflared/legacy-app.json
 ingress:
   - hostname: legacy-origin.internal.example.com
     service: http://localhost:8080
   - service: http_status:404`}</CodeBlock>
 
-                <H2>Reach the database without opening it</H2>
+                <H2>Llega a la base de datos sin abrirla</H2>
                 <P>
-                    New edge functions often need the data in the existing database. Hyperdrive pools connections near the database, so
-                    hundreds of short-lived Workers don't exhaust its connection limit, and it can reach a private database through a
-                    Tunnel. The data stays where it is, as the system of record, until there is a reason to move it (see{' '}
-                    <A href="/blog/serverless/edge-storage-kv-d1-r2/">Edge Storage</A>).
+                    Las nuevas funciones edge suelen necesitar los datos de la base de datos existente. Hyperdrive mantiene un pool de
+                    conexiones cerca de la base de datos, para que cientos de Workers de vida corta no agoten su límite de conexiones, y puede
+                    llegar a una base de datos privada a través de un Tunnel. Los datos se quedan donde están, como sistema de registro, hasta
+                    que haya un motivo para moverlos (consulta <A href="/blog/serverless/edge-storage-kv-d1-r2/">Almacenamiento edge</A>).
                 </P>
-                <CodeBlock title="wrangler.jsonc (excerpt)">{`"hyperdrive": [
-  { "binding": "LEGACY_DB", "id": "<hyperdrive-config-id>" }   // points at Postgres via Tunnel
+                <CodeBlock title="wrangler.jsonc (extracto)">{`"hyperdrive": [
+  { "binding": "LEGACY_DB", "id": "<hyperdrive-config-id>" }   // apunta a Postgres a través de Tunnel
 ]`}</CodeBlock>
 
-                <H2>Stage 3: move one route at a time</H2>
+                <H2>Etapa 3: mueve una ruta cada vez</H2>
                 <P>
-                    The gateway decides, per route, whether the old server or the new code answers. A flag in KV makes every switch
-                    reversible in seconds, without a deploy.
+                    El gateway decide, por ruta, si responde el servidor antiguo o el código nuevo. Un flag en KV hace que cada cambio sea
+                    reversible en segundos, sin desplegar.
                 </P>
                 <CodeBlock title="src/index.ts">{`app.all('*', async (c) => {
   const migrated = (await c.env.CONFIG.get<string[]>('migrated-routes', 'json')) ?? [];
   const path = new URL(c.req.url).pathname;
   if (migrated.some((p) => path.startsWith(p))) {
-    return c.env.CORE.fetch(c.req.raw);                    // new: modular core
+    return c.env.CORE.fetch(c.req.raw);                    // nuevo: núcleo modular
   }
-  return fetch('https://legacy-origin.internal.example.com' + path, c.req.raw);   // old: VM via Tunnel
+  return fetch('https://legacy-origin.internal.example.com' + path, c.req.raw);   // antiguo: VM a través de Tunnel
 });`}</CodeBlock>
-                <Callout title="Shadow before you switch">
-                    For read routes, send each request to both the old and the new implementation for a few days, return the old response,
-                    and log any difference (<Code>ctx.waitUntil</Code> keeps this off the user's critical path). Switch when the diff log stays
-                    empty.
+                <Callout title="Compara en sombra antes de cambiar">
+                    En las rutas de lectura, envía cada petición a la implementación antigua y a la nueva durante unos días, devuelve la
+                    respuesta antigua y registra cualquier diferencia (<Code>ctx.waitUntil</Code> lo mantiene fuera del camino crítico del
+                    usuario). Cambia cuando el registro de diferencias se quede vacío.
                 </Callout>
 
-                <H2>What should stay on servers</H2>
+                <H2>Qué debería quedarse en servidores</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Large stateful systems of record</strong> (the main database, an ERP) are often best left on managed IaaS, reached privately.</>,
-                    <><strong className="text-gray-900">Long-running or heavy compute</strong> (video, large ML jobs) that doesn't fit function limits. Containers or VMs still make sense here.</>,
-                    <><strong className="text-gray-900">Licensed software</strong> that only runs on a specific OS.</>,
+                    <><strong className="text-gray-900">Los grandes sistemas de registro con estado</strong> (la base de datos principal, un ERP) a menudo están mejor en IaaS gestionado, con acceso privado.</>,
+                    <><strong className="text-gray-900">El cómputo largo o pesado</strong> (vídeo, grandes trabajos de ML) que no cabe en los límites de una función. Aquí los contenedores o las VMs siguen teniendo sentido.</>,
+                    <><strong className="text-gray-900">El software con licencia</strong> que solo funciona en un sistema operativo concreto.</>,
                 ]} />
                 <P>
-                    The goal isn't zero servers. It's that every remaining server has a reason to exist, is private, and does only the work
-                    that needs it.
+                    El objetivo no es cero servidores. Es que cada servidor que quede tenga un motivo para existir, sea privado y haga solo el
+                    trabajo que lo necesita.
                 </P>
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    Track routes migrated vs. remaining, requests reaching the legacy origin (should fall each month), public IPs and open
-                    inbound ports (target zero), and the monthly IaaS bill as servers are downsized. Measured in money, the hybrid
-                    migration pays for itself in steps instead of asking for one large budget up front.
+                    Controla las rutas migradas frente a las restantes, las peticiones que llegan al origen heredado (deberían bajar cada mes),
+                    las IP públicas y los puertos de entrada abiertos (objetivo cero), y la factura mensual de IaaS a medida que se reducen los
+                    servidores. Medida en dinero, la migración híbrida se paga sola por etapas en lugar de exigir un gran presupuesto por adelantado.
                 </P>
 
-                <Callout title="Related">
-                    New logic that replaces old routes belongs in the <A href="/blog/core/modular-core-architecture/">Modular Core</A>, not
-                    in the edge. Integrations with on-premises systems reuse the same Tunnel, as shown in{' '}
-                    <A href="/blog/serverless/serverless-integration-paas/">Functions × Integration PaaS</A>.
+                <Callout title="Relacionado">
+                    La lógica nueva que sustituye a las rutas antiguas va en el <A href="/blog/core/modular-core-architecture/">Modular Core</A>,
+                    no en el edge. Las integraciones con sistemas locales reutilizan el mismo Tunnel, como se muestra en{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">Funciones × PaaS de integración</A>.
                 </Callout>
             </>
         );

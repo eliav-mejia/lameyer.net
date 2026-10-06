@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Metering × Multi-tenant SaaS - Lameyer Blog</title>
-    <meta name="description" content="Running one serverless platform for many customers: tenant resolution at the edge, isolated storage per tenant, per-tenant limits, and usage metering with Analytics Engine for billing.">
+    <title>Medición × SaaS multiinquilino - Blog de Lameyer</title>
+    <meta name="description" content="Operar una sola plataforma serverless para muchos clientes: resolución del inquilino en el edge, almacenamiento aislado por inquilino, límites por inquilino y medición de uso con Analytics Engine para facturar.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/multi-tenant-saas-metering/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,77 +23,78 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Resolve the tenant once, at the edge, from a trusted source',
-            'Never accept a tenant ID from the request body',
-            'Choose an isolation level per data type',
-            'Give each plan its own rate limit',
-            'Record one usage event per billable action',
-            'Reconcile usage with invoices every month',
+            'Resuelve el inquilino una sola vez, en el edge, desde una fuente de confianza',
+            'Nunca aceptes un ID de inquilino del cuerpo de la petición',
+            'Elige un nivel de aislamiento por tipo de dato',
+            'Da a cada plan su propio límite de uso',
+            'Registra un evento de uso por cada acción facturable',
+            'Concilia cada mes el uso con las facturas',
         ];
 
         const ISOLATION = [
-            { level: 'Shared tables, tenant column', how: 'One D1 or Postgres database, tenant_id on every row', fits: 'Many small tenants, low-sensitivity data' },
-            { level: 'Database per tenant', how: 'One D1 database per tenant, chosen at the edge', fits: 'Mid-size tenants, easy export and deletion' },
-            { level: 'Object per tenant', how: 'A Durable Object per tenant for counters and coordination', fits: 'Per-tenant state that must be exact' },
-            { level: 'Code per tenant', how: 'Workers for Platforms: each tenant\'s own script in a dispatch namespace', fits: 'Tenants who run custom logic on your platform' },
+            { level: 'Tablas compartidas, columna de inquilino', how: 'Una base de datos D1 o Postgres, tenant_id en cada fila', fits: 'Muchos inquilinos pequeños, datos poco sensibles' },
+            { level: 'Base de datos por inquilino', how: 'Una base de datos D1 por inquilino, elegida en el edge', fits: 'Inquilinos medianos, exportación y borrado sencillos' },
+            { level: 'Objeto por inquilino', how: 'Un Durable Object por inquilino para contadores y coordinación', fits: 'Estado por inquilino que debe ser exacto' },
+            { level: 'Código por inquilino', how: 'Workers for Platforms: el script propio de cada inquilino en un dispatch namespace', fits: 'Inquilinos que ejecutan lógica a medida en tu plataforma' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Building a platform once and selling it to many customers is what turns integration work into a SaaS business. It adds
-                    three requirements a single-client system never has: <strong className="text-gray-900">every customer's data must stay
-                    separate, no customer may degrade the service for others, and usage must be measured accurately enough to bill</strong>.
-                    Serverless helps with all three, because the edge sees every request and can attach a tenant to it before anything else
-                    happens.
+                    Construir una plataforma una vez y vendérsela a muchos clientes es lo que convierte el trabajo de integración en un negocio
+                    SaaS. Añade tres requisitos que un sistema para un solo cliente nunca tiene: <strong className="text-gray-900">los datos de
+                    cada cliente deben quedar separados, ningún cliente puede degradar el servicio de los demás y el uso debe medirse con la
+                    precisión suficiente para facturar</strong>. Serverless ayuda con los tres, porque el edge ve cada petición y puede asociarle
+                    un inquilino antes de que ocurra nada más.
                 </P>
 
-                <H2>Resolve the tenant at the edge</H2>
+                <H2>Resuelve el inquilino en el edge</H2>
                 <P>
-                    The gateway (see <A href="/blog/serverless/routing-caching-auth-edge/">Routing, Caching & Auth</A>) works out the tenant
-                    once, from a source the client can't forge: a claim in a verified JWT, the API key's record, or the hostname when
-                    customers use their own domain through Cloudflare for SaaS. Everything downstream receives it from the gateway, never
-                    from the request body.
+                    El gateway (consulta <A href="/blog/serverless/routing-caching-auth-edge/">Enrutado, caché y autenticación</A>) determina el
+                    inquilino una sola vez, a partir de una fuente que el cliente no puede falsificar: un claim de un JWT verificado, el registro
+                    de la clave de API o el hostname cuando los clientes usan su propio dominio con Cloudflare for SaaS. Todo lo que viene
+                    después lo recibe del gateway, nunca del cuerpo de la petición.
                 </P>
                 <CodeBlock title="src/tenant.ts">{`export async function resolveTenant(request: Request, env: Env, user?: { tenant: string }) {
-  if (user?.tenant) return user.tenant;                         // from a verified JWT
-  const host = new URL(request.url).hostname;                   // api.customer.com
-  const byHost = await env.TENANTS_BY_HOST.get(host);           // KV: hostname -> tenant
+  if (user?.tenant) return user.tenant;                         // de un JWT verificado
+  const host = new URL(request.url).hostname;                   // api.cliente.com
+  const byHost = await env.TENANTS_BY_HOST.get(host);           // KV: hostname -> inquilino
   if (byHost) return byHost;
-  return null;                                                  // unknown: reject with 404
+  return null;                                                  // desconocido: rechazar con 404
 }`}</CodeBlock>
 
-                <H2>Choose isolation per data type</H2>
+                <H2>Elige el aislamiento por tipo de dato</H2>
                 <Table
-                    columns={[{ key: 'level', label: 'Isolation', accent: true }, { key: 'how', label: 'How' }, { key: 'fits', label: 'Fits' }]}
+                    columns={[{ key: 'level', label: 'Aislamiento', accent: true }, { key: 'how', label: 'Cómo' }, { key: 'fits', label: 'Encaja en' }]}
                     rows={ISOLATION}
                 />
                 <P>
-                    One platform can mix levels: shared tables for catalog data, a D1 database per tenant for customer records (which makes
-                    "export all my data" and "delete my account" one operation), and a Durable Object per tenant for usage counters.
-                    Whatever the level, test it: an automated check that tries to read tenant B's data with tenant A's credentials, run on
-                    every release.
+                    Una plataforma puede mezclar niveles: tablas compartidas para los datos del catálogo, una base de datos D1 por inquilino
+                    para los registros de clientes (lo que convierte «exportar todos mis datos» y «borrar mi cuenta» en una sola operación) y un
+                    Durable Object por inquilino para los contadores de uso. Sea cual sea el nivel, pruébalo: una comprobación automática que
+                    intenta leer datos del inquilino B con las credenciales del inquilino A, ejecutada en cada lanzamiento.
                 </P>
 
-                <H2>No noisy neighbors</H2>
+                <H2>Sin vecinos ruidosos</H2>
                 <P>
-                    One customer's month-end import shouldn't slow everyone else down. Per-plan <A href="/blog/serverless/routing-caching-auth-edge/">rate
-                    limits</A> keyed by tenant handle request floods. Queues need the same care: a separate queue, or at least fair
-                    batching, for tenants with heavy background jobs, so their backlog doesn't delay small tenants' events.
+                    La importación de fin de mes de un cliente no debería ralentizar a todos los demás. Los{' '}
+                    <A href="/blog/serverless/routing-caching-auth-edge/">límites de uso</A> por plan, con el inquilino como clave, contienen las
+                    avalanchas de peticiones. Las colas necesitan el mismo cuidado: una cola separada, o al menos lotes equitativos, para los
+                    inquilinos con trabajos en segundo plano pesados, para que su atasco no retrase los eventos de los inquilinos pequeños.
                 </P>
 
-                <H2>Metering: one event per billable action</H2>
+                <H2>Medición: un evento por acción facturable</H2>
                 <P>
-                    Rate limits are approximate. Billing must not be. Record a usage event for every billable action: an API call, a synced
-                    record, a generated document. Workers Analytics Engine is built for this: writes are fire-and-forget, don't slow the
-                    request, and can be queried with SQL.
+                    Los límites de uso son aproximados. La facturación no puede serlo. Registra un evento de uso por cada acción facturable: una
+                    llamada a la API, un registro sincronizado, un documento generado. Workers Analytics Engine está hecho para esto: las
+                    escrituras se lanzan y se olvidan, no ralentizan la petición y se pueden consultar con SQL.
                 </P>
-                <CodeBlock title="Recording usage">{`env.USAGE.writeDataPoint({
-  indexes: [tenant],                         // sampling key: one tenant's data stays together
+                <CodeBlock title="Registrar el uso">{`env.USAGE.writeDataPoint({
+  indexes: [tenant],                         // clave de muestreo: los datos de un inquilino se mantienen juntos
   blobs:   [route, plan, connector ?? ''],
   doubles: [1, cpuMs, recordsSynced],
 });`}</CodeBlock>
-                <CodeBlock title="Monthly usage per tenant (SQL API)">{`SELECT
+                <CodeBlock title="Uso mensual por inquilino (API SQL)">{`SELECT
   index1 AS tenant,
   SUM(_sample_interval * double1) AS api_calls,
   SUM(_sample_interval * double3) AS records_synced
@@ -102,38 +103,38 @@ WHERE timestamp >= toDateTime('2026-09-01 00:00:00')
   AND timestamp <  toDateTime('2026-10-01 00:00:00')
 GROUP BY tenant
 ORDER BY api_calls DESC`}</CodeBlock>
-                <Callout title="Sampling and invoices">
-                    Analytics Engine may sample at very high volumes, which is why the query multiplies by <Code>_sample_interval</Code>.
-                    That is fine for dashboards and usage-based tiers. For line items that must be exact to the unit, also increment a
-                    counter in the tenant's Durable Object and invoice from that, using Analytics Engine to cross-check.
+                <Callout title="Muestreo y facturas">
+                    Analytics Engine puede muestrear con volúmenes muy altos, por eso la consulta multiplica por <Code>_sample_interval</Code>.
+                    Eso vale para paneles y tramos de precio por uso. Para las líneas de factura que deben ser exactas a la unidad, incrementa
+                    también un contador en el Durable Object del inquilino y factura a partir de él, usando Analytics Engine para contrastar.
                 </Callout>
 
-                <H2>From usage to price</H2>
+                <H2>Del uso al precio</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Pick a unit the customer understands:</strong> records synced, documents generated, active connectors. Not CPU milliseconds.</>,
-                    <><strong className="text-gray-900">Know your own unit cost:</strong> requests and CPU time per unit come from <A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing & Cost</A>, so margins are known, not guessed.</>,
-                    <><strong className="text-gray-900">Show usage in the product:</strong> a usage page with the same numbers as the invoice prevents most billing disputes.</>,
-                    <><strong className="text-gray-900">Warn at 80%:</strong> tenants approaching their plan limit are an upgrade conversation, not a surprise 429.</>,
+                    <><strong className="text-gray-900">Elige una unidad que el cliente entienda:</strong> registros sincronizados, documentos generados, conectores activos. No milisegundos de CPU.</>,
+                    <><strong className="text-gray-900">Conoce tu propio coste por unidad:</strong> las peticiones y el tiempo de CPU por unidad salen de <A href="/blog/serverless/logs-tracing-cost/">Logs, trazas y costes</A>, así que los márgenes se conocen, no se adivinan.</>,
+                    <><strong className="text-gray-900">Muestra el uso en el producto:</strong> una página de uso con las mismas cifras que la factura evita la mayoría de las disputas de facturación.</>,
+                    <><strong className="text-gray-900">Avisa al 80 %:</strong> los inquilinos que se acercan al límite de su plan son una conversación de upgrade, no un 429 por sorpresa.</>,
                 ]} />
 
-                <H2>When tenants bring their own code</H2>
+                <H2>Cuando los inquilinos traen su propio código</H2>
                 <P>
-                    Some platforms let customers add their own logic: a custom transformation, a webhook handler. Workers for Platforms runs
-                    each tenant's script in its own isolate inside a dispatch namespace, with limits you set per script. The customer gets
-                    flexibility, and your platform stays protected from their code.
+                    Algunas plataformas permiten a los clientes añadir su propia lógica: una transformación a medida, un manejador de webhooks.
+                    Workers for Platforms ejecuta el script de cada inquilino en su propio isolate dentro de un dispatch namespace, con los
+                    límites que definas por script. El cliente gana flexibilidad y tu plataforma queda protegida de su código.
                 </P>
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    Cross-tenant access incidents (target zero, verified by tests), P95 latency per tenant (the worst tenant matters, not the
-                    average), revenue and cost per tenant, and the gap between metered usage and invoiced usage (should be zero after
-                    reconciliation).
+                    Incidentes de acceso entre inquilinos (objetivo cero, verificado con tests), latencia P95 por inquilino (importa el peor
+                    inquilino, no la media), ingresos y coste por inquilino, y la diferencia entre el uso medido y el facturado (debería ser
+                    cero tras la conciliación).
                 </P>
 
-                <Callout title="Related">
-                    Data ownership inside the core follows the rules in <A href="/blog/core/data-ownership-migrations/">Data Ownership &
-                    Migrations</A>. The connectors that generate most usage events are described in{' '}
-                    <A href="/blog/serverless/serverless-integration-paas/">Functions × Integration PaaS</A>.
+                <Callout title="Relacionado">
+                    La propiedad de los datos dentro del núcleo sigue las reglas de <A href="/blog/core/data-ownership-migrations/">Propiedad de
+                    datos y migraciones</A>. Los conectores que generan la mayoría de los eventos de uso se describen en{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">Funciones × PaaS de integración</A>.
                 </Callout>
             </>
         );

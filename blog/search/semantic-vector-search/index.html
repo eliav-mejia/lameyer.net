@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Semantic & Vector Search - Lameyer Blog</title>
-    <meta name="description" content="Semantic and vector search over code repositories: syntax-aware chunking, embeddings, HNSW indexes, metadata filters and hybrid keyword + vector ranking.">
+    <title>Búsqueda semántica y vectorial - Blog de Lameyer</title>
+    <meta name="description" content="Búsqueda semántica y vectorial en repositorios de código: troceado según la sintaxis, embeddings, índices HNSW, filtros por metadatos y ranking híbrido de palabras clave + vectores.">
     <link rel="canonical" href="https://lameyer.net/blog/search/semantic-vector-search/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,42 +23,44 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Chunk code by function and class, not by line count',
-            'Prefix every chunk with its path and enclosing symbol',
-            'Embed queries and chunks with the same model version',
-            'Store repo, language and path next to each vector',
-            'Combine keyword and vector results with RRF',
-            'Rerank only the top candidates',
+            'Trocea el código por función y clase, no por número de líneas',
+            'Antepón a cada fragmento su ruta y el símbolo que lo contiene',
+            'Genera los embeddings de consultas y fragmentos con la misma versión del modelo',
+            'Guarda repositorio, lenguaje y ruta junto a cada vector',
+            'Combina los resultados de palabras clave y vectores con RRF',
+            'Reordena solo los mejores candidatos',
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Keyword search answers "where does this string appear?". Developers usually ask something else: "where do we retry
-                    failed payments?" The function that does it may be called <Code>reattempt_charge</Code> and never use the word
-                    "retry". Semantic search closes that gap by comparing <em>meaning</em> instead of characters.
+                    La búsqueda por palabras clave responde a «¿dónde aparece esta cadena?». Los desarrolladores suelen preguntar otra
+                    cosa: «¿dónde reintentamos los pagos fallidos?». La función que lo hace puede llamarse <Code>reattempt_charge</Code> y
+                    no usar nunca la palabra «retry». La búsqueda semántica cierra esa brecha comparando <em>significado</em> en lugar de caracteres.
                 </P>
 
-                <H2>How it works</H2>
+                <H2>Cómo funciona</H2>
                 <P>
-                    An embedding model turns a piece of text or code into a vector: a list of a few hundred to a few thousand numbers.
-                    Inputs with similar meaning end up close together, usually measured with cosine similarity. A search then has five steps:
+                    Un modelo de embeddings convierte un texto o un trozo de código en un vector: una lista de entre unos cientos y unos
+                    miles de números. Las entradas con significado parecido quedan cerca, normalmente medido con la similitud del coseno.
+                    Una búsqueda tiene entonces cinco pasos:
                 </P>
                 <UL items={[
-                    <><strong className="text-gray-900">Chunk</strong> the repository into units small enough to embed.</>,
-                    <><strong className="text-gray-900">Embed</strong> each chunk and store the vector with its metadata.</>,
-                    <><strong className="text-gray-900">Index</strong> the vectors for approximate nearest-neighbour (ANN) lookup, typically with HNSW.</>,
-                    <><strong className="text-gray-900">Query:</strong> embed the question with the same model and fetch the nearest chunks.</>,
-                    <><strong className="text-gray-900">Rerank</strong> the top results with a slower, more precise model.</>,
+                    <><strong className="text-gray-900">Trocear</strong> el repositorio en unidades lo bastante pequeñas para generar su embedding.</>,
+                    <><strong className="text-gray-900">Generar el embedding</strong> de cada fragmento y guardar el vector con sus metadatos.</>,
+                    <><strong className="text-gray-900">Indexar</strong> los vectores para una búsqueda aproximada de vecinos más cercanos (ANN), normalmente con HNSW.</>,
+                    <><strong className="text-gray-900">Consultar:</strong> generar el embedding de la pregunta con el mismo modelo y recuperar los fragmentos más cercanos.</>,
+                    <><strong className="text-gray-900">Reordenar</strong> los mejores resultados con un modelo más lento y más preciso.</>,
                 ]} />
 
-                <H2>Chunking: follow the syntax tree</H2>
+                <H2>Troceado: sigue el árbol sintáctico</H2>
                 <P>
-                    Splitting a file every 50 lines cuts functions in half, so neither half embeds well. A parser such as tree-sitter
-                    gives you the syntax tree, so you can chunk at function, method and class boundaries and only split a unit when it is
-                    too long for the model. Then add a short header to each chunk with context the code itself doesn't carry:
+                    Partir un archivo cada 50 líneas corta las funciones por la mitad, y ninguna de las dos mitades genera un buen
+                    embedding. Un parser como tree-sitter te da el árbol sintáctico, así que puedes trocear en los límites de funciones,
+                    métodos y clases y solo dividir una unidad cuando es demasiado larga para el modelo. Después añade a cada fragmento una
+                    breve cabecera con el contexto que el propio código no lleva:
                 </P>
-                <CodeBlock title="One chunk, as sent to the embedding model">{`# repo: acme/payments-ledger-api
+                <CodeBlock title="Un fragmento, tal como se envía al modelo de embeddings">{`# repo: acme/payments-ledger-api
 # path: src/payments/retry.py
 # symbol: PaymentRetrier.reattempt_charge
 # language: python
@@ -67,14 +69,14 @@ def reattempt_charge(self, charge_id: str, attempt: int) -> Charge:
     delay = min(2 ** attempt, 300)
     ...`}</CodeBlock>
                 <P>
-                    The header helps twice. The model sees that this is payments code, and you can show the path and symbol in results
-                    without a second lookup.
+                    La cabecera ayuda dos veces. El modelo ve que es código de pagos, y puedes mostrar la ruta y el símbolo en los
+                    resultados sin una segunda consulta.
                 </P>
 
-                <H2>Storing vectors next to metadata</H2>
+                <H2>Guardar los vectores junto a los metadatos</H2>
                 <P>
-                    You don't need a dedicated vector database to start. PostgreSQL with the pgvector extension keeps vectors, metadata
-                    and filters in one place:
+                    No necesitas una base de datos vectorial dedicada para empezar. PostgreSQL con la extensión pgvector mantiene
+                    vectores, metadatos y filtros en un solo lugar:
                 </P>
                 <CodeBlock title="PostgreSQL + pgvector">{`CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -85,56 +87,59 @@ CREATE TABLE code_chunks (
     language   text NOT NULL,
     symbol     text,
     content    text NOT NULL,
-    model      text NOT NULL,          -- embedding model + version
+    model      text NOT NULL,          -- modelo de embeddings + versión
     embedding  vector(1024) NOT NULL
 );
 
 CREATE INDEX ON code_chunks USING hnsw (embedding vector_cosine_ops);
 
--- $1 is the query embedding; <=> is cosine distance
+-- $1 es el embedding de la consulta; <=> es la distancia del coseno
 SELECT repo, path, symbol
 FROM code_chunks
 WHERE language = 'python' AND repo LIKE 'acme/payments-%'
 ORDER BY embedding <=> $1
 LIMIT 20;`}</CodeBlock>
-                <Callout title="Filters and ANN indexes">
-                    An HNSW index finds the nearest vectors first and applies the <Code>WHERE</Code> clause afterwards, so a narrow
-                    filter can return fewer rows than your <Code>LIMIT</Code>. Recent pgvector versions offer iterative index scans to
-                    keep searching until enough rows match. For very selective filters, partial indexes per repository or language also help.
+                <Callout title="Filtros e índices ANN">
+                    Un índice HNSW encuentra primero los vectores más cercanos y aplica la cláusula <Code>WHERE</Code> después, así que un
+                    filtro muy estrecho puede devolver menos filas que tu <Code>LIMIT</Code>. Las versiones recientes de pgvector ofrecen
+                    escaneos iterativos del índice que siguen buscando hasta que coinciden suficientes filas. Para filtros muy selectivos,
+                    también ayudan los índices parciales por repositorio o lenguaje.
                 </Callout>
 
-                <H2>Hybrid search: keep the keywords</H2>
+                <H2>Búsqueda híbrida: conserva las palabras clave</H2>
                 <P>
-                    Vectors are weak exactly where keywords are strong: identifiers, error codes and version strings. A search for{' '}
-                    <Code>ERR_IDEMPOTENCY_CONFLICT</Code> should return the line that contains it, not something "about conflicts".
-                    So run a keyword search (BM25) and a vector search in parallel and merge the two rankings. Reciprocal rank fusion (RRF)
-                    is a simple merge that needs no score normalization:
+                    Los vectores son débiles justo donde las palabras clave son fuertes: identificadores, códigos de error y cadenas de
+                    versión. Una búsqueda de{' '}
+                    <Code>ERR_IDEMPOTENCY_CONFLICT</Code> debe devolver la línea que lo contiene, no algo «sobre conflictos».
+                    Así que ejecuta en paralelo una búsqueda por palabras clave (BM25) y una búsqueda vectorial y fusiona los dos rankings.
+                    La fusión por rango recíproco (RRF) es una mezcla sencilla que no necesita normalizar puntuaciones:
                 </P>
                 <CodeBlock title="rrf.py">{`def rrf(*rankings, k=60):
-    """Merge ranked lists of ids. Items ranked high in any list rise to the top."""
+    """Fusiona listas ordenadas de ids. Lo que va alto en cualquier lista sube arriba."""
     scores = {}
     for ranking in rankings:
         for rank, doc_id in enumerate(ranking, start=1):
             scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank)
     return sorted(scores, key=scores.get, reverse=True)
 
-results = rrf(bm25_ids, vector_ids)[:50]   # then rerank these 50`}</CodeBlock>
+results = rrf(bm25_ids, vector_ids)[:50]   # después se reordenan estos 50`}</CodeBlock>
 
-                <H2>Reranking: spend compute where it counts</H2>
+                <H2>Reordenación: gasta cómputo donde importa</H2>
                 <P>
-                    The first retrieval stage optimizes for recall: get the right chunk somewhere in the top 50. A cross-encoder reranker
-                    reads the query and each candidate together and scores them much more precisely, but it is too slow to run on the whole
-                    corpus. Running it only on the merged top 50 gives you most of the precision for a fraction of the cost.
+                    La primera etapa de recuperación optimiza el recall: que el fragmento correcto esté en algún lugar del top 50. Un
+                    reranker cross-encoder lee la consulta y cada candidato juntos y los puntúa con mucha más precisión, pero es demasiado
+                    lento para ejecutarlo sobre todo el corpus. Ejecutarlo solo sobre el top 50 fusionado te da casi toda la precisión por
+                    una fracción del coste.
                 </P>
 
-                <H2>Where semantic search stops</H2>
+                <H2>Dónde se detiene la búsqueda semántica</H2>
                 <P>
-                    Each choice above (chunk size, header format, model, <Code>k</Code>, reranker) changes the results, and none of it is
-                    obviously right. Your filters and ranking settings should live in version control
-                    (<A href="/blog/search/search-as-code-sac/">Search as Code</A>), and every change should be measured against real
-                    queries (<A href="/blog/search/benchmark-curation-reap-harvest/">Benchmark Curation</A>). If you index documentation as
-                    well as code, <A href="/blog/search/static-generation-x-vector-search/">Static Generation × Vector Search</A> shows
-                    how to build the index from the same build that publishes the site.
+                    Cada decisión anterior (tamaño del fragmento, formato de la cabecera, modelo, <Code>k</Code>, reranker) cambia los
+                    resultados, y ninguna es obviamente correcta. Tus filtros y ajustes de ranking deberían vivir en control de versiones
+                    (<A href="/blog/search/search-as-code-sac/">Search as Code</A>), y cada cambio debería medirse con consultas reales
+                    (<A href="/blog/search/benchmark-curation-reap-harvest/">Curación de benchmarks</A>). Si indexas documentación además
+                    de código, <A href="/blog/search/static-generation-x-vector-search/">Generación estática × búsqueda vectorial</A> muestra
+                    cómo construir el índice en el mismo build que publica el sitio.
                 </P>
             </>
         );

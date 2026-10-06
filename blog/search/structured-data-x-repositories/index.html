@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Structured Data × Repositories - Lameyer Blog</title>
-    <meta name="description" content="Making code repositories machine-readable with codemeta.json and schema.org SoftwareSourceCode, and reusing the same metadata for internal search filters.">
+    <title>Datos estructurados × repositorios - Blog de Lameyer</title>
+    <meta name="description" content="Hacer que los repositorios de código sean legibles por máquinas con codemeta.json y schema.org SoftwareSourceCode, y reutilizar los mismos metadatos en los filtros de búsqueda internos.">
     <link rel="canonical" href="https://lameyer.net/blog/search/structured-data-x-repositories/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,40 +23,41 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Add codemeta.json to the root of each repository',
-            'Use SPDX license identifiers',
-            'Sync GitHub topics from the keywords',
-            'Publish SoftwareSourceCode JSON-LD on project pages',
-            'Build the internal catalog from the same files',
-            'Validate the metadata in CI',
+            'Añade codemeta.json en la raíz de cada repositorio',
+            'Usa identificadores de licencia SPDX',
+            'Sincroniza los topics de GitHub a partir de las keywords',
+            'Publica JSON-LD SoftwareSourceCode en las páginas de proyecto',
+            'Construye el catálogo interno a partir de los mismos archivos',
+            'Valida los metadatos en CI',
         ];
 
         const USES = [
-            { consumer: 'Internal code search', reads: 'codemeta.json', gets: 'Filters by language, status, owner and keywords' },
-            { consumer: 'GitHub', reads: 'Topics, license file', gets: 'Topic pages, license badge, repository search filters' },
-            { consumer: 'Search engines', reads: 'JSON-LD on the project page', gets: 'An unambiguous description of the project' },
-            { consumer: 'Research and archives', reads: 'codemeta.json, CITATION.cff', gets: 'Citation and preservation metadata' },
+            { consumer: 'Búsqueda de código interna', reads: 'codemeta.json', gets: 'Filtros por lenguaje, estado, responsable y keywords' },
+            { consumer: 'GitHub', reads: 'Topics, archivo de licencia', gets: 'Páginas de topics, insignia de licencia, filtros de búsqueda de repositorios' },
+            { consumer: 'Buscadores', reads: 'JSON-LD en la página del proyecto', gets: 'Una descripción inequívoca del proyecto' },
+            { consumer: 'Investigación y archivos', reads: 'codemeta.json, CITATION.cff', gets: 'Metadatos de citación y preservación' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    The <A href="/blog/search/code-search-repository-organization/">overview</A> of this series argued that filters only work
-                    when the metadata exists. <A href="/blog/search/structured-data/">Structured data</A> showed how to describe a web page for
-                    machines. This crossover connects the two: describe each <em>repository</em> once, in a standard format, and let
-                    internal search, GitHub and public search engines all read the same description.
+                    La <A href="/blog/search/code-search-repository-organization/">visión general</A> de esta serie defendía que los filtros
+                    solo funcionan cuando los metadatos existen. <A href="/blog/search/structured-data/">Datos estructurados</A> mostró cómo
+                    describir una página web para las máquinas. Este cruce conecta ambas ideas: describe cada <em>repositorio</em> una sola
+                    vez, en un formato estándar, y deja que la búsqueda interna, GitHub y los buscadores públicos lean la misma descripción.
                 </P>
 
-                <H2>codemeta.json: metadata that lives with the code</H2>
+                <H2>codemeta.json: metadatos que viven con el código</H2>
                 <P>
-                    CodeMeta is a community standard for software metadata built on the schema.org vocabulary. A <Code>codemeta.json</Code>
-                    {' '}file sits in the root of the repository, so it is versioned and reviewed with the code it describes:
+                    CodeMeta es un estándar comunitario de metadatos de software basado en el vocabulario de schema.org. Un archivo{' '}
+                    <Code>codemeta.json</Code> se coloca en la raíz del repositorio, así que se versiona y se revisa junto con el código
+                    que describe:
                 </P>
                 <CodeBlock title="codemeta.json">{`{
   "@context": "https://w3id.org/codemeta/3.0",
   "@type": "SoftwareSourceCode",
   "name": "payments-ledger-api",
-  "description": "Double-entry ledger and payment retry service for Acme checkout.",
+  "description": "Libro mayor de partida doble y servicio de reintento de pagos para el checkout de Acme.",
   "codeRepository": "https://github.com/acme/payments-ledger-api",
   "programmingLanguage": ["Python"],
   "runtimePlatform": "Python 3.12",
@@ -67,35 +68,37 @@
   "maintainer": { "@type": "Organization", "name": "Acme Payments Team" }
 }`}</CodeBlock>
 
-                <H2>One description, many readers</H2>
+                <H2>Una descripción, muchos lectores</H2>
                 <Table
-                    columns={[{ key: 'consumer', label: 'Reader', accent: true }, { key: 'reads', label: 'Reads' }, { key: 'gets', label: 'Result' }]}
+                    columns={[{ key: 'consumer', label: 'Lector', accent: true }, { key: 'reads', label: 'Lee' }, { key: 'gets', label: 'Resultado' }]}
                     rows={USES}
                 />
 
-                <H2>Feeding internal search</H2>
+                <H2>Alimentar la búsqueda interna</H2>
                 <P>
-                    A nightly job collects <Code>codemeta.json</Code> from every repository and turns it into facets for your code search.
-                    "Active Python services about payments" becomes a filter instead of tribal knowledge, and repositories whose{' '}
-                    <Code>developmentStatus</Code> is a repostatus.org value such as <Code>#inactive</Code> or <Code>#moved</Code> can be excluded by default. Because the facet definitions are part of your{' '}
-                    <A href="/blog/search/search-as-code-sac/">search config</A>, adding a new metadata field is a reviewed change too.
+                    Un job nocturno recoge el <Code>codemeta.json</Code> de cada repositorio y lo convierte en facetas para tu búsqueda de
+                    código. «Servicios Python activos sobre pagos» pasa a ser un filtro en lugar de conocimiento tribal, y los repositorios
+                    cuyo <Code>developmentStatus</Code> sea un valor de repostatus.org como <Code>#inactive</Code> o <Code>#moved</Code> se
+                    pueden excluir por defecto. Como las definiciones de facetas forman parte de tu{' '}
+                    <A href="/blog/search/search-as-code-sac/">configuración de búsqueda</A>, añadir un nuevo campo de metadatos también es un cambio revisado.
                 </P>
                 <P>
-                    The same job can keep GitHub topics in sync with <Code>keywords</Code> using{' '}
-                    <Code>gh repo edit --add-topic</Code>, so the description in the file and the labels on GitHub never disagree.
+                    El mismo job puede mantener los topics de GitHub sincronizados con <Code>keywords</Code> usando{' '}
+                    <Code>gh repo edit --add-topic</Code>, para que la descripción del archivo y las etiquetas de GitHub nunca se contradigan.
                 </P>
 
-                <H2>Publishing it: SoftwareSourceCode on project pages</H2>
+                <H2>Publicarlo: SoftwareSourceCode en las páginas de proyecto</H2>
                 <P>
-                    Most of a project's public audience arrives through a landing page or documentation site, not the repository. Put the
-                    same data there as JSON-LD. Because CodeMeta terms are schema.org terms, most of it can be copied straight across:
+                    La mayor parte del público de un proyecto llega a través de una página de presentación o un sitio de documentación, no
+                    del repositorio. Pon allí los mismos datos como JSON-LD. Como los términos de CodeMeta son términos de schema.org, casi
+                    todo se puede copiar tal cual:
                 </P>
-                <CodeBlock title="Project page head">{`<script type="application/ld+json">
+                <CodeBlock title="Head de la página del proyecto">{`<script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "SoftwareSourceCode",
   "name": "payments-ledger-api",
-  "description": "Double-entry ledger and payment retry service for Acme checkout.",
+  "description": "Libro mayor de partida doble y servicio de reintento de pagos para el checkout de Acme.",
   "codeRepository": "https://github.com/acme/payments-ledger-api",
   "programmingLanguage": "Python",
   "runtimePlatform": "Python 3.12",
@@ -104,18 +107,18 @@
   "keywords": "payments, ledger, idempotency, retries"
 }
 <\/script>`}</CodeBlock>
-                <Callout title="Set expectations">
-                    Google has no dedicated rich result for <Code>SoftwareSourceCode</Code>, so this won't change how your result looks.
-                    It does give every crawler that reads schema.org a precise, consistent description of the project, and it costs nothing
-                    to generate from a file you already maintain.
+                <Callout title="Ajusta las expectativas">
+                    Google no tiene un resultado enriquecido propio para <Code>SoftwareSourceCode</Code>, así que esto no cambiará el aspecto
+                    de tu resultado. Sí da a todo rastreador que lea schema.org una descripción precisa y coherente del proyecto, y no cuesta
+                    nada generarla a partir de un archivo que ya mantienes.
                 </Callout>
 
-                <H2>Make the pages reachable</H2>
+                <H2>Haz que las páginas sean accesibles</H2>
                 <P>
-                    Metadata only helps if the project page is crawled. Generate one page per public repository, link them from a catalog
-                    page and list them in your sitemap, as described in{' '}
-                    <A href="/blog/search/crawlability-indexing/">Crawlability & Indexing</A>. Validate <Code>codemeta.json</Code> in CI so a
-                    broken file never reaches the catalog or the page.
+                    Los metadatos solo ayudan si la página del proyecto se rastrea. Genera una página por repositorio público, enlázalas
+                    desde una página de catálogo e inclúyelas en tu sitemap, como se describe en{' '}
+                    <A href="/blog/search/crawlability-indexing/">Rastreabilidad e indexación</A>. Valida <Code>codemeta.json</Code> en CI
+                    para que un archivo roto nunca llegue al catálogo ni a la página.
                 </P>
             </>
         );

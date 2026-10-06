@@ -11,146 +11,150 @@ const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzaqYJQIIWYBcbq0F
 
 // Header links. Every page lives in its own folder with an index.html.
 const NAV_LINKS = [
-    { href: '/pages/development/', label: 'Development' },
-    { href: '/pages/components/', label: 'Components' },
-    { href: '/pages/community/', label: 'Community' },
+    { href: '/pages/development/', label: 'Desarrollo' },
+    { href: '/pages/components/', label: 'Componentes' },
+    { href: '/pages/community/', label: 'Comunidad' },
     { href: '/pages/stack/', label: 'Stack' },
     { href: '/blog/', label: 'Blog' },
 ];
 
 const isActive = (href) => window.location.pathname.startsWith(href.replace(/\/$/, ''));
 
-// --- LANGUAGES (Google Translate): Spanish <-> English only ---
-// Pages are written in Spanish (<html lang="es">) or English (blog, lang="en"). Picking a flag stores the locale,
-// sets Google's "googtrans" cookie and reloads; Google Translate then translates the page on load.
-// The locale also picks the shop currency (read by useCurrency in js/tienda.jsx).
-const FlagUS = () => (
-    <svg viewBox="0 0 30 20" aria-hidden="true">
-        <rect width="30" height="20" fill="#b22234" />
-        {[1, 3, 5, 7, 9, 11].map(i => <rect key={i} y={i * 20 / 13} width="30" height={20 / 13} fill="#fff" />)}
-        <rect width="13" height={20 * 7 / 13} fill="#3c3b6e" />
-        {[0, 1, 2, 3].map(r => [0, 1, 2, 3, 4].map(c => <circle key={`${r}-${c}`} cx={1.6 + c * 2.45 + (r % 2) * 1.2} cy={1.5 + r * 2.5} r="0.55" fill="#fff" />))}
-    </svg>
-);
+// --- COUNTRY (flags in the header): Spain or Mexico, both in Spanish ---
+// The flag picks the shop currency (EUR or MXN, read by useCurrency in js/tienda.jsx).
+// Until the visitor clicks a flag, the closest available country is guessed: first from the browser's time zone
+// (instant, offline), then corrected with an IP geo-location lookup that is cached in localStorage ('lm-geo').
+// A clicked flag is remembered in 'lm-locale' and always wins over the guess.
 const FlagES = () => (
     <svg viewBox="0 0 30 20" aria-hidden="true">
         <rect width="30" height="20" fill="#aa151b" />
         <rect y="5" width="30" height="10" fill="#f1bf00" />
     </svg>
 );
+const FlagMX = () => (
+    <svg viewBox="0 0 30 20" aria-hidden="true">
+        <rect width="30" height="20" fill="#fff" />
+        <rect width="10" height="20" fill="#006847" />
+        <rect x="20" width="10" height="20" fill="#ce1126" />
+        <ellipse cx="15" cy="10" rx="2.6" ry="2.9" fill="#8c6d2c" />
+        <path d="M12.4 11.6q2.6 2.2 5.2 0" fill="none" stroke="#006847" strokeWidth="0.8" />
+    </svg>
+);
 const LOCALES = [
-    { id: 'en-US', lang: 'en', currency: 'USD', label: 'English', Flag: FlagUS },
-    { id: 'es-ES', lang: 'es', currency: 'EUR', label: 'Español (España)', Flag: FlagES },
+    { id: 'es-ES', country: 'ES', currency: 'EUR', label: 'España', Flag: FlagES, point: [40.42, -3.70] },    // Madrid
+    { id: 'es-MX', country: 'MX', currency: 'MXN', label: 'México', Flag: FlagMX, point: [19.43, -99.13] },   // Mexico City
 ];
-const PAGE_LANG = (document.documentElement.lang || 'es').slice(0, 2);
+const LOCALE_KEY = 'lm-locale';
+const GEO_KEY = 'lm-geo';
+const GEO_URL = 'https://get.geojs.io/v1/ip/geo.json';
 
-const readLocale = () => {
-    try { return LOCALES.find(l => l.id === localStorage.getItem('lm-locale')) || null; } catch (e) { return null; }
+const localeById = (id) => LOCALES.find(l => l.id === id) || null;
+const readKey = (key) => { try { return localStorage.getItem(key); } catch (e) { return null; } };
+const writeKey = (key, value) => { try { localStorage.setItem(key, value); } catch (e) {} };
+
+// Great-circle distance in km between two [lat, lon] points.
+const distanceKm = ([lat1, lon1], [lat2, lon2]) => {
+    const rad = (d) => d * Math.PI / 180;
+    const a = Math.sin(rad(lat2 - lat1) / 2) ** 2 + Math.cos(rad(lat1)) * Math.cos(rad(lat2)) * Math.sin(rad(lon2 - lon1) / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(a));
+};
+const closestLocale = (point) => LOCALES.reduce((best, l) => (distanceKm(point, l.point) < distanceKm(point, best.point) ? l : best));
+
+// Offline first guess: the Americas and the Pacific are closer to Mexico, the rest of the world to Spain.
+const guessFromTimeZone = () => {
+    let tz = '';
+    try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) {}
+    return localeById(/^(America|Pacific)\//.test(tz) ? 'es-MX' : 'es-ES');
 };
 
-const setTranslateCookie = (value) => {
-    const expires = value ? '' : '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+let currentLocale = localeById(readKey(LOCALE_KEY)) || localeById(readKey(GEO_KEY)) || guessFromTimeZone();
+
+const setLocale = (locale) => {
+    currentLocale = locale;
+    window.dispatchEvent(new CustomEvent('lm-locale', { detail: locale }));
+};
+
+// Clicking a flag: remember it and update every component on the page (no reload needed).
+const chooseLocale = (locale) => {
+    writeKey(LOCALE_KEY, locale.id);
+    setLocale(locale);
+};
+
+// Current country; re-renders when a flag is clicked here or in another tab, or when geo-location corrects the guess.
+const useLocale = () => {
+    const [locale, set] = useState(currentLocale);
+    useEffect(() => {
+        const onLocale = (e) => set(e.detail);
+        const onStorage = (e) => { if (e.key === LOCALE_KEY && localeById(e.newValue)) setLocale(localeById(e.newValue)); };
+        window.addEventListener('lm-locale', onLocale);
+        window.addEventListener('storage', onStorage);
+        set(currentLocale);
+        return () => { window.removeEventListener('lm-locale', onLocale); window.removeEventListener('storage', onStorage); };
+    }, []);
+    return locale;
+};
+
+// Runs once per page load: geo-locate only when no flag was clicked and no earlier lookup is cached.
+(() => {
+    // The site used to offer English through Google Translate; drop its leftover cookie so no page gets translated.
     const host = window.location.hostname;
-    // Google reads the cookie on the host and on the parent domain; clear or set both.
     [`; path=/`, host.includes('.') ? `; path=/; domain=.${host.replace(/^www\./, '')}` : null]
         .filter(Boolean)
-        .forEach(scope => { document.cookie = `googtrans=${value || ''}${scope}${expires}`; });
-};
+        .forEach(scope => { document.cookie = `googtrans=${scope}; expires=Thu, 01 Jan 1970 00:00:00 GMT`; });
 
-// Runs once per page load, before React renders.
-const ACTIVE_LOCALE = readLocale();
-const TRANSLATING = Boolean(ACTIVE_LOCALE && ACTIVE_LOCALE.lang !== PAGE_LANG);
-(() => {
-    if (!TRANSLATING) { setTranslateCookie(null); return; }
-    setTranslateCookie(`/${PAGE_LANG}/${ACTIVE_LOCALE.lang}`);
-
-    // Google replaces text nodes with its own <font> tags; without this, React crashes when it later
-    // removes or moves one of those nodes ("The node to be removed is not a child of this node").
-    const removeChild = Node.prototype.removeChild;
-    Node.prototype.removeChild = function (child) {
-        return child.parentNode === this ? removeChild.call(this, child) : child;
-    };
-    const insertBefore = Node.prototype.insertBefore;
-    Node.prototype.insertBefore = function (node, ref) {
-        return ref && ref.parentNode !== this ? node : insertBefore.call(this, node, ref);
-    };
-
-    const holder = document.createElement('div');
-    holder.id = 'google_translate_element';
-    holder.style.display = 'none';
-    document.body.appendChild(holder);
-    window.googleTranslateElementInit = () => {
-        new google.translate.TranslateElement({ pageLanguage: PAGE_LANG, includedLanguages: 'en,es', autoDisplay: false }, 'google_translate_element');
-    };
-    const script = document.createElement('script');
-    script.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-    script.async = true;
-    document.body.appendChild(script);
+    if (localeById(readKey(LOCALE_KEY)) || localeById(readKey(GEO_KEY))) return;
+    fetch(GEO_URL)
+        .then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+        .then(geo => {
+            const lat = parseFloat(geo.latitude), lon = parseFloat(geo.longitude);
+            const locale = LOCALES.find(l => l.country === geo.country_code)
+                || (Number.isFinite(lat) && Number.isFinite(lon) ? closestLocale([lat, lon]) : null);
+            if (!locale) return;
+            writeKey(GEO_KEY, locale.id);
+            if (!localeById(readKey(LOCALE_KEY)) && locale.id !== currentLocale.id) setLocale(locale);
+        })
+        .catch(() => {}); // keep the time-zone guess
 })();
 
-const chooseLocale = (locale) => {
-    try {
-        localStorage.setItem('lm-locale', locale.id);
-        localStorage.setItem('lm-currency', JSON.stringify(locale.currency));
-    } catch (e) {}
-    setTranslateCookie(locale.lang === PAGE_LANG ? null : `/${PAGE_LANG}/${locale.lang}`);
-    window.location.reload();
+const LanguageSwitcher = ({ withLabels = false }) => {
+    const current = useLocale();
+    return (
+        <div className={`flex items-center ${withLabels ? 'flex-wrap justify-center gap-3' : 'gap-1.5'}`} role="group" aria-label="País y divisa">
+            {LOCALES.map(locale => {
+                const active = current.id === locale.id;
+                return (
+                    <button
+                        key={locale.id}
+                        onClick={() => !active && chooseLocale(locale)}
+                        aria-pressed={active}
+                        title={`${locale.label} · ${locale.currency}`}
+                        aria-label={`${locale.label} (${locale.currency})`}
+                        className={withLabels
+                            ? `flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold transition-colors ${active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-700 hover:border-blue-500'}`
+                            : `p-0.5 rounded-md transition-all ${active ? 'ring-2 ring-blue-600 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
+                    >
+                        <span className="block w-6 h-4 rounded-[3px] overflow-hidden shadow-sm border border-black/10 [&>svg]:w-full [&>svg]:h-full"><locale.Flag /></span>
+                        {withLabels && `${locale.label} · ${locale.currency}`}
+                    </button>
+                );
+            })}
+        </div>
+    );
 };
 
-// The page's own language counts as active when nothing has been picked yet.
-const isLocaleActive = (locale) => (ACTIVE_LOCALE ? ACTIVE_LOCALE.id === locale.id : locale.id === (PAGE_LANG === 'en' ? 'en-US' : 'es-ES'));
-
-const LanguageSwitcher = ({ withLabels = false }) => (
-    <div translate="no" className={`notranslate flex items-center ${withLabels ? 'flex-wrap justify-center gap-3' : 'gap-1.5'}`} role="group" aria-label="Idioma / Language">
-        {LOCALES.map(locale => {
-            const active = isLocaleActive(locale);
-            return (
-                <button
-                    key={locale.id}
-                    onClick={() => !active && chooseLocale(locale)}
-                    aria-pressed={active}
-                    title={locale.label}
-                    aria-label={locale.label}
-                    className={withLabels
-                        ? `flex items-center gap-2 px-4 py-2 rounded-full border text-sm font-bold transition-colors ${active ? 'border-blue-600 bg-blue-50 text-blue-700' : 'border-gray-200 text-gray-700 hover:border-blue-500'}`
-                        : `p-0.5 rounded-md transition-all ${active ? 'ring-2 ring-blue-600 ring-offset-1' : 'opacity-60 hover:opacity-100'}`}
-                >
-                    <span className="block w-6 h-4 rounded-[3px] overflow-hidden shadow-sm border border-black/10 [&>svg]:w-full [&>svg]:h-full"><locale.Flag /></span>
-                    {withLabels && locale.label}
-                </button>
-            );
-        })}
-    </div>
-);
-
-// --- POP-UP TEXT (Spanish pages / English pages; Google Translate covers the other language) ---
-const UI_TEXT = {
-    es: {
-        login: 'Iniciar sesión', signup: 'Crear cuenta', account: 'Mi cuenta', logout: 'Cerrar sesión', close: 'Cerrar',
-        name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 8 caracteres',
-        loginIntro: 'Accede a tu cuenta de Lameyer.', signupIntro: 'Crea tu cuenta para guardar tus pedidos y proyectos.',
-        noAccount: '¿No tienes cuenta?', haveAccount: '¿Ya tienes cuenta?', loggedInAs: 'Has iniciado sesión como',
-        errWrong: 'Email o contraseña incorrectos.', errExists: 'Ya existe una cuenta con ese email.', errShort: 'La contraseña debe tener al menos 8 caracteres.',
-        errStorage: 'Tu navegador bloquea el almacenamiento local; no se puede iniciar sesión.', errCrypto: 'Abre la web por https para iniciar sesión.',
-        working: 'Procesando...',
-        cookiesTitle: 'Usamos cookies',
-        cookiesText: 'Usamos cookies necesarias para que la web funcione (idioma, carrito, sesión). Con tu permiso, también usaremos cookies para medir y mejorar la web.',
-        cookiesAccept: 'Aceptar todas', cookiesReject: 'Solo necesarias', cookiesMore: 'Más información',
-    },
-    en: {
-        login: 'Log in', signup: 'Sign up', account: 'My account', logout: 'Log out', close: 'Close',
-        name: 'Name', email: 'Email', password: 'Password', passwordHint: 'At least 8 characters',
-        loginIntro: 'Access your Lameyer account.', signupIntro: 'Create an account to keep your orders and projects.',
-        noAccount: "Don't have an account?", haveAccount: 'Already have an account?', loggedInAs: 'You are logged in as',
-        errWrong: 'Wrong email or password.', errExists: 'An account with that email already exists.', errShort: 'Password must be at least 8 characters.',
-        errStorage: 'Your browser blocks local storage; logging in is not possible.', errCrypto: 'Open the site over https to log in.',
-        working: 'Working...',
-        cookiesTitle: 'We use cookies',
-        cookiesText: 'We use necessary cookies to make the site work (language, cart, session). With your permission we will also use cookies to measure and improve the site.',
-        cookiesAccept: 'Accept all', cookiesReject: 'Necessary only', cookiesMore: 'Learn more',
-    },
+// --- POP-UP TEXT ---
+const TXT = {
+    login: 'Iniciar sesión', signup: 'Crear cuenta', account: 'Mi cuenta', logout: 'Cerrar sesión', close: 'Cerrar',
+    name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 8 caracteres',
+    loginIntro: 'Accede a tu cuenta de Lameyer.', signupIntro: 'Crea tu cuenta para guardar tus pedidos y proyectos.',
+    noAccount: '¿No tienes cuenta?', haveAccount: '¿Ya tienes cuenta?', loggedInAs: 'Has iniciado sesión como',
+    errWrong: 'Email o contraseña incorrectos.', errExists: 'Ya existe una cuenta con ese email.', errShort: 'La contraseña debe tener al menos 8 caracteres.',
+    errStorage: 'Tu navegador bloquea el almacenamiento local; no se puede iniciar sesión.', errCrypto: 'Abre la web por https para iniciar sesión.',
+    working: 'Procesando...',
+    cookiesTitle: 'Usamos cookies',
+    cookiesText: 'Usamos cookies necesarias para que la web funcione (país, carrito, sesión). Con tu permiso, también usaremos cookies para medir y mejorar la web.',
+    cookiesAccept: 'Aceptar todas', cookiesReject: 'Solo necesarias', cookiesMore: 'Más información',
 };
-const TXT = UI_TEXT[PAGE_LANG] || UI_TEXT.es;
 
 // --- ACCOUNTS (login / sign up) ---
 // STAGING: there is no server yet, so accounts live only in this browser's localStorage ('lm-users'), with salted
@@ -411,7 +415,7 @@ const Layout = ({ children }) => {
                     SUSTENTABILIDAD CORPORATIVA & ESG
                 </span>
                 <div className="flex items-center space-x-4 md:space-x-8 opacity-60 grayscale hover:grayscale-0 transition-all duration-500 overflow-x-auto no-scrollbar">
-                    {['ODS 6', 'ODS 11', 'ODS 13', 'AGENDA 2030', 'ESG COMPLIANT'].map((cert, index) => (
+                    {['ODS 6', 'ODS 11', 'ODS 13', 'AGENDA 2030', 'CUMPLIMIENTO ESG'].map((cert, index) => (
                         <div key={index} className="flex items-center space-x-1 flex-shrink-0">
                             <div className="w-1 h-3 bg-blue-500"></div>
                             <span className="text-[9px] font-bold text-white tracking-widest uppercase">{cert}</span>
@@ -423,7 +427,7 @@ const Layout = ({ children }) => {
             {/* Navigation */}
             <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'menu-open' : ''}`}>
                 <a href="/" className="block z-50">
-                    <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer Logo" className="h-10 md:h-12 w-auto object-contain" />
+                    <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Logo de Lameyer" className="h-10 md:h-12 w-auto object-contain" />
                 </a>
 
                 {/* Desktop Links */}
@@ -454,7 +458,7 @@ const Layout = ({ children }) => {
                         onClick={handleRegisterClick}
                         className="hidden sm:block bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold transition-all transform hover:scale-105 shadow-md"
                     >
-                        REGISTER
+                        REGISTRO
                     </button>
 
                     {/* Mobile Hamburger Button: its three lines morph into an X while the menu is open */}
@@ -487,7 +491,7 @@ const Layout = ({ children }) => {
                     onClick={handleRegisterClick}
                     className="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mt-4"
                 >
-                    REGISTER
+                    REGISTRO
                 </button>
                 <button
                     onClick={() => openAuth()}
@@ -562,12 +566,12 @@ const ContactForm = () => {
     ];
     const TECHNOLOGIES = [
         'ENTRETENIMIENTO INTERACTIVO',
-        'CRM & DATA MANAGEMENT',
-        'CYBERSECURITY',
-        'React Development',
-        'API Cloud Integrations',
-        'SQL DB',
-        'System Technology Consulting',
+        'CRM Y GESTIÓN DE DATOS',
+        'CIBERSEGURIDAD',
+        'Desarrollo con React',
+        'Integraciones de API en la nube',
+        'Bases de datos SQL',
+        'Consultoría tecnológica de sistemas',
     ];
     const inputClass = "w-full px-5 py-4 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
 
@@ -661,7 +665,7 @@ const RegisterCTA = ({ title = '¿Listo para construir?', text = 'Cuéntenos su 
                 href="/#form-section"
                 className="inline-block px-10 py-5 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs"
             >
-                Register
+                Registro
             </a>
         </div>
     </section>
@@ -711,7 +715,7 @@ const TechIcon = ({ tech }) => {
             {/* Highlighted icon (appears on hover) */}
             <img
                 src={`https://cdn.simpleicons.org/${tech.slug}/ffffff`}
-                alt={`${tech.name} logo`}
+                alt={`Logo de ${tech.name}`}
                 className="absolute inset-0 w-full h-full object-contain opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             />
         </div>

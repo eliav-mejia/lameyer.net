@@ -167,7 +167,7 @@
                                 ['📦', 'Envío desde Madrid', 'A toda España'],
                                 ['↩️', `Devolución ${RETURN_DAYS} días`, 'Sujeta a revisión'],
                                 ['🛡️', 'Garantía legal 3 años', 'Productos nuevos'],
-                                ['💱', `Precios en ${CURRENCIES.length} divisas`, 'Cobro en EUR'],
+                                ['💱', 'Precios en EUR o MXN', 'Según la bandera'],
                             ].map(([icon, title, text]) => (
                                 <div key={title} className="bg-white p-4 md:p-5 rounded-3xl shadow-xl border border-gray-50 flex items-center gap-3 md:gap-4">
                                     <div className="w-10 h-10 flex-none bg-blue-50 rounded-xl flex items-center justify-center text-lg" aria-hidden="true">{icon}</div>
@@ -207,7 +207,7 @@
                                             </select>
                                             <svg className="pointer-events-none absolute right-4 w-3 h-3 text-gray-400" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 4l4 4 4-4" /></svg>
                                         </label>
-                                        <CurrencySelect value={money.currency.code} onChange={money.setCurrency} className="flex-1 sm:flex-none" />
+                                        <CurrencyBadge money={money} className="flex-1 sm:flex-none" />
                                     </div>
                                 </div>
 

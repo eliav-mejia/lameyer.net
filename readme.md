@@ -1,83 +1,83 @@
 LaMeyer.net
 /* Sitio Web */
 
-Static site on GitHub Pages (custom domain `lameyer.net`, proxied by Cloudflare).
-No build step: pages use Tailwind, React and Babel from CDNs.
+Sitio estático en GitHub Pages (dominio propio `lameyer.net`, con proxy de Cloudflare).
+Sin paso de build: las páginas usan Tailwind, React y Babel desde CDNs.
 
-## Folder structure
+## Estructura de carpetas
 
-Every page is a folder with an `index.html`, so URLs are clean (`/pages/stack/`, `/blog/security/rate-limiting/`)
-and every page is added the same way: copy a folder, edit it.
+Cada página es una carpeta con un `index.html`, así las URLs quedan limpias (`/pages/stack/`, `/blog/security/rate-limiting/`)
+y todas las páginas se añaden igual: copiar una carpeta y editarla.
 
 ```
 lameyer.net/
-├── CNAME                         custom domain for GitHub Pages
-├── readme.md                     this file
-├── index.html                    home page (/)
-├── 404.html                      not-found page; redirects old blog URLs
+├── CNAME                         dominio propio para GitHub Pages
+├── readme.md                     este archivo
+├── index.html                    página de inicio (/)
+├── 404.html                      página no encontrada; redirige las URLs antiguas del blog
 │
 ├── css/
-│   └── site.css                  ONE stylesheet for the whole site
+│   └── site.css                  UNA hoja de estilos para todo el sitio
 │
 ├── js/
-│   ├── layout.jsx                shared by EVERY page: header, footer, contact form,
-│   │                             PageHero, RegisterCTA, tech stack, renderPage()
-│   ├── blog.jsx                  blog only: SERIES, BLOG_TYPES, BLOG_POSTS, dashboard, article template
-│   └── tienda.jsx                shop only: SELLER, RETURN_ADDRESSES, CURRENCIES, data layer (db, useCatalog),
-│                                 cart, ProductCard, ProductPage, renderProduct()
+│   ├── layout.jsx                compartido por TODAS las páginas: cabecera, banderas (país y divisa), pie,
+│   │                             formulario de contacto, PageHero, RegisterCTA, stack tecnológico, renderPage()
+│   ├── blog.jsx                  solo blog: SERIES, BLOG_TYPES, BLOG_POSTS, panel, plantilla de artículo
+│   └── tienda.jsx                solo tienda: SELLER, RETURN_ADDRESSES, CURRENCIES, capa de datos (db, useCatalog),
+│                                 carrito, ProductCard, ProductPage, renderProduct()
 │
 ├── public/
-│   └── db/                       SIMULATED DATABASE (pre-launch, edited by hand) — see public/db/README.md
-│       ├── categorias.json       category groups + categories
-│       └── productos.json        products: price, stock, specs, compatibility, image + credit
+│   └── db/                       BASE DE DATOS SIMULADA (prelanzamiento, editada a mano) — ver public/db/README.md
+│       ├── categorias.json       grupos de categorías + categorías
+│       └── productos.json        productos: precio, stock, especificaciones, compatibilidad, imagen + crédito
 │
 ├── img/
-│   └── productos/                product photos <product-id>-400.webp / -800.webp
+│   └── productos/                fotos de producto <id-producto>-400.webp / -800.webp
 │
 ├── tools/
-│   └── generar-paginas-producto.py   creates pages/components/<slug>/ from public/db/productos.json
+│   └── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
 │
-├── pages/                        one folder per section, served at /pages/<name>/
-│   ├── development/index.html    /pages/development/  (contact form -> Google Sheets)
-│   ├── components/index.html     /pages/components/  shop: filters, search, cart -> WhatsApp
-│   ├── components/<slug>/        /pages/components/<slug>/  one page per product (generated)
-│   ├── terminos/index.html       /pages/terminos/    terms & conditions (linked in the footer)
+├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
+│   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
+│   ├── components/index.html     /pages/components/  tienda: filtros, búsqueda, carrito -> WhatsApp
+│   ├── components/<slug>/        /pages/components/<slug>/  una página por producto (generada)
+│   ├── terminos/index.html       /pages/terminos/    términos y condiciones (enlazados en el pie)
 │   ├── community/index.html      /pages/community/
 │   └── stack/index.html          /pages/stack/
 │
 └── blog/
-    ├── index.html                /blog/  filter dashboard (?series=core, ?series=security, ...)
+    ├── index.html                /blog/  panel de filtros (?series=core, ?series=security, ...)
     │
     ├── core/                     Modular Core
-    │   ├── modular-core-architecture/        overview
+    │   ├── modular-core-architecture/        visión general
     │   ├── domain-modules-boundaries/
     │   ├── contracts-typed-apis/
     │   ├── shared-packages-workspaces/
     │   ├── data-ownership-migrations/
     │   └── contract-testing-versioning/
     ├── serverless/               Serverless Edge
-    │   ├── serverless-edge-architecture/     overview
+    │   ├── serverless-edge-architecture/     visión general
     │   ├── edge-functions-workers/
     │   ├── routing-caching-auth-edge/
     │   ├── edge-storage-kv-d1-r2/
     │   ├── scheduled-jobs-cron-triggers/
     │   ├── logs-tracing-cost/
-    │   ├── realtime-websockets-durable-objects/   step 06 · Real-time
-    │   ├── ai-at-the-edge-workers-ai/             step 07 · Edge AI
-    │   ├── images-media-at-the-edge/              step 08 · Media
-    │   ├── deploy-test-rollout-workers/           step 09 · Deploy
-    │   ├── serverless-integration-paas/      crossover
-    │   ├── serverless-in-front-of-iaas/      crossover
-    │   └── multi-tenant-saas-metering/       crossover
-    ├── workflows/                Workflow Automation
+    │   ├── realtime-websockets-durable-objects/   paso 06 · Tiempo real
+    │   ├── ai-at-the-edge-workers-ai/             paso 07 · IA en el edge
+    │   ├── images-media-at-the-edge/              paso 08 · Multimedia
+    │   ├── deploy-test-rollout-workers/           paso 09 · Despliegue
+    │   ├── serverless-integration-paas/      cruce
+    │   ├── serverless-in-front-of-iaas/      cruce
+    │   └── multi-tenant-saas-metering/       cruce
+    ├── workflows/                Automatización de flujos
     │   └── serverless-workflow-automation/
-    ├── security/                 API Security
+    ├── security/                 Seguridad de APIs
     │   ├── edge-layer-ddos-dns/
     │   ├── waf-bot-layer-layer-7/
     │   ├── api-endpoint-protection/
     │   ├── rate-limiting/
     │   └── cloudflare-tunnel/
-    └── search/                   Code Search & Discoverability
+    └── search/                   Búsqueda de código y visibilidad
         ├── code-search-repository-organization/
         ├── semantic-vector-search/
         ├── search-as-code-sac/
@@ -87,22 +87,23 @@ lameyer.net/
         ├── core-web-vitals-page-speed/
         ├── crawlability-indexing/
         ├── structured-data/
-        ├── benchmarks-x-search-as-code/          crossover
-        ├── static-generation-x-vector-search/    crossover
-        ├── structured-data-x-repositories/       crossover
-        ├── core-web-vitals-x-site-search/        crossover
-        └── crawlability-x-faceted-search/        crossover
+        ├── benchmarks-x-search-as-code/          cruce
+        ├── static-generation-x-vector-search/    cruce
+        ├── structured-data-x-repositories/       cruce
+        ├── core-web-vitals-x-site-search/        cruce
+        └── crawlability-x-faceted-search/        cruce
 ```
 
-Naming rules (they keep everything searchable):
+Reglas de nombres (mantienen todo localizable):
 
-- Folder names are lowercase words joined by `-`: no spaces, `&`, `()` or capitals, so the URL is the folder name as is.
-- A blog folder name is the entry's `slug` in `BLOG_POSTS`. Searching the slug finds both the folder and its registry entry.
-- The series folder (`core`, `serverless`, `workflows`, `security`, `search`) is the series `id` in `SERIES`.
+- Los nombres de carpeta son palabras en minúsculas unidas por `-`: sin espacios, `&`, `()` ni mayúsculas, así la URL es el nombre de la carpeta tal cual.
+- El nombre de una carpeta del blog es el `slug` de la entrada en `BLOG_POSTS`. Buscar el slug encuentra tanto la carpeta como su registro.
+- La carpeta de la serie (`core`, `serverless`, `workflows`, `security`, `search`) es el `id` de la serie en `SERIES`.
+- Las carpetas y los slugs siguen en inglés para no romper los enlaces existentes; el contenido de las páginas está en español.
 
-## What each page loads
+## Qué carga cada página
 
-| Page                       | css/site.css | js/layout.jsx | js/blog.jsx | js/tienda.jsx | GSAP |
+| Página                     | css/site.css | js/layout.jsx | js/blog.jsx | js/tienda.jsx | GSAP |
 |----------------------------|:------------:|:-------------:|:-----------:|:-------------:|:----:|
 | `index.html`               | ✓            | ✓             |             |               | ✓    |
 | `404.html`                 | ✓            | ✓             |             |               |      |
@@ -113,152 +114,166 @@ Naming rules (they keep everything searchable):
 | `pages/community/`         | ✓            | ✓             |             |               |      |
 | `pages/stack/`             | ✓            | ✓             |             |               |      |
 | `blog/`                    | ✓            | ✓             | ✓           |               |      |
-| `blog/<series>/<slug>/`    | ✓            | ✓             | ✓           |               |      |
+| `blog/<serie>/<slug>/`     | ✓            | ✓             | ✓           |               |      |
 
-Order matters: `js/layout.jsx` always loads first, then `js/blog.jsx` (blog pages) or `js/tienda.jsx` (shop pages),
-then the page's own inline script, which ends with `renderPage(MyPage)` (or `renderPost(...)` in blog entries).
-Do not redeclare anything from `layout.jsx` in another file: the later copy silently replaces it.
+El orden importa: `js/layout.jsx` siempre se carga primero, después `js/blog.jsx` (páginas del blog) o `js/tienda.jsx` (páginas de la tienda)
+y luego el script propio de la página, que termina con `renderPage(MiPagina)` (o `renderPost(...)` en las entradas del blog).
+No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior lo sustituye sin avisar.
 
-## Common edits
+## Cambios habituales
 
-- **Header links**: `NAV_LINKS` in `js/layout.jsx` (updates every page).
-- **Contact form fields / Google Apps Script URL**: `ContactForm` and `FORM_ENDPOINT` in `js/layout.jsx`.
-  Field names (`NOMBRE`, `ORGANIZACIÓN`, `TELÉFONO`, `EMAIL`, `TECNOLOGÍA`) must match the Google Sheet columns.
-- **Email address**: `CONTACT_EMAIL` in `js/layout.jsx`.
-- **Languages (flags in the header)**: `LOCALES` in `js/layout.jsx`. Spanish ↔ English only: US → English + USD,
-  Spain → Spanish + EUR. Translation is Google Translate (automatic, machine translated):
-  each page is translated from its own `<html lang>` (`es` for home/shop/terms, `en` for the blog). Wrap numbers or names
-  that must not be translated in `translate="no"`. Google's bar and tooltips are hidden in `css/site.css`.
-- **WhatsApp widget**: `NUMBER` and `STRINGS` in `index.html` (and `whatsapp-chat-snippet.html`). Spain only
-  (+34 602 55 76 85), bilingual ES/EN support; no region picker.
-- **Login / sign up pop-up**: `AuthModal` and `auth` in `js/layout.jsx`, opened from the header (and mobile menu).
-  STAGING: accounts are stored only in the visitor's browser (`lm-users`, salted SHA-256; session in `lm-session`).
-  Swap the `auth` functions for a real backend before launch. Pop-up text: `UI_TEXT` (follows the page's `<html lang>`).
-- **Cookie pop-up**: `CookieConsent` in `js/layout.jsx`. Choice in `lm-cookies` / `window.LM_COOKIES`
-  (`all` or `necessary`); load analytics only when `hasCookieConsent()` is true.
-- **Tech stack**: `TECH_STACK` in `js/layout.jsx` (home page and `/pages/stack/`).
-- **Styles**: `css/site.css`. Everything else is Tailwind classes in the markup.
-  Palette (tokens at the top of `css/site.css`): 1 white `#ffffff` background · 2 blue `#2563eb` buttons, links, accents ·
-  3 dark blue `#0a192f` headings, main text, top banner, dark sections, button hover · 4 grey `#64748b` captions.
-  The end of `css/site.css` maps Tailwind classes to these (`text-gray-900` → dark blue, `text-gray-500` → grey,
-  `bg-blue-600` → blue, `hover:bg-blue-700` → dark blue). Unlisted classes keep Tailwind's own light colours.
-- **Home blog cards**: `BLOG_HIGHLIGHTS` in `index.html` (one card per series).
-- **Shop catalogue (products, prices, stock, categories)**: `public/db/productos.json` and `public/db/categorias.json`.
-  Schema and workflow in `public/db/README.md`. Price/stock/text changes need no other edit.
-- **Product photos**: `img/productos/<product-id>-400.webp` and `-800.webp` (square, white background, WebP ~80 quality),
-  referenced from the product's `image` object in `productos.json` together with its author and licence
-  (Wikimedia Commons photos need them; they are listed under "Créditos de imágenes"). `"image": null` shows the category icon.
-- **Seller data, return addresses, WhatsApp, currencies**: top of `js/tienda.jsx`. Unfilled `[...]` values show highlighted on the terms page.
+- **Enlaces de la cabecera**: `NAV_LINKS` en `js/layout.jsx` (actualiza todas las páginas).
+- **Campos del formulario de contacto / URL de Google Apps Script**: `ContactForm` y `FORM_ENDPOINT` en `js/layout.jsx`.
+  Los nombres de campo (`NOMBRE`, `ORGANIZACIÓN`, `TELÉFONO`, `EMAIL`, `TECNOLOGÍA`) deben coincidir con las columnas de la hoja de Google.
+- **Dirección de email**: `CONTACT_EMAIL` en `js/layout.jsx`.
+- **Banderas de la cabecera (país y divisa)**: `LOCALES` en `js/layout.jsx`. Solo España y México, ambas en español:
+  España → EUR, México → MXN. Todo el sitio está escrito en español; ya no se usa Google Translate.
+  Mientras el visitante no pulsa una bandera, se elige el país disponible más cercano: primero por la zona horaria del navegador
+  (América y Pacífico → México, resto → España) y después se corrige con una consulta de geolocalización por IP
+  (`GEO_URL`, GeoJS; si el país es ES o MX se usa tal cual, si no, el más cercano por distancia a Madrid / Ciudad de México).
+  El resultado se guarda en `lm-geo`; la bandera pulsada se guarda en `lm-locale` y siempre manda. `useLocale()` devuelve el país actual
+  y se actualiza al momento, sin recargar la página.
+- **Widget de WhatsApp**: `NUMBER` y `STRINGS` en `index.html` (y `whatsapp-chat-snippet.html`). Solo España
+  (+34 602 55 76 85), atención en español e inglés; sin selector de región.
+- **Pop-up de acceso / registro**: `AuthModal` y `auth` en `js/layout.jsx`, se abre desde la cabecera (y el menú móvil).
+  STAGING: las cuentas se guardan solo en el navegador del visitante (`lm-users`, SHA-256 con sal; sesión en `lm-session`).
+  Sustituye las funciones de `auth` por un backend real antes del lanzamiento. Textos del pop-up: `TXT`.
+- **Pop-up de cookies**: `CookieConsent` en `js/layout.jsx`. Elección en `lm-cookies` / `window.LM_COOKIES`
+  (`all` o `necessary`); carga analíticas solo cuando `hasCookieConsent()` sea true.
+- **Stack tecnológico**: `TECH_STACK` en `js/layout.jsx` (página de inicio y `/pages/stack/`).
+- **Estilos**: `css/site.css`. Todo lo demás son clases de Tailwind en el marcado.
+  Paleta (tokens al principio de `css/site.css`): 1 blanco `#ffffff` fondo · 2 azul `#2563eb` botones, enlaces, acentos ·
+  3 azul oscuro `#0a192f` encabezados, texto principal, banner superior, secciones oscuras, hover de botones · 4 gris `#64748b` pies de texto.
+  El final de `css/site.css` asigna clases de Tailwind a estos colores (`text-gray-900` → azul oscuro, `text-gray-500` → gris,
+  `bg-blue-600` → azul, `hover:bg-blue-700` → azul oscuro). Las clases no listadas conservan los colores claros de Tailwind.
+- **Tarjetas del blog en el inicio**: `BLOG_HIGHLIGHTS` en `index.html` (una tarjeta por serie).
+- **Catálogo de la tienda (productos, precios, stock, categorías)**: `public/db/productos.json` y `public/db/categorias.json`.
+  Esquema y procedimiento en `public/db/README.md`. Los cambios de precio, stock o texto no necesitan ninguna otra edición.
+- **Fotos de producto**: `img/productos/<id-producto>-400.webp` y `-800.webp` (cuadradas, fondo blanco, WebP calidad ~80),
+  referenciadas desde el objeto `image` del producto en `productos.json` junto con su autor y licencia
+  (las fotos de Wikimedia Commons los necesitan; se listan en «Créditos de imágenes»). `"image": null` muestra el icono de la categoría.
+- **Datos del vendedor, direcciones de devolución, WhatsApp, divisas**: al principio de `js/tienda.jsx`. Los valores `[...]` sin rellenar se ven resaltados en la página de términos.
 
-## Add a page
+## Añadir una página
 
-1. Copy `pages/stack/` to `pages/<new-name>/` and edit its `index.html`.
-2. Add `{ href: '/pages/<new-name>/', label: '...' }` to `NAV_LINKS` in `js/layout.jsx`.
+1. Copia `pages/stack/` en `pages/<nombre-nuevo>/` y edita su `index.html`.
+2. Añade `{ href: '/pages/<nombre-nuevo>/', label: '...' }` a `NAV_LINKS` en `js/layout.jsx`.
 
-## Add a product (pre-launch manual input)
+## Añadir un producto (entrada manual de prelanzamiento)
 
-1. Add an object to `public/db/productos.json` with a new `id`, `slug` and `sku` (fields in `public/db/README.md`).
-2. Add `img/productos/<id>-400.webp` and `-800.webp`, or set `"image": null`.
-3. Run `python tools/generar-paginas-producto.py` to create `pages/components/<slug>/index.html`
-   (or copy an existing product folder and change its `<title>`, description and canonical URL).
-4. Commit and push.
+1. Añade un objeto a `public/db/productos.json` con un `id`, `slug` y `sku` nuevos (campos en `public/db/README.md`).
+2. Añade `img/productos/<id>-400.webp` y `-800.webp`, o pon `"image": null`.
+3. Ejecuta `python tools/generar-paginas-producto.py` para crear `pages/components/<slug>/index.html`
+   (o copia la carpeta de un producto existente y cambia su `<title>`, descripción y URL canónica).
+4. Haz commit y push.
 
-To hide a product set `"active": false`; to show it as sold out set `"stock": 0`.
-Product folders whose slug is no longer in the database are listed by the script; delete them by hand
-and add `'/pages/components/<old-slug>/': '/pages/components/'` to the `moved` list in `404.html`.
+Para ocultar un producto pon `"active": false`; para mostrarlo agotado pon `"stock": 0`.
+El script lista las carpetas de producto cuyo slug ya no está en la base de datos; bórralas a mano
+y añade `'/pages/components/<slug-antiguo>/': '/pages/components/'` a la lista `moved` de `404.html`.
 
-## Add a blog entry
+## Añadir una entrada al blog
 
-1. Copy an entry folder inside its series, e.g. `blog/security/rate-limiting/` to `blog/security/my-new-entry/`.
-2. In its `index.html` change `<title>`, the description, the canonical URL, `CONTROLS` and `Content`.
-   The last line stays `renderPost(CONTROLS, Content);`: the page finds its entry from its own URL.
-3. Add an object with `slug: 'my-new-entry'` and a `type` from `BLOG_TYPES` to `BLOG_POSTS` in `js/blog.jsx`.
-   If you forget, the page tells you which slug is missing.
+1. Copia la carpeta de una entrada dentro de su serie, p. ej. `blog/security/rate-limiting/` en `blog/security/mi-nueva-entrada/`.
+2. En su `index.html` cambia `<title>`, la descripción, la URL canónica, `CONTROLS` y `Content`.
+   La última línea sigue siendo `renderPost(CONTROLS, Content);`: la página encuentra su entrada a partir de su propia URL.
+3. Añade a `BLOG_POSTS` en `js/blog.jsx` un objeto con `slug: 'mi-nueva-entrada'` y un `type` de `BLOG_TYPES`.
+   Si se te olvida, la página te dice qué slug falta.
 
-## Add a blog series
+## Añadir una serie al blog
 
-1. Add the series to `SERIES`, its steps to `BLOG_TYPES` and its zones to `ZONES` in `js/blog.jsx`.
-2. Create `blog/<series-id>/` and add entries as above.
-3. Add a card to `BLOG_HIGHLIGHTS` in `index.html`.
+1. Añade la serie a `SERIES`, sus pasos a `BLOG_TYPES` y sus zonas a `ZONES` en `js/blog.jsx`.
+2. Crea `blog/<id-serie>/` y añade entradas como se indica arriba.
+3. Añade una tarjeta a `BLOG_HIGHLIGHTS` en `index.html`.
 
-## Rename or move an entry
+## Renombrar o mover una entrada
 
-Change the folder name and the `slug`, then add `'/old/path/': '/new/path/'` to the `moved` list in `404.html`
-so old links keep working.
+Cambia el nombre de la carpeta y el `slug`, y después añade `'/ruta/antigua/': '/ruta/nueva/'` a la lista `moved` de `404.html`
+para que los enlaces antiguos sigan funcionando.
 
-Always link with a trailing slash (`/pages/stack/`, `/blog/security/rate-limiting/`).
+Enlaza siempre con barra final (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
-## Versions
+## Versiones
 
-### 1.0.9 — 2026-10-04 · Shop layout, accordion filter, special edition
-- Shop (`/pages/components/`): accordion filter (sidebar on desktop, "Filtros" dropdown on mobile/tablet) with four
-  groups — Componentes del PC, Redes, Equipo básico, Herramientas — and 13 part-type categories (memoria, almacenamiento,
+### 1.0.10 — 2026-10-05 · España y México, todo en español
+- Banderas de la cabecera: solo 🇪🇸 España y 🇲🇽 México, ambas en español. La bandera fija la divisa de la tienda
+  (EUR o MXN) y el cambio se aplica al momento, sin recargar. Se elimina Google Translate (y su cookie `googtrans`).
+- Sin bandera elegida, el país se propone por geolocalización: zona horaria del navegador y, después, país por IP (GeoJS),
+  corregido al país disponible más cercano. Se informa en los términos (Precios y divisas).
+- Tienda: `CURRENCIES` queda en EUR y MXN; el selector de divisa se sustituye por `CurrencyBadge` (muestra la bandera y
+  permite cambiar de país). Se retiran USD y GBP.
+- Todo el sitio traducido al español: blog (panel, 38 artículos, series, facetas y etiquetas), menú, botones, formulario,
+  este readme y `public/db/README.md`. Las fechas del blog se muestran en formato español y los ids de encabezado
+  eliminan las tildes.
+
+### 1.0.9 — 2026-10-04 · Diseño de la tienda, filtro en acordeón, edición especial
+- Tienda (`/pages/components/`): filtro en acordeón (barra lateral en escritorio, desplegable «Filtros» en móvil/tableta) con cuatro
+  grupos — Componentes del PC, Redes, Equipo básico, Herramientas — y 13 categorías por tipo de pieza (memoria, almacenamiento,
   refrigeración, baterías, pantallas, placas, Wi-Fi, cableado, monitores, teclados y ratones, auriculares, mandos,
-  herramientas) instead of Oficina / Estudiante / Dev / Gamer / Otros. Plus a "Solo productos en stock" option.
-- Standard products in compact cards with a smaller photo: 4 columns × 2 rows on desktop, 2 × 4 on mobile, 8 per page.
-- "Edición especial" list below the grid: no photo; name, description, price, category tag and stock badge.
-  1 unit = wine, 2 units = blue, sold out = grey (also on cards and product pages). 10 sample products added (`LM-EE-*`).
-- Cart quantities are capped at the stock. `edition` field and category `groups` documented in `public/db/README.md`.
-- Header: the login button shows only its icon below 1280 px so the menu fits.
+  herramientas) en lugar de Oficina / Estudiante / Dev / Gamer / Otros. Además, una opción «Solo productos en stock».
+- Productos estándar en tarjetas compactas con foto más pequeña: 4 columnas × 2 filas en escritorio, 2 × 4 en móvil, 8 por página.
+- Lista «Edición especial» bajo la cuadrícula: sin foto; nombre, descripción, precio, etiqueta de categoría y distintivo de stock.
+  1 unidad = granate, 2 unidades = azul, agotado = gris (también en tarjetas y fichas de producto). 10 productos de ejemplo (`LM-EE-*`).
+- Las cantidades del carrito se limitan al stock. Campo `edition` y `groups` de categorías documentados en `public/db/README.md`.
+- Cabecera: por debajo de 1280 px el botón de acceso solo muestra su icono para que quepa el menú.
 
-### 1.0.8 — 2026-10-04 · White theme + four-colour palette
-- Back to a white site: white background, blue secondary, dark blue tertiary, grey for captions (`css/site.css`).
-  Header banner, Stack section and chat header in dark blue; footer and mobile menu white again; chat widget light.
-- Israeli shekel (ILS) removed from the shop currencies and the terms page; reference currencies are USD, MXN and GBP.
+### 1.0.8 — 2026-10-04 · Tema blanco + paleta de cuatro colores
+- Vuelta a un sitio blanco: fondo blanco, azul secundario, azul oscuro terciario, gris para pies de texto (`css/site.css`).
+  Banner de cabecera, sección Stack y cabecera del chat en azul oscuro; pie y menú móvil de nuevo en blanco; widget de chat claro.
+- Se elimina el séquel israelí (ILS) de las divisas de la tienda y de los términos; las divisas de referencia son USD, MXN y GBP.
 
-### 1.0.7 — 2026-10-04 · Login / sign up + cookie consent
-- Login / sign up pop-up on every page (header button, mobile menu); staging accounts stored in the browser only.
-- Cookie consent pop-up on the first visit ("Accept all" / "Necessary only"), remembered across pages.
-- Languages limited to Spanish ↔ English (🇪🇸 / 🇺🇸); Mexico and Netherlands removed.
-- WhatsApp widget: region picker code removed; Spain-only, bilingual ES/EN support.
+### 1.0.7 — 2026-10-04 · Acceso / registro + consentimiento de cookies
+- Pop-up de acceso / registro en todas las páginas (botón de la cabecera, menú móvil); cuentas de staging guardadas solo en el navegador.
+- Pop-up de consentimiento de cookies en la primera visita («Aceptar todas» / «Solo necesarias»), recordado entre páginas.
+- Idiomas limitados a español ↔ inglés (🇪🇸 / 🇺🇸); se eliminan México y Países Bajos.
+- Widget de WhatsApp: se elimina el código del selector de región; solo España, atención bilingüe ES/EN.
 
-### 1.0.6 — 2026-10-04 · Languages + WhatsApp Spain only
-- Flags in the header of every page (desktop and mobile menu): 🇺🇸 English, 🇪🇸 Español (España), 🇲🇽 Español (México), 🇳🇱 Nederlands.
-  Google Translate translates the whole site automatically; the choice is remembered across pages (`lm-locale`) and also sets
-  the shop currency (USD, EUR, MXN, EUR). Google's script loads only when a translation is active.
-- React guard in `js/layout.jsx` so Google's DOM changes can't crash the React pages; prices and counters in the shop are
-  `translate="no"` so they keep updating.
-- WhatsApp widget: Israel, US and Mexico removed; only the Spain number remains (region picker hidden).
+### 1.0.6 — 2026-10-04 · Idiomas + WhatsApp solo España
+- Banderas en la cabecera de todas las páginas (escritorio y menú móvil): 🇺🇸 English, 🇪🇸 Español (España), 🇲🇽 Español (México), 🇳🇱 Nederlands.
+  Google Translate traduce todo el sitio automáticamente; la elección se recuerda entre páginas (`lm-locale`) y también fija
+  la divisa de la tienda (USD, EUR, MXN, EUR). El script de Google solo se carga cuando hay una traducción activa.
+- Protección de React en `js/layout.jsx` para que los cambios de Google en el DOM no rompan las páginas React; los precios y contadores de la tienda
+  llevan `translate="no"` para que sigan actualizándose.
+- Widget de WhatsApp: se eliminan Israel, EE. UU. y México; solo queda el número de España (selector de región oculto).
 
-### 1.0.5 — 2026-10-04 · Serverless Edge: four new categories
-- Serverless series extended from 5 to 9 steps (`BLOG_TYPES` in `js/blog.jsx`), each with its own folder and `index.html`
-  in `blog/serverless/` and an entry in `BLOG_POSTS`:
-  06 Real-Time (WebSockets & Durable Objects), 07 AI at the Edge (Workers AI, Vectorize, AI Gateway),
-  08 Images & Media at the Edge (R2, transformations, Stream), 09 Deploy, Test & Roll Out (Wrangler, Vitest, CI, gradual deployments).
-- New zone `platform` ("Platform (ship & evolve)") for the deploy step; real-time sits in `state`, edge AI and media in `compute`.
-- Articles chain with "Next step" links: 05 → 06 → 07 → 08 → 09 → back to the overview.
+### 1.0.5 — 2026-10-04 · Serverless Edge: cuatro categorías nuevas
+- La serie serverless pasa de 5 a 9 pasos (`BLOG_TYPES` en `js/blog.jsx`), cada uno con su carpeta e `index.html`
+  en `blog/serverless/` y una entrada en `BLOG_POSTS`:
+  06 Tiempo real (WebSockets y Durable Objects), 07 IA en el edge (Workers AI, Vectorize, AI Gateway),
+  08 Imágenes y multimedia en el edge (R2, transformaciones, Stream), 09 Desplegar, probar y lanzar (Wrangler, Vitest, CI, despliegues graduales).
+- Nueva zona `platform` («Plataforma (publicar y evolucionar)») para el paso de despliegue; tiempo real va en `state`, IA en el edge y multimedia en `compute`.
+- Los artículos se encadenan con enlaces «Siguiente paso»: 05 → 06 → 07 → 08 → 09 → vuelta a la visión general.
 
-### 1.0.4 — 2026-10-03 · Product pages + simulated database · STAGING (pre-launch)
-- Status: **staging / MVP pre-launch manual input test.** Catalogue data, prices, stock and specs are sample data to be
-  checked by hand before launch; seller data and return addresses are still `[...]` placeholders.
-- New `public/db/` simulated database: `categorias.json` and `productos.json` (id, slug, sku, category, compatibility,
-  price, grade, stock, active, description, specs, image + credit). Documented in `public/db/README.md`.
-- `js/tienda.jsx` gains the data layer (`db.catalog()`, `useCatalog()`): the only place to change when moving to a real database.
-  Cart (`useCart`, synced across tabs), `ProductCard`, `CartDrawer`, `CartButton` and `ProductPage` move there too.
-- 30 product pages at `/pages/components/<slug>/` (generated by `tools/generar-paginas-producto.py`): photo with credit,
-  price in 5 currencies, stock status, quantity, add to cart / buy now, specs with SKU, compatible models,
-  related products, links to returns/guarantee/shipping terms, schema.org `Product` data and Open Graph tags.
-- Shop page reads from the database (loading skeleton and error state), searches compatible models and SKU,
-  links every card to its product page and shows "Agotado" for `stock: 0` (sample: Dell Latitude hinges).
-- `IMAGE_CREDITS` removed from the shop page: credits now live in each product's `image` object.
+### 1.0.4 — 2026-10-03 · Fichas de producto + base de datos simulada · STAGING (prelanzamiento)
+- Estado: **staging / prueba de entrada manual de MVP prelanzamiento.** Los datos del catálogo, precios, stock y especificaciones son de ejemplo y deben
+  revisarse a mano antes del lanzamiento; los datos del vendedor y las direcciones de devolución siguen como marcadores `[...]`.
+- Nueva base de datos simulada `public/db/`: `categorias.json` y `productos.json` (id, slug, sku, categoría, compatibilidad,
+  precio, calidad, stock, activo, descripción, especificaciones, imagen + crédito). Documentada en `public/db/README.md`.
+- `js/tienda.jsx` incorpora la capa de datos (`db.catalog()`, `useCatalog()`): el único lugar que cambiar al pasar a una base de datos real.
+  El carrito (`useCart`, sincronizado entre pestañas), `ProductCard`, `CartDrawer`, `CartButton` y `ProductPage` también pasan allí.
+- 30 fichas de producto en `/pages/components/<slug>/` (generadas por `tools/generar-paginas-producto.py`): foto con crédito,
+  precio en 5 divisas, estado del stock, cantidad, añadir al carrito / comprar ahora, especificaciones con SKU, modelos compatibles,
+  productos relacionados, enlaces a los términos de devoluciones/garantía/envíos, datos schema.org `Product` y etiquetas Open Graph.
+- La tienda lee de la base de datos (esqueleto de carga y estado de error), busca en modelos compatibles y SKU,
+  enlaza cada tarjeta a su ficha y muestra «Agotado» con `stock: 0` (ejemplo: bisagras Dell Latitude).
+- Se elimina `IMAGE_CREDITS` de la página de la tienda: los créditos viven ahora en el objeto `image` de cada producto.
 
-### 1.0.3 — 2026-10-03 · Product photos
-- 29 product photos in `img/productos/` (`<product-id>-400.webp` / `-800.webp`): square, white background, ~8 KB / ~19 KB each.
-- Cards load them responsively (`srcset`, 400w/800w), lazily (first row eager) and with fixed dimensions (no layout shift); the cart shows thumbnails.
-- `IMAGE_CREDITS` in `pages/components/index.html` + "Créditos de imágenes" list at the bottom of the shop (required by CC BY / CC BY-SA).
-- "Images are illustrative" notice in the shop and in the terms (Productos). Products without a photo keep their category icon.
+### 1.0.3 — 2026-10-03 · Fotos de producto
+- 29 fotos de producto en `img/productos/` (`<id-producto>-400.webp` / `-800.webp`): cuadradas, fondo blanco, ~8 KB / ~19 KB cada una.
+- Las tarjetas las cargan de forma responsive (`srcset`, 400w/800w), diferida (la primera fila sin diferir) y con dimensiones fijas (sin saltos de diseño); el carrito muestra miniaturas.
+- `IMAGE_CREDITS` en `pages/components/index.html` + lista «Créditos de imágenes» al final de la tienda (exigida por CC BY / CC BY-SA).
+- Aviso «Las imágenes son ilustrativas» en la tienda y en los términos (Productos). Los productos sin foto mantienen el icono de su categoría.
 
-### 1.0.2 — 2026-10-03 · Components shop + terms
-- `/pages/components/` is now an e-commerce of spare parts (replaces the UI component library):
-  categories Oficina, Estudiante, Dev, Redes, Gamer, Otros (`?cat=<id>`), search, sort, cart and checkout via WhatsApp (+34 602 55 76 85).
-- Prices in EUR (VAT included) with reference conversion to USD, MXN, GBP, ILS using ECB daily rates (Frankfurter API, fallback rates in code).
-- New `/pages/terminos/`: terms and conditions with a 30-day return policy (subject to inspection, returns to an address in Spain or in Madrid),
-  14-day legal withdrawal, 3-year legal guarantee, data protection and withdrawal form. Linked from every product, the cart and the site footer.
-- New `js/tienda.jsx` shared by both shop pages: `SELLER`, `RETURN_ADDRESSES`, `CURRENCIES`, `useCurrency()`.
-- Pending before going live: seller data and both return addresses (`[...]` placeholders in `js/tienda.jsx`) and real catalogue prices.
+### 1.0.2 — 2026-10-03 · Tienda de componentes + términos
+- `/pages/components/` pasa a ser una tienda online de repuestos (sustituye a la biblioteca de componentes de UI):
+  categorías Oficina, Estudiante, Dev, Redes, Gamer, Otros (`?cat=<id>`), búsqueda, orden, carrito y pedido por WhatsApp (+34 602 55 76 85).
+- Precios en EUR (IVA incluido) con conversión orientativa a USD, MXN, GBP, ILS usando los tipos diarios del BCE (API Frankfurter, tipos de respaldo en el código).
+- Nueva `/pages/terminos/`: términos y condiciones con política de devolución de 30 días (sujeta a revisión, devoluciones a una dirección en España o en Madrid),
+  desistimiento legal de 14 días, garantía legal de 3 años, protección de datos y formulario de desistimiento. Enlazada desde cada producto, el carrito y el pie del sitio.
+- Nuevo `js/tienda.jsx` compartido por las dos páginas de la tienda: `SELLER`, `RETURN_ADDRESSES`, `CURRENCIES`, `useCurrency()`.
+- Pendiente antes de publicar: datos del vendedor y ambas direcciones de devolución (marcadores `[...]` en `js/tienda.jsx`) y precios reales del catálogo.
 
-### 1.0.1 — 2026-10-03 · WhatsApp chat widget
-- Floating chat box before `</body>` in `index.html` (standalone copy in `whatsapp-chat-snippet.html`); "Iniciar chat" opens a `wa.me` link
-  in a new tab with `rel="noopener noreferrer"`.
-- Numbers in digits-only international format: MX `525610074750`, ES `34602557685`. US and IL slots exist but stay hidden until a number is set.
-- Region preselected from the visitor's time zone; z-index 90 (above the page, below the mobile menu).
+### 1.0.1 — 2026-10-03 · Widget de chat de WhatsApp
+- Caja de chat flotante antes de `</body>` en `index.html` (copia independiente en `whatsapp-chat-snippet.html`); «Iniciar chat» abre un enlace `wa.me`
+  en una pestaña nueva con `rel="noopener noreferrer"`.
+- Números en formato internacional solo con dígitos: MX `525610074750`, ES `34602557685`. Los huecos de EE. UU. e IL existen pero siguen ocultos hasta que se configure un número.
+- Región preseleccionada según la zona horaria del visitante; z-index 90 (por encima de la página, por debajo del menú móvil).

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Modular Core Architecture - Lameyer Blog</title>
-    <meta name="description" content="Modular Core: splitting business logic into domain modules with owned data and typed contracts, so serverless edge functions and workflows can call it safely.">
+    <title>Arquitectura Modular Core - Blog de Lameyer</title>
+    <meta name="description" content="Modular Core: dividir la lógica de negocio en módulos de dominio con datos propios y contratos tipados, para que las funciones serverless en el edge y los flujos puedan llamarla con seguridad.">
     <link rel="canonical" href="https://lameyer.net/blog/core/modular-core-architecture/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,50 +23,50 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'List your domains before you draw any module',
-            'Give every table exactly one owning module',
-            'Expose each module only through a public contract',
-            'Forbid deep imports with a lint rule',
-            'Version contracts and test them in CI',
-            'Extract a module to a service only when you must',
+            'Enumera tus dominios antes de dibujar ningún módulo',
+            'Da a cada tabla exactamente un módulo propietario',
+            'Expón cada módulo solo a través de un contrato público',
+            'Prohíbe los imports profundos con una regla de lint',
+            'Versiona los contratos y pruébalos en CI',
+            'Extrae un módulo a un servicio solo cuando sea imprescindible',
         ];
 
         const CASES = [
-            { case: 'A change to invoicing breaks login', fix: 'Domain modules with enforced boundaries', step: <A href="/blog/core/domain-modules-boundaries/">Modules</A> },
-            { case: 'Edge functions and workflows call internal functions directly', fix: 'A typed contract (OpenAPI or a TypeScript interface) per module', step: <A href="/blog/core/contracts-typed-apis/">Contracts</A> },
-            { case: 'The same validation code is copied into five repos', fix: 'Shared packages in one workspace', step: <A href="/blog/core/shared-packages-workspaces/">Packages</A> },
-            { case: 'Three modules write to the same table', fix: 'One owner per table, others read through the contract', step: <A href="/blog/core/data-ownership-migrations/">Data</A> },
-            { case: 'A deploy breaks a consumer nobody knew about', fix: 'Contract tests and semantic versioning', step: <A href="/blog/core/contract-testing-versioning/">Versioning</A> },
+            { case: 'Un cambio en facturación rompe el login', fix: 'Módulos de dominio con límites que se hacen cumplir', step: <A href="/blog/core/domain-modules-boundaries/">Módulos</A> },
+            { case: 'Las funciones edge y los flujos llaman directamente a funciones internas', fix: 'Un contrato tipado (OpenAPI o una interfaz de TypeScript) por módulo', step: <A href="/blog/core/contracts-typed-apis/">Contratos</A> },
+            { case: 'El mismo código de validación está copiado en cinco repositorios', fix: 'Paquetes compartidos en un único workspace', step: <A href="/blog/core/shared-packages-workspaces/">Paquetes</A> },
+            { case: 'Tres módulos escriben en la misma tabla', fix: 'Un dueño por tabla; los demás leen a través del contrato', step: <A href="/blog/core/data-ownership-migrations/">Datos</A> },
+            { case: 'Un despliegue rompe a un consumidor que nadie conocía', fix: 'Tests de contrato y versionado semántico', step: <A href="/blog/core/contract-testing-versioning/">Versionado</A> },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    MC-SE stands for <strong className="text-gray-900">Modular Core + Serverless Edge</strong>. The edge is where requests
-                    arrive and where automations run. The core is where the business rules live: pricing, invoicing, users, inventory.
-                    The edge can only stay thin and fast if the core gives it clean, stable entry points. This series is about building
-                    that core.
+                    MC-SE significa <strong className="text-gray-900">Modular Core + Serverless Edge</strong>. El edge es donde llegan las
+                    peticiones y donde se ejecutan las automatizaciones. El núcleo es donde viven las reglas de negocio: precios,
+                    facturación, usuarios, inventario. El edge solo puede seguir siendo ligero y rápido si el núcleo le ofrece puntos de
+                    entrada limpios y estables. Esta serie trata de construir ese núcleo.
                 </P>
 
-                <H2>Developer use cases</H2>
+                <H2>Casos de uso para desarrolladores</H2>
                 <Table
-                    columns={[{ key: 'case', label: 'Symptom' }, { key: 'fix', label: 'Solution' }, { key: 'step', label: 'Step', accent: true }]}
+                    columns={[{ key: 'case', label: 'Síntoma' }, { key: 'fix', label: 'Solución' }, { key: 'step', label: 'Paso', accent: true }]}
                     rows={CASES}
                 />
 
-                <H2>Modules, not microservices</H2>
+                <H2>Módulos, no microservicios</H2>
                 <P>
-                    A modular core is usually a <em>modular monolith</em>: one deployable, many modules. Each module maps to a business
-                    domain (<Code>billing</Code>, <Code>catalog</Code>, <Code>accounts</Code>), owns its data and exposes a small public
-                    API. You get most of the isolation of microservices without the network calls, distributed transactions and
-                    deployment overhead. When a module truly needs to scale or deploy on its own, its contract already exists, so
-                    extracting it is a move, not a rewrite.
+                    Un núcleo modular suele ser un <em>monolito modular</em>: un único desplegable, muchos módulos. Cada módulo corresponde
+                    a un dominio de negocio (<Code>billing</Code>, <Code>catalog</Code>, <Code>accounts</Code>), es dueño de sus datos y
+                    expone una pequeña API pública. Obtienes casi todo el aislamiento de los microservicios sin las llamadas de red, las
+                    transacciones distribuidas ni la carga de despliegue. Cuando un módulo necesita de verdad escalar o desplegarse por su
+                    cuenta, su contrato ya existe, así que extraerlo es una mudanza, no una reescritura.
                 </P>
-                <CodeBlock title="Layout">{`core/
+                <CodeBlock title="Estructura">{`core/
   billing/
-    index.ts        # public contract: the only file other modules import
-    internal/       # implementation, never imported from outside
-    migrations/     # billing owns its tables
+    index.ts        # contrato público: el único archivo que importan los demás módulos
+    internal/       # implementación, nunca se importa desde fuera
+    migrations/     # billing es dueño de sus tablas
   catalog/
     index.ts
     internal/
@@ -74,30 +74,30 @@
     index.ts
     internal/`}</CodeBlock>
 
-                <H2>Contracts are the seam to the edge</H2>
+                <H2>Los contratos son la costura con el edge</H2>
                 <P>
-                    Every module publishes a contract: a TypeScript interface for in-process callers and, where the edge or a workflow
-                    calls it over HTTP, an OpenAPI document. Edge functions generate their client from that document, so a renamed
-                    field fails the build instead of failing in production.
+                    Cada módulo publica un contrato: una interfaz de TypeScript para quienes lo llaman dentro del proceso y, cuando el edge
+                    o un flujo lo llama por HTTP, un documento OpenAPI. Las funciones edge generan su cliente a partir de ese documento, así
+                    que un campo renombrado hace fallar el build en lugar de fallar en producción.
                 </P>
                 <CodeBlock title="core/billing/index.ts">{`export interface Billing {
   createInvoice(input: { customerId: string; lines: Line[] }): Promise<Invoice>;
   getInvoice(id: string): Promise<Invoice | null>;
 }`}</CodeBlock>
 
-                <H2>Enforce the boundaries</H2>
+                <H2>Haz cumplir los límites</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Imports.</strong> A lint rule (for example <Code>no-restricted-imports</Code> or dependency-cruiser) blocks <Code>billing/internal/*</Code> from outside <Code>billing/</Code>.</>,
-                    <><strong className="text-gray-900">Data.</strong> Each table has one owning module. Others read through its contract or subscribe to its events, never with a cross-module SQL join.</>,
-                    <><strong className="text-gray-900">Packages.</strong> Shared code (validation schemas, money types, logging) lives in workspace packages with their own version, not in a <Code>utils/</Code> folder everything imports.</>,
-                    <><strong className="text-gray-900">Versioning.</strong> Contract tests run in CI, and breaking changes bump the major version so edge consumers can migrate on their own schedule.</>,
+                    <><strong className="text-gray-900">Imports.</strong> Una regla de lint (por ejemplo <Code>no-restricted-imports</Code> o dependency-cruiser) bloquea <Code>billing/internal/*</Code> desde fuera de <Code>billing/</Code>.</>,
+                    <><strong className="text-gray-900">Datos.</strong> Cada tabla tiene un módulo propietario. Los demás leen a través de su contrato o se suscriben a sus eventos, nunca con un join SQL entre módulos.</>,
+                    <><strong className="text-gray-900">Paquetes.</strong> El código compartido (esquemas de validación, tipos de dinero, logging) vive en paquetes del workspace con su propia versión, no en una carpeta <Code>utils/</Code> que todo importa.</>,
+                    <><strong className="text-gray-900">Versionado.</strong> Los tests de contrato se ejecutan en CI, y los cambios incompatibles suben la versión mayor para que los consumidores del edge migren a su ritmo.</>,
                 ]} />
 
-                <Callout title="How it connects to the rest of MC-SE">
-                    The <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A> series covers the functions that sit in
-                    front of these contracts, and <A href="/blog/workflows/serverless-workflow-automation/">Workflow Automation</A> covers
-                    the queues and webhooks that call them in the background. Both are protected by the{' '}
-                    <A href="/blog/?series=security">API Security</A> layers.
+                <Callout title="Cómo encaja con el resto de MC-SE">
+                    La serie <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A> trata las funciones que se sitúan
+                    delante de estos contratos, y <A href="/blog/workflows/serverless-workflow-automation/">Automatización de flujos</A> trata
+                    las colas y webhooks que los llaman en segundo plano. Ambas están protegidas por las capas de{' '}
+                    <A href="/blog/?series=security">Seguridad de APIs</A>.
                 </Callout>
             </>
         );

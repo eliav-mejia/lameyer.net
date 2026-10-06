@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scheduled Jobs (Cron Triggers) - Lameyer Blog</title>
-    <meta name="description" content="Replacing the always-on sync server with Cloudflare Cron Triggers that fan work out to queues, with locks, checkpoints and alerts for missed runs.">
+    <title>Tareas programadas (Cron Triggers) - Blog de Lameyer</title>
+    <meta name="description" content="Sustituir el servidor de sincronización siempre encendido por Cloudflare Cron Triggers que reparten el trabajo en colas, con bloqueos, puntos de control y alertas cuando una ejecución no se produce.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/scheduled-jobs-cron-triggers/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,67 +23,68 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Inventory every crontab and scheduled task first',
-            'Write schedules in UTC and say so',
-            'Let the cron only enqueue; workers do the work',
-            'Store a checkpoint so a rerun resumes, not restarts',
-            'Prevent overlapping runs with a lock',
-            'Alert when a run is missed, not only when it fails',
+            'Haz primero un inventario de todos los crontabs y tareas programadas',
+            'Escribe los calendarios en UTC y dilo',
+            'Que el cron solo encole; los workers hacen el trabajo',
+            'Guarda un punto de control para que repetir sea reanudar, no empezar de cero',
+            'Evita las ejecuciones solapadas con un bloqueo',
+            'Alerta cuando una ejecución no se produce, no solo cuando falla',
         ];
 
         const INVENTORY = [
-            { job: 'Sync ERP orders to CRM', before: 'crontab on a VM, every 15 min', after: 'Cron → queue per page of orders' },
-            { job: 'Nightly sales report', before: 'Script on the database server', after: 'Cron → core report endpoint → PDF in R2 → email' },
-            { job: 'Expire trial accounts', before: 'Windows Task Scheduler', after: 'Cron → core accounts contract' },
-            { job: 'Exchange-rate refresh', before: 'Cron inside the app container', after: 'Cron → fetch → KV' },
+            { job: 'Sincronizar pedidos del ERP con el CRM', before: 'crontab en una VM, cada 15 min', after: 'Cron → cola por página de pedidos' },
+            { job: 'Informe nocturno de ventas', before: 'Script en el servidor de la base de datos', after: 'Cron → endpoint de informes del núcleo → PDF en R2 → email' },
+            { job: 'Caducar cuentas de prueba', before: 'Programador de tareas de Windows', after: 'Cron → contrato de accounts del núcleo' },
+            { job: 'Actualizar tipos de cambio', before: 'Cron dentro del contenedor de la app', after: 'Cron → fetch → KV' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Almost every company we work with has one: a server whose only job is to run scheduled scripts. It syncs orders at
-                    night, sends a report at 7:00, and expires trials. It costs money every hour of the month to do a few minutes of work, it
-                    needs patching, and when it quietly stops, nobody notices until the numbers are wrong. <strong className="text-gray-900">Cron
-                    Triggers</strong> run the same schedules on Workers, with no server in between.
+                    Casi todas las empresas con las que trabajamos tienen uno: un servidor cuyo único trabajo es ejecutar scripts
+                    programados. Sincroniza pedidos por la noche, envía un informe a las 7:00 y caduca las pruebas. Cuesta dinero cada hora
+                    del mes para hacer unos minutos de trabajo, necesita parches y, cuando se para en silencio, nadie se entera hasta que las
+                    cifras no cuadran. Los <strong className="text-gray-900">Cron Triggers</strong> ejecutan los mismos calendarios en
+                    Workers, sin ningún servidor de por medio.
                 </P>
 
-                <H2>Start with an inventory</H2>
+                <H2>Empieza con un inventario</H2>
                 <P>
-                    Before moving anything, list every scheduled task you have: crontabs on every VM, Windows Task Scheduler entries,
-                    database jobs, schedules inside integration tools. This list is usually longer than anyone expects, and it is
-                    the backlog for this migration.
+                    Antes de mover nada, enumera todas las tareas programadas que tienes: crontabs en cada VM, entradas del programador de
+                    tareas de Windows, jobs de base de datos, calendarios dentro de herramientas de integración. Esta lista suele ser más
+                    larga de lo que nadie espera, y es el backlog de esta migración.
                 </P>
                 <Table
-                    columns={[{ key: 'job', label: 'Job' }, { key: 'before', label: 'Today' }, { key: 'after', label: 'Serverless', accent: true }]}
+                    columns={[{ key: 'job', label: 'Tarea' }, { key: 'before', label: 'Hoy' }, { key: 'after', label: 'Serverless', accent: true }]}
                     rows={INVENTORY}
                 />
 
-                <H2>Schedules in configuration</H2>
-                <CodeBlock title="wrangler.jsonc (excerpt)">{`"triggers": {
+                <H2>Calendarios en la configuración</H2>
+                <CodeBlock title="wrangler.jsonc (extracto)">{`"triggers": {
   "crons": [
-    "*/15 * * * *",   // ERP → CRM sync
-    "0 6 * * *",      // nightly report (06:00 UTC = 00:00 in Mexico City)
-    "30 3 * * 1"      // weekly cleanup, Monday 03:30 UTC
+    "*/15 * * * *",   // sincronización ERP → CRM
+    "0 6 * * *",      // informe nocturno (06:00 UTC = 00:00 en Ciudad de México)
+    "30 3 * * 1"      // limpieza semanal, lunes 03:30 UTC
   ]
 }`}</CodeBlock>
                 <P>
-                    Cron Triggers always run in UTC. Write the local time next to each schedule, because a report that arrives an hour
-                    late after a daylight-saving change looks like a bug to the person waiting for it.
+                    Los Cron Triggers siempre funcionan en UTC. Escribe la hora local junto a cada calendario, porque un informe que llega una
+                    hora tarde tras el cambio de horario parece un bug para quien lo está esperando.
                 </P>
 
-                <H2>The cron enqueues, workers do the work</H2>
+                <H2>El cron encola, los workers trabajan</H2>
                 <P>
-                    The most common mistake is putting the whole job inside <Code>scheduled()</Code>. If the sync touches 40,000 orders, one
-                    invocation will hit its time limit, and a failure halfway through leaves no trace of where it stopped. Instead, the
-                    scheduled handler only decides <em>what</em> to do and puts it on a queue. Queue consumers do the work in small
-                    batches, with automatic retries.
+                    El error más habitual es meter toda la tarea dentro de <Code>scheduled()</Code>. Si la sincronización toca 40.000 pedidos,
+                    una sola invocación agotará su límite de tiempo, y un fallo a mitad de camino no deja rastro de dónde se paró. En su lugar,
+                    el manejador programado solo decide <em>qué</em> hacer y lo pone en una cola. Los consumidores de la cola hacen el trabajo
+                    en lotes pequeños, con reintentos automáticos.
                 </P>
                 <CodeBlock title="src/index.ts">{`export default {
   async scheduled(event, env, ctx) {
     if (event.cron !== '*/15 * * * *') return;
 
     const since = (await env.STATE.get('erp-sync:checkpoint')) ?? '1970-01-01T00:00:00Z';
-    const pages = await listChangedOrderPages(env, since);      // cheap: IDs only
+    const pages = await listChangedOrderPages(env, since);      // barato: solo IDs
 
     await env.SYNC_QUEUE.sendBatch(pages.map((p) => ({ body: { page: p, since } })));
     ctx.waitUntil(env.STATE.put('erp-sync:last-run', new Date().toISOString()));
@@ -91,45 +92,45 @@
 
   async queue(batch, env) {
     for (const msg of batch.messages) {
-      await syncOrderPage(env, msg.body);    // idempotent: safe to retry
+      await syncOrderPage(env, msg.body);    // idempotente: se puede reintentar
       msg.ack();
     }
   },
 };`}</CodeBlock>
 
-                <H2>Checkpoints and locks</H2>
+                <H2>Puntos de control y bloqueos</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Checkpoint.</strong> After a page succeeds, move the checkpoint forward. A rerun starts where the last one stopped, not from the beginning.</>,
-                    <><strong className="text-gray-900">Lock.</strong> If a run takes longer than its interval, the next one must not start on top of it. A Durable Object makes a reliable lock, because it handles one request at a time.</>,
-                    <><strong className="text-gray-900">Idempotency.</strong> Messages are delivered at least once. Writing to the target with the source record's ID as the key makes a duplicate harmless. The <A href="/blog/workflows/serverless-workflow-automation/">Workflow Automation</A> series covers this in depth.</>,
+                    <><strong className="text-gray-900">Punto de control.</strong> Cuando una página se completa, avanza el punto de control. Una repetición empieza donde se paró la anterior, no desde el principio.</>,
+                    <><strong className="text-gray-900">Bloqueo.</strong> Si una ejecución tarda más que su intervalo, la siguiente no debe empezar encima. Un Durable Object es un bloqueo fiable, porque atiende una petición cada vez.</>,
+                    <><strong className="text-gray-900">Idempotencia.</strong> Los mensajes se entregan al menos una vez. Escribir en el destino usando como clave el ID del registro de origen hace inofensivo un duplicado. La serie <A href="/blog/workflows/serverless-workflow-automation/">Automatización de flujos</A> lo trata a fondo.</>,
                 ]} />
-                <Callout title="Long, multi-step jobs">
-                    When a scheduled job has steps that must happen in order and can each take a while (export, transform, upload, notify),
-                    start a durable Workflow from the cron instead of a queue. Each step is retried on its own and the run survives
-                    restarts.
+                <Callout title="Tareas largas de varios pasos">
+                    Cuando una tarea programada tiene pasos que deben ir en orden y que pueden tardar cada uno un rato (exportar,
+                    transformar, subir, notificar), inicia un Workflow duradero desde el cron en lugar de una cola. Cada paso se reintenta por
+                    separado y la ejecución sobrevive a los reinicios.
                 </Callout>
 
-                <H2>Alert on silence</H2>
+                <H2>Alerta ante el silencio</H2>
                 <P>
-                    Failures that throw errors are easy to catch. The dangerous case is the job that simply doesn't run. Record the time of
-                    every successful run (above, <Code>erp-sync:last-run</Code>) and check it from somewhere else: a second cron, or an
-                    external heartbeat monitor that alerts when it hasn't been pinged on schedule.
+                    Los fallos que lanzan errores son fáciles de detectar. El caso peligroso es la tarea que simplemente no se ejecuta.
+                    Registra la hora de cada ejecución correcta (arriba, <Code>erp-sync:last-run</Code>) y compruébala desde otro sitio: un
+                    segundo cron o un monitor externo de latidos que avisa cuando no recibe el ping a su hora.
                 </P>
-                <CodeBlock title="A watchdog cron">{`const last = await env.STATE.get('erp-sync:last-run');
+                <CodeBlock title="Un cron vigilante">{`const last = await env.STATE.get('erp-sync:last-run');
 if (!last || Date.now() - Date.parse(last) > 45 * 60 * 1000) {
-  await notify(env, 'ERP sync has not completed in 45 minutes');
+  await notify(env, 'La sincronización del ERP no se ha completado en 45 minutos');
 }`}</CodeBlock>
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    Useful numbers: scheduled servers retired, monthly cost of scheduled work before and after, missed runs per month
-                    (target zero), and data freshness, meaning the age of the newest record synced. Freshness is the one the business
-                    actually feels.
+                    Cifras útiles: servidores de tareas programadas retirados, coste mensual del trabajo programado antes y después,
+                    ejecuciones perdidas al mes (objetivo cero) y frescura de los datos, es decir, la antigüedad del registro sincronizado más
+                    reciente. La frescura es la que de verdad nota el negocio.
                 </P>
 
-                <Callout title="Next step">
-                    Jobs that run while everyone sleeps need good logs. <A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing &
-                    Cost</A> covers how to see what they did.
+                <Callout title="Siguiente paso">
+                    Las tareas que se ejecutan mientras todo el mundo duerme necesitan buenos logs. <A href="/blog/serverless/logs-tracing-cost/">Logs,
+                    trazas y costes</A> explica cómo ver lo que hicieron.
                 </Callout>
             </>
         );

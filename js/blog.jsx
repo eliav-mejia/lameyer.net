@@ -18,158 +18,158 @@
 const SERIES = [
     {
         id: 'security',
-        label: 'API Security',
-        eyebrow: 'BLOG · API SECURITY',
-        title: 'Layered Defense',
-        accent: 'for Headless APIs',
-        intro: "A headless API with no frontend exposes keys and data to scraping, brute force and direct origin attacks. Explore each layer of Cloudflare's defense model, from the edge to your origin.",
-        step: 'Layer',
-        from: 'Client',
-        to: 'Origin',
-        flowLabel: 'Request path',
-        typesLabel: 'Defense layers',
-        facet: 'Threat',
-        facetsLabel: 'Threats covered',
-        verb: 'Stops',
-        placeholder: 'e.g. SQL injection, mTLS, 429',
-        cta: { title: 'Need help hardening your API?', text: 'We design and deploy layered Cloudflare defenses for headless APIs.' },
+        label: 'Seguridad de APIs',
+        eyebrow: 'BLOG · SEGURIDAD DE APIS',
+        title: 'Defensa en capas',
+        accent: 'para APIs headless',
+        intro: 'Una API headless sin frontend expone claves y datos al scraping, a la fuerza bruta y a ataques directos al origen. Recorre cada capa del modelo de defensa de Cloudflare, del edge a tu origen.',
+        step: 'Capa',
+        from: 'Cliente',
+        to: 'Origen',
+        flowLabel: 'Recorrido de la petición',
+        typesLabel: 'Capas de defensa',
+        facet: 'Amenaza',
+        facetsLabel: 'Amenazas cubiertas',
+        verb: 'Detiene',
+        placeholder: 'p. ej. inyección SQL, mTLS, 429',
+        cta: { title: '¿Necesitas blindar tu API?', text: 'Diseñamos y desplegamos defensas en capas con Cloudflare para APIs headless.' },
     },
     {
         id: 'search',
-        label: 'Code Search & Discoverability',
-        eyebrow: 'BLOG · CODE SEARCH & DISCOVERABILITY',
-        title: 'Findable Code,',
-        accent: 'Findable Pages',
-        intro: 'Organizing, filtering and semantically searching code and repositories, then publishing what you build so crawlers, search engines and AI systems can find it. Each stage, plus the crossovers where stages meet.',
-        step: 'Stage',
-        from: 'Repository',
-        to: 'Results',
-        flowLabel: 'Discovery path',
-        typesLabel: 'Stages',
-        facet: 'Problem',
-        facetsLabel: 'Problems covered',
-        verb: 'Solves',
-        placeholder: 'e.g. embeddings, LCP, JSON-LD',
-        cta: { title: 'Need your code and docs to be found?', text: 'We build semantic code search and fast, crawlable, structured documentation sites.' },
+        label: 'Búsqueda de código y visibilidad',
+        eyebrow: 'BLOG · BÚSQUEDA DE CÓDIGO Y VISIBILIDAD',
+        title: 'Código localizable,',
+        accent: 'páginas localizables',
+        intro: 'Organizar, filtrar y buscar semánticamente código y repositorios, y después publicar lo que construyes para que rastreadores, buscadores y sistemas de IA lo encuentren. Cada etapa, más los cruces donde las etapas se encuentran.',
+        step: 'Etapa',
+        from: 'Repositorio',
+        to: 'Resultados',
+        flowLabel: 'Recorrido de descubrimiento',
+        typesLabel: 'Etapas',
+        facet: 'Problema',
+        facetsLabel: 'Problemas cubiertos',
+        verb: 'Resuelve',
+        placeholder: 'p. ej. embeddings, LCP, JSON-LD',
+        cta: { title: '¿Quieres que encuentren tu código y tu documentación?', text: 'Creamos búsqueda semántica de código y sitios de documentación rápidos, rastreables y estructurados.' },
     },
     {
         id: 'core',
         label: 'Modular Core',
         eyebrow: 'BLOG · MODULAR CORE',
-        title: 'A Core You Can',
-        accent: 'Rebuild in Pieces',
-        intro: 'The "MC" in MC-SE: splitting business logic into modules with clear boundaries and contracts, so the edge, workflows and integrations can call it without knowing how it works inside.',
-        step: 'Step',
-        from: 'Monolith',
-        to: 'Modules',
-        flowLabel: 'Modularization path',
-        typesLabel: 'Steps',
-        facet: 'Use case',
-        facetsLabel: 'Use cases covered',
-        verb: 'Solves',
-        placeholder: 'e.g. OpenAPI, workspaces, migrations',
-        cta: { title: 'Untangling a monolith?', text: 'We design modular cores with typed contracts that serverless functions and integrations can build on.' },
+        title: 'Un núcleo que puedes',
+        accent: 'reconstruir por piezas',
+        intro: 'La «MC» de MC-SE: dividir la lógica de negocio en módulos con límites y contratos claros, para que el edge, los flujos y las integraciones puedan llamarla sin saber cómo funciona por dentro.',
+        step: 'Paso',
+        from: 'Monolito',
+        to: 'Módulos',
+        flowLabel: 'Recorrido de modularización',
+        typesLabel: 'Pasos',
+        facet: 'Caso de uso',
+        facetsLabel: 'Casos de uso cubiertos',
+        verb: 'Resuelve',
+        placeholder: 'p. ej. OpenAPI, workspaces, migraciones',
+        cta: { title: '¿Desenredando un monolito?', text: 'Diseñamos núcleos modulares con contratos tipados sobre los que construir funciones serverless e integraciones.' },
     },
     {
         id: 'serverless',
         label: 'Serverless Edge',
         eyebrow: 'BLOG · SERVERLESS EDGE',
-        title: 'Logic That Runs',
-        accent: 'Close to the User',
-        intro: 'The "SE" in MC-SE: running request logic, caching and scheduled jobs on serverless edge functions, with storage that lives next to them, and no servers to patch.',
-        step: 'Step',
-        from: 'User',
-        to: 'Core',
-        flowLabel: 'Edge request path',
-        typesLabel: 'Steps',
-        facet: 'Use case',
-        facetsLabel: 'Use cases covered',
-        verb: 'Solves',
-        placeholder: 'e.g. Workers, KV, cron, cold start',
-        cta: { title: 'Moving logic to the edge?', text: 'We build and operate serverless edge functions in front of your core and your APIs.' },
+        title: 'Lógica que se ejecuta',
+        accent: 'cerca del usuario',
+        intro: 'La «SE» de MC-SE: ejecutar la lógica de las peticiones, la caché y las tareas programadas en funciones serverless en el edge, con el almacenamiento a su lado y sin servidores que parchear.',
+        step: 'Paso',
+        from: 'Usuario',
+        to: 'Núcleo',
+        flowLabel: 'Recorrido de la petición en el edge',
+        typesLabel: 'Pasos',
+        facet: 'Caso de uso',
+        facetsLabel: 'Casos de uso cubiertos',
+        verb: 'Resuelve',
+        placeholder: 'p. ej. Workers, KV, cron, arranque en frío',
+        cta: { title: '¿Llevando la lógica al edge?', text: 'Construimos y operamos funciones serverless en el edge delante de tu núcleo y de tus APIs.' },
     },
     {
         id: 'workflows',
-        label: 'Workflow Automation',
-        eyebrow: 'BLOG · WORKFLOW AUTOMATION',
-        title: 'Connect Your Workflows',
-        accent: 'with Serverless Logic',
-        intro: 'Webhooks, queues and durable workflows that connect forms, CRMs, spreadsheets and payment providers to your modular core, reliably, even when one of them is down.',
-        step: 'Step',
-        from: 'Trigger',
-        to: 'Outcome',
-        flowLabel: 'Workflow path',
-        typesLabel: 'Steps',
-        facet: 'Use case',
-        facetsLabel: 'Use cases covered',
-        verb: 'Solves',
-        placeholder: 'e.g. webhook, retry, idempotency',
-        cta: { title: 'Manual steps slowing you down?', text: 'We automate business workflows with serverless functions, queues and integrations.' },
+        label: 'Automatización de flujos',
+        eyebrow: 'BLOG · AUTOMATIZACIÓN DE FLUJOS',
+        title: 'Conecta tus flujos',
+        accent: 'con lógica serverless',
+        intro: 'Webhooks, colas y flujos duraderos que conectan formularios, CRM, hojas de cálculo y pasarelas de pago con tu núcleo modular, de forma fiable, incluso cuando alguno de ellos está caído.',
+        step: 'Paso',
+        from: 'Disparador',
+        to: 'Resultado',
+        flowLabel: 'Recorrido del flujo',
+        typesLabel: 'Pasos',
+        facet: 'Caso de uso',
+        facetsLabel: 'Casos de uso cubiertos',
+        verb: 'Resuelve',
+        placeholder: 'p. ej. webhook, reintento, idempotencia',
+        cta: { title: '¿Los pasos manuales te frenan?', text: 'Automatizamos flujos de negocio con funciones serverless, colas e integraciones.' },
     },
 ];
 
 const BLOG_TYPES = [
     // API Security: the five layers of the Cloudflare defense model, in the order a request crosses them.
-    { id: 'edge', series: 'security', layer: 1, label: 'Edge Layer (DDoS & DNS)', short: 'Edge', zone: 'network' },
-    { id: 'waf', series: 'security', layer: 2, label: 'WAF & Bot Layer (Layer 7)', short: 'WAF & Bot', zone: 'application' },
-    { id: 'api', series: 'security', layer: 3, label: 'API Endpoint Protection', short: 'API Shield', zone: 'application' },
-    { id: 'rate', series: 'security', layer: 4, label: 'Rate Limiting', short: 'Rate Limit', zone: 'application' },
+    { id: 'edge', series: 'security', layer: 1, label: 'Capa edge (DDoS y DNS)', short: 'Edge', zone: 'network' },
+    { id: 'waf', series: 'security', layer: 2, label: 'Capa WAF y bots (capa 7)', short: 'WAF y bots', zone: 'application' },
+    { id: 'api', series: 'security', layer: 3, label: 'Protección de endpoints de API', short: 'API Shield', zone: 'application' },
+    { id: 'rate', series: 'security', layer: 4, label: 'Rate limiting', short: 'Rate limit', zone: 'application' },
     { id: 'tunnel', series: 'security', layer: 5, label: 'Cloudflare Tunnel', short: 'Tunnel', zone: 'origin' },
 
     // Code Search & Discoverability: from organizing a repository to being found on the open web.
-    { id: 'hub', series: 'search', layer: 0, label: 'Code Search & Repository Organization', short: 'Overview', zone: 'retrieval' },
-    { id: 'semantic', series: 'search', layer: 1, label: 'Semantic & Vector Search', short: 'Vector Search', zone: 'retrieval' },
+    { id: 'hub', series: 'search', layer: 0, label: 'Búsqueda de código y organización de repositorios', short: 'Visión general', zone: 'retrieval' },
+    { id: 'semantic', series: 'search', layer: 1, label: 'Búsqueda semántica y vectorial', short: 'Búsqueda vectorial', zone: 'retrieval' },
     { id: 'sac', series: 'search', layer: 2, label: 'Search as Code (SaC)', short: 'Search as Code', zone: 'retrieval' },
-    { id: 'bench', series: 'search', layer: 3, label: 'Benchmark Curation (REAP / Harvest)', short: 'Benchmarks', zone: 'retrieval' },
-    { id: 'ssr', series: 'search', layer: 4, label: 'SSR & Static Generation', short: 'SSR / SSG', zone: 'discovery' },
-    { id: 'html', series: 'search', layer: 5, label: 'Semantic HTML Markup', short: 'Semantic HTML', zone: 'discovery' },
-    { id: 'cwv', series: 'search', layer: 6, label: 'Core Web Vitals & Page Speed', short: 'Web Vitals', zone: 'discovery' },
-    { id: 'crawl', series: 'search', layer: 7, label: 'Crawlability & Indexing', short: 'Crawl & Index', zone: 'discovery' },
-    { id: 'sd', series: 'search', layer: 8, label: 'Structured Data', short: 'Structured Data', zone: 'discovery' },
+    { id: 'bench', series: 'search', layer: 3, label: 'Curación de benchmarks (REAP / Harvest)', short: 'Benchmarks', zone: 'retrieval' },
+    { id: 'ssr', series: 'search', layer: 4, label: 'SSR y generación estática', short: 'SSR / SSG', zone: 'discovery' },
+    { id: 'html', series: 'search', layer: 5, label: 'Marcado HTML semántico', short: 'HTML semántico', zone: 'discovery' },
+    { id: 'cwv', series: 'search', layer: 6, label: 'Core Web Vitals y velocidad de página', short: 'Web Vitals', zone: 'discovery' },
+    { id: 'crawl', series: 'search', layer: 7, label: 'Rastreabilidad e indexación', short: 'Rastreo e índice', zone: 'discovery' },
+    { id: 'sd', series: 'search', layer: 8, label: 'Datos estructurados', short: 'Datos estructurados', zone: 'discovery' },
 
     // Modular Core: from one codebase to modules that the edge and workflows can call.
-    { id: 'core-hub', series: 'core', layer: 0, label: 'Modular Core Architecture', short: 'Overview', zone: 'boundaries' },
-    { id: 'modules', series: 'core', layer: 1, label: 'Domain Modules & Boundaries', short: 'Modules', zone: 'boundaries' },
-    { id: 'contracts', series: 'core', layer: 2, label: 'Contracts & Typed APIs', short: 'Contracts', zone: 'boundaries' },
-    { id: 'packages', series: 'core', layer: 3, label: 'Shared Packages & Workspaces', short: 'Packages', zone: 'delivery' },
-    { id: 'data', series: 'core', layer: 4, label: 'Data Ownership & Migrations', short: 'Data', zone: 'delivery' },
-    { id: 'ctest', series: 'core', layer: 5, label: 'Contract Testing & Versioning', short: 'Versioning', zone: 'delivery' },
+    { id: 'core-hub', series: 'core', layer: 0, label: 'Arquitectura Modular Core', short: 'Visión general', zone: 'boundaries' },
+    { id: 'modules', series: 'core', layer: 1, label: 'Módulos de dominio y límites', short: 'Módulos', zone: 'boundaries' },
+    { id: 'contracts', series: 'core', layer: 2, label: 'Contratos y APIs tipadas', short: 'Contratos', zone: 'boundaries' },
+    { id: 'packages', series: 'core', layer: 3, label: 'Paquetes compartidos y workspaces', short: 'Paquetes', zone: 'delivery' },
+    { id: 'data', series: 'core', layer: 4, label: 'Propiedad de datos y migraciones', short: 'Datos', zone: 'delivery' },
+    { id: 'ctest', series: 'core', layer: 5, label: 'Tests de contrato y versionado', short: 'Versionado', zone: 'delivery' },
 
     // Serverless Edge: the path a request takes through edge functions before it reaches the core.
-    { id: 'serverless-hub', series: 'serverless', layer: 0, label: 'Serverless Edge Architecture', short: 'Overview', zone: 'compute' },
-    { id: 'functions', series: 'serverless', layer: 1, label: 'Edge Functions (Workers)', short: 'Functions', zone: 'compute' },
-    { id: 'routing', series: 'serverless', layer: 2, label: 'Routing, Caching & Auth at the Edge', short: 'Routing & Cache', zone: 'compute' },
-    { id: 'storage', series: 'serverless', layer: 3, label: 'Edge Storage (KV, D1, R2)', short: 'Storage', zone: 'state' },
-    { id: 'cron', series: 'serverless', layer: 4, label: 'Scheduled Jobs (Cron Triggers)', short: 'Cron', zone: 'state' },
-    { id: 'observe', series: 'serverless', layer: 5, label: 'Logs, Tracing & Cost', short: 'Observability', zone: 'state' },
+    { id: 'serverless-hub', series: 'serverless', layer: 0, label: 'Arquitectura Serverless Edge', short: 'Visión general', zone: 'compute' },
+    { id: 'functions', series: 'serverless', layer: 1, label: 'Funciones edge (Workers)', short: 'Funciones', zone: 'compute' },
+    { id: 'routing', series: 'serverless', layer: 2, label: 'Enrutado, caché y autenticación en el edge', short: 'Enrutado y caché', zone: 'compute' },
+    { id: 'storage', series: 'serverless', layer: 3, label: 'Almacenamiento edge (KV, D1, R2)', short: 'Almacenamiento', zone: 'state' },
+    { id: 'cron', series: 'serverless', layer: 4, label: 'Tareas programadas (Cron Triggers)', short: 'Cron', zone: 'state' },
+    { id: 'observe', series: 'serverless', layer: 5, label: 'Logs, trazas y costes', short: 'Observabilidad', zone: 'state' },
     // Serverless Edge · expansion: capabilities built on the same request path.
-    { id: 'realtime', series: 'serverless', layer: 6, label: 'Real-Time (WebSockets & Durable Objects)', short: 'Real-time', zone: 'state' },
-    { id: 'edge-ai', series: 'serverless', layer: 7, label: 'AI at the Edge (Workers AI, Vectorize, AI Gateway)', short: 'Edge AI', zone: 'compute' },
-    { id: 'media', series: 'serverless', layer: 8, label: 'Images & Media at the Edge', short: 'Media', zone: 'compute' },
-    { id: 'deploy', series: 'serverless', layer: 9, label: 'Deploy, Test & Roll Out', short: 'Deploy', zone: 'platform' },
+    { id: 'realtime', series: 'serverless', layer: 6, label: 'Tiempo real (WebSockets y Durable Objects)', short: 'Tiempo real', zone: 'state' },
+    { id: 'edge-ai', series: 'serverless', layer: 7, label: 'IA en el edge (Workers AI, Vectorize, AI Gateway)', short: 'IA en el edge', zone: 'compute' },
+    { id: 'media', series: 'serverless', layer: 8, label: 'Imágenes y multimedia en el edge', short: 'Multimedia', zone: 'compute' },
+    { id: 'deploy', series: 'serverless', layer: 9, label: 'Desplegar, probar y lanzar', short: 'Despliegue', zone: 'platform' },
 
     // Workflow Automation: from the event that starts a workflow to the outcome it produces.
-    { id: 'workflows-hub', series: 'workflows', layer: 0, label: 'Serverless Workflow Automation', short: 'Overview', zone: 'triggers' },
-    { id: 'webhooks', series: 'workflows', layer: 1, label: 'Webhooks & Form Triggers', short: 'Webhooks', zone: 'triggers' },
-    { id: 'queues', series: 'workflows', layer: 2, label: 'Queues & Events', short: 'Queues', zone: 'triggers' },
-    { id: 'durable', series: 'workflows', layer: 3, label: 'Durable Workflows & Orchestration', short: 'Durable', zone: 'execution' },
-    { id: 'idempotency', series: 'workflows', layer: 4, label: 'Idempotency & Retries', short: 'Retries', zone: 'execution' },
-    { id: 'integrations', series: 'workflows', layer: 5, label: 'Integrations (CRM, Sheets, Email, Payments)', short: 'Integrations', zone: 'execution' },
+    { id: 'workflows-hub', series: 'workflows', layer: 0, label: 'Automatización serverless de flujos', short: 'Visión general', zone: 'triggers' },
+    { id: 'webhooks', series: 'workflows', layer: 1, label: 'Webhooks y disparadores de formularios', short: 'Webhooks', zone: 'triggers' },
+    { id: 'queues', series: 'workflows', layer: 2, label: 'Colas y eventos', short: 'Colas', zone: 'triggers' },
+    { id: 'durable', series: 'workflows', layer: 3, label: 'Flujos duraderos y orquestación', short: 'Duraderos', zone: 'execution' },
+    { id: 'idempotency', series: 'workflows', layer: 4, label: 'Idempotencia y reintentos', short: 'Reintentos', zone: 'execution' },
+    { id: 'integrations', series: 'workflows', layer: 5, label: 'Integraciones (CRM, Sheets, email, pagos)', short: 'Integraciones', zone: 'execution' },
 ];
 
 const ZONES = [
-    { id: 'network', series: 'security', label: 'Network (L3/L4 + DNS)' },
-    { id: 'application', series: 'security', label: 'Application (L7)' },
-    { id: 'origin', series: 'security', label: 'Origin' },
-    { id: 'retrieval', series: 'search', label: 'Retrieval (code & repos)' },
-    { id: 'discovery', series: 'search', label: 'Discovery (web & crawlers)' },
-    { id: 'boundaries', series: 'core', label: 'Boundaries (design)' },
-    { id: 'delivery', series: 'core', label: 'Delivery (build & evolve)' },
-    { id: 'compute', series: 'serverless', label: 'Compute (request path)' },
-    { id: 'state', series: 'serverless', label: 'State & operations' },
-    { id: 'platform', series: 'serverless', label: 'Platform (ship & evolve)' },
-    { id: 'triggers', series: 'workflows', label: 'Triggers (events in)' },
-    { id: 'execution', series: 'workflows', label: 'Execution (work out)' },
+    { id: 'network', series: 'security', label: 'Red (L3/L4 + DNS)' },
+    { id: 'application', series: 'security', label: 'Aplicación (L7)' },
+    { id: 'origin', series: 'security', label: 'Origen' },
+    { id: 'retrieval', series: 'search', label: 'Recuperación (código y repos)' },
+    { id: 'discovery', series: 'search', label: 'Descubrimiento (web y rastreadores)' },
+    { id: 'boundaries', series: 'core', label: 'Límites (diseño)' },
+    { id: 'delivery', series: 'core', label: 'Entrega (construir y evolucionar)' },
+    { id: 'compute', series: 'serverless', label: 'Cómputo (recorrido de la petición)' },
+    { id: 'state', series: 'serverless', label: 'Estado y operaciones' },
+    { id: 'platform', series: 'serverless', label: 'Plataforma (publicar y evolucionar)' },
+    { id: 'triggers', series: 'workflows', label: 'Disparadores (eventos de entrada)' },
+    { id: 'execution', series: 'workflows', label: 'Ejecución (trabajo de salida)' },
 ];
 
 // `threats` holds the facet values for any series (threats for security, problems for search).
@@ -178,50 +178,50 @@ const BLOG_POSTS = [
     {
         type: 'edge',
         slug: 'edge-layer-ddos-dns',
-        title: 'Edge Layer: Absorbing DDoS and DNS Floods at the Perimeter',
-        summary: "How Cloudflare's global Anycast network soaks up volumetric Layer 3/4 attacks and DNS query floods before they ever reach your API.",
-        threats: ['DDoS', 'DNS floods', 'Origin IP exposure'],
-        tags: ['Anycast', 'SYN flood', 'UDP flood', 'DNSSEC', 'Proxied DNS'],
+        title: 'Capa edge: absorber DDoS e inundaciones DNS en el perímetro',
+        summary: 'Cómo la red Anycast global de Cloudflare absorbe los ataques volumétricos de capa 3/4 y las inundaciones de consultas DNS antes de que lleguen a tu API.',
+        threats: ['DDoS', 'Inundaciones DNS', 'IP de origen expuesta'],
+        tags: ['Anycast', 'SYN flood', 'UDP flood', 'DNSSEC', 'DNS con proxy'],
         readTime: 6,
         published: '2026-09-26',
     },
     {
         type: 'waf',
         slug: 'waf-bot-layer-layer-7',
-        title: 'WAF & Bot Layer: Filtering Malicious Requests at Layer 7',
-        summary: 'Blocking SQL injection, XSS and automated scraping of a headless API with managed rulesets, custom rules and bot signals.',
-        threats: ['SQL injection', 'XSS', 'Scraping', 'Credential stuffing'],
-        tags: ['WAF', 'Managed rules', 'OWASP', 'Bot Management', 'Custom rules'],
+        title: 'Capa WAF y bots: filtrar peticiones maliciosas en la capa 7',
+        summary: 'Bloquear la inyección SQL, el XSS y el scraping automatizado de una API headless con conjuntos de reglas gestionadas, reglas personalizadas y señales de bots.',
+        threats: ['Inyección SQL', 'XSS', 'Scraping', 'Relleno de credenciales'],
+        tags: ['WAF', 'Reglas gestionadas', 'OWASP', 'Bot Management', 'Reglas personalizadas'],
         readTime: 7,
         published: '2026-09-26',
     },
     {
         type: 'api',
         slug: 'api-endpoint-protection',
-        title: 'API Endpoint Protection with API Shield',
-        summary: 'Discovering shadow APIs, enforcing schema validation and authenticating clients with mTLS to protect API business logic.',
-        threats: ['Shadow APIs', 'Malformed payloads', 'Data exfiltration', 'Key abuse'],
-        tags: ['API Shield', 'Schema validation', 'OpenAPI', 'mTLS', 'API discovery'],
+        title: 'Protección de endpoints de API con API Shield',
+        summary: 'Descubrir APIs en la sombra, exigir validación de esquema y autenticar clientes con mTLS para proteger la lógica de negocio de la API.',
+        threats: ['APIs en la sombra', 'Payloads malformados', 'Exfiltración de datos', 'Abuso de claves'],
+        tags: ['API Shield', 'Validación de esquema', 'OpenAPI', 'mTLS', 'Descubrimiento de APIs'],
         readTime: 7,
         published: '2026-09-26',
     },
     {
         type: 'rate',
         slug: 'rate-limiting',
-        title: 'Rate Limiting: Stopping Brute Force and API Abuse',
-        summary: 'Capping how many requests each client can make per time window, keyed by IP, API key, cookie or header.',
-        threats: ['Brute force', 'Credential stuffing', 'Scraping', 'Key abuse'],
-        tags: ['Rate limiting rules', '429', 'Thresholds', 'API keys'],
+        title: 'Rate limiting: frenar la fuerza bruta y el abuso de la API',
+        summary: 'Limitar cuántas peticiones puede hacer cada cliente por ventana de tiempo, identificándolo por IP, clave de API, cookie o cabecera.',
+        threats: ['Fuerza bruta', 'Relleno de credenciales', 'Scraping', 'Abuso de claves'],
+        tags: ['Reglas de rate limiting', '429', 'Umbrales', 'Claves de API'],
         readTime: 5,
         published: '2026-09-26',
     },
     {
         type: 'tunnel',
         slug: 'cloudflare-tunnel',
-        title: 'Cloudflare Tunnel: Hiding the Origin and Closing Inbound Ports',
-        summary: 'Securing the last mile with an outbound-only connection from your backend to Cloudflare, so attackers cannot bypass the other layers.',
-        threats: ['Origin IP exposure', 'Direct origin attacks', 'DDoS'],
-        tags: ['cloudflared', 'Zero Trust', 'Access', 'Service tokens', 'Firewall'],
+        title: 'Cloudflare Tunnel: ocultar el origen y cerrar los puertos de entrada',
+        summary: 'Asegurar la última milla con una conexión solo de salida desde tu backend hacia Cloudflare, para que nadie pueda saltarse las demás capas.',
+        threats: ['IP de origen expuesta', 'Ataques directos al origen', 'DDoS'],
+        tags: ['cloudflared', 'Zero Trust', 'Access', 'Tokens de servicio', 'Cortafuegos'],
         readTime: 6,
         published: '2026-09-26',
     },
@@ -230,89 +230,89 @@ const BLOG_POSTS = [
     {
         type: 'hub',
         slug: 'code-search-repository-organization',
-        title: 'Organizing, Filtering and Semantically Searching Code',
-        summary: 'A map of the whole series: structure repositories so filters work, add semantic search on top, measure it, and publish pages people and crawlers can find.',
-        threats: ['Repository sprawl', 'Unfindable code', 'Keyword-only search'],
-        tags: ['Monorepo', 'CODEOWNERS', 'Topics', 'Qualifiers', 'Metadata', 'Code search'],
+        title: 'Organizar, filtrar y buscar código semánticamente',
+        summary: 'Un mapa de toda la serie: estructurar los repositorios para que los filtros funcionen, añadir búsqueda semántica encima, medirla y publicar páginas que personas y rastreadores puedan encontrar.',
+        threats: ['Dispersión de repositorios', 'Código imposible de encontrar', 'Búsqueda solo por palabras clave'],
+        tags: ['Monorepo', 'CODEOWNERS', 'Topics', 'Calificadores', 'Metadatos', 'Búsqueda de código'],
         readTime: 7,
         published: '2026-10-02',
     },
     {
         type: 'semantic',
         slug: 'semantic-vector-search',
-        title: 'Semantic & Vector Search over Code Repositories',
-        summary: 'Chunking code along syntax boundaries, embedding it, and combining vector similarity with keyword search so "where do we retry payments?" finds the right function.',
-        threats: ['Keyword-only search', 'Vocabulary mismatch', 'Unfindable code'],
-        tags: ['Embeddings', 'HNSW', 'pgvector', 'Hybrid search', 'BM25', 'RRF', 'tree-sitter', 'Chunking'],
+        title: 'Búsqueda semántica y vectorial en repositorios de código',
+        summary: 'Trocear el código siguiendo su sintaxis, generar embeddings y combinar la similitud vectorial con la búsqueda por palabras clave para que «¿dónde reintentamos los pagos?» encuentre la función correcta.',
+        threats: ['Búsqueda solo por palabras clave', 'Desajuste de vocabulario', 'Código imposible de encontrar'],
+        tags: ['Embeddings', 'HNSW', 'pgvector', 'Búsqueda híbrida', 'BM25', 'RRF', 'tree-sitter', 'Chunking'],
         readTime: 8,
         published: '2026-10-02',
     },
     {
         type: 'sac',
         slug: 'search-as-code-sac',
-        title: 'Search as Code: Versioning Queries, Filters and Ranking',
-        summary: 'Treating search configuration like infrastructure: analyzers, synonyms, boosts and saved queries live in git, are reviewed in pull requests and deployed by CI.',
-        threats: ['Config drift', 'Silent ranking regressions', 'Repository sprawl'],
-        tags: ['GitOps', 'Synonyms', 'Boosts', 'Saved searches', 'Qualifiers', 'CI'],
+        title: 'Search as Code: versionar consultas, filtros y ranking',
+        summary: 'Tratar la configuración de búsqueda como infraestructura: analizadores, sinónimos, boosts y consultas guardadas viven en git, se revisan en pull requests y se despliegan con CI.',
+        threats: ['Deriva de configuración', 'Regresiones silenciosas de ranking', 'Dispersión de repositorios'],
+        tags: ['GitOps', 'Sinónimos', 'Boosts', 'Búsquedas guardadas', 'Calificadores', 'CI'],
         readTime: 6,
         published: '2026-10-02',
     },
     {
         type: 'bench',
         slug: 'benchmark-curation-reap-harvest',
-        title: 'Benchmark Curation: Harvesting and Reaping Real Search Tasks',
-        summary: 'Mining queries and tasks from repository history (Harvest), then filtering them into a trustworthy benchmark (REAP) to measure code search with Recall@k, MRR and nDCG.',
-        threats: ['Untested relevance', 'Benchmark contamination', 'Silent ranking regressions'],
-        tags: ['Harvest', 'REAP', 'Recall@k', 'MRR', 'nDCG', 'Gold labels', 'Deduplication'],
+        title: 'Curación de benchmarks: cosechar y depurar tareas de búsqueda reales',
+        summary: 'Extraer consultas y tareas del historial del repositorio (Harvest) y filtrarlas hasta obtener un benchmark fiable (REAP) para medir la búsqueda de código con Recall@k, MRR y nDCG.',
+        threats: ['Relevancia sin medir', 'Contaminación del benchmark', 'Regresiones silenciosas de ranking'],
+        tags: ['Harvest', 'REAP', 'Recall@k', 'MRR', 'nDCG', 'Etiquetas de referencia', 'Deduplicación'],
         readTime: 8,
         published: '2026-10-02',
     },
     {
         type: 'ssr',
         slug: 'ssr-static-generation',
-        title: 'SSR & Static Generation: Shipping HTML Crawlers Can Read',
-        summary: 'Why pages rendered only in the browser are fragile for search and AI crawlers, and how prerendering at build time or rendering on the server fixes it.',
-        threats: ['Empty initial HTML', 'Delayed indexing', 'Invisible content'],
-        tags: ['SSR', 'SSG', 'Prerendering', 'Hydration', 'renderToString', 'Rendering queue'],
+        title: 'SSR y generación estática: servir HTML que los rastreadores pueden leer',
+        summary: 'Por qué las páginas que solo se renderizan en el navegador son frágiles para los rastreadores de búsqueda e IA, y cómo lo resuelven el prerenderizado en build o el renderizado en servidor.',
+        threats: ['HTML inicial vacío', 'Indexación tardía', 'Contenido invisible'],
+        tags: ['SSR', 'SSG', 'Prerenderizado', 'Hidratación', 'renderToString', 'Cola de renderizado'],
         readTime: 7,
         published: '2026-10-02',
     },
     {
         type: 'html',
         slug: 'semantic-html-markup',
-        title: 'Semantic HTML: Markup That Machines Understand',
-        summary: 'Using landmarks, a real heading outline, <time>, <code> and real links so browsers, screen readers, crawlers and chunkers all read the page the same way.',
-        threats: ['Div soup', 'Broken outline', 'Inaccessible navigation'],
-        tags: ['Landmarks', 'Headings', '<article>', '<time>', '<pre><code>', 'Accessibility'],
+        title: 'HTML semántico: marcado que las máquinas entienden',
+        summary: 'Usar landmarks, un esquema de encabezados real, <time>, <code> y enlaces de verdad para que navegadores, lectores de pantalla, rastreadores y troceadores lean la página igual.',
+        threats: ['Sopa de divs', 'Esquema de encabezados roto', 'Navegación inaccesible'],
+        tags: ['Landmarks', 'Encabezados', '<article>', '<time>', '<pre><code>', 'Accesibilidad'],
         readTime: 6,
         published: '2026-10-02',
     },
     {
         type: 'cwv',
         slug: 'core-web-vitals-page-speed',
-        title: 'Core Web Vitals & Page Speed for Documentation Sites',
-        summary: 'What LCP, INP and CLS measure, the thresholds to hit at the 75th percentile, and the usual causes of slow, janky developer sites.',
-        threats: ['Slow LCP', 'Poor INP', 'Layout shift'],
-        tags: ['LCP', 'INP', 'CLS', 'CrUX', 'Lighthouse', 'Field data', 'Render-blocking'],
+        title: 'Core Web Vitals y velocidad de página en sitios de documentación',
+        summary: 'Qué miden LCP, INP y CLS, qué umbrales hay que cumplir en el percentil 75 y las causas habituales de los sitios para desarrolladores lentos y a tirones.',
+        threats: ['LCP lento', 'INP deficiente', 'Saltos de diseño'],
+        tags: ['LCP', 'INP', 'CLS', 'CrUX', 'Lighthouse', 'Datos de campo', 'Bloqueo de renderizado'],
         readTime: 7,
         published: '2026-10-02',
     },
     {
         type: 'crawl',
         slug: 'crawlability-indexing',
-        title: 'Crawlability & Indexing: Getting Every Page Discovered',
-        summary: 'robots.txt, sitemaps, canonical URLs, status codes and real links: the plumbing that decides whether a page can be found, fetched and kept in the index.',
-        threats: ['Orphan pages', 'Hash-only routes', 'Duplicate URLs', 'Soft 404s'],
-        tags: ['robots.txt', 'sitemap.xml', 'Canonical', 'noindex', 'Search Console', 'Internal links'],
+        title: 'Rastreabilidad e indexación: que se descubra cada página',
+        summary: 'robots.txt, sitemaps, URLs canónicas, códigos de estado y enlaces reales: la fontanería que decide si una página se puede encontrar, descargar y mantener en el índice.',
+        threats: ['Páginas huérfanas', 'Rutas solo con hash', 'URLs duplicadas', 'Soft 404'],
+        tags: ['robots.txt', 'sitemap.xml', 'Canonical', 'noindex', 'Search Console', 'Enlaces internos'],
         readTime: 7,
         published: '2026-10-02',
     },
     {
         type: 'sd',
         slug: 'structured-data',
-        title: 'Structured Data: Describing Pages with JSON-LD',
-        summary: 'Adding schema.org BlogPosting, BreadcrumbList and TechArticle markup so search engines understand what a page is, who wrote it and where it sits.',
-        threats: ['Ambiguous content', 'Missing rich results', 'Unattributed content'],
+        title: 'Datos estructurados: describir páginas con JSON-LD',
+        summary: 'Añadir marcado schema.org BlogPosting, BreadcrumbList y TechArticle para que los buscadores entiendan qué es una página, quién la escribió y dónde se ubica.',
+        threats: ['Contenido ambiguo', 'Sin resultados enriquecidos', 'Contenido sin autoría'],
         tags: ['JSON-LD', 'schema.org', 'BlogPosting', 'TechArticle', 'BreadcrumbList', 'Rich Results Test'],
         readTime: 6,
         published: '2026-10-02',
@@ -324,58 +324,58 @@ const BLOG_POSTS = [
         crosses: ['sac', 'semantic'],
         label: 'Benchmarks × Search as Code',
         slug: 'benchmarks-x-search-as-code',
-        title: 'Benchmarks as Regression Tests for Search as Code',
-        summary: 'Running the curated benchmark in CI on every search-config pull request, so a synonym or a new embedding model cannot ship if relevance drops.',
-        threats: ['Silent ranking regressions', 'Config drift', 'Untested relevance'],
-        tags: ['CI', 'GitHub Actions', 'nDCG', 'Thresholds', 'Embeddings', 'Pull requests'],
+        title: 'Benchmarks como tests de regresión para Search as Code',
+        summary: 'Ejecutar el benchmark curado en CI en cada pull request de configuración de búsqueda, para que un sinónimo o un nuevo modelo de embeddings no se publique si baja la relevancia.',
+        threats: ['Regresiones silenciosas de ranking', 'Deriva de configuración', 'Relevancia sin medir'],
+        tags: ['CI', 'GitHub Actions', 'nDCG', 'Umbrales', 'Embeddings', 'Pull requests'],
         readTime: 6,
         published: '2026-10-02',
     },
     {
         type: 'ssr',
         crosses: ['html', 'semantic'],
-        label: 'Static Generation × Vector Search',
+        label: 'Generación estática × búsqueda vectorial',
         slug: 'static-generation-x-vector-search',
-        title: 'One Build, Two Audiences: Static Pages and a Vector Index',
-        summary: 'Using the static build step to emit crawlable HTML and, from the same semantic headings, the chunks that feed a vector index.',
-        threats: ['Empty initial HTML', 'Vocabulary mismatch', 'Stale search index'],
-        tags: ['SSG', 'Chunking', 'Headings', 'Embeddings', 'Content hash', 'Incremental builds'],
+        title: 'Un build, dos públicos: páginas estáticas y un índice vectorial',
+        summary: 'Aprovechar el paso de build estático para generar HTML rastreable y, a partir de los mismos encabezados semánticos, los fragmentos que alimentan un índice vectorial.',
+        threats: ['HTML inicial vacío', 'Desajuste de vocabulario', 'Índice de búsqueda desactualizado'],
+        tags: ['SSG', 'Chunking', 'Encabezados', 'Embeddings', 'Hash de contenido', 'Builds incrementales'],
         readTime: 7,
         published: '2026-10-02',
     },
     {
         type: 'sd',
         crosses: ['crawl', 'hub'],
-        label: 'Structured Data × Repositories',
+        label: 'Datos estructurados × repositorios',
         slug: 'structured-data-x-repositories',
-        title: 'Making Repositories Machine-Readable: SoftwareSourceCode and CodeMeta',
-        summary: 'Describing code projects with schema.org SoftwareSourceCode on their landing pages and codemeta.json in the repository, so both crawlers and code-search tools can filter by them.',
-        threats: ['Ambiguous content', 'Repository sprawl', 'Unattributed content'],
-        tags: ['SoftwareSourceCode', 'codemeta.json', 'JSON-LD', 'Topics', 'License', 'Metadata'],
+        title: 'Repositorios legibles por máquinas: SoftwareSourceCode y CodeMeta',
+        summary: 'Describir proyectos de código con schema.org SoftwareSourceCode en sus páginas de presentación y codemeta.json en el repositorio, para que rastreadores y herramientas de búsqueda de código puedan filtrarlos.',
+        threats: ['Contenido ambiguo', 'Dispersión de repositorios', 'Contenido sin autoría'],
+        tags: ['SoftwareSourceCode', 'codemeta.json', 'JSON-LD', 'Topics', 'Licencia', 'Metadatos'],
         readTime: 6,
         published: '2026-10-02',
     },
     {
         type: 'cwv',
         crosses: ['semantic', 'html'],
-        label: 'Core Web Vitals × Site Search',
+        label: 'Core Web Vitals × búsqueda en el sitio',
         slug: 'core-web-vitals-x-site-search',
-        title: 'Search Boxes That Don\'t Hurt Core Web Vitals',
-        summary: 'Loading a search index on demand, keeping typing responsive for INP, and reserving space for results so client-side search never shifts the layout.',
-        threats: ['Poor INP', 'Layout shift', 'Slow LCP'],
-        tags: ['INP', 'CLS', 'Web Worker', 'Debounce', 'Lazy loading', '<search>'],
+        title: 'Cajas de búsqueda que no perjudican las Core Web Vitals',
+        summary: 'Cargar el índice de búsqueda bajo demanda, mantener la escritura fluida para el INP y reservar espacio para los resultados para que la búsqueda en cliente nunca desplace el diseño.',
+        threats: ['INP deficiente', 'Saltos de diseño', 'LCP lento'],
+        tags: ['INP', 'CLS', 'Web Worker', 'Debounce', 'Carga diferida', '<search>'],
         readTime: 6,
         published: '2026-10-02',
     },
     {
         type: 'crawl',
         crosses: ['sac', 'ssr'],
-        label: 'Crawlability × Faceted Search',
+        label: 'Rastreabilidad × búsqueda por facetas',
         slug: 'crawlability-x-faceted-search',
-        title: 'Faceted Filters without Crawl Traps',
-        summary: 'Filter URLs like ?type=…&threats=… multiply fast. Decide in code which facets deserve indexable pages, and keep the rest out of the crawl.',
-        threats: ['Duplicate URLs', 'Crawl budget waste', 'Orphan pages'],
-        tags: ['Facets', 'Query parameters', 'Canonical', 'robots.txt', 'Landing pages', 'Sitemaps'],
+        title: 'Filtros por facetas sin trampas de rastreo',
+        summary: 'Las URLs de filtros como ?type=…&threats=… se multiplican rápido. Decide en el código qué facetas merecen páginas indexables y deja el resto fuera del rastreo.',
+        threats: ['URLs duplicadas', 'Presupuesto de rastreo desperdiciado', 'Páginas huérfanas'],
+        tags: ['Facetas', 'Parámetros de consulta', 'Canonical', 'robots.txt', 'Páginas de aterrizaje', 'Sitemaps'],
         readTime: 6,
         published: '2026-10-02',
     },
@@ -384,60 +384,60 @@ const BLOG_POSTS = [
     {
         type: 'core-hub',
         slug: 'modular-core-architecture',
-        title: 'Modular Core: Business Logic with Clear Boundaries',
-        summary: 'Splitting one codebase into domain modules that own their data and expose typed contracts, so edge functions and workflows can call the core without reaching into it.',
-        threats: ['Tangled monolith', 'Shared database coupling', 'Breaking changes', 'Slow deploys'],
-        tags: ['Modular monolith', 'Bounded contexts', 'OpenAPI', 'Workspaces', 'Contract tests', 'Semver'],
+        title: 'Modular Core: lógica de negocio con límites claros',
+        summary: 'Dividir una base de código en módulos de dominio que son dueños de sus datos y exponen contratos tipados, para que las funciones edge y los flujos llamen al núcleo sin meterse dentro.',
+        threats: ['Monolito enredado', 'Acoplamiento por base de datos compartida', 'Cambios incompatibles', 'Despliegues lentos'],
+        tags: ['Monolito modular', 'Contextos delimitados', 'OpenAPI', 'Workspaces', 'Tests de contrato', 'Semver'],
         readTime: 7,
         published: '2026-10-03',
     },
     {
         type: 'modules',
         slug: 'domain-modules-boundaries',
-        title: 'Domain Modules: Drawing Boundaries That Hold',
-        summary: 'Finding module boundaries from business capabilities instead of technical layers, giving each module a public entry point, and enforcing it with lint rules so the boundaries survive the next deadline.',
-        threats: ['Tangled monolith', 'Hidden dependencies', 'Unclear ownership'],
-        tags: ['Bounded contexts', 'Event storming', 'Modular monolith', 'dependency-cruiser', 'ESLint', 'CODEOWNERS'],
+        title: 'Módulos de dominio: trazar límites que se mantengan',
+        summary: 'Encontrar los límites de los módulos a partir de las capacidades de negocio y no de las capas técnicas, dar a cada módulo un punto de entrada público y hacerlo cumplir con reglas de lint para que los límites sobrevivan a la próxima fecha de entrega.',
+        threats: ['Monolito enredado', 'Dependencias ocultas', 'Responsables poco claros'],
+        tags: ['Contextos delimitados', 'Event storming', 'Monolito modular', 'dependency-cruiser', 'ESLint', 'CODEOWNERS'],
         readTime: 8,
         published: '2026-10-03',
     },
     {
         type: 'contracts',
         slug: 'contracts-typed-apis',
-        title: 'Contracts & Typed APIs: One Schema, Every Caller',
-        summary: 'Defining each module\'s inputs, outputs and errors once, in a schema, then generating TypeScript types, runtime validation and an OpenAPI document that edge functions and workflows build their clients from.',
-        threats: ['Breaking changes', 'Runtime type errors', 'Undocumented endpoints'],
-        tags: ['OpenAPI', 'Zod', 'JSON Schema', 'TypeScript', 'Code generation', 'Result types'],
+        title: 'Contratos y APIs tipadas: un esquema para todos los consumidores',
+        summary: 'Definir una sola vez, en un esquema, las entradas, salidas y errores de cada módulo, y generar a partir de él tipos de TypeScript, validación en tiempo de ejecución y un documento OpenAPI con el que las funciones edge y los flujos construyen sus clientes.',
+        threats: ['Cambios incompatibles', 'Errores de tipo en ejecución', 'Endpoints sin documentar'],
+        tags: ['OpenAPI', 'Zod', 'JSON Schema', 'TypeScript', 'Generación de código', 'Tipos Result'],
         readTime: 8,
         published: '2026-10-03',
     },
     {
         type: 'packages',
         slug: 'shared-packages-workspaces',
-        title: 'Shared Packages & Workspaces: Reuse Without a utils/ Folder',
-        summary: 'Moving shared code (schemas, money types, logging, generated clients) into workspace packages with explicit exports and owners, and building only what a change actually touched.',
-        threats: ['Copy-pasted code', 'Utils dumping ground', 'Slow deploys'],
-        tags: ['pnpm workspaces', 'Turborepo', 'exports field', 'Changesets', 'Monorepo', 'Affected builds'],
+        title: 'Paquetes compartidos y workspaces: reutilizar sin una carpeta utils/',
+        summary: 'Mover el código compartido (esquemas, tipos de dinero, logging, clientes generados) a paquetes del workspace con exports y responsables explícitos, y construir solo lo que un cambio ha tocado de verdad.',
+        threats: ['Código copiado y pegado', 'Cajón de sastre utils', 'Despliegues lentos'],
+        tags: ['pnpm workspaces', 'Turborepo', 'Campo exports', 'Changesets', 'Monorepo', 'Builds afectados'],
         readTime: 7,
         published: '2026-10-03',
     },
     {
         type: 'data',
         slug: 'data-ownership-migrations',
-        title: 'Data Ownership & Migrations: One Owner per Table',
-        summary: 'Giving every table exactly one owning module, replacing cross-module joins with contract calls, read models and events, and changing schemas with expand-and-contract migrations that never take the core offline.',
-        threats: ['Shared database coupling', 'Risky migrations', 'Cross-module joins'],
-        tags: ['Schemas', 'Outbox pattern', 'Expand and contract', 'Read models', 'Postgres', 'Zero-downtime'],
+        title: 'Propiedad de datos y migraciones: un dueño por tabla',
+        summary: 'Dar a cada tabla exactamente un módulo propietario, sustituir los joins entre módulos por llamadas a contratos, modelos de lectura y eventos, y cambiar los esquemas con migraciones expandir-y-contraer que nunca dejan el núcleo fuera de servicio.',
+        threats: ['Acoplamiento por base de datos compartida', 'Migraciones arriesgadas', 'Joins entre módulos'],
+        tags: ['Esquemas', 'Patrón outbox', 'Expandir y contraer', 'Modelos de lectura', 'Postgres', 'Sin tiempo de inactividad'],
         readTime: 8,
         published: '2026-10-03',
     },
     {
         type: 'ctest',
         slug: 'contract-testing-versioning',
-        title: 'Contract Testing & Versioning: Changing the Core Without Breaking Callers',
-        summary: 'Catching breaking changes in CI with schema diffs and consumer-driven contract tests, versioning contracts with semver, and retiring old versions with deprecation headers and real usage data.',
-        threats: ['Breaking changes', 'Unknown consumers', 'Big-bang releases'],
-        tags: ['Semver', 'Pact', 'oasdiff', 'Deprecation header', 'Sunset', 'Consumer-driven contracts'],
+        title: 'Tests de contrato y versionado: cambiar el núcleo sin romper a quien lo llama',
+        summary: 'Detectar cambios incompatibles en CI con diffs de esquema y tests de contrato guiados por el consumidor, versionar los contratos con semver y retirar versiones antiguas con cabeceras de deprecación y datos de uso reales.',
+        threats: ['Cambios incompatibles', 'Consumidores desconocidos', 'Lanzamientos big bang'],
+        tags: ['Semver', 'Pact', 'oasdiff', 'Cabecera Deprecation', 'Sunset', 'Contratos guiados por el consumidor'],
         readTime: 8,
         published: '2026-10-03',
     },
@@ -446,9 +446,9 @@ const BLOG_POSTS = [
     {
         type: 'serverless-hub',
         slug: 'serverless-edge-architecture',
-        title: 'Serverless Edge: Running Logic Close to the User',
-        summary: 'What belongs in an edge function and what belongs in the core: routing, auth, caching and scheduled jobs at the edge, with KV, D1 and R2 for state.',
-        threats: ['High latency', 'Server maintenance', 'Traffic spikes', 'Cold starts'],
+        title: 'Serverless Edge: ejecutar la lógica cerca del usuario',
+        summary: 'Qué va en una función edge y qué va en el núcleo: enrutado, autenticación, caché y tareas programadas en el edge, con KV, D1 y R2 para el estado.',
+        threats: ['Latencia alta', 'Mantenimiento de servidores', 'Picos de tráfico', 'Arranques en frío'],
         tags: ['Cloudflare Workers', 'KV', 'D1', 'R2', 'Cron Triggers', 'Cache API', 'Wrangler'],
         readTime: 7,
         published: '2026-10-03',
@@ -456,9 +456,9 @@ const BLOG_POSTS = [
     {
         type: 'functions',
         slug: 'edge-functions-workers',
-        title: 'Edge Functions: Workers as the Front Door of Your Platform',
-        summary: 'How Workers run (isolates, not containers), what their limits mean for design, and how service bindings split a platform into small functions that call each other without touching the public internet.',
-        threats: ['Cold starts', 'Server maintenance', 'Traffic spikes', 'Monolithic gateways'],
+        title: 'Funciones edge: Workers como puerta de entrada de tu plataforma',
+        summary: 'Cómo se ejecutan los Workers (isolates, no contenedores), qué implican sus límites para el diseño y cómo los service bindings dividen una plataforma en funciones pequeñas que se llaman entre sí sin pasar por internet.',
+        threats: ['Arranques en frío', 'Mantenimiento de servidores', 'Picos de tráfico', 'Gateways monolíticos'],
         tags: ['Cloudflare Workers', 'V8 isolates', 'Service bindings', 'Smart Placement', 'Hono', 'wrangler.jsonc'],
         readTime: 8,
         published: '2026-10-04',
@@ -466,40 +466,40 @@ const BLOG_POSTS = [
     {
         type: 'routing',
         slug: 'routing-caching-auth-edge',
-        title: 'Routing, Caching & Auth at the Edge: One Gateway for Every Client',
-        summary: 'Turning a Worker into an API gateway: path and version routing, JWT verification, per-key rate limits and cache rules, so the core only sees requests that are authenticated, allowed and not already cached.',
-        threats: ['High latency', 'Unauthenticated traffic', 'Origin overload', 'Version sprawl'],
-        tags: ['API gateway', 'JWT', 'jose', 'Cache API', 'Rate limiting binding', 'Custom hostnames'],
+        title: 'Enrutado, caché y autenticación en el edge: un gateway para todos los clientes',
+        summary: 'Convertir un Worker en un API gateway: enrutado por ruta y versión, verificación de JWT, límites por clave y reglas de caché, para que el núcleo solo reciba peticiones autenticadas, permitidas y que no estén ya en caché.',
+        threats: ['Latencia alta', 'Tráfico no autenticado', 'Sobrecarga del origen', 'Proliferación de versiones'],
+        tags: ['API gateway', 'JWT', 'jose', 'Cache API', 'Binding de rate limiting', 'Hostnames personalizados'],
         readTime: 8,
         published: '2026-10-04',
     },
     {
         type: 'storage',
         slug: 'edge-storage-kv-d1-r2',
-        title: 'Edge Storage: Choosing Between KV, D1, R2 and Durable Objects',
-        summary: 'A decision guide for state in a serverless platform: what each store is consistent about, what it costs you in latency, and when to keep data in your existing database behind Hyperdrive instead.',
-        threats: ['Stale data', 'Wrong storage choice', 'Egress fees', 'Database connection limits'],
-        tags: ['KV', 'D1', 'R2', 'Durable Objects', 'Hyperdrive', 'S3 API', 'Consistency'],
+        title: 'Almacenamiento edge: elegir entre KV, D1, R2 y Durable Objects',
+        summary: 'Una guía de decisión para el estado en una plataforma serverless: qué garantiza cada almacén en consistencia, cuánto te cuesta en latencia y cuándo conviene mantener los datos en tu base de datos actual detrás de Hyperdrive.',
+        threats: ['Datos desactualizados', 'Almacenamiento equivocado', 'Costes de salida (egress)', 'Límites de conexiones a la base de datos'],
+        tags: ['KV', 'D1', 'R2', 'Durable Objects', 'Hyperdrive', 'S3 API', 'Consistencia'],
         readTime: 9,
         published: '2026-10-04',
     },
     {
         type: 'cron',
         slug: 'scheduled-jobs-cron-triggers',
-        title: 'Scheduled Jobs: Replacing the Always-On Sync Server',
-        summary: 'Moving nightly syncs, report generation and cleanup from a VM with crontab to Cron Triggers that fan work out to queues, with locking, checkpoints and alerts when a run is missed.',
-        threats: ['Server maintenance', 'Missed jobs', 'Overlapping runs', 'Integration sprawl'],
-        tags: ['Cron Triggers', 'scheduled()', 'Queues', 'Durable Objects', 'Checkpoints', 'UTC'],
+        title: 'Tareas programadas: sustituir el servidor de sincronización siempre encendido',
+        summary: 'Pasar las sincronizaciones nocturnas, la generación de informes y la limpieza de una VM con crontab a Cron Triggers que reparten el trabajo en colas, con bloqueos, puntos de control y alertas cuando una ejecución no se produce.',
+        threats: ['Mantenimiento de servidores', 'Tareas no ejecutadas', 'Ejecuciones solapadas', 'Dispersión de integraciones'],
+        tags: ['Cron Triggers', 'scheduled()', 'Colas', 'Durable Objects', 'Puntos de control', 'UTC'],
         readTime: 7,
         published: '2026-10-04',
     },
     {
         type: 'observe',
         slug: 'logs-tracing-cost',
-        title: 'Logs, Tracing & Cost: Seeing Inside a Serverless Platform',
-        summary: 'Following one request from the edge through queues and into the core, keeping logs you can search, and tracking CPU time and requests per customer so the monthly bill holds no surprises.',
-        threats: ['Invisible failures', 'Unpredictable cost', 'Slow debugging'],
-        tags: ['Workers Logs', 'Tail Workers', 'Logpush', 'OpenTelemetry', 'Request ID', 'CPU time'],
+        title: 'Logs, trazas y costes: ver por dentro una plataforma serverless',
+        summary: 'Seguir una petición desde el edge, a través de las colas, hasta el núcleo; conservar logs en los que se pueda buscar, y medir el tiempo de CPU y las peticiones por cliente para que la factura mensual no dé sorpresas.',
+        threats: ['Fallos invisibles', 'Coste impredecible', 'Depuración lenta'],
+        tags: ['Workers Logs', 'Tail Workers', 'Logpush', 'OpenTelemetry', 'ID de petición', 'Tiempo de CPU'],
         readTime: 8,
         published: '2026-10-04',
     },
@@ -508,40 +508,40 @@ const BLOG_POSTS = [
     {
         type: 'realtime',
         slug: 'realtime-websockets-durable-objects',
-        title: 'Real-Time at the Edge: WebSockets and Durable Objects',
-        summary: 'Live dashboards, chat and collaborative editing without a socket server: one Durable Object per room or document coordinates connections, keeps state in SQLite and hibernates when nobody is talking.',
-        threats: ['Polling load', 'Lost updates', 'Race conditions', 'Idle connection cost'],
-        tags: ['Durable Objects', 'WebSockets', 'Hibernation API', 'SQLite storage', 'Alarms', 'Server-Sent Events'],
+        title: 'Tiempo real en el edge: WebSockets y Durable Objects',
+        summary: 'Paneles en vivo, chat y edición colaborativa sin servidor de sockets: un Durable Object por sala o documento coordina las conexiones, guarda el estado en SQLite e hiberna cuando nadie habla.',
+        threats: ['Carga por polling', 'Actualizaciones perdidas', 'Condiciones de carrera', 'Coste de conexiones inactivas'],
+        tags: ['Durable Objects', 'WebSockets', 'Hibernation API', 'Almacenamiento SQLite', 'Alarmas', 'Server-Sent Events'],
         readTime: 8,
         published: '2026-10-04',
     },
     {
         type: 'edge-ai',
         slug: 'ai-at-the-edge-workers-ai',
-        title: 'AI at the Edge: Workers AI, Vectorize and AI Gateway',
-        summary: 'Where inference belongs in a serverless platform: small models and embeddings next to the user, large models behind a gateway that caches, limits and logs every call, and retrieval over your own data with Vectorize.',
-        threats: ['Inference latency', 'Runaway AI cost', 'Ungrounded answers', 'Provider lock-in'],
-        tags: ['Workers AI', 'Vectorize', 'AI Gateway', 'RAG', 'Embeddings', 'Rate limits'],
+        title: 'IA en el edge: Workers AI, Vectorize y AI Gateway',
+        summary: 'Dónde va la inferencia en una plataforma serverless: modelos pequeños y embeddings junto al usuario, modelos grandes detrás de un gateway que cachea, limita y registra cada llamada, y recuperación sobre tus propios datos con Vectorize.',
+        threats: ['Latencia de inferencia', 'Coste de IA desbocado', 'Respuestas sin fundamento', 'Dependencia del proveedor'],
+        tags: ['Workers AI', 'Vectorize', 'AI Gateway', 'RAG', 'Embeddings', 'Límites de uso'],
         readTime: 8,
         published: '2026-10-04',
     },
     {
         type: 'media',
         slug: 'images-media-at-the-edge',
-        title: 'Images & Media at the Edge: R2, Transformations and Stream',
-        summary: 'Serving fast images without an image server: originals in R2, sized and converted to AVIF or WebP on request, cached at the edge, uploaded directly from the browser, and video handed to Stream.',
-        threats: ['Slow pages', 'Oversized images', 'Egress fees', 'Upload bottlenecks'],
-        tags: ['R2', 'Image transformations', 'AVIF / WebP', 'Presigned URLs', 'Stream', 'Cache rules'],
+        title: 'Imágenes y multimedia en el edge: R2, transformaciones y Stream',
+        summary: 'Servir imágenes rápidas sin servidor de imágenes: originales en R2, redimensionadas y convertidas a AVIF o WebP bajo demanda, cacheadas en el edge, subidas directamente desde el navegador, y el vídeo delegado en Stream.',
+        threats: ['Páginas lentas', 'Imágenes sobredimensionadas', 'Costes de salida (egress)', 'Cuellos de botella en subidas'],
+        tags: ['R2', 'Transformaciones de imagen', 'AVIF / WebP', 'URLs prefirmadas', 'Stream', 'Reglas de caché'],
         readTime: 7,
         published: '2026-10-04',
     },
     {
         type: 'deploy',
         slug: 'deploy-test-rollout-workers',
-        title: 'Deploy, Test & Roll Out: Shipping Workers Without Fear',
-        summary: 'A release pipeline for edge functions: local runs on the real runtime, tests with the Workers Vitest pool, staging and production environments, gradual deployments by percentage and a one-command rollback.',
-        threats: ['Broken deploys', 'Config drift', 'Untested edge code', 'Slow rollbacks'],
-        tags: ['Wrangler', 'Vitest', 'GitHub Actions', 'Environments', 'Gradual deployments', 'Rollback'],
+        title: 'Desplegar, probar y lanzar: publicar Workers sin miedo',
+        summary: 'Un pipeline de publicación para funciones edge: ejecución local sobre el runtime real, tests con el pool de Vitest para Workers, entornos de staging y producción, despliegues graduales por porcentaje y rollback con un solo comando.',
+        threats: ['Despliegues rotos', 'Deriva de configuración', 'Código edge sin pruebas', 'Rollbacks lentos'],
+        tags: ['Wrangler', 'Vitest', 'GitHub Actions', 'Entornos', 'Despliegues graduales', 'Rollback'],
         readTime: 8,
         published: '2026-10-04',
     },
@@ -550,36 +550,36 @@ const BLOG_POSTS = [
     {
         type: 'functions',
         crosses: ['routing', 'storage'],
-        label: 'Functions × Integration PaaS',
+        label: 'Funciones × PaaS de integración',
         slug: 'serverless-integration-paas',
-        title: 'A Serverless Integration Platform: One Connector per Function',
-        summary: 'Building an integration PaaS out of edge functions: one Worker per connector, credentials in secrets, mappings versioned in code, and a shared gateway, so adding a new system is a deploy, not a server.',
-        threats: ['Integration sprawl', 'Server maintenance', 'Credential leaks', 'Point-to-point scripts'],
-        tags: ['Integration PaaS', 'Connectors', 'Service bindings', 'Secrets', 'Webhooks', 'Mappings as code'],
+        title: 'Una plataforma de integración serverless: un conector por función',
+        summary: 'Construir un PaaS de integración con funciones edge: un Worker por conector, credenciales en secretos, mapeos versionados en el código y un gateway compartido, de modo que añadir un sistema nuevo sea un despliegue, no un servidor.',
+        threats: ['Dispersión de integraciones', 'Mantenimiento de servidores', 'Fugas de credenciales', 'Scripts punto a punto'],
+        tags: ['Integration PaaS', 'Conectores', 'Service bindings', 'Secretos', 'Webhooks', 'Mapeos como código'],
         readTime: 8,
         published: '2026-10-04',
     },
     {
         type: 'routing',
         crosses: ['functions', 'storage'],
-        label: 'Edge × IaaS (Hybrid)',
+        label: 'Edge × IaaS (híbrido)',
         slug: 'serverless-in-front-of-iaas',
-        title: 'Serverless in Front of IaaS: Modernizing Without a Rewrite',
-        summary: 'Putting edge functions in front of existing VMs and databases, reaching them privately through Tunnel and Hyperdrive, and moving routes off the servers one at a time until the servers are small or gone.',
-        threats: ['Legacy servers', 'Origin IP exposure', 'Big-bang migrations', 'Database connection limits'],
-        tags: ['IaaS', 'Strangler fig', 'Cloudflare Tunnel', 'Hyperdrive', 'Hybrid cloud', 'Route-by-route migration'],
+        title: 'Serverless delante de IaaS: modernizar sin reescribir',
+        summary: 'Poner funciones edge delante de las VMs y bases de datos existentes, llegar a ellas de forma privada con Tunnel e Hyperdrive, y sacar rutas de los servidores una a una hasta que los servidores sean pequeños o desaparezcan.',
+        threats: ['Servidores heredados', 'IP de origen expuesta', 'Migraciones big bang', 'Límites de conexiones a la base de datos'],
+        tags: ['IaaS', 'Strangler fig', 'Cloudflare Tunnel', 'Hyperdrive', 'Nube híbrida', 'Migración ruta a ruta'],
         readTime: 8,
         published: '2026-10-04',
     },
     {
         type: 'observe',
         crosses: ['routing', 'storage'],
-        label: 'Metering × Multi-tenant SaaS',
+        label: 'Medición × SaaS multiinquilino',
         slug: 'multi-tenant-saas-metering',
-        title: 'Multi-Tenant SaaS on Serverless: Isolation, Metering and Billing',
-        summary: 'Running one serverless platform for many customers: tenant resolution at the edge, isolated storage per tenant, per-tenant limits, and usage metering with Analytics Engine that feeds invoices directly.',
-        threats: ['Tenant isolation', 'Usage billing', 'Noisy neighbors', 'Unpredictable cost'],
-        tags: ['Multi-tenant', 'Analytics Engine', 'Workers for Platforms', 'Custom hostnames', 'Usage-based pricing', 'D1 per tenant'],
+        title: 'SaaS multiinquilino en serverless: aislamiento, medición y facturación',
+        summary: 'Operar una sola plataforma serverless para muchos clientes: resolución del inquilino en el edge, almacenamiento aislado por inquilino, límites por inquilino y medición de uso con Analytics Engine que alimenta directamente las facturas.',
+        threats: ['Aislamiento de inquilinos', 'Facturación por uso', 'Vecinos ruidosos', 'Coste impredecible'],
+        tags: ['Multiinquilino', 'Analytics Engine', 'Workers for Platforms', 'Hostnames personalizados', 'Precios por uso', 'D1 por inquilino'],
         readTime: 8,
         published: '2026-10-04',
     },
@@ -588,10 +588,10 @@ const BLOG_POSTS = [
     {
         type: 'workflows-hub',
         slug: 'serverless-workflow-automation',
-        title: 'Connecting Workflows with Serverless Logic',
-        summary: 'Turning manual steps (a form, a CRM update, an invoice, an email) into an automated flow of webhooks, queues and durable steps that survives retries and outages.',
-        threats: ['Manual data entry', 'Lost webhooks', 'Duplicate processing', 'Third-party outages'],
-        tags: ['Webhooks', 'Queues', 'Workflows', 'Idempotency keys', 'Retries', 'Dead-letter queue', 'HMAC'],
+        title: 'Conectar flujos de trabajo con lógica serverless',
+        summary: 'Convertir pasos manuales (un formulario, una actualización del CRM, una factura, un email) en un flujo automatizado de webhooks, colas y pasos duraderos que resiste reintentos y caídas.',
+        threats: ['Introducción manual de datos', 'Webhooks perdidos', 'Procesamiento duplicado', 'Caídas de terceros'],
+        tags: ['Webhooks', 'Colas', 'Workflows', 'Claves de idempotencia', 'Reintentos', 'Cola de mensajes fallidos', 'HMAC'],
         readTime: 7,
         published: '2026-10-03',
     },
@@ -607,7 +607,7 @@ const typesOfPost = (post) => [post.type, ...(post.crosses || [])];
 const isCross = (post) => Boolean(post.crosses && post.crosses.length);
 const postLabel = (post) => post.label || typeOf(post).label;
 const stepLabel = (t) => `${seriesById(t.series).step} ${String(t.layer).padStart(2, '0')}`;
-const formatDate = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+const formatDate = (iso) => new Date(iso + 'T00:00:00').toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
 // Series order: by step, primary post before crossovers that share its step.
 const byStep = (a, b) => (typeOf(a).layer - typeOf(b).layer) || (isCross(a) - isCross(b));
 
@@ -648,7 +648,7 @@ const LayerFlow = ({ series, active, onSelect, dark }) => {
     );
 
     return (
-        <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-2 px-1" aria-label={`${s.flowLabel} from ${s.from} to ${s.to}`}>
+        <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-2 px-1" aria-label={`${s.flowLabel} de ${s.from} a ${s.to}`}>
             {endpoint(s.from)}
             {types.map(node)}
             {endpoint(s.to)}
@@ -686,8 +686,8 @@ const writeParams = (f) => {
 };
 
 const KINDS = [
-    { id: 'deep', label: 'Deep dives', test: (p) => !isCross(p) },
-    { id: 'cross', label: 'Crossovers', test: isCross },
+    { id: 'deep', label: 'A fondo', test: (p) => !isCross(p) },
+    { id: 'cross', label: 'Cruces', test: isCross },
 ];
 
 const Chip = ({ active, onClick, children, count }) => (
@@ -714,7 +714,7 @@ const FilterGroup = ({ title, children }) => (
 
 const CrossBadges = ({ post }) => isCross(post) ? (
     <div className="flex flex-wrap items-center gap-1.5 mb-4">
-        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Crosses</span>
+        <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Cruza</span>
         {post.crosses.map(id => (
             <span key={id} className="px-2.5 py-1 rounded-full border border-blue-200 text-blue-600 text-[10px] font-bold">× {typeById(id).short}</span>
         ))}
@@ -729,7 +729,7 @@ const PostCard = ({ post }) => {
             className="group flex flex-col p-8 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300 animate-fade-in"
         >
             <div className="flex items-center justify-between gap-3 mb-5">
-                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">{isCross(post) ? 'Crossover' : stepLabel(t)}</span>
+                <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">{isCross(post) ? 'Cruce' : stepLabel(t)}</span>
                 <span className="px-3 py-1 rounded-full bg-blue-50 text-blue-600 text-[10px] font-bold uppercase tracking-widest">{t.short}</span>
             </div>
             <h3 className="text-xl font-black text-gray-900 leading-tight mb-3 group-hover:text-blue-600 transition-colors">{post.title}</h3>
@@ -741,8 +741,8 @@ const PostCard = ({ post }) => {
                 ))}
             </div>
             <div className="flex items-center justify-between text-xs font-bold text-gray-400">
-                <span>{formatDate(post.published)} · {post.readTime} min read</span>
-                <span className="text-blue-600 group-hover:translate-x-1 transition-transform">Read →</span>
+                <span>{formatDate(post.published)} · {post.readTime} min de lectura</span>
+                <span className="text-blue-600 group-hover:translate-x-1 transition-transform">Leer →</span>
             </div>
         </a>
     );
@@ -802,7 +802,7 @@ const BlogDashboard = () => {
     return (
         <>
             {/* Series switch */}
-            <nav className="pt-12 flex flex-wrap justify-center gap-2 relative z-10" aria-label="Blog series">
+            <nav className="pt-12 flex flex-wrap justify-center gap-2 relative z-10" aria-label="Series del blog">
                 {SERIES.map(x => (
                     <Chip key={x.id} active={x.id === s.id} onClick={() => switchSeries(x.id)}
                         count={BLOG_POSTS.filter(p => typeOf(p).series === x.id).length}>
@@ -826,24 +826,24 @@ const BlogDashboard = () => {
 
             {/* Flow (click a step to filter) */}
             <section className="max-w-6xl mx-auto mb-12 relative z-10">
-                <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">{s.flowLabel} · click a {s.step.toLowerCase()} to filter</p>
+                <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">{s.flowLabel} · haz clic para filtrar</p>
                 <LayerFlow series={s.id} active={filters.type} onSelect={(type) => set({ type })} />
             </section>
 
             {/* Stats */}
             <section className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mb-16 relative z-10">
-                <StatTile value={posts.length} label="Articles" />
+                <StatTile value={posts.length} label="Artículos" />
                 <StatTile value={types.length} label={s.typesLabel} />
                 {crossCount
-                    ? <StatTile value={crossCount} label="Crossovers" />
+                    ? <StatTile value={crossCount} label="Cruces" />
                     : <StatTile value={allThreats.length} label={s.facetsLabel} />}
-                <StatTile value={results.length} label="Matching now" />
+                <StatTile value={results.length} label="Coinciden ahora" />
             </section>
 
             {/* Filters + results */}
             <section className="max-w-7xl mx-auto pb-24 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 relative z-20">
                 <aside className="lg:sticky lg:top-40 self-start p-8 rounded-[2rem] bg-white/90 backdrop-blur-md border border-gray-100 shadow-xl shadow-gray-200/40">
-                    <label htmlFor="blog-search" className="block text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3">Search</label>
+                    <label htmlFor="blog-search" className="block text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3">Buscar</label>
                     <input
                         id="blog-search"
                         type="search"
@@ -853,8 +853,8 @@ const BlogDashboard = () => {
                         className="w-full px-5 py-3 mb-8 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
                     />
 
-                    <FilterGroup title="Type">
-                        <Chip active={filters.type === 'all'} onClick={() => set({ type: 'all' })}>All</Chip>
+                    <FilterGroup title="Tipo">
+                        <Chip active={filters.type === 'all'} onClick={() => set({ type: 'all' })}>Todos</Chip>
                         {types.map(t => (
                             <Chip key={t.id} active={filters.type === t.id} onClick={() => set({ type: t.id })}
                                 count={posts.filter(p => typesOfPost(p).includes(t.id) && passes(p, 'type')).length}>
@@ -863,8 +863,8 @@ const BlogDashboard = () => {
                         ))}
                     </FilterGroup>
 
-                    <FilterGroup title="Zone">
-                        <Chip active={filters.zone === 'all'} onClick={() => set({ zone: 'all' })}>All</Chip>
+                    <FilterGroup title="Zona">
+                        <Chip active={filters.zone === 'all'} onClick={() => set({ zone: 'all' })}>Todos</Chip>
                         {zones.map(z => (
                             <Chip key={z.id} active={filters.zone === z.id} onClick={() => set({ zone: z.id })}
                                 count={posts.filter(p => typesOfPost(p).some(id => typeById(id).zone === z.id) && passes(p, 'zone')).length}>
@@ -874,8 +874,8 @@ const BlogDashboard = () => {
                     </FilterGroup>
 
                     {crossCount ? (
-                        <FilterGroup title="Format">
-                            <Chip active={filters.kind === 'all'} onClick={() => set({ kind: 'all' })}>All</Chip>
+                        <FilterGroup title="Formato">
+                            <Chip active={filters.kind === 'all'} onClick={() => set({ kind: 'all' })}>Todos</Chip>
                             {KINDS.map(k => (
                                 <Chip key={k.id} active={filters.kind === k.id} onClick={() => set({ kind: k.id })}
                                     count={posts.filter(p => k.test(p) && passes(p, 'kind')).length}>
@@ -893,7 +893,7 @@ const BlogDashboard = () => {
 
                     {hasFilters ? (
                         <button onClick={reset} className="w-full py-3 rounded-full border border-gray-200 hover:border-blue-500 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-blue-600 transition-colors">
-                            Clear filters
+                            Borrar filtros
                         </button>
                     ) : null}
                 </aside>
@@ -901,18 +901,18 @@ const BlogDashboard = () => {
                 <div>
                     <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                         <p className="text-sm font-bold text-gray-500" aria-live="polite">
-                            {results.length} {results.length === 1 ? 'article' : 'articles'}
+                            {results.length} {results.length === 1 ? 'artículo' : 'artículos'}
                         </p>
                         <label className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-400">
-                            Sort
+                            Ordenar
                             <select
                                 value={filters.sort}
                                 onChange={(e) => set({ sort: e.target.value })}
                                 className="px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-700 normal-case tracking-normal text-sm font-bold focus:outline-none focus:border-blue-500"
                             >
-                                <option value="layer">{s.step} order</option>
-                                <option value="title">Title A–Z</option>
-                                <option value="read">Shortest read</option>
+                                <option value="layer">Orden por {s.step.toLowerCase()}</option>
+                                <option value="title">Título A–Z</option>
+                                <option value="read">Lectura más corta</option>
                             </select>
                         </label>
                     </div>
@@ -923,9 +923,9 @@ const BlogDashboard = () => {
                         </div>
                     ) : (
                         <div className="p-16 rounded-[2rem] border border-dashed border-gray-300 text-center">
-                            <p className="text-lg font-black text-gray-900 mb-2">No articles match these filters</p>
-                            <p className="text-sm text-gray-500 font-medium mb-6">Try removing a {s.facet.toLowerCase()} or clearing the search.</p>
-                            <button onClick={reset} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all">Clear filters</button>
+                            <p className="text-lg font-black text-gray-900 mb-2">Ningún artículo coincide con estos filtros</p>
+                            <p className="text-sm text-gray-500 font-medium mb-6">Prueba a quitar un filtro de {s.facet.toLowerCase()} o a borrar la búsqueda.</p>
+                            <button onClick={reset} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all">Borrar filtros</button>
                         </div>
                     )}
                 </div>
@@ -936,7 +936,7 @@ const BlogDashboard = () => {
 
 // --- ARTICLE BUILDING BLOCKS (used inside each post) ---
 // Plain-text headings get an id, so sections can be linked to (and indexed) as /post/#section.
-const slugify = (text) => typeof text === 'string' ? text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : undefined;
+const slugify = (text) => typeof text === 'string' ? text.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') : undefined;
 const H2 = ({ children }) => <h2 id={slugify(children)} className="text-2xl md:text-3xl font-black text-gray-900 tracking-tight mt-14 mb-5 scroll-mt-40">{children}</h2>;
 const H3 = ({ children }) => <h3 className="text-xl font-black text-gray-900 tracking-tight mt-10 mb-4">{children}</h3>;
 const P = ({ children }) => <p className="text-lg text-gray-600 leading-relaxed mb-5">{children}</p>;
@@ -999,14 +999,14 @@ const BlogPostLayout = ({ path, controls, children }) => {
     // Same-series posts that share at least one type with this one: the crossovers.
     const related = ordered.filter(p => p !== post && typesOfPost(p).some(id => typesOfPost(post).includes(id)));
 
-    useEffect(() => { document.title = `${postLabel(post)} - Lameyer Blog`; }, []);
+    useEffect(() => { document.title = `${postLabel(post)} - Blog de Lameyer`; }, []);
 
     const NavCard = ({ p, dir }) => p ? (
         <a href={p.path} className={`group flex-1 p-6 rounded-[2rem] border border-gray-100 bg-white/90 shadow-lg shadow-gray-200/40 hover:border-blue-500 transition-all ${dir === 'next' ? 'text-right' : ''}`}>
             <span className="block text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500 mb-2">
                 {dir === 'next'
-                    ? `Next · ${isCross(p) ? 'Crossover' : stepLabel(typeOf(p))} →`
-                    : `← Previous · ${isCross(p) ? 'Crossover' : stepLabel(typeOf(p))}`}
+                    ? `Siguiente · ${isCross(p) ? 'Cruce' : stepLabel(typeOf(p))} →`
+                    : `← Anterior · ${isCross(p) ? 'Cruce' : stepLabel(typeOf(p))}`}
             </span>
             <span className="block font-black text-gray-900 group-hover:text-blue-600 transition-colors">{postLabel(p)}</span>
         </a>
@@ -1016,10 +1016,10 @@ const BlogPostLayout = ({ path, controls, children }) => {
         <>
             <header className="max-w-4xl mx-auto pt-16 pb-10 relative z-10 animate-fade-in">
                 <a href={`/blog/?series=${s.id}`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors mb-10">
-                    ← Blog dashboard · {s.label}
+                    ← Panel del blog · {s.label}
                 </a>
                 <div className="flex flex-wrap items-center gap-3 mb-6">
-                    <span className="px-4 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.3em] uppercase bg-blue-50/50">{isCross(post) ? 'Crossover' : stepLabel(t)}</span>
+                    <span className="px-4 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.3em] uppercase bg-blue-50/50">{isCross(post) ? 'Cruce' : stepLabel(t)}</span>
                     {typesOfPost(post).map((id, n) => (
                         <a key={id} href={`/blog/?type=${id}`} className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${n === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-blue-200 text-blue-600 hover:border-blue-500'}`}>
                             {n === 0 ? '' : '× '}{typeById(id).label}
@@ -1029,7 +1029,7 @@ const BlogPostLayout = ({ path, controls, children }) => {
                 <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-[1.05] mb-6">{post.title}</h1>
                 <p className="text-xl text-gray-500 font-medium leading-relaxed mb-6">{post.summary}</p>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
-                    <time dateTime={post.published}>{formatDate(post.published)}</time> · {post.readTime} min read
+                    <time dateTime={post.published}>{formatDate(post.published)}</time> · {post.readTime} min de lectura
                 </p>
             </header>
 
@@ -1052,7 +1052,7 @@ const BlogPostLayout = ({ path, controls, children }) => {
                         </div>
                     </div>
                     <div className="p-6 rounded-[2rem] bg-white/95 border border-gray-100 shadow-lg shadow-gray-200/40">
-                        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">Checklist</h3>
+                        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">Lista de control</h3>
                         <ul className="space-y-3">
                             {controls.map(c => (
                                 <li key={c} className="flex gap-3 text-sm font-semibold text-gray-700 leading-snug">
@@ -1063,12 +1063,12 @@ const BlogPostLayout = ({ path, controls, children }) => {
                     </div>
                     {related.length ? (
                         <div className="p-6 rounded-[2rem] bg-white/95 border border-gray-100 shadow-lg shadow-gray-200/40">
-                            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">{isCross(post) ? 'Covered in depth' : 'Crossovers'}</h3>
+                            <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">{isCross(post) ? 'Tratado a fondo' : 'Cruces'}</h3>
                             <ul className="space-y-3">
                                 {related.map(p => (
                                     <li key={p.path}>
                                         <a href={p.path} className="group block text-sm font-bold text-gray-700 hover:text-blue-600 leading-snug transition-colors">
-                                            <span className="block text-[10px] uppercase tracking-[0.2em] text-blue-500 mb-0.5">{isCross(p) ? 'Crossover' : stepLabel(typeOf(p))}</span>
+                                            <span className="block text-[10px] uppercase tracking-[0.2em] text-blue-500 mb-0.5">{isCross(p) ? 'Cruce' : stepLabel(typeOf(p))}</span>
                                             {postLabel(p)}
                                         </a>
                                     </li>
@@ -1079,7 +1079,7 @@ const BlogPostLayout = ({ path, controls, children }) => {
                 </aside>
             </section>
 
-            <nav className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 pb-8 relative z-20" aria-label={`Other ${s.typesLabel.toLowerCase()}`}>
+            <nav className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 pb-8 relative z-20" aria-label={`Más ${s.typesLabel.toLowerCase()}`}>
                 <NavCard p={prev} dir="prev" />
                 <NavCard p={next} dir="next" />
             </nav>
@@ -1097,8 +1097,8 @@ const renderPost = (controls, Content) => {
     if (!BLOG_POSTS.some(p => p.path === path)) {
         return renderPage(() => (
             <section className="max-w-3xl mx-auto py-32 text-center relative z-10">
-                <h1 className="text-3xl font-black text-gray-900 mb-4">This entry is not in BLOG_POSTS yet</h1>
-                <p className="text-gray-500 font-medium">Add an object with <Code>{`slug: '${path.split('/').slice(-2, -1)[0]}'`}</Code> to BLOG_POSTS in /js/blog.jsx.</p>
+                <h1 className="text-3xl font-black text-gray-900 mb-4">Esta entrada aún no está en BLOG_POSTS</h1>
+                <p className="text-gray-500 font-medium">Añade un objeto con <Code>{`slug: '${path.split('/').slice(-2, -1)[0]}'`}</Code> a BLOG_POSTS en /js/blog.jsx.</p>
             </section>
         ));
     }

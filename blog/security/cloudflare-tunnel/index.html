@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudflare Tunnel - Lameyer Blog</title>
-    <meta name="description" content="Hiding your API origin and closing every inbound port with Cloudflare Tunnel's outbound-only connection.">
+    <title>Cloudflare Tunnel - Blog de Lameyer</title>
+    <meta name="description" content="Ocultar el origen de tu API y cerrar todos los puertos de entrada con la conexión solo de salida de Cloudflare Tunnel.">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -22,77 +22,78 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Run cloudflared next to the API',
-            'Bind the API to localhost only',
-            'Deny all inbound traffic in the host firewall',
-            'End ingress rules with a catch-all 404',
-            'Add Access service tokens for machine clients',
-            'Rotate the origin IP if it was ever public',
+            'Ejecuta cloudflared junto a la API',
+            'Haz que la API escuche solo en localhost',
+            'Deniega todo el tráfico de entrada en el cortafuegos del host',
+            'Termina las reglas de ingress con un 404 genérico',
+            'Añade tokens de servicio de Access para los clientes máquina',
+            'Cambia la IP del origen si alguna vez fue pública',
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Every layer in this series protects traffic that flows through Cloudflare. They all share one weakness: if an
-                    attacker learns your origin server's real IP address, they can send requests straight to it and skip the{' '}
+                    Todas las capas de esta serie protegen el tráfico que pasa por Cloudflare. Todas comparten un punto débil: si un
+                    atacante averigua la IP real de tu servidor de origen, puede enviarle peticiones directamente y saltarse por
+                    completo el{' '}
                     <a href="/blog/security/edge-layer-ddos-dns/" className="text-blue-600 font-bold hover:underline">edge</a>,
-                    the WAF, API Shield and rate limiting entirely. Cloudflare Tunnel removes that possibility by making the
-                    origin unreachable from the public internet.
+                    el WAF, API Shield y el rate limiting. Cloudflare Tunnel elimina esa posibilidad haciendo que el origen sea
+                    inalcanzable desde internet.
                 </P>
 
-                <H2>Inside-out instead of outside-in</H2>
+                <H2>De dentro hacia fuera en lugar de fuera hacia dentro</H2>
                 <P>
-                    A traditional server opens a port, such as 443, and waits for the internet to connect. With Cloudflare Tunnel,
-                    a small daemon called <Code>cloudflared</Code> runs next to your API and makes <strong className="text-gray-900">outbound</strong> connections
-                    to several nearby Cloudflare data centers. Requests for your hostname travel down those existing connections.
-                    Nothing ever connects <em>to</em> your server.
+                    Un servidor tradicional abre un puerto, como el 443, y espera a que internet se conecte. Con Cloudflare Tunnel,
+                    un pequeño demonio llamado <Code>cloudflared</Code> se ejecuta junto a tu API y abre conexiones <strong className="text-gray-900">de salida</strong> hacia
+                    varios centros de datos cercanos de Cloudflare. Las peticiones para tu hostname viajan por esas conexiones ya abiertas.
+                    Nada se conecta nunca <em>a</em> tu servidor.
                 </P>
                 <UL items={[
-                    'Every inbound port can be closed. There is nothing to scan and nothing to flood.',
-                    'Your origin IP never appears in DNS. The hostname points at the tunnel, not the server.',
-                    'The connections are redundant, so losing one data center does not take the API down.',
+                    'Puedes cerrar todos los puertos de entrada. No hay nada que escanear ni nada que inundar.',
+                    'La IP de tu origen nunca aparece en el DNS. El hostname apunta al túnel, no al servidor.',
+                    'Las conexiones son redundantes, así que perder un centro de datos no tumba la API.',
                 ]} />
 
-                <H2>Setting up a tunnel</H2>
-                <P>After installing <Code>cloudflared</Code> on the API server:</P>
+                <H2>Configurar un túnel</H2>
+                <P>Después de instalar <Code>cloudflared</Code> en el servidor de la API:</P>
                 <CodeBlock title="Terminal">{`cloudflared tunnel login
 cloudflared tunnel create api-origin
 cloudflared tunnel route dns api-origin api.example.com`}</CodeBlock>
-                <P>Then tell the tunnel where to send traffic:</P>
+                <P>Después indica al túnel adónde enviar el tráfico:</P>
                 <CodeBlock title="~/.cloudflared/config.yml">{`tunnel: <TUNNEL-UUID>
 credentials-file: /root/.cloudflared/<TUNNEL-UUID>.json
 
 ingress:
   - hostname: api.example.com
     service: http://localhost:8000
-  # Anything else gets a 404 instead of reaching a service
+  # Todo lo demás recibe un 404 en lugar de llegar a un servicio
   - service: http_status:404`}</CodeBlock>
                 <CodeBlock title="Terminal">{`cloudflared tunnel run api-origin`}</CodeBlock>
                 <P>
-                    You can also create and manage tunnels from the Zero Trust dashboard, which gives you a single install command
-                    with a token and no config file.
+                    También puedes crear y gestionar túneles desde el panel de Zero Trust, que te da un único comando de instalación
+                    con un token y sin archivo de configuración.
                 </P>
 
-                <H2>Lock the doors behind you</H2>
-                <P>A tunnel only protects you if the old way in is actually closed:</P>
+                <H2>Cierra las puertas al salir</H2>
+                <P>Un túnel solo te protege si el antiguo acceso está realmente cerrado:</P>
                 <UL items={[
-                    <>Bind the API to <Code>127.0.0.1</Code>, not <Code>0.0.0.0</Code>, so it only accepts connections from <Code>cloudflared</Code> on the same machine.</>,
-                    <>Set the host or cloud firewall to deny all inbound traffic. <Code>cloudflared</Code> only needs outbound access, on port 7844.</>,
-                    'If the server ever had a public DNS record, move it to a new IP address. Historical DNS records can still reveal the old one.',
+                    <>Haz que la API escuche en <Code>127.0.0.1</Code>, no en <Code>0.0.0.0</Code>, para que solo acepte conexiones de <Code>cloudflared</Code> en la misma máquina.</>,
+                    <>Configura el cortafuegos del host o de la nube para denegar todo el tráfico de entrada. <Code>cloudflared</Code> solo necesita acceso de salida, por el puerto 7844.</>,
+                    'Si el servidor tuvo alguna vez un registro DNS público, muévelo a una IP nueva. Los registros DNS históricos aún pueden revelar la antigua.',
                 ]} />
 
-                <Callout title="Authenticate machines, not just people">
-                    Put a Cloudflare Access policy in front of the API hostname and issue <strong>service tokens</strong> to your
-                    API clients. Each client sends <Code>CF-Access-Client-Id</Code> and <Code>CF-Access-Client-Secret</Code> headers,
-                    and Cloudflare rejects anything without a valid token before it enters the tunnel.
+                <Callout title="Autentica máquinas, no solo personas">
+                    Pon una política de Cloudflare Access delante del hostname de la API y emite <strong>tokens de servicio</strong> para
+                    tus clientes de la API. Cada cliente envía las cabeceras <Code>CF-Access-Client-Id</Code> y <Code>CF-Access-Client-Secret</Code>,
+                    y Cloudflare rechaza todo lo que no tenga un token válido antes de que entre en el túnel.
                 </Callout>
 
-                <H2>The complete path</H2>
+                <H2>El recorrido completo</H2>
                 <P>
-                    With the tunnel in place, the only route to your API runs through every layer: DDoS and DNS protection at the
-                    edge, WAF and bot filtering, schema validation, rate limiting and finally the tunnel itself. An attacker who wants
-                    your data has to get through all five.{' '}
-                    <a href="/blog/" className="text-blue-600 font-bold hover:underline">Back to the dashboard</a> to review any layer.
+                    Con el túnel en marcha, el único camino hacia tu API atraviesa todas las capas: protección DDoS y DNS en el edge,
+                    filtrado WAF y de bots, validación de esquema, rate limiting y, por último, el propio túnel. Un atacante que quiera
+                    tus datos tiene que superar las cinco.{' '}
+                    <a href="/blog/" className="text-blue-600 font-bold hover:underline">Vuelve al panel</a> para repasar cualquier capa.
                 </P>
             </>
         );

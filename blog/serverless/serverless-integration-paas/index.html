@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Functions × Integration PaaS - Lameyer Blog</title>
-    <meta name="description" content="Building an integration platform from edge functions: one Worker per connector, credentials in secrets, mappings in code and a shared gateway, so adding a system is a deploy, not a server.">
+    <title>Funciones × PaaS de integración - Blog de Lameyer</title>
+    <meta name="description" content="Construir una plataforma de integración con funciones edge: un Worker por conector, credenciales en secretos, mapeos en el código y un gateway compartido, para que añadir un sistema sea un despliegue, no un servidor.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/serverless-integration-paas/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,68 +23,69 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'One connector Worker per external system',
-            'All connectors speak one internal event format',
-            'Credentials in secrets, scoped per connector',
-            'Field mappings in versioned files, not in code branches',
-            'Every inbound webhook verified and queued first',
-            'A dead-letter queue and a replay button per connector',
+            'Un Worker conector por sistema externo',
+            'Todos los conectores hablan un único formato de evento interno',
+            'Credenciales en secretos, limitadas a cada conector',
+            'Mapeos de campos en archivos versionados, no en ramas del código',
+            'Cada webhook entrante se verifica y se encola primero',
+            'Una cola de mensajes fallidos y un botón de reenvío por conector',
         ];
 
         const COMPARE = [
-            { option: 'Point-to-point scripts', cost: 'Low at first, grows with every pair', risk: 'Nobody knows what talks to what' },
-            { option: 'Integration server (IaaS)', cost: 'Fixed monthly, paid even when idle', risk: 'One server to patch, scale and back up' },
-            { option: 'Off-the-shelf iPaaS', cost: 'Per task or per connector, often high', risk: 'Logic locked in a vendor\'s UI' },
-            { option: 'Serverless integration platform', cost: 'Per request and CPU time', risk: 'Needs engineering discipline (this article)' },
+            { option: 'Scripts punto a punto', cost: 'Bajo al principio, crece con cada pareja', risk: 'Nadie sabe qué habla con qué' },
+            { option: 'Servidor de integración (IaaS)', cost: 'Fijo mensual, se paga aunque esté parado', risk: 'Un servidor que parchear, escalar y respaldar' },
+            { option: 'iPaaS comercial', cost: 'Por tarea o por conector, a menudo alto', risk: 'Lógica atrapada en la interfaz de un proveedor' },
+            { option: 'Plataforma de integración serverless', cost: 'Por petición y tiempo de CPU', risk: 'Necesita disciplina de ingeniería (este artículo)' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Our main service is connecting systems: an ERP to a CRM, a store to an accounting package, a form to a spreadsheet and a
-                    billing provider. Done one script at a time, this turns into a tangle nobody can maintain. Done on a rented integration
-                    server, it becomes a machine that costs money all month to work a few minutes an hour. This crossover shows how the
-                    pieces of the Serverless Edge series (<A href="/blog/serverless/edge-functions-workers/">functions</A>,{' '}
-                    <A href="/blog/serverless/routing-caching-auth-edge/">routing</A> and{' '}
-                    <A href="/blog/serverless/edge-storage-kv-d1-r2/">storage</A>) combine into an{' '}
-                    <strong className="text-gray-900">integration platform you run as a service</strong>: a PaaS of your own, without the servers.
+                    Nuestro servicio principal es conectar sistemas: un ERP con un CRM, una tienda con un programa de contabilidad, un
+                    formulario con una hoja de cálculo y un proveedor de facturación. Hecho script a script, esto se convierte en una maraña
+                    que nadie puede mantener. Hecho en un servidor de integración alquilado, se convierte en una máquina que cuesta dinero
+                    todo el mes para trabajar unos minutos por hora. Este cruce muestra cómo las piezas de la serie Serverless Edge (
+                    <A href="/blog/serverless/edge-functions-workers/">funciones</A>,{' '}
+                    <A href="/blog/serverless/routing-caching-auth-edge/">enrutado</A> y{' '}
+                    <A href="/blog/serverless/edge-storage-kv-d1-r2/">almacenamiento</A>) se combinan en una{' '}
+                    <strong className="text-gray-900">plataforma de integración que operas como servicio</strong>: un PaaS propio, sin servidores.
                 </P>
 
-                <H2>Why build it serverless</H2>
+                <H2>Por qué construirla en serverless</H2>
                 <Table
-                    columns={[{ key: 'option', label: 'Option', accent: true }, { key: 'cost', label: 'Cost model' }, { key: 'risk', label: 'Main risk' }]}
+                    columns={[{ key: 'option', label: 'Opción', accent: true }, { key: 'cost', label: 'Modelo de coste' }, { key: 'risk', label: 'Riesgo principal' }]}
                     rows={COMPARE}
                 />
                 <P>
-                    Integration traffic is bursty: quiet for hours, then a batch of 5,000 orders at month end. Serverless pricing follows
-                    that shape, and there is no capacity to plan for the peak.
+                    El tráfico de integración llega a ráfagas: tranquilo durante horas y luego un lote de 5.000 pedidos a fin de mes. El
+                    precio de serverless sigue esa forma, y no hay capacidad que planificar para el pico.
                 </P>
 
-                <H2>The architecture</H2>
-                <CodeBlock title="Platform layout">{`External systems                 Platform (Workers)                    Your core
+                <H2>La arquitectura</H2>
+                <CodeBlock title="Estructura de la plataforma">{`Sistemas externos                Plataforma (Workers)                  Tu núcleo
 ─────────────────                ──────────────────────────           ─────────────
 Shopify ──webhook──►  gateway ──► connector-shopify ─┐
-Stripe  ──webhook──►  (verify,    connector-stripe  ─┼─► events queue ─► core-adapter ──► Modular Core
-HubSpot ◄──API─────    route,     connector-hubspot ◄┘        │
-ERP     ◄──Tunnel──    limit)     connector-erp     ◄─────────┘
+Stripe  ──webhook──►  (verifica,  connector-stripe  ─┼─► cola de eventos ─► core-adapter ──► Modular Core
+HubSpot ◄──API─────    enruta,    connector-hubspot ◄┘        │
+ERP     ◄──Tunnel──    limita)    connector-erp     ◄─────────┘
                                          │
-                       D1: connector settings · KV: tokens cache · R2: payload archive`}</CodeBlock>
+                       D1: ajustes de conectores · KV: caché de tokens · R2: archivo de payloads`}</CodeBlock>
                 <UL items={[
-                    <><strong className="text-gray-900">Gateway.</strong> One public Worker: verifies signatures and tokens, applies limits, routes to the right connector.</>,
-                    <><strong className="text-gray-900">Connectors.</strong> One Worker per external system, reachable only through service bindings. Each one translates between that system and one internal event format.</>,
-                    <><strong className="text-gray-900">Events queue.</strong> Everything inbound becomes an event on a queue, so a slow or failing target never blocks the source.</>,
-                    <><strong className="text-gray-900">Core adapter.</strong> Calls the <A href="/blog/core/contracts-typed-apis/">typed contracts</A> of the modular core. Business rules stay there.</>,
+                    <><strong className="text-gray-900">Gateway.</strong> Un único Worker público: verifica firmas y tokens, aplica límites y enruta al conector correcto.</>,
+                    <><strong className="text-gray-900">Conectores.</strong> Un Worker por sistema externo, accesible solo a través de service bindings. Cada uno traduce entre ese sistema y un único formato de evento interno.</>,
+                    <><strong className="text-gray-900">Cola de eventos.</strong> Todo lo que entra se convierte en un evento en una cola, así que un destino lento o caído nunca bloquea al origen.</>,
+                    <><strong className="text-gray-900">Adaptador del núcleo.</strong> Llama a los <A href="/blog/core/contracts-typed-apis/">contratos tipados</A> del núcleo modular. Las reglas de negocio se quedan allí.</>,
                 ]} />
 
-                <H2>One internal event format</H2>
+                <H2>Un único formato de evento interno</H2>
                 <P>
-                    With N systems, point-to-point integration needs up to N × (N − 1) translations. With one internal format, each
-                    system needs one connector that translates to and from it. That is what keeps the tenth integration as cheap as the
-                    second.
+                    Con N sistemas, la integración punto a punto necesita hasta N × (N − 1) traducciones. Con un formato interno único, cada
+                    sistema necesita un conector que traduzca hacia y desde él. Eso es lo que hace que la décima integración sea tan barata
+                    como la segunda.
                 </P>
-                <CodeBlock title="packages/contracts/events/order-paid.v1.json (excerpt)">{`{
+                <CodeBlock title="packages/contracts/events/order-paid.v1.json (extracto)">{`{
   "type": "order.paid.v1",
-  "id": "evt_01J9...",            // idempotency key, unique per event
+  "id": "evt_01J9...",            // clave de idempotencia, única por evento
   "source": "shopify",
   "occurredAt": "2026-10-04T15:20:11Z",
   "tenant": "acme",
@@ -95,48 +96,49 @@ ERP     ◄──Tunnel──    limit)     connector-erp     ◄─────
   }
 }`}</CodeBlock>
 
-                <H2>Mappings as data, credentials as secrets</H2>
+                <H2>Mapeos como datos, credenciales como secretos</H2>
                 <P>
-                    Each customer's systems are configured a little differently: a custom field in the CRM, a different tax code in the ERP.
-                    Put those differences in mapping files, versioned in git and loaded per tenant from D1 or KV, instead of{' '}
-                    <Code>if (tenant === 'acme')</Code> branches in the code. Credentials (API keys, OAuth refresh tokens) go in Worker
-                    secrets or an encrypted D1 table, scoped so each connector can read only its own.
+                    Los sistemas de cada cliente están configurados de forma un poco distinta: un campo personalizado en el CRM, otro código
+                    fiscal en el ERP. Pon esas diferencias en archivos de mapeo, versionados en git y cargados por inquilino desde D1 o KV, en
+                    lugar de ramas <Code>if (tenant === 'acme')</Code> en el código. Las credenciales (claves de API, refresh tokens de OAuth)
+                    van en secretos del Worker o en una tabla cifrada de D1, limitadas para que cada conector solo pueda leer las suyas.
                 </P>
                 <CodeBlock title="mappings/acme/hubspot.yaml">{`target: hubspot.deal
 fields:
-  dealname:        "Order {{data.orderId}}"
+  dealname:        "Pedido {{data.orderId}}"
   amount:          "{{data.total.amount | cents_to_decimal}}"
   pipeline:        "default"
-  rfc_cliente:     "{{data.customer.taxId}}"     # custom property in this tenant's CRM
+  rfc_cliente:     "{{data.customer.taxId}}"     # propiedad personalizada en el CRM de este inquilino
 on_conflict: update_by_external_id`}</CodeBlock>
 
-                <H2>Failures are normal; make them visible</H2>
+                <H2>Los fallos son normales; hazlos visibles</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Retries with backoff</strong> on every queue consumer. Third-party APIs fail every day.</>,
-                    <><strong className="text-gray-900">A dead-letter queue per connector</strong>, so a broken mapping for one system doesn't stop the others.</>,
-                    <><strong className="text-gray-900">An archive in R2</strong> of every inbound payload, so any event can be replayed after a fix.</>,
-                    <><strong className="text-gray-900">Per-connector dashboards</strong> from <A href="/blog/serverless/logs-tracing-cost/">structured logs</A>: events in, events delivered, events failed, age of the oldest pending one.</>,
+                    <><strong className="text-gray-900">Reintentos con backoff</strong> en cada consumidor de cola. Las APIs de terceros fallan todos los días.</>,
+                    <><strong className="text-gray-900">Una cola de mensajes fallidos por conector</strong>, para que un mapeo roto de un sistema no detenga a los demás.</>,
+                    <><strong className="text-gray-900">Un archivo en R2</strong> de cada payload entrante, para poder reenviar cualquier evento tras un arreglo.</>,
+                    <><strong className="text-gray-900">Paneles por conector</strong> a partir de <A href="/blog/serverless/logs-tracing-cost/">logs estructurados</A>: eventos recibidos, entregados y fallidos, y antigüedad del pendiente más antiguo.</>,
                 ]} />
 
-                <H2>Adding a system is a deploy</H2>
+                <H2>Añadir un sistema es un despliegue</H2>
                 <P>
-                    A new client wants their invoicing system connected. On this platform that is a new connector Worker, a mapping file and a
-                    secret, all through a pull request. No server is provisioned and no existing connector is touched. That is what makes
-                    integrations a product you can sell repeatedly, not a project you rebuild each time.
+                    Un cliente nuevo quiere conectar su sistema de facturación. En esta plataforma eso es un Worker conector nuevo, un archivo
+                    de mapeo y un secreto, todo mediante un pull request. No se aprovisiona ningún servidor ni se toca ningún conector
+                    existente. Eso es lo que convierte las integraciones en un producto que puedes vender una y otra vez, no en un proyecto que
+                    reconstruyes cada vez.
                 </P>
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    The numbers clients care about: time to add a new system (target days, not weeks), delivery success rate per connector,
-                    end-to-end latency from source event to target update, and monthly platform cost compared with the integration server or
-                    iPaaS subscription it replaced.
+                    Las cifras que importan a los clientes: tiempo para añadir un sistema nuevo (objetivo: días, no semanas), tasa de entrega
+                    correcta por conector, latencia de extremo a extremo desde el evento de origen hasta la actualización en el destino y coste
+                    mensual de la plataforma comparado con el servidor de integración o la suscripción iPaaS que sustituyó.
                 </P>
 
-                <Callout title="Related">
-                    The webhook and queue side is covered in depth in <A href="/blog/workflows/serverless-workflow-automation/">Workflow
-                    Automation</A>. Public webhook endpoints are protected by the <A href="/blog/?series=security">API Security</A>{' '}
-                    layers. Systems that only exist on-premises are reached as shown in <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge
-                    × IaaS (Hybrid)</A>.
+                <Callout title="Relacionado">
+                    El lado de los webhooks y las colas se trata a fondo en <A href="/blog/workflows/serverless-workflow-automation/">Automatización
+                    de flujos</A>. Los endpoints públicos de webhooks están protegidos por las capas de{' '}
+                    <A href="/blog/?series=security">Seguridad de APIs</A>. A los sistemas que solo existen en local se llega como se muestra en{' '}
+                    <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge × IaaS (híbrido)</A>.
                 </Callout>
             </>
         );

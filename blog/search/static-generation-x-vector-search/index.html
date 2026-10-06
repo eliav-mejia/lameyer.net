@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Static Generation × Vector Search - Lameyer Blog</title>
-    <meta name="description" content="Using one static build to publish crawlable HTML and to feed a vector index: chunking by semantic headings, content hashes and incremental embedding.">
+    <title>Generación estática × búsqueda vectorial - Blog de Lameyer</title>
+    <meta name="description" content="Usar un único build estático para publicar HTML rastreable y alimentar un índice vectorial: troceado por encabezados semánticos, hashes de contenido y embeddings incrementales.">
     <link rel="canonical" href="https://lameyer.net/blog/search/static-generation-x-vector-search/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,35 +23,37 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Index the built HTML, not the source files',
-            'Chunk at h2 sections inside article',
-            'Give every heading an id and link chunks to it',
-            'Prefix chunks with their heading path',
-            'Embed only chunks whose hash changed',
-            'Delete chunks for removed pages',
+            'Indexa el HTML construido, no los archivos fuente',
+            'Trocea por secciones h2 dentro de article',
+            'Da a cada encabezado un id y enlaza los fragmentos a él',
+            'Antepón a los fragmentos su ruta de encabezados',
+            'Genera embeddings solo de los fragmentos cuyo hash cambió',
+            'Borra los fragmentos de las páginas eliminadas',
         ];
 
         const Content = () => (
             <>
                 <P>
-                    A documentation site usually has two audiences that need the same content in different shapes. Crawlers want complete
-                    HTML pages. A <A href="/blog/search/semantic-vector-search/">semantic search</A> index wants small, self-contained chunks
-                    with a vector each. Teams often build these separately, and the search index drifts out of date. With{' '}
-                    <A href="/blog/search/ssr-static-generation/">static generation</A>, the build already produces every page, so it can
-                    produce the index from the same output.
+                    Un sitio de documentación suele tener dos públicos que necesitan el mismo contenido con formas distintas. Los
+                    rastreadores quieren páginas HTML completas. Un índice de <A href="/blog/search/semantic-vector-search/">búsqueda semántica</A> quiere
+                    fragmentos pequeños y autónomos, cada uno con su vector. Los equipos suelen construirlos por separado y el índice de
+                    búsqueda se queda desactualizado. Con la{' '}
+                    <A href="/blog/search/ssr-static-generation/">generación estática</A>, el build ya produce todas las páginas, así que
+                    puede producir el índice a partir de la misma salida.
                 </P>
 
-                <H2>Why index the built HTML</H2>
+                <H2>Por qué indexar el HTML construido</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">It is what readers see.</strong> Components, includes and data files are already resolved. Indexing source files misses generated tables, lists and shared snippets.</>,
-                    <><strong className="text-gray-900">It has structure.</strong> If the pages use <A href="/blog/search/semantic-html-markup/">semantic HTML</A>, the <Code>article</Code> element marks the content and the <Code>h2</Code> headings mark the sections. Navigation, footers and banners are easy to exclude.</>,
-                    <><strong className="text-gray-900">It gives every chunk a URL.</strong> A heading with an <Code>id</Code> becomes a link like <Code>/blog/search/crawlability-indexing/#canonical-urls-one-page-one-address</Code>, so search results can point to the exact section.</>,
+                    <><strong className="text-gray-900">Es lo que ven los lectores.</strong> Los componentes, includes y archivos de datos ya están resueltos. Indexar los archivos fuente se pierde las tablas, listas y fragmentos compartidos que se generan.</>,
+                    <><strong className="text-gray-900">Tiene estructura.</strong> Si las páginas usan <A href="/blog/search/semantic-html-markup/">HTML semántico</A>, el elemento <Code>article</Code> marca el contenido y los encabezados <Code>h2</Code> marcan las secciones. La navegación, los pies de página y los banners son fáciles de excluir.</>,
+                    <><strong className="text-gray-900">Da una URL a cada fragmento.</strong> Un encabezado con <Code>id</Code> se convierte en un enlace como <Code>/blog/search/crawlability-indexing/#urls-canonicas-una-pagina-una-direccion</Code>, así que los resultados de búsqueda pueden apuntar a la sección exacta.</>,
                 ]} />
 
-                <H2>Chunking by heading</H2>
+                <H2>Troceado por encabezado</H2>
                 <P>
-                    Sections under an <Code>h2</Code> are written to be read on their own, which makes them good chunks. Each chunk gets a
-                    header with the page title and the section heading, the same trick used for code chunks:
+                    Las secciones bajo un <Code>h2</Code> se escriben para leerse por sí solas, lo que las convierte en buenos fragmentos.
+                    Cada fragmento recibe una cabecera con el título de la página y el encabezado de la sección, el mismo truco que se usa
+                    con los fragmentos de código:
                 </P>
                 <CodeBlock title="scripts/chunks.mjs">{`import * as cheerio from 'cheerio';
 import { createHash } from 'node:crypto';
@@ -84,39 +86,41 @@ export function chunksFromHtml(html, pageUrl) {
     });
 }`}</CodeBlock>
 
-                <H2>Incremental embedding with content hashes</H2>
+                <H2>Embeddings incrementales con hashes de contenido</H2>
                 <P>
-                    Embedding every chunk on every build is slow and costs money. Store the hash with each vector. On the next build,
-                    embed only chunks whose hash is new, keep the rest, and delete chunks whose URL disappeared:
+                    Generar el embedding de cada fragmento en cada build es lento y cuesta dinero. Guarda el hash con cada vector. En el
+                    siguiente build, genera embeddings solo de los fragmentos con un hash nuevo, conserva el resto y borra los fragmentos
+                    cuya URL desapareció:
                 </P>
-                <CodeBlock title="scripts/sync-index.mjs (sketch)">{`const built = allPages.flatMap(p => chunksFromHtml(p.html, p.url));
+                <CodeBlock title="scripts/sync-index.mjs (esbozo)">{`const built = allPages.flatMap(p => chunksFromHtml(p.html, p.url));
 const existing = await db.hashesByUrl();              // Map<url, hash>
 
 const changed = built.filter(c => existing.get(c.url) !== c.hash);
 const removed = [...existing.keys()].filter(url => !built.some(c => c.url === url));
 
-const vectors = await embed(changed.map(c => c.body));  // one batched call
+const vectors = await embed(changed.map(c => c.body));  // una sola llamada por lotes
 await db.upsert(changed.map((c, i) => ({ ...c, embedding: vectors[i] })));
 await db.delete(removed);
 
 console.log('embedded', changed.length, 'removed', removed.length, 'kept', built.length - changed.length);`}</CodeBlock>
                 <P>
-                    A typo fix now re-embeds one chunk instead of the whole site. Store the embedding model name with every row too: when
-                    the model changes, every hash is effectively new and you rebuild everything on purpose.
+                    Ahora corregir una errata regenera un fragmento en lugar de todo el sitio. Guarda también el nombre del modelo de
+                    embeddings en cada fila: cuando el modelo cambia, todos los hashes son en la práctica nuevos y lo reconstruyes todo a propósito.
                 </P>
 
-                <H2>Where the index lives</H2>
+                <H2>Dónde vive el índice</H2>
                 <P>
-                    For keyword search on a static site, the index can be static too. Tools such as Pagefind read the built HTML and write
-                    a set of small index files that the browser loads on demand. Vector search is different, because each query has to be
-                    embedded by the same model. That usually means a small API in front of a vector store, with the static site calling it.
-                    Loading either kind of search without slowing the page is covered in{' '}
-                    <A href="/blog/search/core-web-vitals-x-site-search/">Core Web Vitals × Site Search</A>.
+                    Para la búsqueda por palabras clave en un sitio estático, el índice también puede ser estático. Herramientas como
+                    Pagefind leen el HTML construido y escriben un conjunto de pequeños archivos de índice que el navegador carga bajo
+                    demanda. La búsqueda vectorial es distinta, porque cada consulta tiene que pasar por el mismo modelo de embeddings. Eso
+                    suele implicar una pequeña API delante de un almacén vectorial, a la que llama el sitio estático. Cómo cargar cualquiera
+                    de las dos sin ralentizar la página se trata en{' '}
+                    <A href="/blog/search/core-web-vitals-x-site-search/">Core Web Vitals × búsqueda en el sitio</A>.
                 </P>
 
-                <Callout title="Same build, same truth">
-                    Because pages and index come from one build, a page and its search entry can't disagree. Delete a page and its chunks
-                    are deleted in the same deploy.
+                <Callout title="Mismo build, misma verdad">
+                    Como las páginas y el índice salen de un único build, una página y su entrada de búsqueda no pueden contradecirse.
+                    Borra una página y sus fragmentos se borran en el mismo despliegue.
                 </Callout>
             </>
         );

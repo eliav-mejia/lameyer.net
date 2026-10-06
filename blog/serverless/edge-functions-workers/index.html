@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edge Functions (Workers) - Lameyer Blog</title>
-    <meta name="description" content="How Cloudflare Workers run on V8 isolates, what their limits mean for design, and how service bindings split a platform into small functions that call each other privately.">
+    <title>Funciones edge (Workers) - Blog de Lameyer</title>
+    <meta name="description" content="Cómo se ejecutan los Cloudflare Workers sobre isolates de V8, qué implican sus límites para el diseño y cómo los service bindings dividen una plataforma en funciones pequeñas que se llaman entre sí de forma privada.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/edge-functions-workers/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,59 +23,59 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'One Worker per responsibility, not one per endpoint',
-            'Connect Workers with service bindings, not public URLs',
-            'Keep secrets in wrangler secret, never in code',
-            'Stream large bodies instead of buffering them',
-            'Hand slow work to a queue with waitUntil or Queues',
-            'Enable Smart Placement for Workers that talk to one backend',
+            'Un Worker por responsabilidad, no uno por endpoint',
+            'Conecta los Workers con service bindings, no con URLs públicas',
+            'Guarda los secretos con wrangler secret, nunca en el código',
+            'Transmite los cuerpos grandes en streaming en lugar de cargarlos en memoria',
+            'Delega el trabajo lento en una cola con waitUntil o Queues',
+            'Activa Smart Placement en los Workers que hablan con un solo backend',
         ];
 
         const MODELS = [
-            { model: 'VM (IaaS)', unit: 'A whole server', start: 'Minutes', you: 'OS, patches, scaling, capacity' },
-            { model: 'Container (PaaS / FaaS)', unit: 'A process image', start: 'Hundreds of ms to seconds', you: 'Image, runtime version, concurrency' },
-            { model: 'Isolate (Workers)', unit: 'A V8 sandbox', start: 'Usually under 5 ms', you: 'Just the code' },
+            { model: 'VM (IaaS)', unit: 'Un servidor entero', start: 'Minutos', you: 'SO, parches, escalado, capacidad' },
+            { model: 'Contenedor (PaaS / FaaS)', unit: 'Una imagen de proceso', start: 'De cientos de ms a segundos', you: 'Imagen, versión del runtime, concurrencia' },
+            { model: 'Isolate (Workers)', unit: 'Un sandbox de V8', start: 'Normalmente menos de 5 ms', you: 'Solo el código' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Every platform has a front door: the first code that runs when a request, a webhook or a scheduled event arrives. On a
-                    traditional stack that door is a server you rent (IaaS) or a container platform you configure (PaaS). In MC-SE it is an
-                    <strong className="text-gray-900"> edge function</strong>: a small program deployed to every Cloudflare location at
-                    once. This article covers how Workers run, what their limits mean for design, and how to split a platform into
-                    several of them.
+                    Toda plataforma tiene una puerta de entrada: el primer código que se ejecuta cuando llega una petición, un webhook o un
+                    evento programado. En un stack tradicional esa puerta es un servidor que alquilas (IaaS) o una plataforma de contenedores
+                    que configuras (PaaS). En MC-SE es una <strong className="text-gray-900">función edge</strong>: un pequeño programa
+                    desplegado a la vez en todas las ubicaciones de Cloudflare. Este artículo explica cómo se ejecutan los Workers, qué
+                    implican sus límites para el diseño y cómo dividir una plataforma en varios de ellos.
                 </P>
 
-                <H2>Isolates, not servers</H2>
+                <H2>Isolates, no servidores</H2>
                 <P>
-                    A Worker doesn't get its own VM or container. It runs in a V8 isolate, the same sandbox a browser tab uses, and
-                    thousands of isolates share one process. That is why a Worker starts in milliseconds and why there is no capacity to
-                    plan: each request simply gets an isolate in the location closest to the user.
+                    Un Worker no tiene su propia VM ni su propio contenedor. Se ejecuta en un isolate de V8, el mismo sandbox que usa una
+                    pestaña del navegador, y miles de isolates comparten un proceso. Por eso un Worker arranca en milisegundos y por eso no
+                    hay capacidad que planificar: cada petición recibe un isolate en la ubicación más cercana al usuario.
                 </P>
                 <Table
-                    columns={[{ key: 'model', label: 'Model' }, { key: 'unit', label: 'Unit' }, { key: 'start', label: 'Start time', accent: true }, { key: 'you', label: 'You manage' }]}
+                    columns={[{ key: 'model', label: 'Modelo' }, { key: 'unit', label: 'Unidad' }, { key: 'start', label: 'Tiempo de arranque', accent: true }, { key: 'you', label: 'Gestionas tú' }]}
                     rows={MODELS}
                 />
 
-                <H2>Limits shape the design</H2>
+                <H2>Los límites dan forma al diseño</H2>
                 <P>
-                    Isolates trade flexibility for speed. Each request has a CPU time budget (milliseconds on the free plan, configurable
-                    up to minutes on paid plans), around 128 MB of memory, and a cap on outgoing subrequests. There is no local
-                    filesystem and no long-lived process. Check Cloudflare's current limits page before relying on a number. The
-                    design consequences don't change:
+                    Los isolates cambian flexibilidad por velocidad. Cada petición tiene un presupuesto de tiempo de CPU (milisegundos en el
+                    plan gratuito, configurable hasta minutos en los planes de pago), unos 128 MB de memoria y un tope de subpeticiones
+                    salientes. No hay sistema de archivos local ni procesos de larga duración. Consulta la página de límites actual de
+                    Cloudflare antes de fiarte de una cifra. Las consecuencias para el diseño no cambian:
                 </P>
                 <UL items={[
-                    <><strong className="text-gray-900">Do little per request.</strong> Route, check, transform, forward. Heavy work (PDFs, large imports) goes to a queue.</>,
-                    <><strong className="text-gray-900">Stream, don't buffer.</strong> Pass <Code>request.body</Code> straight through instead of reading a 50 MB upload into memory.</>,
-                    <><strong className="text-gray-900">Keep state outside.</strong> Anything that must survive the request lives in <A href="/blog/serverless/edge-storage-kv-d1-r2/">edge storage</A> or the core.</>,
-                    <><strong className="text-gray-900">Waiting is free.</strong> CPU time counts computation, not time spent waiting on <Code>fetch</Code>, so I/O-heavy integration code is cheap.</>,
+                    <><strong className="text-gray-900">Haz poco por petición.</strong> Enrutar, comprobar, transformar, reenviar. El trabajo pesado (PDFs, importaciones grandes) va a una cola.</>,
+                    <><strong className="text-gray-900">Transmite, no acumules.</strong> Pasa <Code>request.body</Code> directamente en lugar de cargar en memoria una subida de 50 MB.</>,
+                    <><strong className="text-gray-900">Mantén el estado fuera.</strong> Todo lo que deba sobrevivir a la petición vive en el <A href="/blog/serverless/edge-storage-kv-d1-r2/">almacenamiento edge</A> o en el núcleo.</>,
+                    <><strong className="text-gray-900">Esperar es gratis.</strong> El tiempo de CPU cuenta el cómputo, no el tiempo esperando un <Code>fetch</Code>, así que el código de integración con mucha E/S es barato.</>,
                 ]} />
 
-                <H2>A minimal Worker with a router</H2>
+                <H2>Un Worker mínimo con router</H2>
                 <P>
-                    For anything beyond one route, a small router such as Hono keeps the code readable. It runs on Workers without adapters
-                    and adds almost nothing to the bundle.
+                    Para cualquier cosa que pase de una ruta, un router pequeño como Hono mantiene el código legible. Funciona en Workers sin
+                    adaptadores y apenas añade nada al bundle.
                 </P>
                 <CodeBlock title="src/index.ts">{`import { Hono } from 'hono';
 
@@ -85,14 +85,14 @@ const app = new Hono<{ Bindings: Env }>();
 app.get('/health', (c) => c.json({ ok: true }));
 
 app.get('/v1/products/:id', async (c) => {
-  // Calls the core through a service binding: no public hop.
+  // Llama al núcleo a través de un service binding: sin salto público.
   return c.env.CORE.fetch(new Request('https://core/products/' + c.req.param('id')));
 });
 
 app.post('/v1/orders', async (c) => {
   const res = await c.env.CORE.fetch('https://core/orders', {
     method: 'POST',
-    body: c.req.raw.body,            // streamed, not buffered
+    body: c.req.raw.body,            // en streaming, sin cargarlo en memoria
     headers: { 'content-type': 'application/json' },
   });
   return new Response(res.body, res);
@@ -100,12 +100,12 @@ app.post('/v1/orders', async (c) => {
 
 export default app;`}</CodeBlock>
 
-                <H2>Split by responsibility with service bindings</H2>
+                <H2>Divide por responsabilidad con service bindings</H2>
                 <P>
-                    A platform rarely fits in one Worker for long. A <strong className="text-gray-900">service binding</strong> lets one
-                    Worker call another directly, inside Cloudflare, without a public URL, DNS lookup or extra auth. The called Worker
-                    can't even be reached from the internet if you don't give it a route. That makes it a clean way to separate a public
-                    gateway from internal functions.
+                    Una plataforma rara vez cabe mucho tiempo en un solo Worker. Un <strong className="text-gray-900">service binding</strong> permite
+                    que un Worker llame a otro directamente, dentro de Cloudflare, sin URL pública, consulta DNS ni autenticación extra. Al
+                    Worker llamado ni siquiera se puede llegar desde internet si no le das una ruta. Es una forma limpia de separar un gateway
+                    público de las funciones internas.
                 </P>
                 <CodeBlock title="wrangler.jsonc (gateway)">{`{
   "name": "gateway",
@@ -120,28 +120,30 @@ export default app;`}</CodeBlock>
   "observability": { "enabled": true }
 }`}</CodeBlock>
                 <Callout title="Smart Placement">
-                    Running at the edge helps only if the function doesn't spend its time talking to a database on another continent. With{' '}
-                    <Code>placement.mode = "smart"</Code>, Cloudflare runs a Worker near the backend it calls most, while users still connect
-                    to the nearest location. Use it for adapters that sit in front of one core or one database.
+                    Ejecutar en el edge solo ayuda si la función no se pasa el tiempo hablando con una base de datos en otro continente. Con{' '}
+                    <Code>placement.mode = "smart"</Code>, Cloudflare ejecuta el Worker cerca del backend al que más llama, mientras los
+                    usuarios siguen conectándose a la ubicación más cercana. Úsalo en los adaptadores que están delante de un núcleo o de una
+                    base de datos.
                 </Callout>
 
-                <H2>What to split, and what not to</H2>
+                <H2>Qué dividir y qué no</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Split</strong> by trust and lifecycle: the public gateway, each third-party connector, admin tools.</>,
-                    <><strong className="text-gray-900">Don't split</strong> per endpoint. Twenty one-route Workers means twenty configs and twenty deploys for one change.</>,
-                    <><strong className="text-gray-900">Keep business rules in the core.</strong> A Worker that calculates prices duplicates the <A href="/blog/core/modular-core-architecture/">modular core</A> and drifts from it.</>,
+                    <><strong className="text-gray-900">Divide</strong> por confianza y ciclo de vida: el gateway público, cada conector de terceros, las herramientas de administración.</>,
+                    <><strong className="text-gray-900">No dividas</strong> por endpoint. Veinte Workers de una ruta son veinte configuraciones y veinte despliegues para un solo cambio.</>,
+                    <><strong className="text-gray-900">Mantén las reglas de negocio en el núcleo.</strong> Un Worker que calcula precios duplica el <A href="/blog/core/modular-core-architecture/">núcleo modular</A> y acaba divergiendo de él.</>,
                 ]} />
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    Track P50 and P95 wall time per route, CPU time per request (it drives cost), error rate per Worker, and subrequests per
-                    request. A route whose CPU time keeps creeping up is doing work that belongs in the core or in a queue.
+                    Controla el tiempo real P50 y P95 por ruta, el tiempo de CPU por petición (determina el coste), la tasa de errores por
+                    Worker y las subpeticiones por petición. Una ruta cuyo tiempo de CPU no deja de subir está haciendo un trabajo que
+                    corresponde al núcleo o a una cola.
                 </P>
 
-                <Callout title="Next step">
-                    A front door needs rules about who gets in. <A href="/blog/serverless/routing-caching-auth-edge/">Routing, Caching & Auth
-                    at the Edge</A> turns this Worker into a gateway. To see the same pattern used to sell integrations, read{' '}
-                    <A href="/blog/serverless/serverless-integration-paas/">Functions × Integration PaaS</A>.
+                <Callout title="Siguiente paso">
+                    Una puerta de entrada necesita reglas sobre quién entra. <A href="/blog/serverless/routing-caching-auth-edge/">Enrutado,
+                    caché y autenticación en el edge</A> convierte este Worker en un gateway. Para ver el mismo patrón aplicado a vender
+                    integraciones, lee <A href="/blog/serverless/serverless-integration-paas/">Funciones × PaaS de integración</A>.
                 </Callout>
             </>
         );

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Benchmarks × Search as Code - Lameyer Blog</title>
-    <meta name="description" content="Running a curated code search benchmark in CI on every search-config pull request, with per-slice thresholds and a versioned baseline.">
+    <title>Benchmarks × Search as Code - Blog de Lameyer</title>
+    <meta name="description" content="Ejecutar un benchmark curado de búsqueda de código en CI en cada pull request de configuración de búsqueda, con umbrales por segmento y una línea base versionada.">
     <link rel="canonical" href="https://lameyer.net/blog/search/benchmarks-x-search-as-code/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,34 +23,34 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Trigger the eval on any change under search/',
-            'Compare against a versioned baseline from main',
-            'Gate on slices, not only on the average',
-            'Allow tiny noise, fail on real drops',
-            'Require an explicit label to accept a regression',
-            'Refresh the baseline only on merge',
+            'Lanza la evaluación con cualquier cambio bajo search/',
+            'Compara con una línea base versionada de main',
+            'Pon la barrera por segmentos, no solo en la media',
+            'Tolera el ruido pequeño y falla con las caídas reales',
+            'Exige una etiqueta explícita para aceptar una regresión',
+            'Actualiza la línea base solo al fusionar',
         ];
 
         const REPORT = [
-            { slice: 'All queries (n=184)', base: '0.712', cand: '0.731', delta: '+0.019', status: '✓' },
-            { slice: 'python', base: '0.744', cand: '0.770', delta: '+0.026', status: '✓' },
-            { slice: 'typescript', base: '0.689', cand: '0.701', delta: '+0.012', status: '✓' },
-            { slice: 'go', base: '0.655', cand: '0.618', delta: '−0.037', status: '✗ fails (max −0.02)' },
+            { slice: 'Todas las consultas (n=184)', base: '0,712', cand: '0,731', delta: '+0,019', status: '✓' },
+            { slice: 'python', base: '0,744', cand: '0,770', delta: '+0,026', status: '✓' },
+            { slice: 'typescript', base: '0,689', cand: '0,701', delta: '+0,012', status: '✓' },
+            { slice: 'go', base: '0,655', cand: '0,618', delta: '−0,037', status: '✗ falla (máx. −0,02)' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    <A href="/blog/search/search-as-code-sac/">Search as Code</A> puts every relevance setting in git.
-                    A <A href="/blog/search/benchmark-curation-reap-harvest/">curated benchmark</A> tells you whether a setting helps.
-                    Put them together and you get what software teams have had for years: a test suite that runs on every pull request
-                    and blocks the merge when something breaks. Here, "breaks" means "finds worse results".
+                    <A href="/blog/search/search-as-code-sac/">Search as Code</A> pone en git todos los ajustes de relevancia.
+                    Un <A href="/blog/search/benchmark-curation-reap-harvest/">benchmark curado</A> te dice si un ajuste ayuda.
+                    Júntalos y obtienes lo que los equipos de software tienen desde hace años: una batería de tests que se ejecuta en cada
+                    pull request y bloquea la fusión cuando algo se rompe. Aquí, «se rompe» significa «encuentra peores resultados».
                 </P>
 
-                <H2>The workflow</H2>
+                <H2>El flujo de trabajo</H2>
                 <P>
-                    The job runs only when search configuration changes. It builds a temporary index from the branch, runs every benchmark
-                    query against it and compares the scores with the baseline recorded on <Code>main</Code>:
+                    El job solo se ejecuta cuando cambia la configuración de búsqueda. Construye un índice temporal a partir de la rama,
+                    lanza todas las consultas del benchmark contra él y compara las puntuaciones con la línea base registrada en <Code>main</Code>:
                 </P>
                 <CodeBlock title=".github/workflows/search-relevance.yml">{`name: search-relevance
 on:
@@ -71,10 +71,10 @@ jobs:
           python-version: "3.12"
       - run: pip install -r search/requirements.txt
 
-      - name: Build candidate index from this branch
+      - name: Construir el índice candidato desde esta rama
         run: python search/tools/build_index.py --config search/ --out .eval/candidate
 
-      - name: Score candidate against the main baseline
+      - name: Puntuar el candidato contra la línea base de main
         run: >
           python search/tools/evaluate.py
           --index .eval/candidate
@@ -83,51 +83,52 @@ jobs:
           --max-drop 0.02
           --report .eval/report.md
 
-      - name: Post report on the pull request
+      - name: Publicar el informe en el pull request
         if: always()
         run: gh pr comment "$PR" --body-file .eval/report.md
         env:
           GH_TOKEN: \${{ github.token }}
           PR: \${{ github.event.pull_request.number }}`}</CodeBlock>
-                <Callout title="Index the snapshot, not today's code">
-                    Benchmark items are pinned to the commit they were harvested from. The build script indexes those snapshots, so a
-                    change in the application code never moves the scores, only a change in the search config does.
+                <Callout title="Indexa el snapshot, no el código de hoy">
+                    Los elementos del benchmark están fijados al commit del que se cosecharon. El script de build indexa esos snapshots, así
+                    que un cambio en el código de la aplicación nunca mueve las puntuaciones; solo las mueve un cambio en la configuración de búsqueda.
                 </Callout>
 
-                <H2>Gate on slices, not just the average</H2>
+                <H2>Pon la barrera por segmentos, no solo en la media</H2>
                 <P>
-                    An average can hide a regression. A new synonym list might help Python queries a lot and quietly break Go. Score each
-                    slice (language, repository, query type) separately and apply the threshold to each one:
+                    Una media puede ocultar una regresión. Una nueva lista de sinónimos puede ayudar mucho a las consultas de Python y romper
+                    en silencio las de Go. Puntúa cada segmento (lenguaje, repositorio, tipo de consulta) por separado y aplica el umbral a cada uno:
                 </P>
                 <Table
-                    columns={[{ key: 'slice', label: 'nDCG@10 · slice', mono: true }, { key: 'base', label: 'main' }, { key: 'cand', label: 'branch' }, { key: 'delta', label: 'Δ', accent: true }, { key: 'status', label: 'Status' }]}
+                    columns={[{ key: 'slice', label: 'nDCG@10 · segmento', mono: true }, { key: 'base', label: 'main' }, { key: 'cand', label: 'rama' }, { key: 'delta', label: 'Δ', accent: true }, { key: 'status', label: 'Estado' }]}
                     rows={REPORT}
                 />
                 <P>
-                    This pull request improves the overall score and still fails, which is the point: someone has to look at the Go queries
-                    before it ships.
+                    Este pull request mejora la puntuación global y aun así falla, y esa es la idea: alguien tiene que mirar las consultas de
+                    Go antes de publicarlo.
                 </P>
 
-                <H2>Noise, thresholds and accepted regressions</H2>
+                <H2>Ruido, umbrales y regresiones aceptadas</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Make runs repeatable.</strong> Fix random seeds and pin the embedding model version. Approximate nearest-neighbour search can still vary slightly between builds, so allow a small tolerance.</>,
-                    <><strong className="text-gray-900">Small slices are noisy.</strong> With 15 queries, one query flipping changes the score a lot. Set a minimum slice size before gating, and report smaller slices without failing on them.</>,
-                    <><strong className="text-gray-900">Some regressions are worth it.</strong> A model upgrade might cost 1% on one slice and gain 8% elsewhere. Let a reviewer accept it explicitly with a PR label, so the decision is recorded.</>,
-                    <><strong className="text-gray-900">Move the baseline on merge only.</strong> A second job on <Code>main</Code> re-runs the evaluation and commits the new <Code>baseline.json</Code>.</>,
+                    <><strong className="text-gray-900">Haz que las ejecuciones sean repetibles.</strong> Fija las semillas aleatorias y la versión del modelo de embeddings. La búsqueda aproximada de vecinos más cercanos aún puede variar ligeramente entre builds, así que permite una pequeña tolerancia.</>,
+                    <><strong className="text-gray-900">Los segmentos pequeños tienen ruido.</strong> Con 15 consultas, que cambie una sola mueve mucho la puntuación. Define un tamaño mínimo de segmento antes de bloquear e informa de los segmentos más pequeños sin hacer fallar el job.</>,
+                    <><strong className="text-gray-900">Algunas regresiones merecen la pena.</strong> Una mejora de modelo puede costar un 1 % en un segmento y ganar un 8 % en otros. Deja que quien revisa la acepte explícitamente con una etiqueta en el PR, para que la decisión quede registrada.</>,
+                    <><strong className="text-gray-900">Mueve la línea base solo al fusionar.</strong> Un segundo job en <Code>main</Code> vuelve a ejecutar la evaluación y hace commit del nuevo <Code>baseline.json</Code>.</>,
                 ]} />
 
-                <H2>Changing the embedding model</H2>
+                <H2>Cambiar el modelo de embeddings</H2>
                 <P>
-                    A new <A href="/blog/search/semantic-vector-search/">embedding model</A> means re-embedding every chunk, which is the
-                    most expensive change you can make. Because <Code>embedding.yaml</Code> is part of the config, it goes through the same
-                    pipeline: the job builds a full candidate index with the new model and you see the per-slice impact before paying to
-                    re-index production.
+                    Un nuevo <A href="/blog/search/semantic-vector-search/">modelo de embeddings</A> implica regenerar los embeddings de todos
+                    los fragmentos, el cambio más caro que puedes hacer. Como <Code>embedding.yaml</Code> forma parte de la configuración, pasa
+                    por el mismo pipeline: el job construye un índice candidato completo con el nuevo modelo y ves el impacto por segmento antes
+                    de pagar por reindexar producción.
                 </P>
 
-                <H2>What this gives you</H2>
+                <H2>Lo que te aporta</H2>
                 <P>
-                    Search changes become as safe and as reviewable as code changes. The history of <Code>baseline.json</Code> is a chart of
-                    your search quality over time, and every point on it links to the pull request that caused it.
+                    Los cambios de búsqueda pasan a ser tan seguros y revisables como los cambios de código. El historial de{' '}
+                    <Code>baseline.json</Code> es una gráfica de la calidad de tu búsqueda en el tiempo, y cada punto enlaza con el pull
+                    request que lo provocó.
                 </P>
             </>
         );

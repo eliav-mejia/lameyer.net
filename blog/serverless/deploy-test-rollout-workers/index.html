@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Deploy, Test & Roll Out - Lameyer Blog</title>
-    <meta name="description" content="A release pipeline for Cloudflare Workers: local runs on the real runtime, Vitest tests, staging and production environments, gradual deployments and one-command rollback.">
+    <title>Desplegar, probar y lanzar - Blog de Lameyer</title>
+    <meta name="description" content="Un pipeline de publicación para Cloudflare Workers: ejecución local sobre el runtime real, tests con Vitest, entornos de staging y producción, despliegues graduales y rollback con un solo comando.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/deploy-test-rollout-workers/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,41 +23,42 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Run and test locally on workerd, the same runtime as production',
-            'Keep staging and production as named environments in one config',
-            'Deploy only from CI, never from a laptop',
-            'Apply database migrations before the code that needs them',
-            'Release to a small percentage first, then widen',
-            'Know the rollback command before you need it',
+            'Ejecuta y prueba en local sobre workerd, el mismo runtime que producción',
+            'Mantén staging y producción como entornos con nombre en una sola configuración',
+            'Despliega solo desde CI, nunca desde un portátil',
+            'Aplica las migraciones de base de datos antes que el código que las necesita',
+            'Publica primero para un porcentaje pequeño y después amplía',
+            'Conoce el comando de rollback antes de necesitarlo',
         ];
 
         const PIPELINE = [
-            { stage: 'Local', command: 'wrangler dev', gate: 'Runs on workerd with local KV, D1 and R2' },
-            { stage: 'Test', command: 'vitest run', gate: 'Unit and integration tests inside the Workers runtime' },
-            { stage: 'Staging', command: 'wrangler deploy --env staging', gate: 'Smoke tests against real bindings' },
-            { stage: 'Canary', command: 'wrangler versions deploy (10 %)', gate: 'Error rate and latency stay flat' },
-            { stage: 'Production', command: 'wrangler versions deploy (100 %)', gate: 'Rollback ready: wrangler rollback' },
+            { stage: 'Local', command: 'wrangler dev', gate: 'Se ejecuta sobre workerd con KV, D1 y R2 locales' },
+            { stage: 'Tests', command: 'vitest run', gate: 'Tests unitarios y de integración dentro del runtime de Workers' },
+            { stage: 'Staging', command: 'wrangler deploy --env staging', gate: 'Smoke tests contra bindings reales' },
+            { stage: 'Canary', command: 'wrangler versions deploy (10 %)', gate: 'La tasa de errores y la latencia se mantienen estables' },
+            { stage: 'Producción', command: 'wrangler versions deploy (100 %)', gate: 'Rollback listo: wrangler rollback' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Serverless removes servers, not mistakes. A bad deploy reaches every Cloudflare location within seconds, which is
-                    great for fixes and terrible for bugs. The answer isn't to deploy less, it is to make every deploy small, tested and
-                    reversible. This article closes the series with the <strong className="text-gray-900">release pipeline</strong> the
-                    other pieces depend on.
+                    Serverless elimina los servidores, no los errores. Un mal despliegue llega a todas las ubicaciones de Cloudflare en
+                    segundos, algo estupendo para los arreglos y terrible para los bugs. La respuesta no es desplegar menos, sino hacer que
+                    cada despliegue sea pequeño, probado y reversible. Este artículo cierra la serie con el{' '}
+                    <strong className="text-gray-900">pipeline de publicación</strong> del que dependen todas las demás piezas.
                 </P>
 
-                <H2>The pipeline at a glance</H2>
+                <H2>El pipeline de un vistazo</H2>
                 <Table
-                    columns={[{ key: 'stage', label: 'Stage' }, { key: 'command', label: 'Command', accent: true }, { key: 'gate', label: 'Gate to pass' }]}
+                    columns={[{ key: 'stage', label: 'Etapa' }, { key: 'command', label: 'Comando', accent: true }, { key: 'gate', label: 'Barrera que superar' }]}
                     rows={PIPELINE}
                 />
 
-                <H2>Test on the real runtime</H2>
+                <H2>Prueba sobre el runtime real</H2>
                 <P>
-                    Node.js is not the Workers runtime: some APIs are missing, others behave differently. The Workers Vitest pool runs your
-                    tests inside workerd with real bindings, so a test that passes locally passes in production for the same reasons.
+                    Node.js no es el runtime de Workers: faltan algunas APIs y otras se comportan de forma distinta. El pool de Vitest para
+                    Workers ejecuta tus tests dentro de workerd con bindings reales, así que un test que pasa en local pasa en producción por
+                    los mismos motivos.
                 </P>
                 <CodeBlock title="test/gateway.test.ts">{`import { SELF, env } from 'cloudflare:test';
 import { describe, it, expect } from 'vitest';
@@ -80,11 +81,11 @@ describe('gateway', () => {
   });
 });`}</CodeBlock>
 
-                <H2>One config, two environments</H2>
+                <H2>Una configuración, dos entornos</H2>
                 <P>
-                    Staging and production live in the same <Code>wrangler.jsonc</Code> as named environments, each with its own
-                    bindings. Secrets are set per environment (<Code>wrangler secret put API_TOKEN --env staging</Code>) and never
-                    committed. Because both environments come from one file, they cannot drift apart silently.
+                    Staging y producción viven en el mismo <Code>wrangler.jsonc</Code> como entornos con nombre, cada uno con sus propios
+                    bindings. Los secretos se definen por entorno (<Code>wrangler secret put API_TOKEN --env staging</Code>) y nunca se suben
+                    al repositorio. Como ambos entornos salen de un único archivo, no pueden divergir en silencio.
                 </P>
                 <CodeBlock title="wrangler.jsonc">{`{
   "name": "gateway",
@@ -100,11 +101,12 @@ describe('gateway', () => {
   }
 }`}</CodeBlock>
 
-                <H2>Deploy from CI, gradually</H2>
+                <H2>Despliega desde CI, de forma gradual</H2>
                 <P>
-                    CI is the only place allowed to deploy. On every push to <Code>main</Code> it runs the tests, applies D1 migrations,
-                    deploys to staging, then uploads a new production version without sending it traffic. Gradual deployments split
-                    traffic between the old and new version by percentage, so a bug reaches one user in ten, not all of them.
+                    CI es el único lugar autorizado para desplegar. En cada push a <Code>main</Code> ejecuta los tests, aplica las migraciones
+                    de D1, despliega en staging y después sube una nueva versión de producción sin enviarle tráfico. Los despliegues graduales
+                    reparten el tráfico entre la versión antigua y la nueva por porcentaje, así que un bug llega a uno de cada diez usuarios,
+                    no a todos.
                 </P>
                 <CodeBlock title=".github/workflows/deploy.yml">{`name: deploy
 on:
@@ -126,34 +128,34 @@ jobs:
       - run: npx wrangler d1 migrations apply DB --remote --env staging
       - run: npx wrangler deploy --env staging
       - run: npx wrangler d1 migrations apply DB --remote
-      # Upload the new version; promote it in steps (10 % -> 100 %) after checking metrics.
+      # Sube la nueva versión; promuévela por pasos (10 % -> 100 %) tras revisar las métricas.
       - run: npx wrangler versions upload`}</CodeBlock>
-                <Callout title="Migrations first, and backwards compatible">
-                    During a gradual deployment the old and new code run at the same time against the same database. Make every
-                    migration additive (new column, new table) so the old version keeps working; remove the old column in a later
-                    release, once no version uses it. The same rule appears in{' '}
-                    <A href="/blog/core/data-ownership-migrations/">Data Ownership & Migrations</A>.
+                <Callout title="Primero las migraciones, y compatibles hacia atrás">
+                    Durante un despliegue gradual, el código antiguo y el nuevo se ejecutan a la vez contra la misma base de datos. Haz que
+                    cada migración sea aditiva (columna nueva, tabla nueva) para que la versión antigua siga funcionando; elimina la columna
+                    antigua en un lanzamiento posterior, cuando ninguna versión la use. La misma regla aparece en{' '}
+                    <A href="/blog/core/data-ownership-migrations/">Propiedad de datos y migraciones</A>.
                 </Callout>
 
-                <H2>Rolling back</H2>
+                <H2>Hacer rollback</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Promote in steps:</strong> <Code>wrangler versions deploy</Code> lets you send 10 %, then 50 %, then 100 % of traffic to the new version.</>,
-                    <><strong className="text-gray-900">Watch the right numbers:</strong> error rate and P95 latency per version, from <A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing & Cost</A>.</>,
-                    <><strong className="text-gray-900">Roll back in one command:</strong> <Code>wrangler rollback</Code> returns traffic to the previous version within seconds.</>,
-                    <><strong className="text-gray-900">Feature flags for the risky parts:</strong> a flag in KV turns a new code path off without any deploy.</>,
+                    <><strong className="text-gray-900">Promueve por pasos:</strong> <Code>wrangler versions deploy</Code> te permite enviar el 10 %, después el 50 % y después el 100 % del tráfico a la nueva versión.</>,
+                    <><strong className="text-gray-900">Vigila las cifras correctas:</strong> tasa de errores y latencia P95 por versión, de <A href="/blog/serverless/logs-tracing-cost/">Logs, trazas y costes</A>.</>,
+                    <><strong className="text-gray-900">Rollback en un comando:</strong> <Code>wrangler rollback</Code> devuelve el tráfico a la versión anterior en segundos.</>,
+                    <><strong className="text-gray-900">Feature flags para las partes arriesgadas:</strong> un flag en KV desactiva un camino de código nuevo sin ningún despliegue.</>,
                 ]} />
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    Track the four delivery metrics: deployment frequency, lead time from commit to production, change failure rate and
-                    time to restore. On a healthy serverless platform deploys are daily, lead time is under an hour, and restoring service
-                    is a rollback measured in minutes.
+                    Controla las cuatro métricas de entrega: frecuencia de despliegue, tiempo desde el commit hasta producción, tasa de
+                    cambios fallidos y tiempo de recuperación. En una plataforma serverless sana los despliegues son diarios, el tiempo de
+                    entrega es de menos de una hora y recuperar el servicio es un rollback que se mide en minutos.
                 </P>
 
-                <Callout title="Back to the map">
-                    That completes the request path and the platform around it. Return to the{' '}
-                    <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge overview</A>, or see the series applied to a
-                    business in <A href="/blog/serverless/serverless-integration-paas/">Integration PaaS</A>.
+                <Callout title="De vuelta al mapa">
+                    Con esto se completa el recorrido de la petición y la plataforma que lo rodea. Vuelve a la{' '}
+                    <A href="/blog/serverless/serverless-edge-architecture/">visión general de Serverless Edge</A> o mira la serie aplicada a
+                    un negocio en <A href="/blog/serverless/serverless-integration-paas/">PaaS de integración</A>.
                 </Callout>
             </>
         );

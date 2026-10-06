@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serverless Edge Architecture - Lameyer Blog</title>
-    <meta name="description" content="Serverless Edge: what belongs in an edge function and what belongs in the core. Routing, auth, caching and cron jobs at the edge, with KV, D1 and R2 for state.">
+    <title>Arquitectura Serverless Edge - Blog de Lameyer</title>
+    <meta name="description" content="Serverless Edge: qué va en una función edge y qué va en el núcleo. Enrutado, autenticación, caché y tareas cron en el edge, con KV, D1 y R2 para el estado.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/serverless-edge-architecture/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,43 +23,43 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Keep edge functions thin: route, check, cache, forward',
-            'Put business rules in the core, not at the edge',
-            'Choose storage by consistency need (KV, D1, R2)',
-            'Cache public GET responses with explicit TTLs',
-            'Move periodic tasks to Cron Triggers',
-            'Log a request ID through edge and core',
+            'Mantén ligeras las funciones edge: enrutar, comprobar, cachear, reenviar',
+            'Pon las reglas de negocio en el núcleo, no en el edge',
+            'Elige el almacenamiento según la consistencia que necesites (KV, D1, R2)',
+            'Cachea las respuestas GET públicas con TTL explícitos',
+            'Pasa las tareas periódicas a Cron Triggers',
+            'Registra un ID de petición a través del edge y el núcleo',
         ];
 
         const PLACEMENT = [
-            { task: 'Redirects, A/B routing, geolocation', where: 'Edge', why: 'Needs only the request, runs in every location' },
-            { task: 'Verifying a JWT or API key', where: 'Edge', why: 'Rejects bad requests before they cost the core anything' },
-            { task: 'Caching catalog or blog responses', where: 'Edge', why: 'Served from the nearest location, no origin round trip' },
-            { task: 'Feature flags and config', where: 'Edge (KV)', why: 'Read-heavy, tolerates a few seconds of staleness' },
-            { task: 'Creating an invoice, charging a card', where: 'Core', why: 'Needs transactions and the full business rules' },
-            { task: 'Nightly reports, cleanup, sync', where: 'Edge (Cron) calling core', why: 'No server to keep running between jobs' },
+            { task: 'Redirecciones, enrutado A/B, geolocalización', where: 'Edge', why: 'Solo necesita la petición y se ejecuta en todas las ubicaciones' },
+            { task: 'Verificar un JWT o una clave de API', where: 'Edge', why: 'Rechaza las peticiones malas antes de que le cuesten nada al núcleo' },
+            { task: 'Cachear respuestas del catálogo o del blog', where: 'Edge', why: 'Se sirven desde la ubicación más cercana, sin ir al origen' },
+            { task: 'Feature flags y configuración', where: 'Edge (KV)', why: 'Muchas lecturas; tolera unos segundos de desfase' },
+            { task: 'Crear una factura, cobrar una tarjeta', where: 'Núcleo', why: 'Necesita transacciones y todas las reglas de negocio' },
+            { task: 'Informes nocturnos, limpieza, sincronización', where: 'Edge (Cron) llamando al núcleo', why: 'Ningún servidor encendido entre tarea y tarea' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    The <strong className="text-gray-900">Serverless Edge</strong> is the "SE" in MC-SE. Instead of one server in one
-                    region, small functions run in data centers close to every user, start in milliseconds and scale to zero. Nobody
-                    patches an operating system, and a traffic spike is the provider's problem. The trade-off is that each function has
-                    tight CPU and memory limits, so the question is always: <em>what belongs at the edge, and what belongs in the core?</em>
+                    El <strong className="text-gray-900">Serverless Edge</strong> es la «SE» de MC-SE. En lugar de un servidor en una región,
+                    pequeñas funciones se ejecutan en centros de datos cercanos a cada usuario, arrancan en milisegundos y escalan a cero.
+                    Nadie parchea un sistema operativo, y un pico de tráfico es problema del proveedor. La contrapartida es que cada función
+                    tiene límites estrictos de CPU y memoria, así que la pregunta siempre es: <em>¿qué va en el edge y qué va en el núcleo?</em>
                 </P>
 
-                <H2>Developer use cases: edge or core?</H2>
+                <H2>Casos de uso para desarrolladores: ¿edge o núcleo?</H2>
                 <Table
-                    columns={[{ key: 'task', label: 'Task' }, { key: 'where', label: 'Runs at', accent: true }, { key: 'why', label: 'Why' }]}
+                    columns={[{ key: 'task', label: 'Tarea' }, { key: 'where', label: 'Se ejecuta en', accent: true }, { key: 'why', label: 'Por qué' }]}
                     rows={PLACEMENT}
                 />
 
-                <H2>A thin edge function</H2>
+                <H2>Una función edge ligera</H2>
                 <P>
-                    A good edge function does four things: route, check, cache and forward. Here a Cloudflare Worker validates an API key
-                    stored in KV, serves cached GET responses and forwards everything else to the{' '}
-                    <A href="/blog/core/modular-core-architecture/">modular core</A>.
+                    Una buena función edge hace cuatro cosas: enrutar, comprobar, cachear y reenviar. Aquí un Worker de Cloudflare valida una
+                    clave de API guardada en KV, sirve las respuestas GET cacheadas y reenvía todo lo demás al{' '}
+                    <A href="/blog/core/modular-core-architecture/">núcleo modular</A>.
                 </P>
                 <CodeBlock title="src/worker.ts">{`export default {
   async fetch(request, env, ctx) {
@@ -84,40 +84,40 @@
   },
 };`}</CodeBlock>
 
-                <H2>State at the edge</H2>
+                <H2>Estado en el edge</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">KV</strong> for read-heavy, eventually consistent values: config, feature flags, API key lookups.</>,
-                    <><strong className="text-gray-900">D1</strong> (SQLite) when the edge needs relational queries over its own small dataset.</>,
-                    <><strong className="text-gray-900">R2</strong> for files and objects: uploads, exports, generated PDFs, with no egress fees.</>,
-                    <><strong className="text-gray-900">Durable Objects</strong> when one thing needs strong consistency, such as a counter, a lock or a chat room.</>,
+                    <><strong className="text-gray-900">KV</strong> para valores con muchas lecturas y consistencia eventual: configuración, feature flags, búsquedas de claves de API.</>,
+                    <><strong className="text-gray-900">D1</strong> (SQLite) cuando el edge necesita consultas relacionales sobre su propio conjunto de datos pequeño.</>,
+                    <><strong className="text-gray-900">R2</strong> para archivos y objetos: subidas, exportaciones, PDFs generados, sin costes de salida.</>,
+                    <><strong className="text-gray-900">Durable Objects</strong> cuando algo concreto necesita consistencia fuerte, como un contador, un bloqueo o una sala de chat.</>,
                 ]} />
 
-                <H2>Operating it</H2>
+                <H2>Operarlo</H2>
                 <P>
-                    Serverless does not mean invisible. Pass a request ID from the edge into the core, keep logs and traces for both,
-                    and watch per-request CPU time, because it drives both latency and cost. <Code>wrangler tail</Code> streams live logs
-                    while you debug.
+                    Serverless no significa invisible. Pasa un ID de petición del edge al núcleo, conserva logs y trazas de ambos y vigila el
+                    tiempo de CPU por petición, porque determina tanto la latencia como el coste. <Code>wrangler tail</Code> muestra los logs
+                    en directo mientras depuras.
                 </P>
 
-                <H2>Go deeper</H2>
+                <H2>Profundiza</H2>
                 <UL items={[
-                    <><A href="/blog/serverless/edge-functions-workers/">Edge Functions</A>: how Workers run, their limits, and splitting a platform with service bindings.</>,
-                    <><A href="/blog/serverless/routing-caching-auth-edge/">Routing, Caching & Auth</A>: turning a Worker into the API gateway.</>,
-                    <><A href="/blog/serverless/edge-storage-kv-d1-r2/">Edge Storage</A>: choosing between KV, D1, R2, Durable Objects and Hyperdrive.</>,
-                    <><A href="/blog/serverless/scheduled-jobs-cron-triggers/">Scheduled Jobs</A>: retiring the always-on sync server.</>,
-                    <><A href="/blog/serverless/logs-tracing-cost/">Logs, Tracing & Cost</A>: seeing inside the platform and what each customer costs.</>,
+                    <><A href="/blog/serverless/edge-functions-workers/">Funciones edge</A>: cómo se ejecutan los Workers, sus límites y cómo dividir una plataforma con service bindings.</>,
+                    <><A href="/blog/serverless/routing-caching-auth-edge/">Enrutado, caché y autenticación</A>: convertir un Worker en el API gateway.</>,
+                    <><A href="/blog/serverless/edge-storage-kv-d1-r2/">Almacenamiento edge</A>: elegir entre KV, D1, R2, Durable Objects e Hyperdrive.</>,
+                    <><A href="/blog/serverless/scheduled-jobs-cron-triggers/">Tareas programadas</A>: jubilar el servidor de sincronización siempre encendido.</>,
+                    <><A href="/blog/serverless/logs-tracing-cost/">Logs, trazas y costes</A>: ver por dentro la plataforma y cuánto cuesta cada cliente.</>,
                 ]} />
                 <P>
-                    Three crossovers apply all of this to the platforms we build for clients: an{' '}
-                    <A href="/blog/serverless/serverless-integration-paas/">integration PaaS made of edge functions</A>, a{' '}
-                    <A href="/blog/serverless/serverless-in-front-of-iaas/">hybrid path for existing servers (IaaS)</A>, and{' '}
-                    <A href="/blog/serverless/multi-tenant-saas-metering/">multi-tenant SaaS with usage metering</A>.
+                    Tres cruces aplican todo esto a las plataformas que construimos para clientes: un{' '}
+                    <A href="/blog/serverless/serverless-integration-paas/">PaaS de integración hecho de funciones edge</A>, un{' '}
+                    <A href="/blog/serverless/serverless-in-front-of-iaas/">camino híbrido para servidores existentes (IaaS)</A> y un{' '}
+                    <A href="/blog/serverless/multi-tenant-saas-metering/">SaaS multiinquilino con medición de uso</A>.
                 </P>
 
-                <Callout title="How it connects to the rest of MC-SE">
-                    The edge is also where the <A href="/blog/?series=security">API Security</A> layers run, from DDoS protection to rate
-                    limiting. Background work that should not block a request belongs in{' '}
-                    <A href="/blog/workflows/serverless-workflow-automation/">Workflow Automation</A>.
+                <Callout title="Cómo encaja con el resto de MC-SE">
+                    El edge es también donde se ejecutan las capas de <A href="/blog/?series=security">Seguridad de APIs</A>, desde la
+                    protección DDoS hasta el rate limiting. El trabajo en segundo plano que no debe bloquear una petición va en{' '}
+                    <A href="/blog/workflows/serverless-workflow-automation/">Automatización de flujos</A>.
                 </Callout>
             </>
         );

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search as Code (SaC) - Lameyer Blog</title>
-    <meta name="description" content="Search as Code: keeping analyzers, synonyms, boosts, filters and saved queries in git, reviewed in pull requests and deployed by CI.">
+    <title>Search as Code (SaC) - Blog de Lameyer</title>
+    <meta name="description" content="Search as Code: mantener analizadores, sinónimos, boosts, filtros y consultas guardadas en git, revisados en pull requests y desplegados por CI.">
     <link rel="canonical" href="https://lameyer.net/blog/search/search-as-code-sac/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,49 +23,51 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Move every search setting out of admin UIs into git',
-            'Tokenize identifiers on camelCase and snake_case',
-            'Keep synonyms in a reviewed text file',
-            'Version the embedding model with the config',
-            'Store saved queries next to the code they audit',
-            'Deploy search config only through CI',
+            'Saca todos los ajustes de búsqueda de los paneles de administración y llévalos a git',
+            'Tokeniza los identificadores en camelCase y snake_case',
+            'Guarda los sinónimos en un archivo de texto revisado',
+            'Versiona el modelo de embeddings junto con la configuración',
+            'Guarda las consultas guardadas junto al código que auditan',
+            'Despliega la configuración de búsqueda solo a través de CI',
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Search quality usually degrades through small edits nobody remembers making: a synonym added in an admin console,
-                    a boost changed to fix one complaint, an index rebuilt with a different analyzer. <strong className="text-gray-900">Search
-                    as Code</strong> applies the infrastructure-as-code idea to search. Every setting that changes which results appear,
-                    or in what order, lives in a file in git, goes through a pull request and is deployed by a pipeline.
+                    La calidad de la búsqueda suele degradarse por pequeños cambios que nadie recuerda haber hecho: un sinónimo añadido en
+                    una consola de administración, un boost cambiado para resolver una queja, un índice reconstruido con otro analizador.
+                    <strong className="text-gray-900"> Search as Code</strong> aplica a la búsqueda la idea de la infraestructura como código.
+                    Todo ajuste que cambia qué resultados aparecen, o en qué orden, vive en un archivo en git, pasa por un pull request y
+                    lo despliega un pipeline.
                 </P>
 
-                <H2>What belongs in the repository</H2>
+                <H2>Qué va en el repositorio</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Index definition:</strong> fields, types and analyzers.</>,
-                    <><strong className="text-gray-900">Vocabulary:</strong> synonyms, stop words and abbreviations specific to your codebase.</>,
-                    <><strong className="text-gray-900">Ranking:</strong> field boosts, recency decay, the hybrid keyword/vector weighting and the reranker.</>,
-                    <><strong className="text-gray-900">Embedding settings:</strong> model name and version, chunking rules and the chunk header format.</>,
-                    <><strong className="text-gray-900">Facets and filters:</strong> which metadata users can filter by and which values are allowed.</>,
-                    <><strong className="text-gray-900">Saved queries:</strong> the searches your team runs again and again, such as security audits.</>,
+                    <><strong className="text-gray-900">Definición del índice:</strong> campos, tipos y analizadores.</>,
+                    <><strong className="text-gray-900">Vocabulario:</strong> sinónimos, palabras vacías y abreviaturas propias de tu base de código.</>,
+                    <><strong className="text-gray-900">Ranking:</strong> boosts por campo, decaimiento por antigüedad, la ponderación híbrida palabras clave/vectores y el reranker.</>,
+                    <><strong className="text-gray-900">Ajustes de embeddings:</strong> nombre y versión del modelo, reglas de troceado y formato de la cabecera de cada fragmento.</>,
+                    <><strong className="text-gray-900">Facetas y filtros:</strong> por qué metadatos pueden filtrar los usuarios y qué valores se permiten.</>,
+                    <><strong className="text-gray-900">Consultas guardadas:</strong> las búsquedas que tu equipo ejecuta una y otra vez, como las auditorías de seguridad.</>,
                 ]} />
-                <CodeBlock title="Repository layout">{`search/
-├── index.json          # mappings + analyzers
-├── synonyms.txt        # one rule per line, reviewed like code
-├── ranking.yaml        # boosts, hybrid weights, reranker
-├── embedding.yaml      # model, version, chunking rules
-├── queries/            # saved queries, run on a schedule
+                <CodeBlock title="Estructura del repositorio">{`search/
+├── index.json          # mappings + analizadores
+├── synonyms.txt        # una regla por línea, revisada como código
+├── ranking.yaml        # boosts, pesos híbridos, reranker
+├── embedding.yaml      # modelo, versión, reglas de troceado
+├── queries/            # consultas guardadas, ejecutadas periódicamente
 │   └── security.yaml
-└── benchmark/          # queries + expected results
+└── benchmark/          # consultas + resultados esperados
     └── queries.jsonl`}</CodeBlock>
 
-                <H2>Analyzers that understand identifiers</H2>
+                <H2>Analizadores que entienden los identificadores</H2>
                 <P>
-                    A standard text analyzer treats <Code>reattemptCharge</Code> as one token, so a search for "charge" misses it. The
-                    fix is a one-time analyzer change, and because it lives in a file, the reason for it is in the commit history.
-                    In Elasticsearch or OpenSearch, a <Code>word_delimiter_graph</Code> filter splits identifiers while keeping the original:
+                    Un analizador de texto estándar trata <Code>reattemptCharge</Code> como un único token, así que una búsqueda de «charge»
+                    no lo encuentra. La solución es un cambio único en el analizador y, como vive en un archivo, el motivo queda en el
+                    historial de commits. En Elasticsearch u OpenSearch, un filtro <Code>word_delimiter_graph</Code> divide los
+                    identificadores conservando el original:
                 </P>
-                <CodeBlock title="search/index.json (excerpt)">{`"analysis": {
+                <CodeBlock title="search/index.json (extracto)">{`"analysis": {
   "filter": {
     "code_parts": {
       "type": "word_delimiter_graph",
@@ -82,60 +84,62 @@
   }
 }`}</CodeBlock>
                 <P>
-                    Now <Code>reattemptCharge</Code>, <Code>reattempt_charge</Code> and "reattempt charge" all match each other.
+                    Ahora <Code>reattemptCharge</Code>, <Code>reattempt_charge</Code> y «reattempt charge» coinciden entre sí.
                 </P>
 
-                <H2>Synonyms are code too</H2>
+                <H2>Los sinónimos también son código</H2>
                 <P>
-                    Every team has its own vocabulary: "PSP" means payment service provider, "ledger" and "journal" mean the same table.
-                    Synonyms close that gap for keyword search, but a bad rule can flood results with noise. Keeping them in a reviewed file
-                    means someone has to explain each rule:
+                    Cada equipo tiene su propio vocabulario: «PSP» significa proveedor de servicios de pago, «ledger» y «journal» son la
+                    misma tabla. Los sinónimos cierran esa brecha en la búsqueda por palabras clave, pero una mala regla puede llenar los
+                    resultados de ruido. Guardarlos en un archivo revisado obliga a que alguien explique cada regla:
                 </P>
-                <CodeBlock title="search/synonyms.txt">{`# Payments team vocabulary (owner: @acme/payments)
+                <CodeBlock title="search/synonyms.txt">{`# Vocabulario del equipo de pagos (responsable: @acme/payments)
 retry, reattempt, backoff
 psp, payment service provider
 ledger, journal
-# One-way: a search for "k8s" also finds "kubernetes", not the reverse
+# En un solo sentido: buscar "k8s" también encuentra "kubernetes", no al revés
 k8s => k8s, kubernetes`}</CodeBlock>
 
-                <H2>Saved queries as scheduled checks</H2>
+                <H2>Consultas guardadas como comprobaciones programadas</H2>
                 <P>
-                    Some searches are really audits: "where do we still call the deprecated client?", "who disables TLS verification?".
-                    Write them down once and run them on a schedule. With the GitHub CLI, a saved query is a single command:
+                    Algunas búsquedas son en realidad auditorías: «¿dónde seguimos llamando al cliente obsoleto?», «¿quién desactiva la
+                    verificación TLS?». Escríbelas una vez y ejecútalas periódicamente. Con la CLI de GitHub, una consulta guardada es un
+                    único comando:
                 </P>
-                <CodeBlock title="search/queries/security.yaml">{`# Our own format, read by a small nightly script that calls gh
+                <CodeBlock title="search/queries/security.yaml">{`# Formato propio, leído por un pequeño script nocturno que llama a gh
 - name: tls-verification-disabled
   owner: "@acme/security"
   query: "verify=False language:python"
   args: ["--owner", "acme", "--json", "repository,path,url"]
-  expect: 0            # any hit fails the nightly job
+  expect: 0            # cualquier resultado hace fallar el job nocturno
 
 - name: legacy-payments-client
   owner: "@acme/payments"
   query: "LegacyPspClient"
   args: ["--owner", "acme", "--json", "repository,path"]
-  expect_max: 12       # migration in progress; must only go down`}</CodeBlock>
-                <CodeBlock title="Running one query">{`gh search code "verify=False language:python" --owner acme --json repository,path,url`}</CodeBlock>
+  expect_max: 12       # migración en curso; solo puede bajar`}</CodeBlock>
+                <CodeBlock title="Ejecutar una consulta">{`gh search code "verify=False language:python" --owner acme --json repository,path,url`}</CodeBlock>
 
-                <H2>The deployment pipeline</H2>
+                <H2>El pipeline de despliegue</H2>
                 <P>
-                    A pull request that changes anything under <Code>search/</Code> should validate the files, build a temporary index,
-                    and run the benchmark against it. Merging deploys the new config by creating a new index and switching an alias to it,
-                    so a revert is also a rollback. The benchmark step is what turns this from tidy config management into actual quality
-                    control. <A href="/blog/search/benchmarks-x-search-as-code/">Benchmarks × Search as Code</A> walks through that CI job.
+                    Un pull request que cambia cualquier cosa bajo <Code>search/</Code> debería validar los archivos, construir un índice
+                    temporal y ejecutar el benchmark contra él. Al fusionar, la nueva configuración se despliega creando un índice nuevo y
+                    apuntando un alias hacia él, así que revertir también es hacer rollback. El paso del benchmark es lo que convierte esto
+                    de una gestión ordenada de la configuración en un control de calidad real.{' '}
+                    <A href="/blog/search/benchmarks-x-search-as-code/">Benchmarks × Search as Code</A> recorre ese job de CI.
                 </P>
 
-                <Callout title="Config without measurement is still guesswork">
-                    Version control tells you <em>what</em> changed. Only a benchmark tells you whether it was an improvement. Build one from
-                    real queries with the method in <A href="/blog/search/benchmark-curation-reap-harvest/">Benchmark Curation</A>.
+                <Callout title="Configuración sin medición sigue siendo adivinar">
+                    El control de versiones te dice <em>qué</em> cambió. Solo un benchmark te dice si fue una mejora. Construye uno a partir
+                    de consultas reales con el método de <A href="/blog/search/benchmark-curation-reap-harvest/">Curación de benchmarks</A>.
                 </Callout>
 
-                <H2>Facets are search config, too</H2>
+                <H2>Las facetas también son configuración de búsqueda</H2>
                 <P>
-                    The same idea applies to the filters on a public site, such as the type and topic filters on this blog. Defining facets
-                    in code lets you decide, in one reviewed place, which filter combinations deserve their own indexable page and which should
-                    stay out of search engines. That is the subject of <A href="/blog/search/crawlability-x-faceted-search/">Crawlability ×
-                    Faceted Search</A>.
+                    La misma idea se aplica a los filtros de un sitio público, como los filtros de tipo y tema de este blog. Definir las
+                    facetas en el código te permite decidir, en un único lugar revisado, qué combinaciones de filtros merecen su propia
+                    página indexable y cuáles deben quedarse fuera de los buscadores. Ese es el tema de{' '}
+                    <A href="/blog/search/crawlability-x-faceted-search/">Rastreabilidad × búsqueda por facetas</A>.
                 </P>
             </>
         );

@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rate Limiting - Lameyer Blog</title>
-    <meta name="description" content="Stopping brute force and API abuse with Cloudflare rate limiting rules keyed by IP, API key, cookie or header.">
+    <title>Rate limiting - Blog de Lameyer</title>
+    <meta name="description" content="Frenar la fuerza bruta y el abuso de la API con reglas de rate limiting de Cloudflare basadas en IP, clave de API, cookie o cabecera.">
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -22,67 +22,67 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Put a strict limit on login and token endpoints',
-            'Set separate limits for reads and writes',
-            'Count by API key where your plan allows',
-            'Base thresholds on real traffic, not guesses',
-            'Return 429 with Retry-After from the origin too',
+            'Pon un límite estricto en los endpoints de login y de tokens',
+            'Define límites distintos para lecturas y escrituras',
+            'Cuenta por clave de API si tu plan lo permite',
+            'Basa los umbrales en tráfico real, no en suposiciones',
+            'Devuelve también 429 con Retry-After desde el origen',
         ];
 
         const TIERS = [
-            { endpoint: 'POST /v1/auth/login', limit: '5 requests / 10 s', why: 'Brute force and credential stuffing target this first.' },
-            { endpoint: 'POST /v1/orders', limit: '30 requests / 1 min', why: 'Writes are expensive and rarely bursty for real clients.' },
-            { endpoint: 'GET /v1/products', limit: '300 requests / 1 min', why: 'Reads are cheap, but unlimited reads invite scraping.' },
+            { endpoint: 'POST /v1/auth/login', limit: '5 peticiones / 10 s', why: 'La fuerza bruta y el relleno de credenciales apuntan aquí primero.' },
+            { endpoint: 'POST /v1/orders', limit: '30 peticiones / 1 min', why: 'Las escrituras son caras y los clientes reales rara vez las hacen en ráfaga.' },
+            { endpoint: 'GET /v1/products', limit: '300 peticiones / 1 min', why: 'Las lecturas son baratas, pero sin límite invitan al scraping.' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Every layer so far has asked <em>"is this request malicious?"</em> Rate limiting asks a different question:
-                    <em> "is this client asking for too much?"</em> A login request with a valid-looking password is harmless once
-                    and an attack ten thousand times. Rate limiting caps how many requests a client can make in a time window, and
-                    throttles or blocks clients that go over it.
+                    Hasta ahora, cada capa se preguntaba <em>«¿esta petición es maliciosa?»</em>. El rate limiting se hace otra pregunta:
+                    <em> «¿este cliente está pidiendo demasiado?»</em>. Una petición de login con una contraseña de aspecto válido es
+                    inofensiva una vez y un ataque diez mil veces. El rate limiting limita cuántas peticiones puede hacer un cliente en
+                    una ventana de tiempo, y frena o bloquea a los clientes que la superan.
                 </P>
 
-                <H2>Anatomy of a rate limiting rule</H2>
-                <P>A Cloudflare rate limiting rule has four parts:</P>
+                <H2>Anatomía de una regla de rate limiting</H2>
+                <P>Una regla de rate limiting de Cloudflare tiene cuatro partes:</P>
                 <UL items={[
-                    <><strong className="text-gray-900">Match.</strong> Which requests count, for example one path on your API host.</>,
-                    <><strong className="text-gray-900">Characteristics.</strong> What identifies a client: its IP address, or on higher plans an API key header, session cookie, query parameter or other request property.</>,
-                    <><strong className="text-gray-900">Threshold.</strong> How many requests are allowed per period.</>,
-                    <><strong className="text-gray-900">Action.</strong> What happens when a client exceeds it: block, log or (for browsers only) challenge, for a set duration.</>,
+                    <><strong className="text-gray-900">Coincidencia.</strong> Qué peticiones cuentan, por ejemplo una ruta del host de tu API.</>,
+                    <><strong className="text-gray-900">Características.</strong> Qué identifica a un cliente: su dirección IP o, en planes superiores, una cabecera con la clave de API, una cookie de sesión, un parámetro de consulta u otra propiedad de la petición.</>,
+                    <><strong className="text-gray-900">Umbral.</strong> Cuántas peticiones se permiten por periodo.</>,
+                    <><strong className="text-gray-900">Acción.</strong> Qué ocurre cuando un cliente lo supera: bloquear, registrar o (solo para navegadores) lanzar un challenge, durante un tiempo determinado.</>,
                 ]} />
-                <CodeBlock title="Login endpoint · Block for 10 s">{`Expression:
+                <CodeBlock title="Endpoint de login · Bloquear durante 10 s">{`Expresión:
 (http.host eq "api.example.com"
  and http.request.uri.path eq "/v1/auth/login"
  and http.request.method eq "POST")
 
-Characteristics:  IP
-Threshold:        5 requests per 10 seconds
-Action:           Block for 10 seconds`}</CodeBlock>
+Características:  IP
+Umbral:           5 peticiones cada 10 segundos
+Acción:           Bloquear durante 10 segundos`}</CodeBlock>
 
-                <H2>Why counting by IP isn't enough</H2>
+                <H2>Por qué contar por IP no basta</H2>
                 <P>
-                    Counting by IP is available on every plan and is a good start, but it has two weaknesses. Many legitimate
-                    users can share one IP behind a corporate or mobile network. And attackers rotate through thousands of
-                    residential proxy IPs, so each IP stays under the limit.
+                    Contar por IP está disponible en todos los planes y es un buen comienzo, pero tiene dos puntos débiles. Muchos
+                    usuarios legítimos pueden compartir una IP detrás de una red corporativa o móvil. Y los atacantes rotan entre miles
+                    de IP de proxies residenciales, de modo que cada IP se queda por debajo del límite.
                 </P>
                 <P>
-                    For an API, the stronger key is the <strong className="text-gray-900">API key itself</strong>. Counting per{' '}
-                    <Code>x-api-key</Code> header means one leaked key can only be abused as fast as its limit allows, no matter
-                    how many IPs the attacker uses. Counting by headers, cookies and other characteristics requires Cloudflare's
-                    Advanced Rate Limiting.
+                    Para una API, la clave más sólida es <strong className="text-gray-900">la propia clave de API</strong>. Contar por
+                    cabecera <Code>x-api-key</Code> significa que una clave filtrada solo puede abusarse tan rápido como permita su límite,
+                    sin importar cuántas IP use el atacante. Contar por cabeceras, cookies y otras características requiere el Advanced
+                    Rate Limiting de Cloudflare.
                 </P>
 
-                <H2>Different endpoints, different limits</H2>
-                <P>One global limit is either too loose for login or too tight for reads. An example starting point:</P>
+                <H2>Endpoints distintos, límites distintos</H2>
+                <P>Un límite global único es o demasiado laxo para el login o demasiado estricto para las lecturas. Un punto de partida de ejemplo:</P>
                 <div className="my-8 overflow-x-auto rounded-2xl border border-gray-100">
                     <table className="w-full text-left text-sm">
                         <thead className="bg-slate-50 text-[10px] uppercase tracking-[0.2em] text-gray-400">
                             <tr>
                                 <th className="p-4 font-bold">Endpoint</th>
-                                <th className="p-4 font-bold">Limit per client</th>
-                                <th className="p-4 font-bold">Reason</th>
+                                <th className="p-4 font-bold">Límite por cliente</th>
+                                <th className="p-4 font-bold">Motivo</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
@@ -96,15 +96,15 @@ Action:           Block for 10 seconds`}</CodeBlock>
                         </tbody>
                     </table>
                 </div>
-                <Callout title="Measure before you limit">
-                    Run new rules with the Log action first and compare against your real traffic in Security Analytics.
-                    A threshold set too low will block your own customers during normal peaks.
+                <Callout title="Mide antes de limitar">
+                    Ejecuta las reglas nuevas primero con la acción Log y compáralas con tu tráfico real en Security Analytics.
+                    Un umbral demasiado bajo bloqueará a tus propios clientes durante los picos normales.
                 </Callout>
 
-                <H2>Where rate limiting stops</H2>
+                <H2>Dónde se detiene el rate limiting</H2>
                 <P>
-                    All of these layers protect traffic that goes through Cloudflare. If an attacker finds your origin's real IP,
-                    they can skip every one of them. Closing that door is the job of the final layer,{' '}
+                    Todas estas capas protegen el tráfico que pasa por Cloudflare. Si un atacante encuentra la IP real de tu origen,
+                    puede saltárselas todas. Cerrar esa puerta es trabajo de la última capa,{' '}
                     <a href="/blog/security/cloudflare-tunnel/" className="text-blue-600 font-bold hover:underline">Cloudflare Tunnel</a>.
                 </P>
             </>

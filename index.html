@@ -43,9 +43,9 @@
         const BLOG_HIGHLIGHTS = [
             { num: '01', label: 'Modular Core', text: 'Módulos y contratos para tu lógica de negocio', href: '/blog/?series=core' },
             { num: '02', label: 'Serverless Edge', text: 'Funciones, caché y cron cerca del usuario', href: '/blog/?series=serverless' },
-            { num: '03', label: 'Workflow Automation', text: 'Webhooks, colas y flujos fiables', href: '/blog/?series=workflows' },
-            { num: '04', label: 'API Security', text: 'Defensa en capas para APIs headless', href: '/blog/?series=security' },
-            { num: '05', label: 'Code Search & Discoverability', text: 'Código y páginas fáciles de encontrar', href: '/blog/?series=search' },
+            { num: '03', label: 'Automatización de flujos', text: 'Webhooks, colas y flujos fiables', href: '/blog/?series=workflows' },
+            { num: '04', label: 'Seguridad de APIs', text: 'Defensa en capas para APIs headless', href: '/blog/?series=security' },
+            { num: '05', label: 'Búsqueda de código y visibilidad', text: 'Código y páginas fáciles de encontrar', href: '/blog/?series=search' },
         ];
 
         const ContentCard = ({ title, desc, align, active, icon }) => {
@@ -207,11 +207,11 @@
                                 <div className="absolute -inset-4 bg-blue-600/5 rounded-[4rem] blur-2xl"></div>
                                 <img
                                     src="https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&q=80&w=1200"
-                                    alt="Software Development"
+                                    alt="Desarrollo de software"
                                     className="relative rounded-[3rem] shadow-2xl object-cover aspect-[4/3] w-full border border-gray-100"
                                     onError={(e) => {
                                         e.target.onerror = null;
-                                        e.target.src = 'https://placehold.co/1200x900/1a202c/ffffff?text=Software+Development';
+                                        e.target.src = 'https://placehold.co/1200x900/1a202c/ffffff?text=Desarrollo+de+software';
                                     }}
                                 />
                                 <div className="absolute -bottom-6 -left-6 bg-white p-6 rounded-3xl shadow-xl border border-gray-50 flex items-center gap-4 max-w-[200px]">
@@ -313,8 +313,8 @@
 
         renderPage(HomePage);
     </script>
-    <!-- ===================== Lameyer WhatsApp chat widget ===================== -->
-    <!-- Self-contained: paste right before </body>. Opens wa.me (Meta's official deep link). -->
+    <!-- ===================== Widget de chat de WhatsApp de Lameyer ===================== -->
+    <!-- Autónomo: pégalo justo antes de </body>. Abre wa.me (el enlace directo oficial de Meta). -->
     <style>
         .lm-chat { --lm-blue: #2563eb; --lm-navy: #0a192f; --lm-ink: #0a192f; --lm-muted: #64748b; --lm-line: #e2e8f0; --lm-wa: #25d366;
             position: fixed; right: 24px; bottom: 24px; z-index: 90; font-family: 'Plus Jakarta Sans', system-ui, sans-serif; color: var(--lm-ink); }
@@ -518,7 +518,7 @@
             root.hidden = false;
         })();
     </script>
-    <!-- =================== /Lameyer WhatsApp chat widget =================== -->
+    <!-- =================== /Widget de chat de WhatsApp de Lameyer =================== -->
 
 </body>
 </html>

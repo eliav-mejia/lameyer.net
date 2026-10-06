@@ -31,13 +31,12 @@ const TERMS_URL = '/pages/terminos/';
 const TERMS_UPDATED = '3 de octubre de 2026';
 
 // --- CURRENCIES ---
-// Prices are stored and charged in EUR. Other currencies are shown for reference
-// using the European Central Bank daily rates (Frankfurter API), with these fallbacks.
+// Prices are stored and charged in EUR. The currency follows the flag picked in the header (useLocale in layout.jsx):
+// Spain → EUR, Mexico → MXN. Pesos are shown for reference using the European Central Bank daily rate
+// (Frankfurter API), with this fallback.
 const CURRENCIES = [
     { code: 'EUR', label: 'Euro', locale: 'es-ES', rate: 1 },
-    { code: 'USD', label: 'Dólar EE. UU.', locale: 'en-US', rate: 1.1225 },
     { code: 'MXN', label: 'Peso mexicano', locale: 'es-MX', rate: 20.5806 },
-    { code: 'GBP', label: 'Libra esterlina', locale: 'en-GB', rate: 0.85033 },
 ];
 const RATES_URL = 'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=' +
     CURRENCIES.filter(c => c.code !== 'EUR').map(c => c.code).join(',');
@@ -52,12 +51,10 @@ const store = {
     },
 };
 
-// Selected currency + live rates. Returns { currency, setCurrency, format, ratesDate }.
+// Currency of the selected flag + live rates. Returns { currency, locale, format, ratesDate }.
 const useCurrency = () => {
-    const [code, setCode] = useState(() => {
-        const saved = store.get('lm-currency', 'EUR');
-        return CURRENCIES.some(c => c.code === saved) ? saved : 'EUR';
-    });
+    const locale = useLocale();
+    const code = CURRENCIES.some(c => c.code === locale.currency) ? locale.currency : 'EUR';
     const [rates, setRates] = useState(() => Object.fromEntries(CURRENCIES.map(c => [c.code, c.rate])));
     const [ratesDate, setRatesDate] = useState(null);
 
@@ -74,32 +71,33 @@ const useCurrency = () => {
         return () => { alive = false; };
     }, []);
 
-    const setCurrency = (next) => { setCode(next); store.set('lm-currency', next); };
     const currency = CURRENCIES.find(c => c.code === code);
 
     const format = (eur, target = code) => {
         const c = CURRENCIES.find(x => x.code === target);
-        // "MXN 821.17" instead of "$821.17", so pesos and dollars can't be confused.
+        // "MXN 821.17" instead of "$821.17", so it is clear the amount is in pesos.
         const display = c.code === 'EUR' ? 'symbol' : 'code';
         return new Intl.NumberFormat(c.locale, { style: 'currency', currency: c.code, currencyDisplay: display }).format(eur * rates[c.code]);
     };
 
-    return { currency, setCurrency, format, ratesDate };
+    return { currency, locale, format, ratesDate };
 };
 
-const CurrencySelect = ({ value, onChange, className = '' }) => (
-    <label className={`relative inline-flex items-center ${className}`}>
-        <span className="sr-only">Divisa</span>
-        <select
-            value={value}
-            onChange={e => onChange(e.target.value)}
-            className="appearance-none cursor-pointer pl-5 pr-10 py-3 rounded-full border border-gray-200 bg-white text-xs font-bold uppercase tracking-widest text-gray-700 hover:border-blue-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors"
+// Shows the active currency with its flag. To change it, the visitor clicks the other flag in the header (or here).
+const CurrencyBadge = ({ money, className = '' }) => {
+    const other = LOCALES.find(l => l.id !== money.locale.id);
+    return (
+        <button
+            type="button"
+            onClick={() => other && chooseLocale(other)}
+            title={other ? `Cambiar a ${other.label} (${other.currency})` : undefined}
+            className={`inline-flex items-center justify-center gap-2 pl-4 pr-5 py-3 rounded-full border border-gray-200 bg-white text-xs font-bold uppercase tracking-widest text-gray-700 hover:border-blue-500 transition-colors ${className}`}
         >
-            {CURRENCIES.map(c => <option key={c.code} value={c.code}>{c.code} · {c.label}</option>)}
-        </select>
-        <svg className="pointer-events-none absolute right-4 w-3 h-3 text-gray-400" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2"><path d="M2 4l4 4 4-4" /></svg>
-    </label>
-);
+            <span className="block w-5 h-3.5 rounded-[2px] overflow-hidden border border-black/10 [&>svg]:w-full [&>svg]:h-full"><money.locale.Flag /></span>
+            <span><span className="sr-only">Divisa: </span>{money.currency.code} · {money.currency.label}</span>
+        </button>
+    );
+};
 
 // --- DATA LAYER ---
 // Pre-launch: the "database" is two JSON files in /public/db/ edited by hand (see public/db/README.md).
@@ -629,7 +627,7 @@ const ProductPage = () => {
                                         {foreign ? `Se cobra ${eur(product.price_eur)} · IVA incluido` : 'IVA incluido · envío no incluido'}
                                     </p>
                                 </div>
-                                <CurrencySelect value={money.currency.code} onChange={money.setCurrency} />
+                                <CurrencyBadge money={money} />
                             </div>
 
                             {stock.canBuy ? (

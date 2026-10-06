@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Domain Modules & Boundaries - Lameyer Blog</title>
-    <meta name="description" content="Drawing module boundaries from business capabilities, giving each module one public entry point, and enforcing boundaries with lint rules in a modular monolith.">
+    <title>Módulos de dominio y límites - Blog de Lameyer</title>
+    <meta name="description" content="Trazar los límites de los módulos a partir de las capacidades de negocio, dar a cada módulo un único punto de entrada público y hacer cumplir los límites con reglas de lint en un monolito modular.">
     <link rel="canonical" href="https://lameyer.net/blog/core/domain-modules-boundaries/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,77 +23,77 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Split by business capability, not by technical layer',
-            'Name each module after a noun the business uses',
-            'Give every module one public index.ts',
-            'Block imports of another module\'s internal/ folder',
-            'Assign an owner to each module in CODEOWNERS',
-            'Track dependency direction and forbid cycles',
+            'Divide por capacidad de negocio, no por capa técnica',
+            'Nombra cada módulo con un sustantivo que use el negocio',
+            'Da a cada módulo un único index.ts público',
+            'Bloquea los imports de la carpeta internal/ de otro módulo',
+            'Asigna un responsable a cada módulo en CODEOWNERS',
+            'Controla la dirección de las dependencias y prohíbe los ciclos',
         ];
 
         const SIGNALS = [
-            { signal: 'Words change meaning', example: '"Account" means a login in auth and a customer in billing', verdict: 'Two modules' },
-            { signal: 'Different rate of change', example: 'Pricing rules change weekly, tax rules yearly', verdict: 'Two modules' },
-            { signal: 'Different people decide', example: 'Finance owns invoices, operations owns shipments', verdict: 'Two modules' },
-            { signal: 'Always change together', example: 'Order and order lines are edited in the same transaction', verdict: 'One module' },
+            { signal: 'Las palabras cambian de significado', example: '«Cuenta» es un login en auth y un cliente en billing', verdict: 'Dos módulos' },
+            { signal: 'Ritmo de cambio distinto', example: 'Las reglas de precios cambian cada semana; las fiscales, cada año', verdict: 'Dos módulos' },
+            { signal: 'Deciden personas distintas', example: 'Finanzas es dueña de las facturas; operaciones, de los envíos', verdict: 'Dos módulos' },
+            { signal: 'Siempre cambian juntos', example: 'El pedido y sus líneas se editan en la misma transacción', verdict: 'Un módulo' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Most monoliths are not tangled because people were careless. They are tangled because the folders follow technical layers
-                    (<Code>controllers/</Code>, <Code>services/</Code>, <Code>models/</Code>) and every feature cuts across all of them.
-                    A change to invoicing touches five folders, and nothing stops <Code>InvoiceService</Code> from calling straight into{' '}
-                    <Code>UserRepository</Code>. A <strong className="text-gray-900">domain module</strong> turns that around: one folder per business
-                    capability, containing its own logic, data access and tests, with a single door to the outside.
+                    La mayoría de los monolitos no están enredados por descuido. Están enredados porque las carpetas siguen capas técnicas
+                    (<Code>controllers/</Code>, <Code>services/</Code>, <Code>models/</Code>) y cada funcionalidad las atraviesa todas.
+                    Un cambio en facturación toca cinco carpetas, y nada impide que <Code>InvoiceService</Code> llame directamente a{' '}
+                    <Code>UserRepository</Code>. Un <strong className="text-gray-900">módulo de dominio</strong> le da la vuelta: una carpeta por
+                    capacidad de negocio, con su propia lógica, acceso a datos y tests, y una única puerta hacia fuera.
                 </P>
 
-                <H2>Find boundaries in the business, not the code</H2>
+                <H2>Busca los límites en el negocio, no en el código</H2>
                 <P>
-                    Start with a list of capabilities written in the language the business uses: <em>quote a price, take an order, issue an
-                    invoice, ship a package</em>. A short event-storming session works well here: write every event that happens
-                    ("Order placed", "Invoice issued", "Payment failed") on a sticky note, then group them. Each group is a candidate
-                    module. Then test each candidate against these signals:
+                    Empieza con una lista de capacidades escrita en el lenguaje que usa el negocio: <em>calcular un precio, aceptar un
+                    pedido, emitir una factura, enviar un paquete</em>. Una breve sesión de event storming funciona bien: escribe cada
+                    evento que ocurre («Pedido realizado», «Factura emitida», «Pago fallido») en un pósit y después agrúpalos. Cada grupo es
+                    un módulo candidato. Luego pon a prueba cada candidato con estas señales:
                 </P>
                 <Table
-                    columns={[{ key: 'signal', label: 'Signal' }, { key: 'example', label: 'Example' }, { key: 'verdict', label: 'Verdict', accent: true }]}
+                    columns={[{ key: 'signal', label: 'Señal' }, { key: 'example', label: 'Ejemplo' }, { key: 'verdict', label: 'Veredicto', accent: true }]}
                     rows={SIGNALS}
                 />
-                <Callout title="Start with fewer, larger modules">
-                    Merging two modules that turned out to be one is painful; splitting a large, well-bounded module later is easy. Four to
-                    eight modules is a healthy start for most business applications.
+                <Callout title="Empieza con menos módulos y más grandes">
+                    Fusionar dos módulos que resultaron ser uno es doloroso; dividir más adelante un módulo grande y bien delimitado es
+                    fácil. Entre cuatro y ocho módulos es un buen comienzo para la mayoría de las aplicaciones de negocio.
                 </Callout>
 
-                <H2>Anatomy of a module</H2>
+                <H2>Anatomía de un módulo</H2>
                 <P>
-                    Each module has the same shape, so anyone on the team knows where to look. Only <Code>index.ts</Code> is public.
-                    Everything else is an implementation detail the module is free to change.
+                    Todos los módulos tienen la misma forma, así que cualquiera del equipo sabe dónde mirar. Solo <Code>index.ts</Code> es
+                    público. Todo lo demás es un detalle de implementación que el módulo puede cambiar libremente.
                 </P>
                 <CodeBlock title="core/billing/">{`billing/
-├── index.ts            # public API: types + functions other modules may use
-├── contract.ts         # schemas for inputs, outputs, errors (see Contracts)
+├── index.ts            # API pública: tipos + funciones que pueden usar otros módulos
+├── contract.ts         # esquemas de entradas, salidas y errores (ver Contratos)
 ├── internal/
-│   ├── invoice.ts      # business rules
+│   ├── invoice.ts      # reglas de negocio
 │   ├── tax.ts
-│   └── repository.ts   # only billing touches billing tables
-├── events.ts           # events billing publishes: InvoiceIssued, ...
-├── migrations/         # billing's own schema (see Data)
+│   └── repository.ts   # solo billing toca las tablas de billing
+├── events.ts           # eventos que publica billing: InvoiceIssued, ...
+├── migrations/         # el esquema propio de billing (ver Datos)
 └── tests/`}</CodeBlock>
                 <CodeBlock title="core/billing/index.ts">{`export type { Invoice, InvoiceLine } from './contract';
 export { createInvoice, getInvoice, voidInvoice } from './internal/invoice';
 export { InvoiceIssued } from './events';
-// Nothing from ./internal/repository or ./internal/tax is exported.`}</CodeBlock>
+// No se exporta nada de ./internal/repository ni de ./internal/tax.`}</CodeBlock>
 
-                <H2>Enforce boundaries with tooling</H2>
+                <H2>Haz cumplir los límites con herramientas</H2>
                 <P>
-                    A boundary that relies on discipline lasts until the first deadline. Make the build fail instead. With{' '}
-                    <Code>dependency-cruiser</Code>, two rules cover most of it: no reaching into another module's internals, and no cycles.
+                    Un límite que depende de la disciplina dura hasta la primera fecha de entrega. Haz que falle el build. Con{' '}
+                    <Code>dependency-cruiser</Code>, dos reglas cubren casi todo: no meterse en los internos de otro módulo y no tener ciclos.
                 </P>
                 <CodeBlock title=".dependency-cruiser.cjs">{`module.exports = {
   forbidden: [
     {
       name: 'no-deep-imports',
-      comment: 'Import other modules only through their index.ts',
+      comment: 'Importa otros módulos solo a través de su index.ts',
       severity: 'error',
       from: { path: '^core/([^/]+)/' },
       to:   { path: '^core/([^/]+)/internal/', pathNot: '^core/$1/' },
@@ -107,43 +107,44 @@ export { InvoiceIssued } from './events';
   ],
 };`}</CodeBlock>
                 <P>
-                    Run it in CI next to the tests. If you prefer ESLint, <Code>no-restricted-imports</Code> with a pattern like{' '}
-                    <Code>{'@core/*/internal/*'}</Code> does the same for single files. In other languages the idea is identical: Java has
-                    JPMS modules and ArchUnit, .NET has <Code>internal</Code> visibility and NetArchTest, Python has <Code>import-linter</Code>.
+                    Ejecútalo en CI junto a los tests. Si prefieres ESLint, <Code>no-restricted-imports</Code> con un patrón como{' '}
+                    <Code>{'@core/*/internal/*'}</Code> hace lo mismo para archivos sueltos. En otros lenguajes la idea es idéntica: Java
+                    tiene los módulos JPMS y ArchUnit, .NET tiene la visibilidad <Code>internal</Code> y NetArchTest, Python tiene <Code>import-linter</Code>.
                 </P>
 
-                <H2>Direction matters as much as boundaries</H2>
+                <H2>La dirección importa tanto como los límites</H2>
                 <P>
-                    Allowing imports only through <Code>index.ts</Code> is not enough if every module imports every other one. Draw the
-                    dependency graph and keep it pointing one way: <Code>orders</Code> may call <Code>catalog</Code> and{' '}
-                    <Code>billing</Code>, but <Code>billing</Code> should not call back into <Code>orders</Code>. When a lower module needs
-                    to react to something a higher one does, it subscribes to an event instead of importing it.
+                    Permitir imports solo a través de <Code>index.ts</Code> no basta si cada módulo importa a todos los demás. Dibuja el
+                    grafo de dependencias y mantenlo en un solo sentido: <Code>orders</Code> puede llamar a <Code>catalog</Code> y a{' '}
+                    <Code>billing</Code>, pero <Code>billing</Code> no debería llamar de vuelta a <Code>orders</Code>. Cuando un módulo de
+                    nivel inferior necesita reaccionar a algo que hace uno superior, se suscribe a un evento en lugar de importarlo.
                 </P>
                 <UL items={[
-                    <><strong className="text-gray-900">Calls go down.</strong> Higher-level workflows (orders) call lower-level capabilities (billing, catalog).</>,
-                    <><strong className="text-gray-900">Events go up.</strong> Billing publishes <Code>InvoiceIssued</Code>; orders listens and updates its status.</>,
-                    <><strong className="text-gray-900">Shared kernel stays tiny.</strong> Only truly universal types (money, IDs, dates) live in a shared package. See <A href="/blog/core/shared-packages-workspaces/">Shared Packages & Workspaces</A>.</>,
+                    <><strong className="text-gray-900">Las llamadas bajan.</strong> Los flujos de nivel superior (orders) llaman a las capacidades de nivel inferior (billing, catalog).</>,
+                    <><strong className="text-gray-900">Los eventos suben.</strong> Billing publica <Code>InvoiceIssued</Code>; orders lo escucha y actualiza su estado.</>,
+                    <><strong className="text-gray-900">El núcleo compartido se mantiene diminuto.</strong> Solo los tipos realmente universales (dinero, IDs, fechas) viven en un paquete compartido. Consulta <A href="/blog/core/shared-packages-workspaces/">Paquetes compartidos y workspaces</A>.</>,
                 ]} />
 
-                <H2>Ownership</H2>
+                <H2>Responsables</H2>
                 <P>
-                    A module without an owner becomes a shared dumping ground again. Put each module in <Code>CODEOWNERS</Code> so changes
-                    to its public API need its owner's review, while internal changes move fast:
+                    Un módulo sin responsable vuelve a convertirse en un cajón de sastre compartido. Pon cada módulo en <Code>CODEOWNERS</Code> para
+                    que los cambios en su API pública necesiten la revisión de su responsable, mientras los cambios internos avanzan rápido:
                 </P>
                 <CodeBlock title=".github/CODEOWNERS">{`/core/billing/            @acme/finance-dev
 /core/billing/index.ts    @acme/finance-dev @acme/architects
 /core/catalog/            @acme/catalog-dev`}</CodeBlock>
 
-                <H2>Measuring progress</H2>
+                <H2>Medir el progreso</H2>
                 <P>
-                    Modularizing an existing codebase takes months, so track it. Useful numbers: boundary violations reported by the
-                    dependency checker (should only go down), files changed per typical feature, and how often one team's deploy is blocked by
-                    another team's failing tests. When those trend down, the boundaries are working.
+                    Modularizar una base de código existente lleva meses, así que hazle seguimiento. Cifras útiles: las violaciones de
+                    límites que informa el comprobador de dependencias (solo deberían bajar), los archivos cambiados por funcionalidad típica
+                    y la frecuencia con la que el despliegue de un equipo se bloquea por tests fallidos de otro. Cuando esas cifras bajan, los
+                    límites están funcionando.
                 </P>
 
-                <Callout title="Next step">
-                    A module's <Code>index.ts</Code> is its door. The next article, <A href="/blog/core/contracts-typed-apis/">Contracts &
-                    Typed APIs</A>, makes that door precise enough for edge functions and workflows on the other side of a network.
+                <Callout title="Siguiente paso">
+                    El <Code>index.ts</Code> de un módulo es su puerta. El siguiente artículo, <A href="/blog/core/contracts-typed-apis/">Contratos
+                    y APIs tipadas</A>, hace esa puerta lo bastante precisa para las funciones edge y los flujos que están al otro lado de una red.
                 </Callout>
             </>
         );

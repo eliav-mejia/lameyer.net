@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edge Storage (KV, D1, R2) - Lameyer Blog</title>
-    <meta name="description" content="Choosing between Cloudflare KV, D1, R2, Durable Objects and Hyperdrive: consistency, latency and when to keep data in your existing database.">
+    <title>Almacenamiento edge (KV, D1, R2) - Blog de Lameyer</title>
+    <meta name="description" content="Elegir entre Cloudflare KV, D1, R2, Durable Objects e Hyperdrive: consistencia, latencia y cuándo mantener los datos en tu base de datos actual.">
     <link rel="canonical" href="https://lameyer.net/blog/serverless/edge-storage-kv-d1-r2/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,96 +23,97 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Pick the store by consistency need first',
-            'Never use KV for counters or balances',
-            'Keep the system of record in one place',
-            'Put files in R2 and hand out signed URLs',
-            'Reach existing databases through Hyperdrive',
-            'Write down which data lives where, and why',
+            'Elige el almacén primero por la consistencia que necesitas',
+            'Nunca uses KV para contadores ni saldos',
+            'Mantén el sistema de registro en un solo lugar',
+            'Pon los archivos en R2 y entrega URLs firmadas',
+            'Llega a las bases de datos existentes a través de Hyperdrive',
+            'Anota qué datos viven dónde y por qué',
         ];
 
         const STORES = [
-            { store: 'KV', is: 'Global key-value', consistency: 'Eventual (changes can take up to about a minute to appear everywhere)', use: 'Config, feature flags, API key lookups, cached lists' },
-            { store: 'D1', is: 'SQLite database', consistency: 'Strong on the primary, optional read replicas', use: 'Edge-owned relational data: tenants, settings, small apps' },
-            { store: 'R2', is: 'S3-compatible objects', consistency: 'Strong per object', use: 'Uploads, exports, invoices as PDF, backups. No egress fees' },
-            { store: 'Durable Objects', is: 'One stateful instance per ID', consistency: 'Strong, single-threaded', use: 'Counters, locks, sessions, per-tenant coordination' },
-            { store: 'Hyperdrive', is: 'Pooled access to your Postgres/MySQL', consistency: 'Your database\'s', use: 'Existing systems of record, IaaS-hosted databases' },
+            { store: 'KV', is: 'Clave-valor global', consistency: 'Eventual (los cambios pueden tardar hasta un minuto en verse en todas partes)', use: 'Configuración, feature flags, búsquedas de claves de API, listas cacheadas' },
+            { store: 'D1', is: 'Base de datos SQLite', consistency: 'Fuerte en la primaria, réplicas de lectura opcionales', use: 'Datos relacionales propios del edge: inquilinos, ajustes, apps pequeñas' },
+            { store: 'R2', is: 'Objetos compatibles con S3', consistency: 'Fuerte por objeto', use: 'Subidas, exportaciones, facturas en PDF, copias de seguridad. Sin costes de salida' },
+            { store: 'Durable Objects', is: 'Una instancia con estado por ID', consistency: 'Fuerte, de un solo hilo', use: 'Contadores, bloqueos, sesiones, coordinación por inquilino' },
+            { store: 'Hyperdrive', is: 'Acceso con pool a tu Postgres/MySQL', consistency: 'La de tu base de datos', use: 'Sistemas de registro existentes, bases de datos alojadas en IaaS' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Functions are stateless, so every serverless platform ends up asking the same question: <em>where does the data
-                    live?</em> Cloudflare offers several stores, and they are not interchangeable. Picking by habit ("we always use a
-                    database") or by novelty ("KV is fast") is how platforms end up with stale prices or race conditions. Pick by what the
-                    data needs, and consistency comes first.
+                    Las funciones no tienen estado, así que toda plataforma serverless acaba haciéndose la misma pregunta: <em>¿dónde viven
+                    los datos?</em> Cloudflare ofrece varios almacenes y no son intercambiables. Elegir por costumbre («siempre usamos una base
+                    de datos») o por novedad («KV es rápido») es como las plataformas acaban con precios desactualizados o condiciones de
+                    carrera. Elige según lo que necesitan los datos, y la consistencia va primero.
                 </P>
 
-                <H2>The options at a glance</H2>
+                <H2>Las opciones de un vistazo</H2>
                 <Table
-                    columns={[{ key: 'store', label: 'Store', accent: true }, { key: 'is', label: 'What it is' }, { key: 'consistency', label: 'Consistency' }, { key: 'use', label: 'Use it for' }]}
+                    columns={[{ key: 'store', label: 'Almacén', accent: true }, { key: 'is', label: 'Qué es' }, { key: 'consistency', label: 'Consistencia' }, { key: 'use', label: 'Úsalo para' }]}
                     rows={STORES}
                 />
 
-                <H2>A decision path</H2>
+                <H2>Un camino de decisión</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Is it a file or a blob?</strong> R2. Store the key in a database, never the bytes.</>,
-                    <><strong className="text-gray-900">Must every reader see the latest write immediately</strong> (stock, balance, a lock)? A Durable Object, D1, or your existing database. Never KV.</>,
-                    <><strong className="text-gray-900">Is it read constantly and changed rarely?</strong> KV, with the system of record somewhere else.</>,
-                    <><strong className="text-gray-900">Does it already live in a database you run today?</strong> Leave it there and connect through Hyperdrive. Move it only with a reason.</>,
-                    <><strong className="text-gray-900">Is it relational data owned by the edge layer itself</strong> (tenants, API keys, settings)? D1.</>,
+                    <><strong className="text-gray-900">¿Es un archivo o un blob?</strong> R2. Guarda la clave en una base de datos, nunca los bytes.</>,
+                    <><strong className="text-gray-900">¿Todos los lectores deben ver la última escritura al instante</strong> (stock, saldo, un bloqueo)? Un Durable Object, D1 o tu base de datos actual. Nunca KV.</>,
+                    <><strong className="text-gray-900">¿Se lee constantemente y cambia poco?</strong> KV, con el sistema de registro en otro sitio.</>,
+                    <><strong className="text-gray-900">¿Ya vive en una base de datos que operas hoy?</strong> Déjalo ahí y conéctate a través de Hyperdrive. Muévelo solo si hay un motivo.</>,
+                    <><strong className="text-gray-900">¿Son datos relacionales propios de la capa edge</strong> (inquilinos, claves de API, ajustes)? D1.</>,
                 ]} />
 
-                <H2>KV: fast reads, slow agreement</H2>
+                <H2>KV: lecturas rápidas, acuerdo lento</H2>
                 <P>
-                    KV is built for reads. Values are cached in the locations where they are read, so a lookup is usually very fast. The
-                    price is that a write can take a while to show up everywhere. That is fine for an API key lookup or a feature flag, and
-                    dangerous for anything that is incremented or decremented.
+                    KV está hecho para leer. Los valores se cachean en las ubicaciones donde se leen, así que una consulta suele ser muy
+                    rápida. El precio es que una escritura puede tardar un rato en verse en todas partes. Eso está bien para buscar una clave
+                    de API o un feature flag, y es peligroso para cualquier cosa que se incremente o decremente.
                 </P>
-                <CodeBlock title="API key lookup with a fallback">{`let key = await env.API_KEYS.get(hash, 'json');
+                <CodeBlock title="Búsqueda de clave de API con alternativa">{`let key = await env.API_KEYS.get(hash, 'json');
 if (!key) {
-  // Not in KV yet (new key) or never existed: ask the system of record once.
+  // Aún no está en KV (clave nueva) o nunca existió: pregunta una vez al sistema de registro.
   key = await env.DB.prepare('SELECT tenant, plan, revoked FROM api_keys WHERE hash = ?')
     .bind(hash).first();
   if (key) ctx.waitUntil(env.API_KEYS.put(hash, JSON.stringify(key), { expirationTtl: 300 }));
 }`}</CodeBlock>
-                <Callout title="Revocation needs a plan">
-                    If a revoked key is cached in KV for five minutes, it keeps working for up to five minutes. Use short TTLs for
-                    security-sensitive values, or check a Durable Object for revocations when the risk justifies the extra call.
+                <Callout title="La revocación necesita un plan">
+                    Si una clave revocada está cacheada en KV durante cinco minutos, sigue funcionando hasta cinco minutos. Usa TTL cortos
+                    para los valores sensibles para la seguridad, o consulta un Durable Object para las revocaciones cuando el riesgo
+                    justifique la llamada extra.
                 </Callout>
 
-                <H2>D1 and Durable Objects for data that must agree</H2>
+                <H2>D1 y Durable Objects para los datos que deben coincidir</H2>
                 <P>
-                    D1 is SQLite managed for you, ideal for the data a platform layer owns: tenants, plans, connector settings. A single D1
-                    database has a size limit (around 10 GB at the time of writing), and it is meant to be split horizontally, for example
-                    one database per tenant. Durable Objects go further: each object is one instance, in one place, handling one request at
-                    a time, which makes counters and locks trivial to get right.
+                    D1 es SQLite gestionado por otros, ideal para los datos de los que es dueña la capa de plataforma: inquilinos, planes,
+                    ajustes de conectores. Una base de datos D1 tiene un límite de tamaño (unos 10 GB en el momento de escribir esto) y está
+                    pensada para dividirse horizontalmente, por ejemplo una base de datos por inquilino. Los Durable Objects van más allá: cada
+                    objeto es una instancia, en un lugar, que atiende una petición cada vez, lo que hace trivial acertar con contadores y bloqueos.
                 </P>
-                <CodeBlock title="A per-tenant counter in a Durable Object">{`export class TenantUsage extends DurableObject {
+                <CodeBlock title="Un contador por inquilino en un Durable Object">{`export class TenantUsage extends DurableObject {
   async increment(units: number) {
     const used = ((await this.ctx.storage.get<number>('used')) ?? 0) + units;
     await this.ctx.storage.put('used', used);
-    return used;     // no race: requests to one object run one at a time
+    return used;     // sin carreras: las peticiones a un objeto se ejecutan de una en una
   }
 }`}</CodeBlock>
 
-                <H2>R2 for files, without egress fees</H2>
+                <H2>R2 para archivos, sin costes de salida</H2>
                 <P>
-                    R2 speaks the S3 API, so existing SDKs and tools work unchanged, and it doesn't charge for data transferred out.
-                    For integration platforms that move a lot of exports, invoices and images between systems, that removes one of the
-                    largest line items of a typical IaaS bill. Let clients upload and download directly with presigned URLs, so files
-                    never pass through a Worker's memory.
+                    R2 habla la API de S3, así que los SDK y herramientas existentes funcionan sin cambios, y no cobra por los datos
+                    transferidos hacia fuera. En plataformas de integración que mueven muchas exportaciones, facturas e imágenes entre
+                    sistemas, eso elimina una de las partidas más grandes de una factura típica de IaaS. Deja que los clientes suban y
+                    descarguen directamente con URLs prefirmadas, para que los archivos nunca pasen por la memoria de un Worker.
                 </P>
 
-                <H2>Hyperdrive: keep the database you have</H2>
+                <H2>Hyperdrive: conserva la base de datos que ya tienes</H2>
                 <P>
-                    Many clients already have a Postgres or MySQL database on a VM or a managed cloud service, and it is the system of record
-                    for good reasons. Opening a new database connection from every function invocation would exhaust it quickly.
-                    <strong className="text-gray-900"> Hyperdrive</strong> keeps a pool of connections near the database and lets Workers
-                    use a normal driver against it. Combined with Cloudflare Tunnel, the database doesn't need a public IP at all.
-                    That pattern is covered in <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge × IaaS (Hybrid)</A>.
+                    Muchos clientes ya tienen una base de datos Postgres o MySQL en una VM o en un servicio gestionado en la nube, y es el
+                    sistema de registro por buenos motivos. Abrir una conexión nueva desde cada invocación de función la agotaría enseguida.
+                    <strong className="text-gray-900"> Hyperdrive</strong> mantiene un pool de conexiones cerca de la base de datos y permite
+                    a los Workers usar un driver normal contra ella. Combinado con Cloudflare Tunnel, la base de datos ni siquiera necesita
+                    una IP pública. Ese patrón se trata en <A href="/blog/serverless/serverless-in-front-of-iaas/">Edge × IaaS (híbrido)</A>.
                 </P>
-                <CodeBlock title="Postgres through Hyperdrive">{`import postgres from 'postgres';
+                <CodeBlock title="Postgres a través de Hyperdrive">{`import postgres from 'postgres';
 
 export default {
   async fetch(request, env) {
@@ -122,17 +123,18 @@ export default {
   },
 };`}</CodeBlock>
 
-                <H2>Measuring it</H2>
+                <H2>Medirlo</H2>
                 <P>
-                    Track read latency per store, KV hit ratio, Hyperdrive query latency and pool usage, and R2 storage and operations per
-                    tenant. Most important, keep a simple data map: each entity, its system of record, and any copies. Most storage bugs in
-                    serverless platforms come from two places both believing they own the same data, the same rule as{' '}
-                    <A href="/blog/core/data-ownership-migrations/">Data Ownership</A> in the core.
+                    Controla la latencia de lectura por almacén, la tasa de aciertos de KV, la latencia de las consultas y el uso del pool de
+                    Hyperdrive, y el almacenamiento y las operaciones de R2 por inquilino. Lo más importante: mantén un mapa de datos sencillo
+                    con cada entidad, su sistema de registro y sus copias. La mayoría de los bugs de almacenamiento en plataformas serverless
+                    vienen de dos lugares que creen ser dueños de los mismos datos, la misma regla que la{' '}
+                    <A href="/blog/core/data-ownership-migrations/">propiedad de datos</A> en el núcleo.
                 </P>
 
-                <Callout title="Next step">
-                    With state in place, the platform can run work on its own schedule. <A href="/blog/serverless/scheduled-jobs-cron-triggers/">Scheduled
-                    Jobs</A> replaces the always-on sync server.
+                <Callout title="Siguiente paso">
+                    Con el estado resuelto, la plataforma puede ejecutar trabajo según su propio calendario. <A href="/blog/serverless/scheduled-jobs-cron-triggers/">Tareas
+                    programadas</A> sustituye el servidor de sincronización siempre encendido.
                 </Callout>
             </>
         );

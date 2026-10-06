@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Ownership & Migrations - Lameyer Blog</title>
-    <meta name="description" content="One owning module per table, replacing cross-module joins with contract calls, read models and outbox events, and expand-and-contract migrations without downtime.">
+    <title>Propiedad de datos y migraciones - Blog de Lameyer</title>
+    <meta name="description" content="Un módulo propietario por tabla, sustituyendo los joins entre módulos por llamadas a contratos, modelos de lectura y eventos outbox, y migraciones expandir-y-contraer sin tiempo de inactividad.">
     <link rel="canonical" href="https://lameyer.net/blog/core/data-ownership-migrations/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,34 +23,35 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Give each module its own database schema',
-            'Grant each module\'s DB role access to its schema only',
-            'Replace cross-module joins with calls or read models',
-            'Publish events through an outbox table',
-            'Change schemas with expand, migrate, contract',
-            'Keep migrations inside the owning module',
+            'Da a cada módulo su propio esquema de base de datos',
+            'Concede al rol de BD de cada módulo acceso solo a su esquema',
+            'Sustituye los joins entre módulos por llamadas o modelos de lectura',
+            'Publica los eventos a través de una tabla outbox',
+            'Cambia los esquemas con expandir, migrar y contraer',
+            'Mantén las migraciones dentro del módulo propietario',
         ];
 
         const OPTIONS = [
-            { need: 'One record from another module, now', use: 'Call its contract', cost: 'Simple. One extra call per request.' },
-            { need: 'Lists that combine data from two modules', use: 'Local read model fed by events', cost: 'Fast reads, eventually consistent.' },
-            { need: 'React when something happens elsewhere', use: 'Subscribe to its events', cost: 'Decoupled, needs idempotent handlers.' },
-            { need: 'Reports across the whole business', use: 'Analytics copy (warehouse)', cost: 'Never used by live features.' },
+            { need: 'Un registro de otro módulo, ahora', use: 'Llamar a su contrato', cost: 'Sencillo. Una llamada extra por petición.' },
+            { need: 'Listados que combinan datos de dos módulos', use: 'Modelo de lectura local alimentado por eventos', cost: 'Lecturas rápidas, consistencia eventual.' },
+            { need: 'Reaccionar cuando algo ocurre en otro lugar', use: 'Suscribirse a sus eventos', cost: 'Desacoplado; necesita manejadores idempotentes.' },
+            { need: 'Informes de todo el negocio', use: 'Copia analítica (data warehouse)', cost: 'Nunca la usan las funcionalidades en vivo.' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    You can draw perfect module boundaries in the code and still have a monolith, because every module reads and writes the
-                    same tables. A join from <Code>orders</Code> into <Code>billing.invoices</Code> is a dependency the linter never sees, and
-                    the day billing renames a column, orders breaks. The rule that fixes this is simple to state:{' '}
-                    <strong className="text-gray-900">every table has exactly one owning module, and only that module writes to it or reads it directly.</strong>
+                    Puedes trazar límites de módulo perfectos en el código y seguir teniendo un monolito, porque todos los módulos leen y
+                    escriben en las mismas tablas. Un join desde <Code>orders</Code> hacia <Code>billing.invoices</Code> es una dependencia
+                    que el linter nunca ve, y el día que billing renombra una columna, orders se rompe. La regla que lo arregla es fácil de
+                    enunciar:{' '}
+                    <strong className="text-gray-900">cada tabla tiene exactamente un módulo propietario, y solo ese módulo escribe en ella o la lee directamente.</strong>
                 </P>
 
-                <H2>Make ownership physical</H2>
+                <H2>Haz física la propiedad</H2>
                 <P>
-                    You don't need separate database servers. In Postgres, give each module its own schema and its own role. The database
-                    then enforces what code review used to.
+                    No necesitas servidores de base de datos separados. En Postgres, da a cada módulo su propio esquema y su propio rol. La
+                    base de datos hace cumplir entonces lo que antes hacía la revisión de código.
                 </P>
                 <CodeBlock title="migrations/000_modules.sql">{`CREATE SCHEMA billing;
 CREATE SCHEMA catalog;
@@ -61,27 +62,28 @@ GRANT USAGE, CREATE ON SCHEMA billing TO billing_svc;
 ALTER DEFAULT PRIVILEGES IN SCHEMA billing
   GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO billing_svc;
 
--- orders_svc gets no grant on billing: a cross-module query now fails loudly.`}</CodeBlock>
+-- orders_svc no recibe permisos sobre billing: una consulta entre módulos ahora falla de forma visible.`}</CodeBlock>
                 <P>
-                    The core still runs as one deployable. Each module simply opens its connection pool with its own role. If you later
-                    extract a module into its own service, its schema can move to its own database without untangling anything.
+                    El núcleo sigue funcionando como un único desplegable. Cada módulo simplemente abre su pool de conexiones con su propio
+                    rol. Si más adelante extraes un módulo a su propio servicio, su esquema puede mudarse a su propia base de datos sin
+                    desenredar nada.
                 </P>
 
-                <H2>How other modules get the data</H2>
+                <H2>Cómo obtienen los datos los demás módulos</H2>
                 <Table
-                    columns={[{ key: 'need', label: 'Need' }, { key: 'use', label: 'Use', accent: true }, { key: 'cost', label: 'Trade-off' }]}
+                    columns={[{ key: 'need', label: 'Necesidad' }, { key: 'use', label: 'Usa', accent: true }, { key: 'cost', label: 'Contrapartida' }]}
                     rows={OPTIONS}
                 />
                 <P>
-                    Most needs are covered by the first row. Read models are worth it when a screen lists hundreds of rows that each need
-                    data from another module, such as an order list showing invoice status.
+                    La primera fila cubre la mayoría de las necesidades. Los modelos de lectura compensan cuando una pantalla lista cientos de
+                    filas que necesitan datos de otro módulo, como un listado de pedidos que muestra el estado de la factura.
                 </P>
 
-                <H2>Events without lost messages: the outbox</H2>
+                <H2>Eventos sin mensajes perdidos: el outbox</H2>
                 <P>
-                    Publishing an event right after a database commit has a gap: if the process crashes between the two, the invoice exists
-                    but nobody hears about it. The <strong className="text-gray-900">outbox pattern</strong> closes it by writing the event in the
-                    same transaction as the data. A relay then sends it to the queue.
+                    Publicar un evento justo después de un commit en la base de datos deja un hueco: si el proceso se cae entre ambos, la
+                    factura existe pero nadie se entera. El <strong className="text-gray-900">patrón outbox</strong> lo cierra escribiendo el
+                    evento en la misma transacción que los datos. Después, un relé lo envía a la cola.
                 </P>
                 <CodeBlock title="core/billing/internal/invoice.ts">{`await db.transaction(async (tx) => {
   const invoice = await tx.insert(invoices).values(data).returning();
@@ -91,51 +93,52 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA billing
     payload: { invoiceId: invoice.id, customerId: data.customerId, total: invoice.total },
   });
 });
-// A relay (cron or LISTEN/NOTIFY) reads unsent rows, publishes them
-// to the queue, and marks them sent. Delivery is at-least-once.`}</CodeBlock>
+// Un relé (cron o LISTEN/NOTIFY) lee las filas sin enviar, las publica
+// en la cola y las marca como enviadas. La entrega es al menos una vez.`}</CodeBlock>
                 <P>
-                    Because delivery is at-least-once, consumers must be idempotent. The <A href="/blog/workflows/serverless-workflow-automation/">Workflow
-                    Automation</A> series covers the queue side, including deduplication by event key.
+                    Como la entrega es al menos una vez, los consumidores deben ser idempotentes. La serie{' '}
+                    <A href="/blog/workflows/serverless-workflow-automation/">Automatización de flujos</A> trata el lado de la cola, incluida
+                    la deduplicación por clave de evento.
                 </P>
 
-                <H2>Migrations: expand, migrate, contract</H2>
+                <H2>Migraciones: expandir, migrar, contraer</H2>
                 <P>
-                    In MC-SE, edge functions and workflows are deployed separately from the core, so for a while old and new code run at the
-                    same time. A migration that renames a column in one step breaks whichever version isn't expecting it. Split every
-                    breaking schema change into three releases:
+                    En MC-SE, las funciones edge y los flujos se despliegan por separado del núcleo, así que durante un tiempo el código
+                    antiguo y el nuevo se ejecutan a la vez. Una migración que renombra una columna en un solo paso rompe la versión que no
+                    la espera. Divide cada cambio de esquema incompatible en tres lanzamientos:
                 </P>
                 <UL items={[
-                    <><strong className="text-gray-900">Expand.</strong> Add the new column or table next to the old one. Nothing reads it yet.</>,
-                    <><strong className="text-gray-900">Migrate.</strong> Deploy code that writes both, backfill old rows in batches, then switch reads to the new column.</>,
-                    <><strong className="text-gray-900">Contract.</strong> Once no deployed code uses the old column, drop it.</>,
+                    <><strong className="text-gray-900">Expandir.</strong> Añade la nueva columna o tabla junto a la antigua. Nadie la lee todavía.</>,
+                    <><strong className="text-gray-900">Migrar.</strong> Despliega código que escribe en ambas, rellena las filas antiguas por lotes y después cambia las lecturas a la nueva columna.</>,
+                    <><strong className="text-gray-900">Contraer.</strong> Cuando ningún código desplegado use la columna antigua, elimínala.</>,
                 ]} />
-                <CodeBlock title="billing/migrations: renaming amount -> total_cents">{`-- 041_expand.sql
+                <CodeBlock title="billing/migrations: renombrar amount -> total_cents">{`-- 041_expand.sql
 ALTER TABLE billing.invoices ADD COLUMN total_cents bigint;
 
--- 042_backfill.sql (run in batches to avoid long locks)
+-- 042_backfill.sql (por lotes, para evitar bloqueos largos)
 UPDATE billing.invoices SET total_cents = amount
 WHERE total_cents IS NULL AND id IN (
   SELECT id FROM billing.invoices WHERE total_cents IS NULL LIMIT 5000
 );
 
--- 043_contract.sql (a later release, after reads have switched)
+-- 043_contract.sql (un lanzamiento posterior, cuando las lecturas ya han cambiado)
 ALTER TABLE billing.invoices ALTER COLUMN total_cents SET NOT NULL;
 ALTER TABLE billing.invoices DROP COLUMN amount;`}</CodeBlock>
-                <Callout title="Migrations belong to the module">
-                    Keep each module's migrations in its own folder (<Code>core/billing/migrations/</Code>) and run them with that module's
-                    role. A migration that touches two schemas is a sign that a boundary is in the wrong place.
+                <Callout title="Las migraciones pertenecen al módulo">
+                    Guarda las migraciones de cada módulo en su propia carpeta (<Code>core/billing/migrations/</Code>) y ejecútalas con el rol
+                    de ese módulo. Una migración que toca dos esquemas es señal de que un límite está en el lugar equivocado.
                 </Callout>
 
-                <H2>Measuring progress</H2>
+                <H2>Medir el progreso</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Cross-schema queries</strong> found by the database logs: target zero.</>,
-                    <><strong className="text-gray-900">Downtime per migration</strong>: target zero, with expand-and-contract.</>,
-                    <><strong className="text-gray-900">Outbox lag</strong>: how long events wait before publishing, alerted when it grows.</>,
+                    <><strong className="text-gray-900">Consultas entre esquemas</strong> detectadas en los logs de la base de datos: objetivo cero.</>,
+                    <><strong className="text-gray-900">Tiempo de inactividad por migración</strong>: objetivo cero, con expandir-y-contraer.</>,
+                    <><strong className="text-gray-900">Retraso del outbox</strong>: cuánto esperan los eventos antes de publicarse, con alerta cuando crece.</>,
                 ]} />
 
-                <Callout title="Next step">
-                    The database is now private and the contract is public, so the contract is the thing that must not break.{' '}
-                    <A href="/blog/core/contract-testing-versioning/">Contract Testing & Versioning</A> makes sure it doesn't.
+                <Callout title="Siguiente paso">
+                    La base de datos ahora es privada y el contrato es público, así que el contrato es lo que no se puede romper.{' '}
+                    <A href="/blog/core/contract-testing-versioning/">Tests de contrato y versionado</A> se asegura de que no se rompa.
                 </Callout>
             </>
         );

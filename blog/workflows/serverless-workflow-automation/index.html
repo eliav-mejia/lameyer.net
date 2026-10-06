@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Serverless Workflow Automation - Lameyer Blog</title>
-    <meta name="description" content="Connecting workflows with serverless logic: webhooks, queues and durable steps that link forms, CRMs, spreadsheets and payments to a modular core, with retries and idempotency.">
+    <title>Automatización serverless de flujos - Blog de Lameyer</title>
+    <meta name="description" content="Conectar flujos de trabajo con lógica serverless: webhooks, colas y pasos duraderos que enlazan formularios, CRM, hojas de cálculo y pagos con un núcleo modular, con reintentos e idempotencia.">
     <link rel="canonical" href="https://lameyer.net/blog/workflows/serverless-workflow-automation/">
 
     <script src="https://cdn.tailwindcss.com"></script>
@@ -23,43 +23,43 @@
     <script type="text/babel" src="/js/blog.jsx"></script>
     <script type="text/babel">
         const CONTROLS = [
-            'Verify every webhook signature',
-            'Acknowledge fast, process in a queue',
-            'Give every job an idempotency key',
-            'Retry with backoff, then dead-letter',
-            'Split long flows into durable steps',
-            'Alert on the dead-letter queue, not on every retry',
+            'Verifica la firma de cada webhook',
+            'Confirma rápido y procesa en una cola',
+            'Da a cada trabajo una clave de idempotencia',
+            'Reintenta con backoff y después envía a la cola de mensajes fallidos',
+            'Divide los flujos largos en pasos duraderos',
+            'Alerta sobre la cola de mensajes fallidos, no sobre cada reintento',
         ];
 
         const CASES = [
-            { case: 'A contact form should create a CRM lead and send a welcome email', solution: 'Form webhook → queue → two independent steps' },
-            { case: 'A paid order should issue an invoice and update a spreadsheet', solution: 'Payment webhook → durable workflow calling the core' },
-            { case: 'The payment provider sends the same webhook twice', solution: 'Idempotency key stored before processing' },
-            { case: 'The CRM API is down for an hour', solution: 'Queue retries with backoff, nothing is lost' },
-            { case: 'Every night, sync stock levels from a supplier', solution: 'Cron trigger → queue → batch steps' },
+            { case: 'Un formulario de contacto debe crear un lead en el CRM y enviar un email de bienvenida', solution: 'Webhook del formulario → cola → dos pasos independientes' },
+            { case: 'Un pedido pagado debe emitir una factura y actualizar una hoja de cálculo', solution: 'Webhook del pago → flujo duradero que llama al núcleo' },
+            { case: 'El proveedor de pagos envía el mismo webhook dos veces', solution: 'Clave de idempotencia guardada antes de procesar' },
+            { case: 'La API del CRM está caída durante una hora', solution: 'La cola reintenta con backoff y no se pierde nada' },
+            { case: 'Cada noche, sincronizar el stock de un proveedor', solution: 'Cron trigger → cola → pasos por lotes' },
         ];
 
         const Content = () => (
             <>
                 <P>
-                    Most business workflows are still someone copying data from one tool to another: a form into a CRM, an order into a
-                    spreadsheet, a payment into an invoice. <strong className="text-gray-900">Serverless logic</strong> connects those
-                    tools without a server running all day. An event arrives, a function reacts, the{' '}
-                    <A href="/blog/core/modular-core-architecture/">modular core</A> applies the business rules, and integrations deliver
-                    the outcome.
+                    La mayoría de los flujos de negocio siguen siendo alguien copiando datos de una herramienta a otra: un formulario al CRM,
+                    un pedido a una hoja de cálculo, un pago a una factura. La <strong className="text-gray-900">lógica serverless</strong> conecta
+                    esas herramientas sin un servidor encendido todo el día. Llega un evento, una función reacciona, el{' '}
+                    <A href="/blog/core/modular-core-architecture/">núcleo modular</A> aplica las reglas de negocio y las integraciones entregan
+                    el resultado.
                 </P>
 
-                <H2>Developer use cases</H2>
+                <H2>Casos de uso para desarrolladores</H2>
                 <Table
-                    columns={[{ key: 'case', label: 'Workflow' }, { key: 'solution', label: 'Serverless solution', accent: true }]}
+                    columns={[{ key: 'case', label: 'Flujo' }, { key: 'solution', label: 'Solución serverless', accent: true }]}
                     rows={CASES}
                 />
 
-                <H2>The shape of a reliable workflow</H2>
+                <H2>La forma de un flujo fiable</H2>
                 <P>
-                    Every workflow follows the same path: <strong className="text-gray-900">trigger → queue → steps → outcome</strong>.
-                    The trigger (a webhook, a form, a schedule) must answer quickly, so it only verifies the request and puts a message
-                    on a queue. The consumer does the slow work, and the queue retries it when an external API fails.
+                    Todos los flujos siguen el mismo camino: <strong className="text-gray-900">disparador → cola → pasos → resultado</strong>.
+                    El disparador (un webhook, un formulario, un calendario) debe responder rápido, así que solo verifica la petición y pone un
+                    mensaje en una cola. El consumidor hace el trabajo lento, y la cola lo reintenta cuando falla una API externa.
                 </P>
                 <CodeBlock title="src/webhook.ts">{`export default {
   async fetch(request, env) {
@@ -74,37 +74,38 @@
 
   async queue(batch, env) {
     for (const msg of batch.messages) {
-      if (await env.PROCESSED.get(msg.body.id)) { msg.ack(); continue; }  // already done
+      if (await env.PROCESSED.get(msg.body.id)) { msg.ack(); continue; }  // ya procesado
       try {
-        await handleOrder(msg.body, env);  // core: invoice, CRM, email
+        await handleOrder(msg.body, env);  // núcleo: factura, CRM, email
         await env.PROCESSED.put(msg.body.id, '1', { expirationTtl: 7 * 86400 });
         msg.ack();
       } catch {
-        msg.retry({ delaySeconds: 30 });  // after max retries it goes to the dead-letter queue
+        msg.retry({ delaySeconds: 30 });  // tras el máximo de reintentos va a la cola de mensajes fallidos
       }
     }
   },
 };`}</CodeBlock>
 
-                <H2>The four rules</H2>
+                <H2>Las cuatro reglas</H2>
                 <UL items={[
-                    <><strong className="text-gray-900">Verify.</strong> Check the HMAC signature on every webhook. An unauthenticated webhook URL is an open door into your core.</>,
-                    <><strong className="text-gray-900">Acknowledge fast.</strong> Providers time out and resend after a few seconds. Return <Code>202</Code> and do the work in the queue.</>,
-                    <><strong className="text-gray-900">Be idempotent.</strong> Delivery is at least once, so the same event will arrive twice. Record an idempotency key before acting on it.</>,
-                    <><strong className="text-gray-900">Retry, then dead-letter.</strong> Back off between retries, and after the last one move the message to a dead-letter queue that someone is alerted about.</>,
+                    <><strong className="text-gray-900">Verificar.</strong> Comprueba la firma HMAC de cada webhook. Una URL de webhook sin autenticar es una puerta abierta a tu núcleo.</>,
+                    <><strong className="text-gray-900">Confirmar rápido.</strong> Los proveedores agotan el tiempo y reenvían a los pocos segundos. Devuelve <Code>202</Code> y haz el trabajo en la cola.</>,
+                    <><strong className="text-gray-900">Ser idempotente.</strong> La entrega es al menos una vez, así que el mismo evento llegará dos veces. Registra una clave de idempotencia antes de actuar.</>,
+                    <><strong className="text-gray-900">Reintentar y después apartar.</strong> Espera cada vez más entre reintentos y, tras el último, mueve el mensaje a una cola de mensajes fallidos que avise a alguien.</>,
                 ]} />
 
-                <H2>When a queue is not enough: durable workflows</H2>
+                <H2>Cuando una cola no basta: flujos duraderos</H2>
                 <P>
-                    A flow with many steps, waits ("send a reminder in three days") or human approvals is better written as a durable
-                    workflow, such as Cloudflare Workflows, AWS Step Functions or Temporal. Each step's result is saved, so a failure
-                    in step four retries step four, not the whole flow.
+                    Un flujo con muchos pasos, esperas («envía un recordatorio dentro de tres días») o aprobaciones humanas se escribe mejor
+                    como un flujo duradero, como Cloudflare Workflows, AWS Step Functions o Temporal. El resultado de cada paso se guarda, así
+                    que un fallo en el paso cuatro reintenta el paso cuatro, no todo el flujo.
                 </P>
 
-                <Callout title="How it connects to the rest of MC-SE">
-                    Triggers run on the <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A>, business rules live in
-                    the <A href="/blog/core/modular-core-architecture/">Modular Core</A>, and the public webhook endpoints are protected by
-                    the <A href="/blog/?series=security">API Security</A> layers, especially rate limiting and schema validation.
+                <Callout title="Cómo encaja con el resto de MC-SE">
+                    Los disparadores se ejecutan en el <A href="/blog/serverless/serverless-edge-architecture/">Serverless Edge</A>, las reglas
+                    de negocio viven en el <A href="/blog/core/modular-core-architecture/">Modular Core</A> y los endpoints públicos de webhooks
+                    están protegidos por las capas de <A href="/blog/?series=security">Seguridad de APIs</A>, sobre todo el rate limiting y la
+                    validación de esquema.
                 </Callout>
             </>
         );
