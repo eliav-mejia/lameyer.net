@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Búsqueda semántica y vectorial - Academia Lameyer</title>
+    <meta name="description" content="Búsqueda semántica y vectorial en repositorios de código: troceado según la sintaxis, embeddings, índices HNSW, filtros por metadatos y ranking híbrido de palabras clave + vectores.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/busqueda-semantica-vectorial/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Trocea el código por función y clase, no por número de líneas',
+            'Antepón a cada fragmento su ruta y el símbolo que lo contiene',
+            'Genera los embeddings de consultas y fragmentos con la misma versión del modelo',
+            'Guarda repositorio, lenguaje y ruta junto a cada vector',
+            'Combina los resultados de palabras clave y vectores con RRF',
+            'Reordena solo los mejores candidatos',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    La búsqueda por palabras clave responde a «¿dónde aparece esta cadena?». Los desarrolladores suelen preguntar otra
+                    cosa: «¿dónde reintentamos los pagos fallidos?». La función que lo hace puede llamarse <Code>reattempt_charge</Code> y
+                    no usar nunca la palabra «retry». La búsqueda semántica cierra esa brecha comparando <em>significado</em> en lugar de caracteres.
+                </P>
+
+                <H2>Cómo funciona</H2>
+                <P>
+                    Un modelo de embeddings convierte un texto o un trozo de código en un vector: una lista de entre unos cientos y unos
+                    miles de números. Las entradas con significado parecido quedan cerca, normalmente medido con la similitud del coseno.
+                    Una búsqueda tiene entonces cinco pasos:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Trocear</strong> el repositorio en unidades lo bastante pequeñas para generar su embedding.</>,
+                    <><strong className="text-gray-900">Generar el embedding</strong> de cada fragmento y guardar el vector con sus metadatos.</>,
+                    <><strong className="text-gray-900">Indexar</strong> los vectores para una búsqueda aproximada de vecinos más cercanos (ANN), normalmente con HNSW.</>,
+                    <><strong className="text-gray-900">Consultar:</strong> generar el embedding de la pregunta con el mismo modelo y recuperar los fragmentos más cercanos.</>,
+                    <><strong className="text-gray-900">Reordenar</strong> los mejores resultados con un modelo más lento y más preciso.</>,
+                ]} />
+
+                <H2>Troceado: sigue el árbol sintáctico</H2>
+                <P>
+                    Partir un archivo cada 50 líneas corta las funciones por la mitad, y ninguna de las dos mitades genera un buen
+                    embedding. Un parser como tree-sitter te da el árbol sintáctico, así que puedes trocear en los límites de funciones,
+                    métodos y clases y solo dividir una unidad cuando es demasiado larga para el modelo. Después añade a cada fragmento una
+                    breve cabecera con el contexto que el propio código no lleva:
+                </P>
+                <CodeBlock title="Un fragmento, tal como se envía al modelo de embeddings">{`# repo: acme/payments-ledger-api
+# path: src/payments/retry.py
+# symbol: PaymentRetrier.reattempt_charge
+# language: python
+def reattempt_charge(self, charge_id: str, attempt: int) -> Charge:
+    """Retry a failed card charge with exponential backoff."""
+    delay = min(2 ** attempt, 300)
+    ...`}</CodeBlock>
+                <P>
+                    La cabecera ayuda dos veces. El modelo ve que es código de pagos, y puedes mostrar la ruta y el símbolo en los
+                    resultados sin una segunda consulta.
+                </P>
+
+                <H2>Guardar los vectores junto a los metadatos</H2>
+                <P>
+                    No necesitas una base de datos vectorial dedicada para empezar. PostgreSQL con la extensión pgvector mantiene
+                    vectores, metadatos y filtros en un solo lugar:
+                </P>
+                <CodeBlock title="PostgreSQL + pgvector">{`CREATE EXTENSION IF NOT EXISTS vector;
+
+CREATE TABLE code_chunks (
+    id         bigserial PRIMARY KEY,
+    repo       text NOT NULL,
+    path       text NOT NULL,
+    language   text NOT NULL,
+    symbol     text,
+    content    text NOT NULL,
+    model      text NOT NULL,          -- modelo de embeddings + versión
+    embedding  vector(1024) NOT NULL
+);
+
+CREATE INDEX ON code_chunks USING hnsw (embedding vector_cosine_ops);
+
+-- $1 es el embedding de la consulta; <=> es la distancia del coseno
+SELECT repo, path, symbol
+FROM code_chunks
+WHERE language = 'python' AND repo LIKE 'acme/payments-%'
+ORDER BY embedding <=> $1
+LIMIT 20;`}</CodeBlock>
+                <Callout title="Filtros e índices ANN">
+                    Un índice HNSW encuentra primero los vectores más cercanos y aplica la cláusula <Code>WHERE</Code> después, así que un
+                    filtro muy estrecho puede devolver menos filas que tu <Code>LIMIT</Code>. Las versiones recientes de pgvector ofrecen
+                    escaneos iterativos del índice que siguen buscando hasta que coinciden suficientes filas. Para filtros muy selectivos,
+                    también ayudan los índices parciales por repositorio o lenguaje.
+                </Callout>
+
+                <H2>Búsqueda híbrida: conserva las palabras clave</H2>
+                <P>
+                    Los vectores son débiles justo donde las palabras clave son fuertes: identificadores, códigos de error y cadenas de
+                    versión. Una búsqueda de{' '}
+                    <Code>ERR_IDEMPOTENCY_CONFLICT</Code> debe devolver la línea que lo contiene, no algo «sobre conflictos».
+                    Así que ejecuta en paralelo una búsqueda por palabras clave (BM25) y una búsqueda vectorial y fusiona los dos rankings.
+                    La fusión por rango recíproco (RRF) es una mezcla sencilla que no necesita normalizar puntuaciones:
+                </P>
+                <CodeBlock title="rrf.py">{`def rrf(*rankings, k=60):
+    """Fusiona listas ordenadas de ids. Lo que va alto en cualquier lista sube arriba."""
+    scores = {}
+    for ranking in rankings:
+        for rank, doc_id in enumerate(ranking, start=1):
+            scores[doc_id] = scores.get(doc_id, 0) + 1 / (k + rank)
+    return sorted(scores, key=scores.get, reverse=True)
+
+results = rrf(bm25_ids, vector_ids)[:50]   # después se reordenan estos 50`}</CodeBlock>
+
+                <H2>Reordenación: gasta cómputo donde importa</H2>
+                <P>
+                    La primera etapa de recuperación optimiza el recall: que el fragmento correcto esté en algún lugar del top 50. Un
+                    reranker cross-encoder lee la consulta y cada candidato juntos y los puntúa con mucha más precisión, pero es demasiado
+                    lento para ejecutarlo sobre todo el corpus. Ejecutarlo solo sobre el top 50 fusionado te da casi toda la precisión por
+                    una fracción del coste.
+                </P>
+
+                <H2>Dónde se detiene la búsqueda semántica</H2>
+                <P>
+                    Cada decisión anterior (tamaño del fragmento, formato de la cabecera, modelo, <Code>k</Code>, reranker) cambia los
+                    resultados, y ninguna es obviamente correcta. Tus filtros y ajustes de ranking deberían vivir en control de versiones
+                    (<A href="/academia/busqueda-visibilidad/busqueda-como-codigo-sac/">Búsqueda como código</A>), y cada cambio debería medirse con consultas reales
+                    (<A href="/academia/busqueda-visibilidad/curacion-benchmarks-reap-harvest/">Curación de benchmarks</A>). Si indexas documentación además
+                    de código, <A href="/academia/busqueda-visibilidad/generacion-estatica-x-busqueda-vectorial/">Generación estática × búsqueda vectorial</A> muestra
+                    cómo construir el índice en el mismo build que publica el sitio.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

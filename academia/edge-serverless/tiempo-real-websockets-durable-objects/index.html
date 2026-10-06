@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tiempo real (WebSockets y Durable Objects) - Academia Lameyer</title>
+    <meta name="description" content="Paneles en vivo, chat y edición colaborativa en serverless: un Durable Object por sala coordina los WebSockets, guarda el estado en SQLite e hiberna cuando está inactivo.">
+    <link rel="canonical" href="https://lameyer.net/academia/edge-serverless/tiempo-real-websockets-durable-objects/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Un Durable Object por sala, documento o inquilino, nunca un único objeto global',
+            'Acepta los sockets con la Hibernation API para que las conexiones inactivas no cuesten nada',
+            'Guarda el estado en el almacenamiento SQLite del objeto, no solo en memoria',
+            'Autentica en el Worker antes de que la petición llegue al objeto',
+            'Usa alarmas para timeouts y limpieza en lugar de temporizadores',
+            'Recurre a Server-Sent Events cuando los clientes solo necesitan escuchar',
+        ];
+
+        const OPTIONS = [
+            { option: 'Polling', how: 'El cliente pregunta cada N segundos', fits: 'Actualizaciones poco frecuentes, clientes sencillos', cost: 'La carga crece con los usuarios, no con los cambios' },
+            { option: 'Server-Sent Events', how: 'Flujo unidireccional desde un Worker', fits: 'Notificaciones, progreso, precios en vivo', cost: 'Bajo; sin canal de cliente a servidor' },
+            { option: 'WebSockets + Durable Object', how: 'Bidireccional, coordinado por sala', fits: 'Chat, presencia, coedición, juegos', cost: 'Pagas por mensaje mientras hiberna' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Los Workers no tienen estado a propósito: cualquier petición puede caer en cualquier máquina de cualquier ciudad. Eso es
+                    perfecto para una API e inútil para una sala de chat, donde cada mensaje debe llegar en orden a todos los que están en la
+                    sala. Las funcionalidades en tiempo real necesitan un lugar que sepa quién está conectado. En Cloudflare ese lugar es un
+                    <strong className="text-gray-900"> Durable Object</strong>: una única instancia, direccionada por nombre, con su propio
+                    almacenamiento, a la que llegan todas las peticiones para ese nombre.
+                </P>
+
+                <H2>Elige el canal más ligero que funcione</H2>
+                <P>
+                    No toda pantalla «en vivo» necesita WebSockets. Si el navegador solo escucha, un flujo de Server-Sent Events desde un
+                    Worker es más sencillo y se reconecta solo. Recurre a un Durable Object cuando los clientes también envían o cuando el
+                    orden de los mensajes importa.
+                </P>
+                <Table
+                    columns={[{ key: 'option', label: 'Opción' }, { key: 'how', label: 'Cómo funciona' }, { key: 'fits', label: 'Bueno para' }, { key: 'cost', label: 'Forma del coste', accent: true }]}
+                    rows={OPTIONS}
+                />
+
+                <H2>Un objeto por sala</H2>
+                <P>
+                    Un Durable Object se ejecuta en un solo hilo, así que nunca tiene dos peticiones compitiendo por actualizar el mismo
+                    estado. Esa es la ventaja y también el límite: un objeto atiende un flujo de eventos. Divide por lo que comparten los
+                    usuarios (una sala de chat, un documento, el panel de un inquilino), para que miles de salas se repartan entre miles de
+                    objetos. Un único objeto «global» se convierte en el cuello de botella de toda la plataforma.
+                </P>
+                <P>
+                    El Worker sigue siendo la puerta de entrada. Autentica al usuario y después reenvía la petición de upgrade al objeto
+                    correcto con <Code>idFromName</Code>, de modo que el mismo nombre de sala siempre llega a la misma instancia.
+                </P>
+                <CodeBlock title="src/index.ts">{`import { DurableObject } from 'cloudflare:workers';
+
+type Env = { ROOMS: DurableObjectNamespace<Room> };
+
+export default {
+  async fetch(request: Request, env: Env) {
+    const url = new URL(request.url);
+    const match = url.pathname.match(/^\\/rooms\\/([\\w-]+)\\/ws$/);
+    if (!match) return new Response('Not found', { status: 404 });
+    if (request.headers.get('Upgrade') !== 'websocket') return new Response('Expected WebSocket', { status: 426 });
+    // Verifica aquí la sesión (JWT, cookie) antes de tocar el objeto.
+    const room = env.ROOMS.get(env.ROOMS.idFromName(match[1]));
+    return room.fetch(request);
+  },
+};
+
+export class Room extends DurableObject<Env> {
+  async fetch(request: Request) {
+    const { 0: client, 1: server } = new WebSocketPair();
+    this.ctx.acceptWebSocket(server);          // Hibernation API: sin coste mientras está inactivo
+    return new Response(null, { status: 101, webSocket: client });
+  }
+
+  async webSocketMessage(ws: WebSocket, message: string | ArrayBuffer) {
+    // Primero guarda y después difunde, para que un cliente que se reconecta pueda ponerse al día.
+    this.ctx.storage.sql.exec('INSERT INTO messages (body, at) VALUES (?, ?)', String(message), Date.now());
+    for (const peer of this.ctx.getWebSockets()) peer.send(String(message));
+  }
+
+  async webSocketClose(ws: WebSocket, code: number) {
+    ws.close(code, 'bye');
+  }
+}`}</CodeBlock>
+                <CodeBlock title="wrangler.jsonc">{`{
+  "name": "realtime",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  "durable_objects": { "bindings": [{ "name": "ROOMS", "class_name": "Room" }] },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room"] }]
+}`}</CodeBlock>
+                <Callout title="La hibernación cambia la factura">
+                    Con <Code>acceptWebSocket</Code>, el objeto puede salir de memoria mientras sus sockets siguen abiertos. Solo se despierta
+                    cuando llega un mensaje, así que una sala con 200 usuarios conectados pero callados casi no cuesta nada. Sin hibernación
+                    pagas toda la vida del objeto. Crea la tabla <Code>messages</Code> en el constructor con{' '}
+                    <Code>ctx.blockConcurrencyWhile</Code> para que exista antes del primer mensaje.
+                </Callout>
+
+                <H2>Estado que sobrevive a los reinicios</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">La memoria es una caché.</strong> Un objeto puede reiniciarse o moverse en cualquier momento; todo lo importante va primero a <Code>ctx.storage</Code> (SQLite).</>,
+                    <><strong className="text-gray-900">Ponerse al día al reconectar.</strong> Los clientes envían el id del último mensaje que vieron y el objeto responde con lo que se perdieron, sacado del almacenamiento.</>,
+                    <><strong className="text-gray-900">Alarmas, no temporizadores.</strong> <Code>ctx.storage.setAlarm()</Code> sobrevive a los reinicios, así que «cerrar la sala tras 24 h de inactividad» sigue ocurriendo.</>,
+                    <><strong className="text-gray-900">El núcleo sigue siendo la fuente de verdad</strong> de los datos de negocio. El objeto mantiene la sesión en vivo; los resultados terminados van al <A href="/academia/nucleo-modular/arquitectura-nucleo-modular/">núcleo modular</A> a través de una cola.</>,
+                ]} />
+
+                <H2>Medirlo</H2>
+                <P>
+                    Vigila las conexiones simultáneas por objeto, el tiempo de difusión de mensajes (de la publicación a la última entrega),
+                    la tasa de reconexión y el tamaño del almacenamiento por sala. Un objeto cuyo tiempo de CPU sube mientras los demás están
+                    inactivos es un problema de reparto: divide esa sala o ese inquilino en unidades más pequeñas.
+                </P>
+
+                <Callout title="Siguiente paso">
+                    Las funcionalidades en vivo suelen terminar con una pregunta a un modelo: resume este hilo, sugiere una respuesta.{' '}
+                    <A href="/academia/edge-serverless/ia-en-el-edge-workers-ai/">IA en el edge</A> explica dónde debería ejecutarse esa inferencia.
+                    Para ver dónde más puede vivir el estado, compara con <A href="/academia/edge-serverless/almacenamiento-edge-kv-d1-r2/">Almacenamiento edge</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

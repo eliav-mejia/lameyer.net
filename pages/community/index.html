@@ -20,21 +20,31 @@
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel">
         // Edit these links to point at your real channels.
+        // Stack is a page of this site (same tab); Skool and GitHub are outside lameyer.net (new tab).
+        // TODO: replace the Skool href with the URL of the Lameyer community on Skool.
         const CHANNELS = [
+            {
+                name: 'Stack',
+                slug: null,
+                short: '</>',
+                desc: 'Las tecnologías con las que construimos y por qué las elegimos.',
+                href: '/pages/stack/',
+                cta: 'Ver el stack',
+            },
+            {
+                name: 'Skool',
+                slug: null,
+                short: 'S',
+                desc: 'Nuestra comunidad: talleres, preguntas y proyectos compartidos.',
+                href: 'https://www.skool.com/',
+                cta: 'Unirme en Skool',
+            },
             {
                 name: 'GitHub',
                 slug: 'github',
                 desc: 'Código abierto, plantillas y ejemplos del equipo.',
                 href: 'https://github.com/cypher-the-meyer',
                 cta: 'Ver repositorios',
-            },
-            {
-                name: 'Correo',
-                slug: null,
-                short: '@',
-                desc: 'Propuestas de colaboración, charlas o alianzas.',
-                href: `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Comunidad Lameyer')}`,
-                cta: 'Escribirnos',
             },
         ];
 
@@ -133,15 +143,15 @@
 
                 {/* Channels */}
                 <section className="py-24 relative z-20">
-                    <div className="max-w-4xl mx-auto">
+                    <div className="max-w-6xl mx-auto">
                         <SectionTitle kicker="Canales">Conecte con nosotros</SectionTitle>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {CHANNELS.map(channel => (
                                 <a
                                     key={channel.name}
                                     href={channel.href}
                                     target={channel.href.startsWith('http') ? '_blank' : undefined}
-                                    rel="noopener noreferrer"
+                                    rel={channel.href.startsWith('http') ? 'noopener noreferrer' : undefined}
                                     className="group flex items-start gap-6 p-8 rounded-[2rem] bg-white/90 border border-gray-100 shadow-lg shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300"
                                 >
                                     <ChannelIcon channel={channel} />

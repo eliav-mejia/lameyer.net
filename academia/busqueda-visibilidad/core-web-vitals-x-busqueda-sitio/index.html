@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Core Web Vitals × búsqueda en el sitio - Academia Lameyer</title>
+    <meta name="description" content="Añadir búsqueda en cliente y semántica a un sitio sin perjudicar LCP, INP ni CLS: carga del índice bajo demanda, Web Workers y espacio reservado para los resultados.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/core-web-vitals-x-busqueda-sitio/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Nunca cargues el índice de búsqueda con la página',
+            'Precárgalo al enfocar, no con la primera tecla',
+            'Busca en un Web Worker si el índice es grande',
+            'Ignora los resultados de consultas desfasadas',
+            'Muestra los resultados en una capa superpuesta o en un espacio reservado',
+            'Envuelve el formulario en el elemento search',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Una caja de búsqueda es una de las cosas más útiles de un sitio de documentación y una de las formas más fáciles de
+                    arruinar sus <A href="/academia/busqueda-visibilidad/core-web-vitals-velocidad-pagina/">Core Web Vitals</A>. Un índice grande descargado al cargar
+                    la página retrasa el LCP. Buscar en el hilo principal con cada pulsación perjudica el INP. Una lista de resultados que
+                    empuja la página hacia abajo provoca CLS. Cada problema tiene una solución sencilla.
+                </P>
+
+                <H2>LCP: el índice no forma parte de la página</H2>
+                <P>
+                    La mayoría de los visitantes nunca usan la búsqueda, así que nunca deberían pagar por ella. No importes el índice en tu
+                    bundle principal ni lo descargues al cargar. Empieza a cargarlo cuando el usuario muestre intención: al enfocar la caja de
+                    búsqueda o al pulsar el atajo de teclado. Para cuando termina de escribir la primera palabra, normalmente ya está ahí.
+                </P>
+
+                <H2>INP: que escribir sea instantáneo</H2>
+                <P>
+                    El INP mide el tiempo desde una pulsación hasta el siguiente fotograma. Si el manejador del input busca entre miles de
+                    entradas antes de terminar, cada letra se siente pegajosa. Lleva la búsqueda a un Web Worker para que el hilo principal
+                    solo actualice el input y renderice los resultados cuando lleguen:
+                </P>
+                <CodeBlock title="js/search-worker.js">{`let index = null;
+
+self.onmessage = async ({ data }) => {
+  if (!index) index = await fetch('/search-index.json').then(r => r.json());
+  if (!data.q) return;                       // mensaje de precarga
+  self.postMessage({ q: data.q, hits: search(index, data.q).slice(0, 10) });
+};`}</CodeBlock>
+                <CodeBlock title="Hilo principal">{`const worker = new Worker('/js/search-worker.js');
+const input = document.querySelector('#site-search');
+
+input.addEventListener('focus', () => worker.postMessage({ q: '' }), { once: true });
+input.addEventListener('input', () => worker.postMessage({ q: input.value }));
+
+worker.onmessage = ({ data }) => {
+  if (data.q !== input.value) return;        // ya viene en camino una consulta más reciente
+  renderHits(data.hits);
+};`}</CodeBlock>
+                <P>
+                    En React, <Code>useDeferredValue</Code> da un efecto parecido para listas más pequeñas: el input se actualiza al instante
+                    y los resultados filtrados se renderizan con menor prioridad. Los filtros del panel de esta academia trabajan sobre unas
+                    pocas decenas de artículos, lo bastante rápido como para ejecutarlos directamente.
+                </P>
+
+                <H2>La búsqueda semántica añade un viaje de ida y vuelta por la red</H2>
+                <P>
+                    La <A href="/academia/busqueda-visibilidad/busqueda-semantica-vectorial/">búsqueda vectorial</A> necesita que un modelo genere el embedding de la
+                    consulta, normalmente detrás de una API. Eso tarda más que una búsqueda local, pero no tiene por qué perjudicar el INP:
+                    la petición se ejecuta en segundo plano y la página sigue respondiendo. Un buen patrón es mostrar al instante los
+                    resultados por palabras clave del índice local y después añadir o reordenar resultados cuando llega la respuesta
+                    semántica. Cancela las peticiones desfasadas con un <Code>AbortController</Code> para que una respuesta lenta para
+                    «retr» nunca sobrescriba los resultados de «retry payment».
+                </P>
+
+                <H2>CLS: dale a los resultados un sitio adonde ir</H2>
+                <P>
+                    El desplazamiento del diseño se mide sobre el contenido que se mueve sin que el usuario lo provoque. Los resultados que se
+                    abren en una capa superpuesta, un diálogo o un panel con posición absoluta no mueven nada más. Si los resultados se
+                    muestran en línea, reserva su espacio con un <Code>min-height</Code> antes de que aparezca el primero y mantén la caja con
+                    la misma altura mientras se actualizan.
+                </P>
+
+                <H2>Marcado para el formulario de búsqueda</H2>
+                <CodeBlock title="Formulario de búsqueda semántico">{`<search>
+  <form action="/search/" role="search">
+    <label for="site-search">Buscar en la documentación</label>
+    <input id="site-search" name="q" type="search" autocomplete="off">
+  </form>
+</search>`}</CodeBlock>
+                <P>
+                    El elemento <Code>{'<search>'}</Code> es un landmark para las tecnologías de apoyo y los navegadores modernos lo
+                    admiten. El <Code>role="search"</Code> del formulario mantiene el landmark en navegadores antiguos. El atributo{' '}
+                    <Code>action</Code> hace que el formulario siga funcionando si JavaScript falla, una buena práctica de{' '}
+                    <A href="/academia/busqueda-visibilidad/marcado-html-semantico/">HTML semántico</A> en general.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

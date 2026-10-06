@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Medición × SaaS multiinquilino - Academia Lameyer</title>
+    <meta name="description" content="Operar una sola plataforma serverless para muchos clientes: resolución del inquilino en el edge, almacenamiento aislado por inquilino, límites por inquilino y medición de uso con Analytics Engine para facturar.">
+    <link rel="canonical" href="https://lameyer.net/academia/edge-serverless/medicion-x-saas-multiinquilino/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Resuelve el inquilino una sola vez, en el edge, desde una fuente de confianza',
+            'Nunca aceptes un ID de inquilino del cuerpo de la petición',
+            'Elige un nivel de aislamiento por tipo de dato',
+            'Da a cada plan su propio límite de uso',
+            'Registra un evento de uso por cada acción facturable',
+            'Concilia cada mes el uso con las facturas',
+        ];
+
+        const ISOLATION = [
+            { level: 'Tablas compartidas, columna de inquilino', how: 'Una base de datos D1 o Postgres, tenant_id en cada fila', fits: 'Muchos inquilinos pequeños, datos poco sensibles' },
+            { level: 'Base de datos por inquilino', how: 'Una base de datos D1 por inquilino, elegida en el edge', fits: 'Inquilinos medianos, exportación y borrado sencillos' },
+            { level: 'Objeto por inquilino', how: 'Un Durable Object por inquilino para contadores y coordinación', fits: 'Estado por inquilino que debe ser exacto' },
+            { level: 'Código por inquilino', how: 'Workers for Platforms: el script propio de cada inquilino en un dispatch namespace', fits: 'Inquilinos que ejecutan lógica a medida en tu plataforma' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Construir una plataforma una vez y vendérsela a muchos clientes es lo que convierte el trabajo de integración en un negocio
+                    SaaS. Añade tres requisitos que un sistema para un solo cliente nunca tiene: <strong className="text-gray-900">los datos de
+                    cada cliente deben quedar separados, ningún cliente puede degradar el servicio de los demás y el uso debe medirse con la
+                    precisión suficiente para facturar</strong>. Serverless ayuda con los tres, porque el edge ve cada petición y puede asociarle
+                    un inquilino antes de que ocurra nada más.
+                </P>
+
+                <H2>Resuelve el inquilino en el edge</H2>
+                <P>
+                    El gateway (consulta <A href="/academia/edge-serverless/enrutado-cache-autenticacion-edge/">Enrutado, caché y autenticación</A>) determina el
+                    inquilino una sola vez, a partir de una fuente que el cliente no puede falsificar: un claim de un JWT verificado, el registro
+                    de la clave de API o el hostname cuando los clientes usan su propio dominio con Cloudflare for SaaS. Todo lo que viene
+                    después lo recibe del gateway, nunca del cuerpo de la petición.
+                </P>
+                <CodeBlock title="src/tenant.ts">{`export async function resolveTenant(request: Request, env: Env, user?: { tenant: string }) {
+  if (user?.tenant) return user.tenant;                         // de un JWT verificado
+  const host = new URL(request.url).hostname;                   // api.cliente.com
+  const byHost = await env.TENANTS_BY_HOST.get(host);           // KV: hostname -> inquilino
+  if (byHost) return byHost;
+  return null;                                                  // desconocido: rechazar con 404
+}`}</CodeBlock>
+
+                <H2>Elige el aislamiento por tipo de dato</H2>
+                <Table
+                    columns={[{ key: 'level', label: 'Aislamiento', accent: true }, { key: 'how', label: 'Cómo' }, { key: 'fits', label: 'Encaja en' }]}
+                    rows={ISOLATION}
+                />
+                <P>
+                    Una plataforma puede mezclar niveles: tablas compartidas para los datos del catálogo, una base de datos D1 por inquilino
+                    para los registros de clientes (lo que convierte «exportar todos mis datos» y «borrar mi cuenta» en una sola operación) y un
+                    Durable Object por inquilino para los contadores de uso. Sea cual sea el nivel, pruébalo: una comprobación automática que
+                    intenta leer datos del inquilino B con las credenciales del inquilino A, ejecutada en cada lanzamiento.
+                </P>
+
+                <H2>Sin vecinos ruidosos</H2>
+                <P>
+                    La importación de fin de mes de un cliente no debería ralentizar a todos los demás. Los{' '}
+                    <A href="/academia/edge-serverless/enrutado-cache-autenticacion-edge/">límites de uso</A> por plan, con el inquilino como clave, contienen las
+                    avalanchas de peticiones. Las colas necesitan el mismo cuidado: una cola separada, o al menos lotes equitativos, para los
+                    inquilinos con trabajos en segundo plano pesados, para que su atasco no retrase los eventos de los inquilinos pequeños.
+                </P>
+
+                <H2>Medición: un evento por acción facturable</H2>
+                <P>
+                    Los límites de uso son aproximados. La facturación no puede serlo. Registra un evento de uso por cada acción facturable: una
+                    llamada a la API, un registro sincronizado, un documento generado. Workers Analytics Engine está hecho para esto: las
+                    escrituras se lanzan y se olvidan, no ralentizan la petición y se pueden consultar con SQL.
+                </P>
+                <CodeBlock title="Registrar el uso">{`env.USAGE.writeDataPoint({
+  indexes: [tenant],                         // clave de muestreo: los datos de un inquilino se mantienen juntos
+  blobs:   [route, plan, connector ?? ''],
+  doubles: [1, cpuMs, recordsSynced],
+});`}</CodeBlock>
+                <CodeBlock title="Uso mensual por inquilino (API SQL)">{`SELECT
+  index1 AS tenant,
+  SUM(_sample_interval * double1) AS api_calls,
+  SUM(_sample_interval * double3) AS records_synced
+FROM usage
+WHERE timestamp >= toDateTime('2026-09-01 00:00:00')
+  AND timestamp <  toDateTime('2026-10-01 00:00:00')
+GROUP BY tenant
+ORDER BY api_calls DESC`}</CodeBlock>
+                <Callout title="Muestreo y facturas">
+                    Analytics Engine puede muestrear con volúmenes muy altos, por eso la consulta multiplica por <Code>_sample_interval</Code>.
+                    Eso vale para paneles y tramos de precio por uso. Para las líneas de factura que deben ser exactas a la unidad, incrementa
+                    también un contador en el Durable Object del inquilino y factura a partir de él, usando Analytics Engine para contrastar.
+                </Callout>
+
+                <H2>Del uso al precio</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Elige una unidad que el cliente entienda:</strong> registros sincronizados, documentos generados, conectores activos. No milisegundos de CPU.</>,
+                    <><strong className="text-gray-900">Conoce tu propio coste por unidad:</strong> las peticiones y el tiempo de CPU por unidad salen de <A href="/academia/edge-serverless/logs-trazas-costes/">Logs, trazas y costes</A>, así que los márgenes se conocen, no se adivinan.</>,
+                    <><strong className="text-gray-900">Muestra el uso en el producto:</strong> una página de uso con las mismas cifras que la factura evita la mayoría de las disputas de facturación.</>,
+                    <><strong className="text-gray-900">Avisa al 80 %:</strong> los inquilinos que se acercan al límite de su plan son una conversación de upgrade, no un 429 por sorpresa.</>,
+                ]} />
+
+                <H2>Cuando los inquilinos traen su propio código</H2>
+                <P>
+                    Algunas plataformas permiten a los clientes añadir su propia lógica: una transformación a medida, un manejador de webhooks.
+                    Workers for Platforms ejecuta el script de cada inquilino en su propio isolate dentro de un dispatch namespace, con los
+                    límites que definas por script. El cliente gana flexibilidad y tu plataforma queda protegida de su código.
+                </P>
+
+                <H2>Medirlo</H2>
+                <P>
+                    Incidentes de acceso entre inquilinos (objetivo cero, verificado con tests), latencia P95 por inquilino (importa el peor
+                    inquilino, no la media), ingresos y coste por inquilino, y la diferencia entre el uso medido y el facturado (debería ser
+                    cero tras la conciliación).
+                </P>
+
+                <Callout title="Relacionado">
+                    La propiedad de los datos dentro del núcleo sigue las reglas de <A href="/academia/nucleo-modular/propiedad-datos-migraciones/">Propiedad de
+                    datos y migraciones</A>. Los conectores que generan la mayoría de los eventos de uso se describen en{' '}
+                    <A href="/academia/edge-serverless/funciones-x-paas-integracion/">Funciones × PaaS de integración</A>.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

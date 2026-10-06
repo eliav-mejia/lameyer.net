@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos estructurados - Academia Lameyer</title>
+    <meta name="description" content="Datos estructurados con JSON-LD: marcado BlogPosting, TechArticle y BreadcrumbList generado a partir de los metadatos de tus artículos, y cómo validarlo.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/datos-estructurados/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Usa JSON-LD en el head de la página',
+            'Genéralo a partir de los mismos datos que la página',
+            'Describe solo contenido visible en la página',
+            'Añade BreadcrumbList para la jerarquía de la academia',
+            'Pon el JSON-LD en el HTML estático',
+            'Valídalo con la prueba de resultados enriquecidos',
+        ];
+
+        const TYPES = [
+            { type: 'BlogPosting', use: 'Cada artículo. Titular, fechas, autor, imagen.', google: 'Resultados enriquecidos de Article' },
+            { type: 'TechArticle', use: 'Contenido práctico y de referencia. Añade proficiencyLevel y dependencies.', google: 'Se trata como Article' },
+            { type: 'BreadcrumbList', use: 'Dónde está la página: Inicio › Academia › Artículo.', google: 'Ruta de navegación en los resultados' },
+            { type: 'SoftwareSourceCode', use: 'Un proyecto o fragmento de código: repositorio, lenguaje, licencia.', google: 'Sin resultado enriquecido propio; lo leen otros consumidores' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    El <A href="/academia/busqueda-visibilidad/marcado-html-semantico/">HTML semántico</A> le dice a una máquina cómo está estructurada una
+                    página. Los datos estructurados le dicen qué <em>es</em> la página: un artículo titulado X, escrito por Y, publicado el
+                    día Z, parte de la serie W. Usan el vocabulario compartido de schema.org, que entienden los buscadores y muchas otras
+                    herramientas.
+                </P>
+
+                <H2>JSON-LD: los datos junto a la página, no entretejidos en ella</H2>
+                <P>
+                    Hay tres sintaxis (JSON-LD, Microdata y RDFa). JSON-LD es la que recomienda Google y la más fácil de mantener, porque es
+                    un único bloque script en lugar de atributos repartidos por el marcado:
+                </P>
+                <CodeBlock title="BlogPosting para este artículo">{`<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Datos estructurados: describir páginas con JSON-LD",
+  "description": "Añadir marcado schema.org BlogPosting, BreadcrumbList y TechArticle...",
+  "datePublished": "2026-10-02",
+  "dateModified": "2026-10-02",
+  "inLanguage": "es",
+  "author": { "@type": "Organization", "name": "Lameyer", "url": "https://lameyer.net/" },
+  "publisher": { "@type": "Organization", "name": "Lameyer", "url": "https://lameyer.net/" },
+  "mainEntityOfPage": "https://lameyer.net/academia/busqueda-visibilidad/datos-estructurados/",
+  "isPartOf": { "@type": "Blog", "name": "Academia Lameyer", "url": "https://lameyer.net/academia/" },
+  "keywords": ["JSON-LD", "schema.org", "BlogPosting", "TechArticle"]
+}
+<\/script>`}</CodeBlock>
+
+                <H2>Qué tipos usar</H2>
+                <Table
+                    columns={[{ key: 'type', label: 'Tipo', mono: true }, { key: 'use', label: 'Úsalo para' }, { key: 'google', label: 'En la Búsqueda de Google' }]}
+                    rows={TYPES}
+                />
+                <P>
+                    Schema.org tiene cientos de tipos y Google solo muestra resultados enriquecidos para una parte. Aun así, merece la pena
+                    añadir el marcado de otros tipos cuando describe la página con precisión: otros buscadores, sistemas de IA y herramientas
+                    internas también lo leen.
+                </P>
+
+                <H2>Rutas de navegación (breadcrumbs)</H2>
+                <CodeBlock title="BreadcrumbList">{`{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Inicio", "item": "https://lameyer.net/" },
+    { "@type": "ListItem", "position": 2, "name": "Academia", "item": "https://lameyer.net/academia/" },
+    { "@type": "ListItem", "position": 3, "name": "Datos estructurados" }
+  ]
+}`}</CodeBlock>
+
+                <H2>Genéralo, no lo escribas a mano</H2>
+                <P>
+                    Cada artículo de esta academia ya tiene título, resumen, fecha y etiquetas en <Code>ACADEMIA_POSTS</Code>. Construir el JSON-LD a
+                    partir de ese objeto garantiza que siempre coincida con la página visible, que además es una de las directrices de Google:
+                    los datos estructurados deben describir contenido que el lector puede ver.
+                </P>
+                <CodeBlock title="jsonLdFor(post)">{`const SITE = 'https://lameyer.net';
+
+const jsonLdFor = (post) => ({
+  '@context': 'https://schema.org',
+  '@type': isCross(post) ? 'TechArticle' : 'BlogPosting',
+  headline: post.title,
+  description: post.summary,
+  datePublished: post.published,
+  inLanguage: 'es',
+  keywords: post.tags,
+  author: { '@type': 'Organization', name: 'Lameyer', url: SITE + '/' },
+  mainEntityOfPage: SITE + encodeURI(post.path),
+  isPartOf: { '@type': 'Blog', name: 'Academia Lameyer', url: SITE + '/academia/' },
+});`}</CodeBlock>
+
+                <Callout title="Mejor estático que inyectado">
+                    Google puede leer el JSON-LD añadido por JavaScript después de renderizar, pero muchos otros consumidores solo leen el
+                    HTML en bruto. Escribe el bloque script en la página durante el build, como se describe en{' '}
+                    <A href="/academia/busqueda-visibilidad/ssr-generacion-estatica/">SSR y generación estática</A>.
+                </Callout>
+
+                <H2>Valida antes de publicar</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">La prueba de resultados enriquecidos</strong> muestra para qué resultados enriquecidos de Google es apta una página y señala los campos obligatorios que faltan.</>,
+                    <><strong className="text-gray-900">El validador de marcado de Schema</strong> (validator.schema.org) comprueba cualquier tipo de schema.org, incluidos los que Google no usa.</>,
+                    <><strong className="text-gray-900">Search Console</strong> informa de los errores de datos estructurados de todo el sitio tras la indexación.</>,
+                ]} />
+
+                <H2>Más allá de los artículos de la academia</H2>
+                <P>
+                    El mismo enfoque puede describir los propios proyectos de código, con <Code>SoftwareSourceCode</Code> en sus páginas de
+                    presentación y un archivo <Code>codemeta.json</Code> en el repositorio. Ese cruce se trata en{' '}
+                    <A href="/academia/busqueda-visibilidad/datos-estructurados-x-repositorios/">Datos estructurados × repositorios</A>.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

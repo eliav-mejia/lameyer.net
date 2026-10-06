@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generación estática × búsqueda vectorial - Academia Lameyer</title>
+    <meta name="description" content="Usar un único build estático para publicar HTML rastreable y alimentar un índice vectorial: troceado por encabezados semánticos, hashes de contenido y embeddings incrementales.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/generacion-estatica-x-busqueda-vectorial/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Indexa el HTML construido, no los archivos fuente',
+            'Trocea por secciones h2 dentro de article',
+            'Da a cada encabezado un id y enlaza los fragmentos a él',
+            'Antepón a los fragmentos su ruta de encabezados',
+            'Genera embeddings solo de los fragmentos cuyo hash cambió',
+            'Borra los fragmentos de las páginas eliminadas',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Un sitio de documentación suele tener dos públicos que necesitan el mismo contenido con formas distintas. Los
+                    rastreadores quieren páginas HTML completas. Un índice de <A href="/academia/busqueda-visibilidad/busqueda-semantica-vectorial/">búsqueda semántica</A> quiere
+                    fragmentos pequeños y autónomos, cada uno con su vector. Los equipos suelen construirlos por separado y el índice de
+                    búsqueda se queda desactualizado. Con la{' '}
+                    <A href="/academia/busqueda-visibilidad/ssr-generacion-estatica/">generación estática</A>, el build ya produce todas las páginas, así que
+                    puede producir el índice a partir de la misma salida.
+                </P>
+
+                <H2>Por qué indexar el HTML construido</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Es lo que ven los lectores.</strong> Los componentes, includes y archivos de datos ya están resueltos. Indexar los archivos fuente se pierde las tablas, listas y fragmentos compartidos que se generan.</>,
+                    <><strong className="text-gray-900">Tiene estructura.</strong> Si las páginas usan <A href="/academia/busqueda-visibilidad/marcado-html-semantico/">HTML semántico</A>, el elemento <Code>article</Code> marca el contenido y los encabezados <Code>h2</Code> marcan las secciones. La navegación, los pies de página y los banners son fáciles de excluir.</>,
+                    <><strong className="text-gray-900">Da una URL a cada fragmento.</strong> Un encabezado con <Code>id</Code> se convierte en un enlace como <Code>/academia/busqueda-visibilidad/rastreabilidad-indexacion/#urls-canonicas-una-pagina-una-direccion</Code>, así que los resultados de búsqueda pueden apuntar a la sección exacta.</>,
+                ]} />
+
+                <H2>Troceado por encabezado</H2>
+                <P>
+                    Las secciones bajo un <Code>h2</Code> se escriben para leerse por sí solas, lo que las convierte en buenos fragmentos.
+                    Cada fragmento recibe una cabecera con el título de la página y el encabezado de la sección, el mismo truco que se usa
+                    con los fragmentos de código:
+                </P>
+                <CodeBlock title="scripts/chunks.mjs">{`import * as cheerio from 'cheerio';
+import { createHash } from 'node:crypto';
+
+export function chunksFromHtml(html, pageUrl) {
+  const $ = cheerio.load(html);
+  const title = $('article h1, h1').first().text().trim();
+  const sections = [];
+  let current = { heading: title, id: null, text: [] };
+
+  $('article').children().each((_, el) => {
+    if (el.tagName === 'h2') {
+      sections.push(current);
+      current = { heading: $(el).text().trim(), id: $(el).attr('id'), text: [] };
+    } else {
+      current.text.push($(el).text().trim());
+    }
+  });
+  sections.push(current);
+
+  return sections
+    .filter(s => s.text.join('').length > 0)
+    .map(s => {
+      const body = title + ' › ' + s.heading + '\\n\\n' + s.text.join('\\n');
+      return {
+        url: s.id ? pageUrl + '#' + s.id : pageUrl,
+        body,
+        hash: createHash('sha256').update(body).digest('hex'),
+      };
+    });
+}`}</CodeBlock>
+
+                <H2>Embeddings incrementales con hashes de contenido</H2>
+                <P>
+                    Generar el embedding de cada fragmento en cada build es lento y cuesta dinero. Guarda el hash con cada vector. En el
+                    siguiente build, genera embeddings solo de los fragmentos con un hash nuevo, conserva el resto y borra los fragmentos
+                    cuya URL desapareció:
+                </P>
+                <CodeBlock title="scripts/sync-index.mjs (esbozo)">{`const built = allPages.flatMap(p => chunksFromHtml(p.html, p.url));
+const existing = await db.hashesByUrl();              // Map<url, hash>
+
+const changed = built.filter(c => existing.get(c.url) !== c.hash);
+const removed = [...existing.keys()].filter(url => !built.some(c => c.url === url));
+
+const vectors = await embed(changed.map(c => c.body));  // una sola llamada por lotes
+await db.upsert(changed.map((c, i) => ({ ...c, embedding: vectors[i] })));
+await db.delete(removed);
+
+console.log('embedded', changed.length, 'removed', removed.length, 'kept', built.length - changed.length);`}</CodeBlock>
+                <P>
+                    Ahora corregir una errata regenera un fragmento en lugar de todo el sitio. Guarda también el nombre del modelo de
+                    embeddings en cada fila: cuando el modelo cambia, todos los hashes son en la práctica nuevos y lo reconstruyes todo a propósito.
+                </P>
+
+                <H2>Dónde vive el índice</H2>
+                <P>
+                    Para la búsqueda por palabras clave en un sitio estático, el índice también puede ser estático. Herramientas como
+                    Pagefind leen el HTML construido y escriben un conjunto de pequeños archivos de índice que el navegador carga bajo
+                    demanda. La búsqueda vectorial es distinta, porque cada consulta tiene que pasar por el mismo modelo de embeddings. Eso
+                    suele implicar una pequeña API delante de un almacén vectorial, a la que llama el sitio estático. Cómo cargar cualquiera
+                    de las dos sin ralentizar la página se trata en{' '}
+                    <A href="/academia/busqueda-visibilidad/core-web-vitals-x-busqueda-sitio/">Core Web Vitals × búsqueda en el sitio</A>.
+                </P>
+
+                <Callout title="Mismo build, misma verdad">
+                    Como las páginas y el índice salen de un único build, una página y su entrada de búsqueda no pueden contradecirse.
+                    Borra una página y sus fragmentos se borran en el mismo despliegue.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

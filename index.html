@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lameyer - Firma Tecnológica</title>
-    <meta name="description" content="Lameyer: soluciones web y manejo de datos. Conecta tus flujos de trabajo con lógica Serverless: Modular Core + Serverless Edge (MC-SE).">
+    <meta name="description" content="Lameyer: soluciones web y manejo de datos. Conecta tus flujos de trabajo con lógica Serverless: Núcleo Modular + Edge Serverless (MC-SE).">
     <link rel="canonical" href="https://lameyer.net/">
 
     <script>
@@ -15,7 +15,7 @@
                 '#/components': '/pages/components/',
                 '#/community': '/pages/community/',
                 '#/stack': '/pages/stack/',
-                '#/blog': '/blog/'
+                '#/blog': '/academia/'
             };
             var target = legacy[window.location.hash.replace(/\/$/, '')];
             if (target) window.location.replace(target);
@@ -39,13 +39,13 @@
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel">
-        // One card per blog series (the five MC-SE categories); keep in sync with SERIES in /js/blog.jsx.
-        const BLOG_HIGHLIGHTS = [
-            { num: '01', label: 'Modular Core', text: 'Módulos y contratos para tu lógica de negocio', href: '/blog/?series=core' },
-            { num: '02', label: 'Serverless Edge', text: 'Funciones, caché y cron cerca del usuario', href: '/blog/?series=serverless' },
-            { num: '03', label: 'Automatización de flujos', text: 'Webhooks, colas y flujos fiables', href: '/blog/?series=workflows' },
-            { num: '04', label: 'Seguridad de APIs', text: 'Defensa en capas para APIs headless', href: '/blog/?series=security' },
-            { num: '05', label: 'Búsqueda de código y visibilidad', text: 'Código y páginas fáciles de encontrar', href: '/blog/?series=search' },
+        // One card per academia series (the five MC-SE categories); keep in sync with SERIES in /js/academia.jsx.
+        const ACADEMIA_HIGHLIGHTS = [
+            { num: '01', label: 'Núcleo Modular', text: 'Módulos y contratos para tu lógica de negocio', href: '/academia/?series=nucleo-modular' },
+            { num: '02', label: 'Edge Serverless', text: 'Funciones, caché y cron cerca del usuario', href: '/academia/?series=edge-serverless' },
+            { num: '03', label: 'Automatización de flujos', text: 'Webhooks, colas y flujos fiables', href: '/academia/?series=automatizacion-flujos' },
+            { num: '04', label: 'Seguridad de APIs', text: 'Defensa en capas para APIs headless', href: '/academia/?series=seguridad-apis' },
+            { num: '05', label: 'Búsqueda de código y visibilidad', text: 'Código y páginas fáciles de encontrar', href: '/academia/?series=busqueda-visibilidad' },
         ];
 
         const ContentCard = ({ title, desc, align, active, icon }) => {
@@ -225,22 +225,22 @@
             );
         };
 
-        // --- BLOG TEASER (links into the /blog/ folder) ---
-        const BlogSection = () => (
+        // --- ACADEMIA TEASER (links into the /academia/ folder) ---
+        const AcademiaSection = () => (
             <section className="py-32 px-4 md:px-8 relative z-20">
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Blog · Casos y soluciones MC-SE</p>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Academia · Casos y soluciones MC-SE</p>
                             <h3 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
                                 Conecta tus flujos<br/><span className="text-blue-600">con lógica Serverless</span>
                             </h3>
                         </div>
                         <a
-                            href="/blog/"
+                            href="/academia/"
                             className="self-start md:self-auto inline-flex items-center gap-3 px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full shadow-xl hover:scale-105 transition-all uppercase tracking-widest text-xs"
                         >
-                            Ver el blog
+                            Ver la academia
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                             </svg>
@@ -248,7 +248,7 @@
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-                        {BLOG_HIGHLIGHTS.map(post => (
+                        {ACADEMIA_HIGHLIGHTS.map(post => (
                             <a
                                 key={post.href}
                                 href={post.href}
@@ -287,7 +287,7 @@
                                 SOLUCIONES WEB &<br/><span className="text-blue-600">MANEJO DE DATOS</span>
                             </h1>
                             <p className="text-xl md:text-2xl text-gray-500 max-w-3xl mx-auto mb-16 font-medium">
-                                Conecta tus flujos de trabajo con lógica Serverless: Modular Core + Serverless Edge (MC-SE).
+                                Conecta tus flujos de trabajo con lógica Serverless: Núcleo Modular + Edge Serverless (MC-SE).
                             </p>
                             <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
                                 <a href="/pages/development/" className="px-10 py-5 bg-blue-600 text-white font-black rounded-full shadow-2xl hover:scale-105 transition-all uppercase tracking-widest text-xs">Explorar Soluciones</a>
@@ -304,7 +304,7 @@
 
                     <StackSection />
 
-                    <BlogSection />
+                    <AcademiaSection />
 
                     <ContactSection />
                 </>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tareas programadas (Cron Triggers) - Academia Lameyer</title>
+    <meta name="description" content="Sustituir el servidor de sincronización siempre encendido por Cloudflare Cron Triggers que reparten el trabajo en colas, con bloqueos, puntos de control y alertas cuando una ejecución no se produce.">
+    <link rel="canonical" href="https://lameyer.net/academia/edge-serverless/tareas-programadas-cron/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Haz primero un inventario de todos los crontabs y tareas programadas',
+            'Escribe los calendarios en UTC y dilo',
+            'Que el cron solo encole; los workers hacen el trabajo',
+            'Guarda un punto de control para que repetir sea reanudar, no empezar de cero',
+            'Evita las ejecuciones solapadas con un bloqueo',
+            'Alerta cuando una ejecución no se produce, no solo cuando falla',
+        ];
+
+        const INVENTORY = [
+            { job: 'Sincronizar pedidos del ERP con el CRM', before: 'crontab en una VM, cada 15 min', after: 'Cron → cola por página de pedidos' },
+            { job: 'Informe nocturno de ventas', before: 'Script en el servidor de la base de datos', after: 'Cron → endpoint de informes del núcleo → PDF en R2 → email' },
+            { job: 'Caducar cuentas de prueba', before: 'Programador de tareas de Windows', after: 'Cron → contrato de accounts del núcleo' },
+            { job: 'Actualizar tipos de cambio', before: 'Cron dentro del contenedor de la app', after: 'Cron → fetch → KV' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Casi todas las empresas con las que trabajamos tienen uno: un servidor cuyo único trabajo es ejecutar scripts
+                    programados. Sincroniza pedidos por la noche, envía un informe a las 7:00 y caduca las pruebas. Cuesta dinero cada hora
+                    del mes para hacer unos minutos de trabajo, necesita parches y, cuando se para en silencio, nadie se entera hasta que las
+                    cifras no cuadran. Los <strong className="text-gray-900">Cron Triggers</strong> ejecutan los mismos calendarios en
+                    Workers, sin ningún servidor de por medio.
+                </P>
+
+                <H2>Empieza con un inventario</H2>
+                <P>
+                    Antes de mover nada, enumera todas las tareas programadas que tienes: crontabs en cada VM, entradas del programador de
+                    tareas de Windows, jobs de base de datos, calendarios dentro de herramientas de integración. Esta lista suele ser más
+                    larga de lo que nadie espera, y es el backlog de esta migración.
+                </P>
+                <Table
+                    columns={[{ key: 'job', label: 'Tarea' }, { key: 'before', label: 'Hoy' }, { key: 'after', label: 'Serverless', accent: true }]}
+                    rows={INVENTORY}
+                />
+
+                <H2>Calendarios en la configuración</H2>
+                <CodeBlock title="wrangler.jsonc (extracto)">{`"triggers": {
+  "crons": [
+    "*/15 * * * *",   // sincronización ERP → CRM
+    "0 6 * * *",      // informe nocturno (06:00 UTC = 00:00 en Ciudad de México)
+    "30 3 * * 1"      // limpieza semanal, lunes 03:30 UTC
+  ]
+}`}</CodeBlock>
+                <P>
+                    Los Cron Triggers siempre funcionan en UTC. Escribe la hora local junto a cada calendario, porque un informe que llega una
+                    hora tarde tras el cambio de horario parece un bug para quien lo está esperando.
+                </P>
+
+                <H2>El cron encola, los workers trabajan</H2>
+                <P>
+                    El error más habitual es meter toda la tarea dentro de <Code>scheduled()</Code>. Si la sincronización toca 40.000 pedidos,
+                    una sola invocación agotará su límite de tiempo, y un fallo a mitad de camino no deja rastro de dónde se paró. En su lugar,
+                    el manejador programado solo decide <em>qué</em> hacer y lo pone en una cola. Los consumidores de la cola hacen el trabajo
+                    en lotes pequeños, con reintentos automáticos.
+                </P>
+                <CodeBlock title="src/index.ts">{`export default {
+  async scheduled(event, env, ctx) {
+    if (event.cron !== '*/15 * * * *') return;
+
+    const since = (await env.STATE.get('erp-sync:checkpoint')) ?? '1970-01-01T00:00:00Z';
+    const pages = await listChangedOrderPages(env, since);      // barato: solo IDs
+
+    await env.SYNC_QUEUE.sendBatch(pages.map((p) => ({ body: { page: p, since } })));
+    ctx.waitUntil(env.STATE.put('erp-sync:last-run', new Date().toISOString()));
+  },
+
+  async queue(batch, env) {
+    for (const msg of batch.messages) {
+      await syncOrderPage(env, msg.body);    // idempotente: se puede reintentar
+      msg.ack();
+    }
+  },
+};`}</CodeBlock>
+
+                <H2>Puntos de control y bloqueos</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Punto de control.</strong> Cuando una página se completa, avanza el punto de control. Una repetición empieza donde se paró la anterior, no desde el principio.</>,
+                    <><strong className="text-gray-900">Bloqueo.</strong> Si una ejecución tarda más que su intervalo, la siguiente no debe empezar encima. Un Durable Object es un bloqueo fiable, porque atiende una petición cada vez.</>,
+                    <><strong className="text-gray-900">Idempotencia.</strong> Los mensajes se entregan al menos una vez. Escribir en el destino usando como clave el ID del registro de origen hace inofensivo un duplicado. La serie <A href="/academia/automatizacion-flujos/automatizacion-serverless-flujos/">Automatización de flujos</A> lo trata a fondo.</>,
+                ]} />
+                <Callout title="Tareas largas de varios pasos">
+                    Cuando una tarea programada tiene pasos que deben ir en orden y que pueden tardar cada uno un rato (exportar,
+                    transformar, subir, notificar), inicia un Workflow duradero desde el cron en lugar de una cola. Cada paso se reintenta por
+                    separado y la ejecución sobrevive a los reinicios.
+                </Callout>
+
+                <H2>Alerta ante el silencio</H2>
+                <P>
+                    Los fallos que lanzan errores son fáciles de detectar. El caso peligroso es la tarea que simplemente no se ejecuta.
+                    Registra la hora de cada ejecución correcta (arriba, <Code>erp-sync:last-run</Code>) y compruébala desde otro sitio: un
+                    segundo cron o un monitor externo de latidos que avisa cuando no recibe el ping a su hora.
+                </P>
+                <CodeBlock title="Un cron vigilante">{`const last = await env.STATE.get('erp-sync:last-run');
+if (!last || Date.now() - Date.parse(last) > 45 * 60 * 1000) {
+  await notify(env, 'La sincronización del ERP no se ha completado en 45 minutos');
+}`}</CodeBlock>
+
+                <H2>Medirlo</H2>
+                <P>
+                    Cifras útiles: servidores de tareas programadas retirados, coste mensual del trabajo programado antes y después,
+                    ejecuciones perdidas al mes (objetivo cero) y frescura de los datos, es decir, la antigüedad del registro sincronizado más
+                    reciente. La frescura es la que de verdad nota el negocio.
+                </P>
+
+                <Callout title="Siguiente paso">
+                    Las tareas que se ejecutan mientras todo el mundo duerme necesitan buenos logs. <A href="/academia/edge-serverless/logs-trazas-costes/">Logs,
+                    trazas y costes</A> explica cómo ver lo que hicieron.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

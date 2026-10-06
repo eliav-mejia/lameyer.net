@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreabilidad × búsqueda por facetas - Academia Lameyer</title>
+    <meta name="description" content="URLs de filtros por facetas sin trampas de rastreo: decidir en el código qué facetas tienen páginas de aterrizaje indexables y canonicalizar o bloquear el resto.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Cuenta cuántas URLs de filtros puede producir tu sitio',
+            'Da a cada faceta una política de indexación explícita',
+            'Convierte las facetas valiosas en rutas estáticas reales',
+            'Canonicaliza las variaciones de parámetros hacia la página base',
+            'Bloquea en robots.txt los parámetros de búsqueda de texto libre',
+            'Incluye en el sitemap solo URLs canónicas',
+        ];
+
+        const POLICIES = [
+            { facet: 'type', value: 'Uno por etapa', policy: 'Página de aterrizaje', why: 'Cada etapa ya tiene un artículo que hace de página.' },
+            { facet: 'series', value: '2', policy: 'Página de aterrizaje', why: 'Merece una ruta real como /academia/search/.' },
+            { facet: 'zone, kind', value: 'Unos pocos cada uno', policy: 'Canónica → /academia/', why: 'Útil para las personas, no aporta nada nuevo a la búsqueda.' },
+            { facet: 'threats', value: 'Cualquier combinación', policy: 'Canónica → /academia/', why: 'Las combinaciones se multiplican rápido.' },
+            { facet: 'sort', value: '3', policy: 'Canónica → /academia/', why: 'Mismo contenido, otro orden.' },
+            { facet: 'q', value: 'Ilimitados', policy: 'Bloquear en robots.txt', why: 'El texto libre crea infinitas URLs.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    El panel de esta academia guarda sus filtros en la URL: <Code>/academia/?series=busqueda-visibilidad&type=crawl&threats=URLs+duplicadas</Code>.
+                    Es bueno para las personas, porque cualquier vista se puede guardar en marcadores o compartir. Para los rastreadores es
+                    un riesgo. Cada combinación de filtros es una URL distinta que muestra un subconjunto de los mismos artículos, y el
+                    número de combinaciones crece muy deprisa.
+                </P>
+
+                <H2>Haciendo las cuentas</H2>
+                <P>
+                    Con 9 tipos (más «todos»), 2 zonas (más «todas»), 3 formatos, 3 órdenes y cualquier subconjunto de sus 26 problemas, solo
+                    la serie de búsqueda puede producir miles de millones de URLs distintas. Casi todas son casi duplicados. Un rastreador que
+                    las sigue malgasta un tiempo que podría dedicar a tus páginas reales, y los duplicados compiten entre sí en el índice. Eso
+                    es una <strong className="text-gray-900">trampa de rastreo</strong>.
+                </P>
+                <P>
+                    Los rastreadores sí encuentran estas URLs: los chips de tipo y de problema de cada artículo enlazan a vistas filtradas del
+                    panel. Esos enlaces son útiles para los lectores, así que la solución no es quitarlos sino decir a los rastreadores qué
+                    hacer con ellos.
+                </P>
+
+                <H2>Una política por faceta, escrita como código</H2>
+                <P>
+                    Decide una sola vez, para cada filtro, qué debe pasar con él, y deja la decisión junto a las definiciones de las facetas.
+                    Eso es <A href="/academia/busqueda-visibilidad/busqueda-como-codigo-sac/">Búsqueda como código</A> aplicado a un sitio público:
+                </P>
+                <Table
+                    columns={[{ key: 'facet', label: 'Faceta', mono: true }, { key: 'value', label: 'Valores' }, { key: 'policy', label: 'Política', accent: true }, { key: 'why', label: 'Por qué' }]}
+                    rows={POLICIES}
+                />
+                <CodeBlock title="facets.config.js">{`// Una entrada por cada parámetro de URL que escribe el panel.
+export const FACET_POLICY = {
+  series:  'landing',     // construir una ruta real por valor
+  type:    'landing',
+  zone:    'canonical',   // rastreable, con la canónica apuntando a /academia/
+  kind:    'canonical',
+  threats: 'canonical',
+  sort:    'canonical',
+  q:       'block',       // Disallow en robots.txt
+};`}</CodeBlock>
+
+                <H2>Aterrizaje: convierte las facetas valiosas en páginas reales</H2>
+                <P>
+                    Un alojamiento estático ignora la query string, así que <Code>/academia/?series=busqueda-visibilidad</Code> es siempre el mismo archivo. Una
+                    faceta que merece indexarse necesita una ruta real, generada en build con su propio título, descripción y lista de
+                    artículos prerenderizada (consulta <A href="/academia/busqueda-visibilidad/ssr-generacion-estatica/">SSR y generación estática</A>). En esta
+                    academia, el artículo principal de cada etapa ya cumple ese papel para la faceta <Code>type</Code>.
+                </P>
+
+                <H2>Canónica: una dirección para todo lo demás</H2>
+                <P>
+                    Como el panel es un único <Code>index.html</Code>, una sola etiqueta cubre todas las combinaciones de parámetros:
+                </P>
+                <CodeBlock title="Head de /academia/index.html">{`<link rel="canonical" href="https://lameyer.net/academia/">`}</CodeBlock>
+                <P>
+                    Una canónica es una indicación fuerte, no una orden, pero en páginas que son claramente subconjuntos de la página base
+                    los buscadores suelen seguirla.
+                </P>
+
+                <H2>Bloquear: solo para parámetros ilimitados</H2>
+                <CodeBlock title="/robots.txt">{`User-agent: *
+Disallow: /*?q=
+Disallow: /*&q=
+
+Sitemap: https://lameyer.net/sitemap.xml`}</CodeBlock>
+                <Callout title="No bloquees lo que canonicalizas">
+                    Un rastreador no puede leer la etiqueta canónica de una URL que no puede descargar. Usa robots.txt solo para parámetros
+                    con valores ilimitados, como la búsqueda de texto libre, y deja que la etiqueta canónica se ocupe del resto. Consulta{' '}
+                    <A href="/academia/busqueda-visibilidad/rastreabilidad-indexacion/">Rastreabilidad e indexación</A> para ver por qué <Code>Disallow</Code> no
+                    elimina páginas del índice.
+                </Callout>
+
+                <H2>Los sitemaps solo incluyen URLs canónicas</H2>
+                <P>
+                    Genera el sitemap a partir de la misma configuración: todos los artículos, todas las rutas de aterrizaje y ninguna URL con
+                    parámetros. Cuando la política y el sitemap salen de un mismo archivo, no pueden contradecirse.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

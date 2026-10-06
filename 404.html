@@ -8,41 +8,92 @@
 
     <script>
         // GitHub Pages serves this file for every missing URL.
-        // Old blog addresses (flat .html files and the first folder names) redirect to /blog/<series>/<slug>/.
-        // When you rename or move an entry, add its old path here.
+        // Old blog addresses (/blog/..., flat .html files, first folder names and the English series/slugs)
+        // redirect to /academia/<serie>/<slug>/. When you rename or move an entry, add its old path here.
+        // `series` translates the old ?series= values of the dashboard (/blog/?series=core -> /academia/?series=nucleo-modular).
         (function () {
             var moved = {
-                '/blog/api-endpoint-protection.html': '/blog/security/api-endpoint-protection/',
-                '/blog/benchmark-curation-reap-harvest.html': '/blog/search/benchmark-curation-reap-harvest/',
-                '/blog/benchmarks-x-search-as-code.html': '/blog/search/benchmarks-x-search-as-code/',
-                '/blog/cloudflare-tunnel.html': '/blog/security/cloudflare-tunnel/',
-                '/blog/code-search-repository-organization.html': '/blog/search/code-search-repository-organization/',
-                '/blog/core-web-vitals-page-speed.html': '/blog/search/core-web-vitals-page-speed/',
-                '/blog/core-web-vitals-x-site-search.html': '/blog/search/core-web-vitals-x-site-search/',
-                '/blog/crawlability-indexing.html': '/blog/search/crawlability-indexing/',
-                '/blog/crawlability-x-faceted-search.html': '/blog/search/crawlability-x-faceted-search/',
-                '/blog/edge-layer-ddos-dns.html': '/blog/security/edge-layer-ddos-dns/',
-                '/blog/modular-core-architecture.html': '/blog/core/modular-core-architecture/',
-                '/blog/rate-limiting.html': '/blog/security/rate-limiting/',
-                '/blog/search-as-code-sac.html': '/blog/search/search-as-code-sac/',
-                '/blog/semantic-html-markup.html': '/blog/search/semantic-html-markup/',
-                '/blog/semantic-vector-search.html': '/blog/search/semantic-vector-search/',
-                '/blog/serverless-edge-architecture.html': '/blog/serverless/serverless-edge-architecture/',
-                '/blog/serverless-workflow-automation.html': '/blog/workflows/serverless-workflow-automation/',
-                '/blog/ssr-static-generation.html': '/blog/search/ssr-static-generation/',
-                '/blog/static-generation-x-vector-search.html': '/blog/search/static-generation-x-vector-search/',
-                '/blog/structured-data.html': '/blog/search/structured-data/',
-                '/blog/structured-data-x-repositories.html': '/blog/search/structured-data-x-repositories/',
-                '/blog/waf-bot-layer-layer-7.html': '/blog/security/waf-bot-layer-layer-7/',
-                '/blog/Edge_Layer_(DDoS_&_DNS)/': '/blog/security/edge-layer-ddos-dns/',
-                '/blog/WAF_&_Bot_Layer_(Layer_7)/': '/blog/security/waf-bot-layer-layer-7/',
-                '/blog/API_Endpoint_Protection/': '/blog/security/api-endpoint-protection/',
-                '/blog/Rate_Limiting/': '/blog/security/rate-limiting/',
-                '/blog/Cloudflare_Tunnel/': '/blog/security/cloudflare-tunnel/'
+                '/blog/': '/academia/',
+                '/blog/api-endpoint-protection.html': '/academia/seguridad-apis/proteccion-endpoints-api/',
+                '/blog/benchmark-curation-reap-harvest.html': '/academia/busqueda-visibilidad/curacion-benchmarks-reap-harvest/',
+                '/blog/benchmarks-x-search-as-code.html': '/academia/busqueda-visibilidad/benchmarks-x-busqueda-como-codigo/',
+                '/blog/cloudflare-tunnel.html': '/academia/seguridad-apis/tunel-cloudflare/',
+                '/blog/code-search-repository-organization.html': '/academia/busqueda-visibilidad/busqueda-codigo-organizacion-repositorios/',
+                '/blog/core-web-vitals-page-speed.html': '/academia/busqueda-visibilidad/core-web-vitals-velocidad-pagina/',
+                '/blog/core-web-vitals-x-site-search.html': '/academia/busqueda-visibilidad/core-web-vitals-x-busqueda-sitio/',
+                '/blog/crawlability-indexing.html': '/academia/busqueda-visibilidad/rastreabilidad-indexacion/',
+                '/blog/crawlability-x-faceted-search.html': '/academia/busqueda-visibilidad/rastreabilidad-x-busqueda-facetas/',
+                '/blog/edge-layer-ddos-dns.html': '/academia/seguridad-apis/capa-edge-ddos-dns/',
+                '/blog/modular-core-architecture.html': '/academia/nucleo-modular/arquitectura-nucleo-modular/',
+                '/blog/rate-limiting.html': '/academia/seguridad-apis/limitacion-de-tasa/',
+                '/blog/search-as-code-sac.html': '/academia/busqueda-visibilidad/busqueda-como-codigo-sac/',
+                '/blog/semantic-html-markup.html': '/academia/busqueda-visibilidad/marcado-html-semantico/',
+                '/blog/semantic-vector-search.html': '/academia/busqueda-visibilidad/busqueda-semantica-vectorial/',
+                '/blog/serverless-edge-architecture.html': '/academia/edge-serverless/arquitectura-edge-serverless/',
+                '/blog/serverless-workflow-automation.html': '/academia/automatizacion-flujos/automatizacion-serverless-flujos/',
+                '/blog/ssr-static-generation.html': '/academia/busqueda-visibilidad/ssr-generacion-estatica/',
+                '/blog/static-generation-x-vector-search.html': '/academia/busqueda-visibilidad/generacion-estatica-x-busqueda-vectorial/',
+                '/blog/structured-data.html': '/academia/busqueda-visibilidad/datos-estructurados/',
+                '/blog/structured-data-x-repositories.html': '/academia/busqueda-visibilidad/datos-estructurados-x-repositorios/',
+                '/blog/waf-bot-layer-layer-7.html': '/academia/seguridad-apis/capa-waf-bots-capa-7/',
+                '/blog/Edge_Layer_(DDoS_&_DNS)/': '/academia/seguridad-apis/capa-edge-ddos-dns/',
+                '/blog/WAF_&_Bot_Layer_(Layer_7)/': '/academia/seguridad-apis/capa-waf-bots-capa-7/',
+                '/blog/API_Endpoint_Protection/': '/academia/seguridad-apis/proteccion-endpoints-api/',
+                '/blog/Rate_Limiting/': '/academia/seguridad-apis/limitacion-de-tasa/',
+                '/blog/Cloudflare_Tunnel/': '/academia/seguridad-apis/tunel-cloudflare/',
+                '/blog/workflows/serverless-workflow-automation/': '/academia/automatizacion-flujos/automatizacion-serverless-flujos/',
+                '/blog/search/code-search-repository-organization/': '/academia/busqueda-visibilidad/busqueda-codigo-organizacion-repositorios/',
+                '/blog/search/search-as-code-sac/': '/academia/busqueda-visibilidad/busqueda-como-codigo-sac/',
+                '/blog/search/semantic-vector-search/': '/academia/busqueda-visibilidad/busqueda-semantica-vectorial/',
+                '/blog/search/core-web-vitals-page-speed/': '/academia/busqueda-visibilidad/core-web-vitals-velocidad-pagina/',
+                '/blog/search/core-web-vitals-x-site-search/': '/academia/busqueda-visibilidad/core-web-vitals-x-busqueda-sitio/',
+                '/blog/search/benchmark-curation-reap-harvest/': '/academia/busqueda-visibilidad/curacion-benchmarks-reap-harvest/',
+                '/blog/search/structured-data-x-repositories/': '/academia/busqueda-visibilidad/datos-estructurados-x-repositorios/',
+                '/blog/search/structured-data/': '/academia/busqueda-visibilidad/datos-estructurados/',
+                '/blog/search/benchmarks-x-search-as-code/': '/academia/busqueda-visibilidad/benchmarks-x-busqueda-como-codigo/',
+                '/blog/search/static-generation-x-vector-search/': '/academia/busqueda-visibilidad/generacion-estatica-x-busqueda-vectorial/',
+                '/blog/search/semantic-html-markup/': '/academia/busqueda-visibilidad/marcado-html-semantico/',
+                '/blog/search/crawlability-indexing/': '/academia/busqueda-visibilidad/rastreabilidad-indexacion/',
+                '/blog/search/crawlability-x-faceted-search/': '/academia/busqueda-visibilidad/rastreabilidad-x-busqueda-facetas/',
+                '/blog/search/ssr-static-generation/': '/academia/busqueda-visibilidad/ssr-generacion-estatica/',
+                '/blog/serverless/edge-storage-kv-d1-r2/': '/academia/edge-serverless/almacenamiento-edge-kv-d1-r2/',
+                '/blog/serverless/serverless-edge-architecture/': '/academia/edge-serverless/arquitectura-edge-serverless/',
+                '/blog/serverless/deploy-test-rollout-workers/': '/academia/edge-serverless/desplegar-probar-lanzar-workers/',
+                '/blog/serverless/serverless-in-front-of-iaas/': '/academia/edge-serverless/edge-x-iaas-hibrido/',
+                '/blog/serverless/routing-caching-auth-edge/': '/academia/edge-serverless/enrutado-cache-autenticacion-edge/',
+                '/blog/serverless/edge-functions-workers/': '/academia/edge-serverless/funciones-edge-workers/',
+                '/blog/serverless/serverless-integration-paas/': '/academia/edge-serverless/funciones-x-paas-integracion/',
+                '/blog/serverless/ai-at-the-edge-workers-ai/': '/academia/edge-serverless/ia-en-el-edge-workers-ai/',
+                '/blog/serverless/images-media-at-the-edge/': '/academia/edge-serverless/imagenes-multimedia-edge/',
+                '/blog/serverless/logs-tracing-cost/': '/academia/edge-serverless/logs-trazas-costes/',
+                '/blog/serverless/multi-tenant-saas-metering/': '/academia/edge-serverless/medicion-x-saas-multiinquilino/',
+                '/blog/serverless/scheduled-jobs-cron-triggers/': '/academia/edge-serverless/tareas-programadas-cron/',
+                '/blog/serverless/realtime-websockets-durable-objects/': '/academia/edge-serverless/tiempo-real-websockets-durable-objects/',
+                '/blog/core/modular-core-architecture/': '/academia/nucleo-modular/arquitectura-nucleo-modular/',
+                '/blog/core/contracts-typed-apis/': '/academia/nucleo-modular/contratos-apis-tipadas/',
+                '/blog/core/domain-modules-boundaries/': '/academia/nucleo-modular/modulos-dominio-limites/',
+                '/blog/core/shared-packages-workspaces/': '/academia/nucleo-modular/paquetes-compartidos-espacios-trabajo/',
+                '/blog/core/data-ownership-migrations/': '/academia/nucleo-modular/propiedad-datos-migraciones/',
+                '/blog/core/contract-testing-versioning/': '/academia/nucleo-modular/pruebas-contrato-versionado/',
+                '/blog/security/edge-layer-ddos-dns/': '/academia/seguridad-apis/capa-edge-ddos-dns/',
+                '/blog/security/waf-bot-layer-layer-7/': '/academia/seguridad-apis/capa-waf-bots-capa-7/',
+                '/blog/security/rate-limiting/': '/academia/seguridad-apis/limitacion-de-tasa/',
+                '/blog/security/api-endpoint-protection/': '/academia/seguridad-apis/proteccion-endpoints-api/',
+                '/blog/security/cloudflare-tunnel/': '/academia/seguridad-apis/tunel-cloudflare/'
+            };
+            var series = {
+                'security': 'seguridad-apis',
+                'search': 'busqueda-visibilidad',
+                'core': 'nucleo-modular',
+                'serverless': 'edge-serverless',
+                'workflows': 'automatizacion-flujos'
             };
             var path = decodeURIComponent(window.location.pathname);
             var target = moved[path] || moved[path.replace(/index\.html$/, '')] || moved[path.replace(/\/?$/, '/')];
-            if (target) window.location.replace(target + window.location.search + window.location.hash);
+            if (target) {
+                var search = window.location.search.replace(/([?&]series=)([a-z]+)/, function (m, key, id) { return key + (series[id] || id); });
+                window.location.replace(target + search + window.location.hash);
+            }
         })();
     </script>
 
@@ -66,7 +117,7 @@
                 <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6">Página no encontrada</h1>
                 <div className="flex flex-wrap justify-center gap-4">
                     <a href="/" className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs">Inicio</a>
-                    <a href="/blog/" className="px-8 py-4 border border-gray-200 hover:border-blue-500 text-gray-700 font-black rounded-full uppercase tracking-widest text-xs">Blog</a>
+                    <a href="/academia/" className="px-8 py-4 border border-gray-200 hover:border-blue-500 text-gray-700 font-black rounded-full uppercase tracking-widest text-xs">Academia</a>
                 </div>
             </section>
         );

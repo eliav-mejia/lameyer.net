@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Imágenes y multimedia en el edge - Academia Lameyer</title>
+    <meta name="description" content="Imágenes rápidas sin servidor de imágenes: originales en R2, redimensionadas y convertidas a AVIF o WebP bajo demanda, cacheadas en el edge, subidas directamente desde el navegador y vídeo en Stream.">
+    <link rel="canonical" href="https://lameyer.net/academia/edge-serverless/imagenes-multimedia-edge/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Guarda un original por imagen en R2, nunca tamaños pregenerados',
+            'Permite una lista fija de anchos para que nadie pueda pedir 10.000 variantes',
+            'Negocia AVIF o WebP a partir de la cabecera Accept',
+            'Da a cada <img> width, height y srcset para evitar saltos de diseño',
+            'Sube directamente del navegador a R2 con URLs prefirmadas de vida corta',
+            'Envía el vídeo a Stream en lugar de transcodificarlo tú',
+        ];
+
+        const VARIANTS = [
+            { name: 'thumb', width: '400 px', use: 'Tarjetas, listados, carrito', format: 'AVIF / WebP, calidad 75–80' },
+            { name: 'card', width: '800 px', use: 'Tarjetas retina, ficha de producto en móvil', format: 'AVIF / WebP, calidad 75–80' },
+            { name: 'hero', width: '1600 px', use: 'Ficha de producto en escritorio, banners', format: 'AVIF / WebP, calidad 70–75' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Las imágenes suelen ser la parte más pesada de una página y el principal motivo por el que una API rápida sigue
+                    pareciendo lenta. La solución clásica es un servidor de imágenes que redimensiona las subidas en una docena de tamaños,
+                    con una CDN delante. En una plataforma serverless no necesitas ninguna de las dos cosas: guarda{' '}
+                    <strong className="text-gray-900">un único original</strong> en R2 y deja que el edge produzca, convierta y cachee cada
+                    tamaño la primera vez que un navegador lo pide.
+                </P>
+
+                <H2>Un conjunto pequeño y fijo de variantes</H2>
+                <P>
+                    Elige unos pocos anchos que encajen con tu diseño y sírvelos con <Code>srcset</Code>, para que un móvil descargue el
+                    archivo de 400 px y una pantalla grande el de 1600 px. Una lista corta también mantiene caliente la caché: todos los
+                    visitantes comparten las mismas pocas variantes. La <A href="/pages/components/">tienda de Lameyer</A> usa exactamente
+                    este patrón, con archivos WebP de 400 y 800 px sobre fondo blanco.
+                </P>
+                <Table
+                    columns={[{ key: 'name', label: 'Variante' }, { key: 'width', label: 'Ancho', accent: true }, { key: 'use', label: 'Se usa en' }, { key: 'format', label: 'Formato' }]}
+                    rows={VARIANTS}
+                />
+
+                <H2>Redimensiona y convierte bajo demanda</H2>
+                <P>
+                    Un Worker delante del bucket valida la petición, elige el mejor formato que acepta el navegador y pide a las
+                    transformaciones de imagen de Cloudflare que hagan el trabajo. El resultado se cachea en el edge, así que la
+                    transformación se ejecuta una vez por variante, no una vez por visita.
+                </P>
+                <CodeBlock title="src/images.ts">{`const WIDTHS = [400, 800, 1600];
+const ORIGIN = 'https://media.example.com/originals/';   // bucket R2 público en un dominio propio
+
+export default {
+  async fetch(request: Request) {
+    const url = new URL(request.url);
+    const key = url.pathname.replace(/^\\/img\\//, '');
+    const width = Number(url.searchParams.get('w')) || 800;
+    if (!key || !WIDTHS.includes(width)) return new Response('Bad image request', { status: 400 });
+
+    const accept = request.headers.get('Accept') || '';
+    const format = accept.includes('image/avif') ? 'avif' : accept.includes('image/webp') ? 'webp' : undefined;
+
+    const res = await fetch(ORIGIN + key, {
+      cf: { image: { width, fit: 'scale-down', quality: 78, format, background: '#ffffff' } },
+    });
+    const out = new Response(res.body, res);
+    out.headers.set('Cache-Control', 'public, max-age=31536000, immutable');
+    out.headers.set('Vary', 'Accept');
+    return out;
+  },
+};`}</CodeBlock>
+                <Callout title="Versiona los nombres de archivo">
+                    La caché larga <Code>immutable</Code> solo es segura si una imagen modificada recibe una clave nueva (<Code>sku-123-v2.jpg</Code>).
+                    Sobrescribir la misma clave deja copias antiguas en los navegadores y en el edge hasta que caducan.
+                </Callout>
+
+                <H2>Subidas que se saltan tus servidores</H2>
+                <P>
+                    Pasar una subida de 20 MB por una función malgasta su memoria y su presupuesto de CPU. En su lugar, un Worker comprueba
+                    al usuario y devuelve una URL prefirmada válida durante unos minutos; el navegador sube directamente a R2 a través de su
+                    API compatible con S3. El Worker solo registra la clave, así que el tamaño de la subida nunca toca sus límites.
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Comprueba antes de firmar:</strong> quién sube, qué tipo de contenido, tamaño máximo.</>,
+                    <><strong className="text-gray-900">Que caduque pronto:</strong> de cinco a quince minutos bastan para una subida.</>,
+                    <><strong className="text-gray-900">Analiza tras la subida:</strong> un consumidor de cola valida el tipo y el tamaño del archivo antes de publicarlo.</>,
+                    <><strong className="text-gray-900">Sin costes de salida:</strong> R2 no cobra por los datos leídos del bucket, y eso es lo que hace asequibles las variantes al vuelo.</>,
+                ]} />
+
+                <H2>El vídeo es otro trabajo</H2>
+                <P>
+                    Transcodificar vídeo necesita minutos de CPU y codificadores especializados, mucho más de lo que está pensado para una
+                    función edge. Súbelo a <strong className="text-gray-900">Stream</strong>, que codifica versiones con bitrate adaptativo y
+                    las entrega con su propio reproductor o con cualquier reproductor HLS/DASH. La plataforma solo guarda el id del vídeo
+                    junto al producto o al artículo.
+                </P>
+
+                <H2>Medirlo</H2>
+                <P>
+                    Controla los bytes de imagen por página vista, la tasa de aciertos de caché del edge en la ruta de imágenes, el Largest
+                    Contentful Paint en móvil y el número de variantes distintas solicitadas al día. Si el número de variantes sube, alguien
+                    está llamando a la ruta con anchos fuera de tu lista, o la lista ha crecido demasiado.
+                </P>
+
+                <Callout title="Siguiente paso">
+                    Todo lo visto hasta ahora es código que tiene que llegar a producción con seguridad. <A href="/academia/edge-serverless/desplegar-probar-lanzar-workers/">Desplegar,
+                    probar y lanzar</A> cierra la serie con el pipeline de publicación.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

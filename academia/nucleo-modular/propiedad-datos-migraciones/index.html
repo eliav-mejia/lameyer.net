@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Propiedad de datos y migraciones - Academia Lameyer</title>
+    <meta name="description" content="Un módulo propietario por tabla, sustituyendo los joins entre módulos por llamadas a contratos, modelos de lectura y eventos outbox, y migraciones expandir-y-contraer sin tiempo de inactividad.">
+    <link rel="canonical" href="https://lameyer.net/academia/nucleo-modular/propiedad-datos-migraciones/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Da a cada módulo su propio esquema de base de datos',
+            'Concede al rol de BD de cada módulo acceso solo a su esquema',
+            'Sustituye los joins entre módulos por llamadas o modelos de lectura',
+            'Publica los eventos a través de una tabla outbox',
+            'Cambia los esquemas con expandir, migrar y contraer',
+            'Mantén las migraciones dentro del módulo propietario',
+        ];
+
+        const OPTIONS = [
+            { need: 'Un registro de otro módulo, ahora', use: 'Llamar a su contrato', cost: 'Sencillo. Una llamada extra por petición.' },
+            { need: 'Listados que combinan datos de dos módulos', use: 'Modelo de lectura local alimentado por eventos', cost: 'Lecturas rápidas, consistencia eventual.' },
+            { need: 'Reaccionar cuando algo ocurre en otro lugar', use: 'Suscribirse a sus eventos', cost: 'Desacoplado; necesita manejadores idempotentes.' },
+            { need: 'Informes de todo el negocio', use: 'Copia analítica (data warehouse)', cost: 'Nunca la usan las funcionalidades en vivo.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Puedes trazar límites de módulo perfectos en el código y seguir teniendo un monolito, porque todos los módulos leen y
+                    escriben en las mismas tablas. Un join desde <Code>orders</Code> hacia <Code>billing.invoices</Code> es una dependencia
+                    que el linter nunca ve, y el día que billing renombra una columna, orders se rompe. La regla que lo arregla es fácil de
+                    enunciar:{' '}
+                    <strong className="text-gray-900">cada tabla tiene exactamente un módulo propietario, y solo ese módulo escribe en ella o la lee directamente.</strong>
+                </P>
+
+                <H2>Haz física la propiedad</H2>
+                <P>
+                    No necesitas servidores de base de datos separados. En Postgres, da a cada módulo su propio esquema y su propio rol. La
+                    base de datos hace cumplir entonces lo que antes hacía la revisión de código.
+                </P>
+                <CodeBlock title="migrations/000_modules.sql">{`CREATE SCHEMA billing;
+CREATE SCHEMA catalog;
+CREATE SCHEMA orders;
+
+CREATE ROLE billing_svc LOGIN;
+GRANT USAGE, CREATE ON SCHEMA billing TO billing_svc;
+ALTER DEFAULT PRIVILEGES IN SCHEMA billing
+  GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO billing_svc;
+
+-- orders_svc no recibe permisos sobre billing: una consulta entre módulos ahora falla de forma visible.`}</CodeBlock>
+                <P>
+                    El núcleo sigue funcionando como un único desplegable. Cada módulo simplemente abre su pool de conexiones con su propio
+                    rol. Si más adelante extraes un módulo a su propio servicio, su esquema puede mudarse a su propia base de datos sin
+                    desenredar nada.
+                </P>
+
+                <H2>Cómo obtienen los datos los demás módulos</H2>
+                <Table
+                    columns={[{ key: 'need', label: 'Necesidad' }, { key: 'use', label: 'Usa', accent: true }, { key: 'cost', label: 'Contrapartida' }]}
+                    rows={OPTIONS}
+                />
+                <P>
+                    La primera fila cubre la mayoría de las necesidades. Los modelos de lectura compensan cuando una pantalla lista cientos de
+                    filas que necesitan datos de otro módulo, como un listado de pedidos que muestra el estado de la factura.
+                </P>
+
+                <H2>Eventos sin mensajes perdidos: el outbox</H2>
+                <P>
+                    Publicar un evento justo después de un commit en la base de datos deja un hueco: si el proceso se cae entre ambos, la
+                    factura existe pero nadie se entera. El <strong className="text-gray-900">patrón outbox</strong> lo cierra escribiendo el
+                    evento en la misma transacción que los datos. Después, un relé lo envía a la cola.
+                </P>
+                <CodeBlock title="core/billing/internal/invoice.ts">{`await db.transaction(async (tx) => {
+  const invoice = await tx.insert(invoices).values(data).returning();
+  await tx.insert(outbox).values({
+    topic: 'billing.invoice_issued.v1',
+    key: invoice.id,
+    payload: { invoiceId: invoice.id, customerId: data.customerId, total: invoice.total },
+  });
+});
+// Un relé (cron o LISTEN/NOTIFY) lee las filas sin enviar, las publica
+// en la cola y las marca como enviadas. La entrega es al menos una vez.`}</CodeBlock>
+                <P>
+                    Como la entrega es al menos una vez, los consumidores deben ser idempotentes. La serie{' '}
+                    <A href="/academia/automatizacion-flujos/automatizacion-serverless-flujos/">Automatización de flujos</A> trata el lado de la cola, incluida
+                    la deduplicación por clave de evento.
+                </P>
+
+                <H2>Migraciones: expandir, migrar, contraer</H2>
+                <P>
+                    En MC-SE, las funciones edge y los flujos se despliegan por separado del núcleo, así que durante un tiempo el código
+                    antiguo y el nuevo se ejecutan a la vez. Una migración que renombra una columna en un solo paso rompe la versión que no
+                    la espera. Divide cada cambio de esquema incompatible en tres lanzamientos:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Expandir.</strong> Añade la nueva columna o tabla junto a la antigua. Nadie la lee todavía.</>,
+                    <><strong className="text-gray-900">Migrar.</strong> Despliega código que escribe en ambas, rellena las filas antiguas por lotes y después cambia las lecturas a la nueva columna.</>,
+                    <><strong className="text-gray-900">Contraer.</strong> Cuando ningún código desplegado use la columna antigua, elimínala.</>,
+                ]} />
+                <CodeBlock title="billing/migrations: renombrar amount -> total_cents">{`-- 041_expand.sql
+ALTER TABLE billing.invoices ADD COLUMN total_cents bigint;
+
+-- 042_backfill.sql (por lotes, para evitar bloqueos largos)
+UPDATE billing.invoices SET total_cents = amount
+WHERE total_cents IS NULL AND id IN (
+  SELECT id FROM billing.invoices WHERE total_cents IS NULL LIMIT 5000
+);
+
+-- 043_contract.sql (un lanzamiento posterior, cuando las lecturas ya han cambiado)
+ALTER TABLE billing.invoices ALTER COLUMN total_cents SET NOT NULL;
+ALTER TABLE billing.invoices DROP COLUMN amount;`}</CodeBlock>
+                <Callout title="Las migraciones pertenecen al módulo">
+                    Guarda las migraciones de cada módulo en su propia carpeta (<Code>core/billing/migrations/</Code>) y ejecútalas con el rol
+                    de ese módulo. Una migración que toca dos esquemas es señal de que un límite está en el lugar equivocado.
+                </Callout>
+
+                <H2>Medir el progreso</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Consultas entre esquemas</strong> detectadas en los logs de la base de datos: objetivo cero.</>,
+                    <><strong className="text-gray-900">Tiempo de inactividad por migración</strong>: objetivo cero, con expandir-y-contraer.</>,
+                    <><strong className="text-gray-900">Retraso del outbox</strong>: cuánto esperan los eventos antes de publicarse, con alerta cuando crece.</>,
+                ]} />
+
+                <Callout title="Siguiente paso">
+                    La base de datos ahora es privada y el contrato es público, así que el contrato es lo que no se puede romper.{' '}
+                    <A href="/academia/nucleo-modular/pruebas-contrato-versionado/">Pruebas de contrato y versionado</A> se asegura de que no se rompa.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

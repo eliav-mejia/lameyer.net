@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.7 — Academia, revisión de traducción y flujo de datos</title>
+<link rel="stylesheet" href="doc.css">
+<style>
+    .layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 6px 0 10px; }
+    .layers div { border: 1px solid var(--blue-line); border-top: 3px solid var(--blue-mid); border-radius: 3px; padding: 6px 8px; background: #fff; }
+    .layers b { display: block; font-size: 7pt; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 2px; }
+    .layers p { margin: 0; font-size: 7.8pt; }
+    td.slug { font-family: Consolas, monospace; font-size: 7pt; }
+</style>
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Documentación de desarrollo de software</div>
+    <h1>Versión <span class="v">1.0.7</span> — Academia, revisión de traducción y flujo de datos</h1>
+    <div class="sub">El blog pasa a llamarse Academia, con carpetas, series y slugs en español. Stack sale del menú principal y entra en la sección de canales de Comunidad.
+        Incluye la revisión de traducción, la alineación de palabras clave entre artículos relacionados y un análisis de flujo de datos:
+        dependencia de datos directa, dependencia de control y acoplamiento de datos.</div>
+</header>
+
+<div class="meta">
+    <div><b>Versión</b><span>1.0.7</span></div>
+    <div><b>Fecha</b><span>2026-10-06</span></div>
+    <div><b>Base</b><span><code>acdfdcd</code> (1.0.6 en curso)</span></div>
+    <div><b>Alcance</b><span>Navegación · Comunidad · Academia · glosario</span></div>
+</div>
+
+<div class="note"><b>1.0.6 sigue abierta.</b> Las medidas de seguridad de 1.0.6 no cambian con esta versión. 1.0.7 solo toca navegación, contenido y rutas;
+    las URLs nuevas (<code>/academia/…</code>) deberán incluirse en las comprobaciones de cabeceras de 1.0.6 (§6, prueba 17).</div>
+
+<h2><span class="n">1</span>Resumen</h2>
+<div class="layers">
+    <div><b>Navegación</b><p>Menú principal: Desarrollo, Componentes, Comunidad, Academia. Stack ya no aparece; su página sigue en <code>/pages/stack/</code> y en ella se resalta Comunidad.</p></div>
+    <div><b>Comunidad · Canales</b><p>«Conecte con nosotros» pasa a tres tarjetas: Stack (enlace interno, misma pestaña), Skool y GitHub (externos, pestaña nueva). Se elimina la tarjeta de correo.</p></div>
+    <div><b>Academia</b><p><code>/blog/</code> → <code>/academia/</code>. Series, carpetas y los 39 slugs en español; archivos, identificadores y textos renombrados. Las URLs antiguas redirigen desde <code>404.html</code>.</p></div>
+</div>
+
+<h2><span class="n">2</span>Navegación y Comunidad</h2>
+<table>
+    <tr><th style="width:24%">Archivo</th><th>Cambio</th></tr>
+    <tr><td><code>js/layout.jsx</code></td><td><code>NAV_LINKS</code>: se quita <code>{ href: '/pages/stack/', label: 'Stack' }</code>; <code>Blog</code> → <code>{ href: '/academia/', label: 'Academia' }</code>.
+        Comunidad recibe <code>also: ['/pages/stack/']</code> e <code>isActive(link)</code> comprueba <code>href</code> y <code>also</code>, así el menú marca Comunidad dentro de Stack.
+        Como el menú se genera desde <code>NAV_LINKS</code>, el cambio llega a todos los <code>index.html</code> (escritorio y menú móvil).</td></tr>
+    <tr><td><code>pages/community/index.html</code></td><td><code>CHANNELS</code> = Stack (<code>/pages/stack/</code>), Skool (<code>https://www.skool.com/</code>, <b>provisional</b>), GitHub. Rejilla de 3 columnas.
+        <code>target="_blank"</code> y <code>rel="noopener noreferrer"</code> solo para enlaces <code>http</code>. Se elimina la tarjeta «Correo» (el boletín sigue usando <code>CONTACT_EMAIL</code>).</td></tr>
+    <tr><td><code>index.html</code></td><td>El enlace «Ver stack tecnológico» de la portada se mantiene; el atajo antiguo <code>#/blog</code> lleva a <code>/academia/</code>.</td></tr>
+</table>
+
+<h2><span class="n">3</span>Blog → Academia</h2>
+<h3>3.1 Archivos e identificadores</h3>
+<table>
+    <tr><th style="width:34%">Antes</th><th style="width:34%">Después</th><th>Notas</th></tr>
+    <tr><td><code>blog/</code></td><td><code>academia/</code></td><td>Movido con <code>git mv</code>: el historial se conserva.</td></tr>
+    <tr><td><code>js/blog.jsx</code> · <code>css/blog.css</code></td><td><code>js/academia.jsx</code> · <code>css/academia.css</code></td><td><code>academia.css</code> sigue sin enlazarse (pendiente de 1.0.3).</td></tr>
+    <tr><td><code>BLOG_POSTS</code>, <code>BLOG_TYPES</code>, <code>BLOG_HIGHLIGHTS</code></td><td><code>ACADEMIA_POSTS</code>, <code>ACADEMIA_TYPES</code>, <code>ACADEMIA_HIGHLIGHTS</code></td><td>También <code>BlogDashboard</code>, <code>BlogPostLayout</code>, <code>BlogSection</code> → <code>Academia…</code>.</td></tr>
+    <tr><td>«… - Blog de Lameyer», «Panel del blog», «BLOG · …»</td><td>«… - Academia Lameyer», «Panel de la academia», «ACADEMIA · …»</td><td>El tipo schema.org <code>BlogPosting</code> y <code>"@type": "Blog"</code> de los ejemplos JSON-LD se mantienen: son vocabulario, no texto.</td></tr>
+</table>
+
+<h3>3.2 Series</h3>
+<table>
+    <tr><th style="width:18%">id anterior</th><th style="width:26%">Carpeta / id nuevo</th><th>Nombre visible</th></tr>
+    <tr><td><code>security</code></td><td><code>seguridad-apis</code></td><td>Seguridad de APIs</td></tr>
+    <tr><td><code>search</code></td><td><code>busqueda-visibilidad</code></td><td>Búsqueda de código y visibilidad</td></tr>
+    <tr><td><code>core</code></td><td><code>nucleo-modular</code></td><td>Núcleo Modular (antes «Modular Core»)</td></tr>
+    <tr><td><code>serverless</code></td><td><code>edge-serverless</code></td><td>Edge Serverless (antes «Serverless Edge»)</td></tr>
+    <tr><td><code>workflows</code></td><td><code>automatizacion-flujos</code></td><td>Automatización de flujos</td></tr>
+</table>
+<p>Los ids de tipo y zona (<code>rate</code>, <code>crawl</code>, <code>retrieval</code>…) siguen siendo claves internas cortas y no se ven en la página; sí aparecen en <code>?type=</code>, que se mantiene compatible.
+    El acrónimo MC-SE se conserva y se explica donde se define: <i>Modular Core + Serverless Edge</i>: núcleo modular + edge serverless.</p>
+
+<h3>3.3 Artículos (39)</h3>
+<table>
+    <tr><th style="width:50%">/blog/… (anterior)</th><th>/academia/… (nuevo)</th></tr>
+    <tr><td class="slug">/blog/workflows/serverless-workflow-automation/</td><td class="slug">/academia/automatizacion-flujos/automatizacion-serverless-flujos/</td></tr>
+    <tr><td class="slug">/blog/search/code-search-repository-organization/</td><td class="slug">/academia/busqueda-visibilidad/busqueda-codigo-organizacion-repositorios/</td></tr>
+    <tr><td class="slug">/blog/search/search-as-code-sac/</td><td class="slug">/academia/busqueda-visibilidad/busqueda-como-codigo-sac/</td></tr>
+    <tr><td class="slug">/blog/search/semantic-vector-search/</td><td class="slug">/academia/busqueda-visibilidad/busqueda-semantica-vectorial/</td></tr>
+    <tr><td class="slug">/blog/search/core-web-vitals-page-speed/</td><td class="slug">/academia/busqueda-visibilidad/core-web-vitals-velocidad-pagina/</td></tr>
+    <tr><td class="slug">/blog/search/core-web-vitals-x-site-search/</td><td class="slug">/academia/busqueda-visibilidad/core-web-vitals-x-busqueda-sitio/</td></tr>
+    <tr><td class="slug">/blog/search/benchmark-curation-reap-harvest/</td><td class="slug">/academia/busqueda-visibilidad/curacion-benchmarks-reap-harvest/</td></tr>
+    <tr><td class="slug">/blog/search/structured-data-x-repositories/</td><td class="slug">/academia/busqueda-visibilidad/datos-estructurados-x-repositorios/</td></tr>
+    <tr><td class="slug">/blog/search/structured-data/</td><td class="slug">/academia/busqueda-visibilidad/datos-estructurados/</td></tr>
+    <tr><td class="slug">/blog/search/benchmarks-x-search-as-code/</td><td class="slug">/academia/busqueda-visibilidad/benchmarks-x-busqueda-como-codigo/</td></tr>
+    <tr><td class="slug">/blog/search/static-generation-x-vector-search/</td><td class="slug">/academia/busqueda-visibilidad/generacion-estatica-x-busqueda-vectorial/</td></tr>
+    <tr><td class="slug">/blog/search/semantic-html-markup/</td><td class="slug">/academia/busqueda-visibilidad/marcado-html-semantico/</td></tr>
+    <tr><td class="slug">/blog/search/crawlability-indexing/</td><td class="slug">/academia/busqueda-visibilidad/rastreabilidad-indexacion/</td></tr>
+    <tr><td class="slug">/blog/search/crawlability-x-faceted-search/</td><td class="slug">/academia/busqueda-visibilidad/rastreabilidad-x-busqueda-facetas/</td></tr>
+    <tr><td class="slug">/blog/search/ssr-static-generation/</td><td class="slug">/academia/busqueda-visibilidad/ssr-generacion-estatica/</td></tr>
+    <tr><td class="slug">/blog/serverless/edge-storage-kv-d1-r2/</td><td class="slug">/academia/edge-serverless/almacenamiento-edge-kv-d1-r2/</td></tr>
+    <tr><td class="slug">/blog/serverless/serverless-edge-architecture/</td><td class="slug">/academia/edge-serverless/arquitectura-edge-serverless/</td></tr>
+    <tr><td class="slug">/blog/serverless/deploy-test-rollout-workers/</td><td class="slug">/academia/edge-serverless/desplegar-probar-lanzar-workers/</td></tr>
+    <tr><td class="slug">/blog/serverless/serverless-in-front-of-iaas/</td><td class="slug">/academia/edge-serverless/edge-x-iaas-hibrido/</td></tr>
+    <tr><td class="slug">/blog/serverless/routing-caching-auth-edge/</td><td class="slug">/academia/edge-serverless/enrutado-cache-autenticacion-edge/</td></tr>
+    <tr><td class="slug">/blog/serverless/edge-functions-workers/</td><td class="slug">/academia/edge-serverless/funciones-edge-workers/</td></tr>
+    <tr><td class="slug">/blog/serverless/serverless-integration-paas/</td><td class="slug">/academia/edge-serverless/funciones-x-paas-integracion/</td></tr>
+    <tr><td class="slug">/blog/serverless/ai-at-the-edge-workers-ai/</td><td class="slug">/academia/edge-serverless/ia-en-el-edge-workers-ai/</td></tr>
+    <tr><td class="slug">/blog/serverless/images-media-at-the-edge/</td><td class="slug">/academia/edge-serverless/imagenes-multimedia-edge/</td></tr>
+    <tr><td class="slug">/blog/serverless/logs-tracing-cost/</td><td class="slug">/academia/edge-serverless/logs-trazas-costes/</td></tr>
+    <tr><td class="slug">/blog/serverless/multi-tenant-saas-metering/</td><td class="slug">/academia/edge-serverless/medicion-x-saas-multiinquilino/</td></tr>
+    <tr><td class="slug">/blog/serverless/scheduled-jobs-cron-triggers/</td><td class="slug">/academia/edge-serverless/tareas-programadas-cron/</td></tr>
+    <tr><td class="slug">/blog/serverless/realtime-websockets-durable-objects/</td><td class="slug">/academia/edge-serverless/tiempo-real-websockets-durable-objects/</td></tr>
+    <tr><td class="slug">/blog/core/modular-core-architecture/</td><td class="slug">/academia/nucleo-modular/arquitectura-nucleo-modular/</td></tr>
+    <tr><td class="slug">/blog/core/contracts-typed-apis/</td><td class="slug">/academia/nucleo-modular/contratos-apis-tipadas/</td></tr>
+    <tr><td class="slug">/blog/core/domain-modules-boundaries/</td><td class="slug">/academia/nucleo-modular/modulos-dominio-limites/</td></tr>
+    <tr><td class="slug">/blog/core/shared-packages-workspaces/</td><td class="slug">/academia/nucleo-modular/paquetes-compartidos-espacios-trabajo/</td></tr>
+    <tr><td class="slug">/blog/core/data-ownership-migrations/</td><td class="slug">/academia/nucleo-modular/propiedad-datos-migraciones/</td></tr>
+    <tr><td class="slug">/blog/core/contract-testing-versioning/</td><td class="slug">/academia/nucleo-modular/pruebas-contrato-versionado/</td></tr>
+    <tr><td class="slug">/blog/security/edge-layer-ddos-dns/</td><td class="slug">/academia/seguridad-apis/capa-edge-ddos-dns/</td></tr>
+    <tr><td class="slug">/blog/security/waf-bot-layer-layer-7/</td><td class="slug">/academia/seguridad-apis/capa-waf-bots-capa-7/</td></tr>
+    <tr><td class="slug">/blog/security/rate-limiting/</td><td class="slug">/academia/seguridad-apis/limitacion-de-tasa/</td></tr>
+    <tr><td class="slug">/blog/security/api-endpoint-protection/</td><td class="slug">/academia/seguridad-apis/proteccion-endpoints-api/</td></tr>
+    <tr><td class="slug">/blog/security/cloudflare-tunnel/</td><td class="slug">/academia/seguridad-apis/tunel-cloudflare/</td></tr>
+</table>
+
+<h3>3.4 Redirecciones</h3>
+<p><code>404.html</code> pasa de 27 a 67 entradas en <code>moved</code>: <code>/blog/</code>, las 27 direcciones antiguas (archivos <code>.html</code> planos y carpetas con mayúsculas), ahora apuntando
+    directamente a la ruta final (sin cadenas de redirección), y las 39 rutas <code>/blog/&lt;serie&gt;/&lt;slug&gt;/</code>. Un mapa <code>series</code> traduce el parámetro
+    <code>?series=</code> antiguo (<code>/blog/?series=core</code> → <code>/academia/?series=nucleo-modular</code>).</p>
+
+<h2><span class="n">4</span>Revisión de traducción</h2>
+<p><b>Criterio.</b> Se traduce todo concepto con un equivalente asentado en español; se mantienen los nombres de producto (Workers, Durable Objects, API Shield, Cloudflare Tunnel, Bot Management),
+    los acrónimos y métricas (SSR, SSG, LCP, INP, CLS, JSON-LD, Core Web Vitals), los nombres de archivos, cabeceras y APIs (<code>sitemap.xml</code>, <code>robots.txt</code>, <code>Sunset</code>, Server-Sent Events)
+    y los préstamos de uso general en español técnico (benchmark, build en el cuerpo del texto, logs, edge, serverless, webhook). Cuando el término cambia de género se corrige la concordancia
+    («el rate limiting» → «la limitación de tasa», «los tests de contrato guiados» → «las pruebas de contrato guiadas»).</p>
+<table>
+    <tr><th style="width:30%">Antes</th><th style="width:30%">Después</th><th>Dónde</th></tr>
+    <tr><td>Modular Core · Serverless Edge</td><td>Núcleo Modular · Edge Serverless</td><td>Series, tipos, títulos, portada, artículos</td></tr>
+    <tr><td>Rate limiting · Rate limit</td><td>Limitación de tasa · Límite de tasa</td><td>Tipo, título, etiquetas, artículos</td></tr>
+    <tr><td>Search as Code (SaC)</td><td>Búsqueda como código (SaC)</td><td>Tipo, título, cruces, artículos</td></tr>
+    <tr><td>Tests de contrato</td><td>Pruebas de contrato</td><td>Tipo, etiquetas, artículos</td></tr>
+    <tr><td>Paquetes compartidos y workspaces · Workspaces</td><td>… y espacios de trabajo · Espacios de trabajo</td><td>Tipo, título, etiqueta (<code>pnpm workspaces</code> se mantiene: es la función de pnpm)</td></tr>
+    <tr><td>Scraping</td><td>Raspado de datos</td><td>Faceta (Seguridad de APIs), artículos WAF y limitación</td></tr>
+    <tr><td>Tunnel (abreviatura)</td><td>Túnel</td><td>Diagrama de capas</td></tr>
+    <tr><td>SYN / UDP flood · Payloads malformados</td><td>Inundación SYN / UDP · Cargas útiles malformadas</td><td>Etiquetas y facetas</td></tr>
+    <tr><td>Topics · Chunking · Boosts · Landmarks</td><td>Temas de GitHub · Fragmentación · Impulsos de relevancia · Regiones ARIA</td><td>Etiquetas</td></tr>
+    <tr><td>Canonical · Sitemaps · Soft 404 · Rich Results Test</td><td>URL canónica · <code>sitemap.xml</code> · 404 blandos · Prueba de resultados enriquecidos</td><td>Etiquetas y facetas</td></tr>
+    <tr><td>Pull requests · Builds incrementales / afectados · Debounce</td><td>Solicitudes de cambios (PR) · Compilaciones incrementales / afectadas · Antirrebote (debounce)</td><td>Etiquetas</td></tr>
+    <tr><td>Lanzamientos / Migraciones big bang · Rollback(s)</td><td>… de golpe · Reversión / Reversiones lentas</td><td>Facetas y etiquetas</td></tr>
+    <tr><td>API gateway · Gateways monolíticos · Hostnames personalizados</td><td>Pasarela de API · Pasarelas monolíticas · Nombres de host personalizados</td><td>Etiquetas, facetas, título de Enrutado</td></tr>
+    <tr><td>S3 API · Hibernation API · Carga por polling</td><td>API de S3 · API de hibernación · Carga por sondeo</td><td>Etiquetas y facetas</td></tr>
+    <tr><td>Integration PaaS · Strangler fig</td><td>PaaS de integración · Patrón estrangulador</td><td>Etiquetas de cruces</td></tr>
+    <tr><td>«Un build, dos públicos»</td><td>«Una compilación, dos públicos»</td><td>Título de cruce</td></tr>
+</table>
+
+<h2><span class="n">5</span>Alineación de palabras clave para relaciones</h2>
+<p>La academia relaciona artículos de dos formas: por <b>tipo</b> (la lista «Cruces» / «Tratado a fondo» de cada artículo comparte un id de <code>type</code> o <code>crosses</code>) y por
+    <b>palabras clave</b> (la búsqueda del panel compara título, resumen, etiquetas de tipo, <code>tags</code> y <code>threats</code>; los chips de faceta comparan <code>threats</code> por igualdad exacta).
+    La primera relación es estructural; la segunda solo funciona si el mismo concepto se escribe igual en ambos artículos. Se revisaron los 8 cruces contra el artículo principal de cada tipo que cruzan (24 pares).</p>
+<table>
+    <tr><th style="width:30%">Cruce</th><th style="width:26%">Par sin palabra común</th><th>Palabra añadida (presente en el texto del cruce)</th></tr>
+    <tr><td>Datos estructurados × repositorios</td><td>Rastreabilidad e indexación</td><td><code>sitemap.xml</code></td></tr>
+    <tr><td>Core Web Vitals × búsqueda en el sitio</td><td>Búsqueda vectorial · HTML semántico</td><td><code>Embeddings</code> · <code>Regiones ARIA</code> (el artículo explica <code>&lt;search&gt;</code> como landmark)</td></tr>
+    <tr><td>Rastreabilidad × búsqueda por facetas</td><td>Búsqueda como código · SSR</td><td><code>Facetas</code> en Búsqueda como código (trata los filtros del sitio) · <code>Prerenderizado</code></td></tr>
+    <tr><td>Funciones × PaaS de integración</td><td>Enrutado · Almacenamiento</td><td><code>Pasarela de API</code> · <code>KV</code>, <code>D1</code></td></tr>
+    <tr><td>Edge × IaaS (híbrido)</td><td>Enrutado · Funciones</td><td><code>Pasarela de API</code> · <code>Cloudflare Workers</code></td></tr>
+    <tr><td>Medición × SaaS multiinquilino</td><td>Almacenamiento</td><td><code>D1</code></td></tr>
+</table>
+<p><b>Resultado:</b> pares sin palabra común 10 → 0; etiquetas compartidas por dos o más artículos 36 → 40 (194 etiquetas distintas). La unificación del glosario también fusionó variantes:
+    <code>Sitemaps</code> = <code>sitemap.xml</code> y <code>Canonical</code> = URL canónica en los dos artículos de rastreo.</p>
+<div class="gap"><b>Pendiente.</b> Facetas que solo aparecen en un artículo (no crean relación al filtrar): Seguridad 8 de 13, Búsqueda 11 de 26, Núcleo 10 de 14, Edge 33 de 41, Flujos 4 de 4.
+    En Edge Serverless conviene agrupar facetas en una lista cerrada por zona antes de añadir más artículos.</div>
+
+<h2><span class="n">6</span>Análisis de flujo de datos</h2>
+<p>Se sigue cómo viaja cada dato del sitio desde donde se declara hasta donde decide algo. Tres relaciones: <b>dependencia de datos directa</b> (un valor se usa tal cual en otro punto: si cambia uno,
+    el otro debe cambiar), <b>dependencia de control</b> (un valor decide qué rama se ejecuta o qué se muestra) y <b>acoplamiento de datos</b> (dos módulos se comunican solo pasando datos
+    elementales por parámetros, la forma de acoplamiento más débil y deseable).</p>
+
+<h3>6.1 Dependencia de datos directa</h3>
+<table>
+    <tr><th style="width:26%">Productor</th><th style="width:30%">Consumidor</th><th>Consecuencia / control en 1.0.7</th></tr>
+    <tr><td><code>SERIES[].id</code> (<code>academia.jsx</code>)</td><td>Nombre de carpeta <code>academia/&lt;id&gt;/</code>; <code>p.path</code>; <code>?series=</code> en portada, artículos y 404</td><td>Cambiar el id exige mover la carpeta y actualizar <code>ACADEMIA_HIGHLIGHTS</code>, enlaces <code>&lt;A&gt;</code> y el mapa <code>series</code> del 404. Hecho para las 5 series.</td></tr>
+    <tr><td><code>ACADEMIA_POSTS[].slug</code></td><td>Carpeta del artículo; <code>p.path = /academia/${serie}/${slug}/</code>; enlaces internos entre artículos</td><td>39 slugs y 39 carpetas renombrados juntos; comprobado que todo <code>/academia/a/b/</code> enlazado existe.</td></tr>
+    <tr><td><code>threats[]</code> (texto)</td><td>Chips de faceta, <code>?threats=</code>, enlaces de la barra lateral</td><td>Igualdad exacta de cadenas: traducir una faceta en un artículo y no en otro rompe la relación. El glosario se aplicó a todo <code>academia.jsx</code> a la vez.</td></tr>
+    <tr><td><code>NAV_LINKS</code></td><td>Cabecera de escritorio y menú móvil de todas las páginas</td><td>Un solo cambio retira Stack de todo el sitio.</td></tr>
+    <tr><td><code>CHANNELS[].href</code></td><td><code>target</code>/<code>rel</code> de cada tarjeta</td><td>El tipo de enlace (interno/externo) se deriva del propio <code>href</code>; no hay un campo duplicado que pueda contradecirlo.</td></tr>
+</table>
+
+<h3>6.2 Dependencia de control</h3>
+<table>
+    <tr><th style="width:30%">Condición</th><th style="width:30%">Rama controlada</th><th>Observación</th></tr>
+    <tr><td><code>ACADEMIA_POSTS.some(p =&gt; p.path === currentPath())</code> en <code>renderPost</code></td><td>Artículo completo o aviso «Esta entrada aún no está en ACADEMIA_POSTS»</td><td>La URL del navegador controla qué se renderiza. Los 39 artículos se cargaron en Edge headless: ninguno cae en el aviso.</td></tr>
+    <tr><td><code>readParams()</code>: <code>series</code> desconocida</td><td>Vuelve a <code>SERIES[0]</code> (Seguridad) sin aviso</td><td>Riesgo silencioso: <code>/academia/?series=core</code> mostraría Seguridad. Mitigado para las URLs antiguas por el 404; no hay enlaces nuevos con ids antiguos.</td></tr>
+    <tr><td><code>moved[path]</code> en <code>404.html</code></td><td>Redirección o página «no encontrada»</td><td>7 casos probados: <code>/blog/</code>, <code>?series=core</code>, ruta por serie, <code>.html</code> plano, carpeta con mayúsculas, <code>index.html</code>, ruta inexistente.</td></tr>
+    <tr><td><code>isActive(link)</code></td><td>Resaltado y <code>aria-current</code> del menú</td><td>Con <code>also</code>, <code>/pages/stack/</code> activa Comunidad.</td></tr>
+    <tr><td><code>channel.href.startsWith('http')</code> · <code>channel.slug</code></td><td>Pestaña nueva · icono de Simple Icons o inicial</td><td>Stack se abre en la misma pestaña; Skool no tiene icono en Simple Icons (404), usa la inicial.</td></tr>
+</table>
+
+<h3>6.3 Acoplamiento de datos (Data Coupling)</h3>
+<p>Interfaces que ya cumplen acoplamiento de datos (solo parámetros elementales): <code>renderPost(CONTROLS, Content)</code>, <code>RegisterCTA({ title, text })</code>, <code>LayerFlow({ series, active, onSelect })</code>,
+    <code>stepLabel(type)</code>, <code>formatDate(iso)</code>, <code>isActive(link)</code>. Cada una recibe lo que necesita y no lee estado ajeno.</p>
+<p>Donde <b>no</b> hay acoplamiento de datos: los scripts se comunican por el ámbito global compartido de Babel (<code>layout.jsx</code> declara <code>renderPage</code>, <code>CONTACT_EMAIL</code>, hooks;
+    <code>academia.jsx</code> y las páginas los leen sin pasarlos). Es acoplamiento común: un nombre redeclarado en otro archivo sustituye al anterior sin aviso (ya advertido en el readme).
+    Además, los nombres de serie están duplicados entre <code>SERIES</code> y <code>ACADEMIA_HIGHLIGHTS</code> (portada); el glosario los cambió en ambos, pero nada lo garantiza.</p>
+<div class="gap"><b>Recomendación.</b> Al migrar a módulos (opción A o B de 1.0.5): exportar <code>SERIES</code> y derivar de él las tarjetas de la portada y el mapa de redirecciones,
+    y pasar a <code>renderPost</code> el slug esperado en lugar de deducirlo de la URL, para que una carpeta mal nombrada falle en la compilación y no en el navegador.</div>
+
+<h2><span class="n">7</span>Pruebas realizadas</h2>
+<table>
+    <tr><th style="width:4%">#</th><th>Comprobación</th><th style="width:34%">Resultado</th></tr>
+    <tr><td>1</td><td>Cargar los 39 artículos de <code>/academia/&lt;serie&gt;/&lt;slug&gt;/</code> en Edge headless</td><td>39/39 muestran «Panel de la academia · &lt;serie&gt;»</td></tr>
+    <tr><td>2</td><td>Panel <code>/academia/</code></td><td>5 series (5, 14, 6, 13, 1 artículos); menú sin Stack, «Academia» activa</td></tr>
+    <tr><td>3</td><td>URLs antiguas a través de <code>404.html</code> (servidor local que imita GitHub Pages)</td><td>6 redirecciones correctas; ruta inexistente → «Página no encontrada»</td></tr>
+    <tr><td>4</td><td><code>/pages/community/</code></td><td>Stack (<code>/pages/stack/</code>, misma pestaña), Skool y GitHub (<code>_blank</code>); sin correo</td></tr>
+    <tr><td>5</td><td><code>/pages/stack/</code></td><td>Comunidad resaltada en el menú</td></tr>
+    <tr><td>6</td><td>Búsqueda de restos: <code>/blog/</code>, <code>blog.jsx</code>, <code>BLOG_</code> fuera de <code>_docs/</code> y de las claves antiguas de <code>404.html</code></td><td>Ninguno</td></tr>
+</table>
+
+<h2><span class="n">8</span>Pendiente</h2>
+<ul>
+    <li><b>URL de Skool</b>: <code>https://www.skool.com/</code> es provisional; sustituirla en <code>CHANNELS</code> (<code>pages/community/index.html</code>).</li>
+    <li>Facetas de un solo artículo (§5) y lista cerrada por zona en Edge Serverless.</li>
+    <li>Alias de <code>?series=</code> antiguos dentro de <code>readParams()</code> si aparecen enlaces externos a <code>/academia/?series=core</code> (§6.2).</li>
+    <li>Los documentos 1.0.1–1.0.6 no se modifican: siguen citando <code>/blog/</code> y <code>js/blog.jsx</code> como estaban en su versión.</li>
+</ul>
+
+<footer class="doc-foot"><span>Lameyer.net · 1.0.7</span><span>2026-10-06 · Sincronizado con readme.md (Versiones → 1.0.7)</span></footer>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marcado HTML semántico - Academia Lameyer</title>
+    <meta name="description" content="HTML semántico para sitios técnicos: landmarks, un esquema de encabezados real, enlaces frente a botones, time, pre y code, para que navegadores, rastreadores y troceadores lean bien las páginas.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/marcado-html-semantico/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Usa header, nav, main, article, aside y footer',
+            'Un h1 por página, sin saltar niveles de encabezado',
+            'Los enlaces navegan, los botones actúan',
+            'Marca las fechas con time y un atributo datetime',
+            'Envuelve los ejemplos de código en pre y code',
+            'Define lang en la página y en las partes en otro idioma',
+        ];
+
+        const ELEMENTS = [
+            { el: '<main>', meaning: 'El contenido principal de la página. Exactamente uno.' },
+            { el: '<article>', meaning: 'Una pieza autónoma que tiene sentido por sí sola, como un artículo.' },
+            { el: '<nav>', meaning: 'Un bloque de enlaces de navegación. Etiquétalo si hay más de uno.' },
+            { el: '<aside>', meaning: 'Contenido relacionado pero secundario: una lista de control, artículos relacionados.' },
+            { el: '<time datetime>', meaning: 'Una fecha legible por máquinas junto a la legible por personas.' },
+            { el: '<pre><code>', meaning: 'Código preformateado. Añade una clase de lenguaje para los resaltadores.' },
+            { el: '<figure>', meaning: 'Un diagrama, tabla o listado con su <figcaption>.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Un <Code>{'<div>'}</Code> con estilo de encabezado se ve bien para quien lee con la vista y no significa nada para
+                    todos los demás. Los lectores de pantalla, los rastreadores de los buscadores, los modos de lectura de los navegadores y
+                    los troceadores que alimentan los índices vectoriales se basan en el <em>elemento</em>, no en el estilo, para entender
+                    una página. El HTML semántico es la forma más barata de hacer que una página sea comprensible para todos ellos a la vez.
+                </P>
+
+                <H2>Sopa de divs frente a significado</H2>
+                <CodeBlock title="Antes">{`<div class="top">
+  <div class="logo" onclick="goHome()">Lameyer</div>
+  <div class="link" onclick="go('/academia/')">Academia</div>
+</div>
+<div class="content">
+  <div class="big-title">Limitación de tasa</div>
+  <div class="date">26 sept 2026</div>
+  <div class="sub-title">Por qué contar por IP no basta</div>
+</div>`}</CodeBlock>
+                <CodeBlock title="Después">{`<header>
+  <a href="/">Lameyer</a>
+  <nav aria-label="Principal">
+    <a href="/academia/">Academia</a>
+  </nav>
+</header>
+<main>
+  <article>
+    <h1>Limitación de tasa</h1>
+    <time datetime="2026-09-26">26 sept 2026</time>
+    <h2>Por qué contar por IP no basta</h2>
+  </article>
+</main>`}</CodeBlock>
+                <P>
+                    La segunda versión puede tener exactamente el mismo aspecto. La diferencia es que ahora todas las herramientas saben
+                    dónde está la navegación, qué texto es el título, cuándo se publicó el artículo y cómo se anidan sus secciones.
+                </P>
+
+                <H2>Los elementos que más importan</H2>
+                <Table
+                    columns={[{ key: 'el', label: 'Elemento', mono: true }, { key: 'meaning', label: 'Significado' }]}
+                    rows={ELEMENTS}
+                />
+
+                <H2>Los encabezados son un esquema, no un tamaño de letra</H2>
+                <P>
+                    Usa un <Code>h1</Code> para el título de la página y anida <Code>h2</Code> y <Code>h3</Code> debajo sin saltar niveles.
+                    Si un encabezado debe verse más pequeño, cambia su clase, no su nivel. Quienes usan lector de pantalla saltan entre
+                    encabezados para ojear, los buscadores los usan para entender los temas y los troceadores dividen los documentos por
+                    ellos. Un esquema roto rompe las tres cosas.
+                </P>
+
+                <H2>Los enlaces navegan, los botones actúan</H2>
+                <P>
+                    Los rastreadores descubren páginas siguiendo <Code>{'<a href>'}</Code>. Un <Code>div</Code> con un <Code>onClick</Code> que
+                    cambia la URL es invisible para ellos e inalcanzable con el teclado. La regla es sencilla: si te lleva a otra URL, usa un
+                    enlace; si cambia algo en la página actual, como un filtro o un menú, usa un <Code>{'<button>'}</Code>. Esta academia sigue
+                    esa regla: las tarjetas de artículo son enlaces y los chips de filtro son botones.
+                </P>
+
+                <H2>Idioma y código</H2>
+                <P>
+                    El atributo <Code>lang</Code> indica a navegadores, lectores de pantalla y buscadores en qué idioma están leyendo.
+                    Cuando una parte de la página está en otro idioma, márcala: <Code>{'<span lang="en">Búsqueda como código</span>'}</Code>.
+                    Para el código, <Code>{'<pre><code class="language-python">'}</Code> conserva los espacios y dice a resaltadores,
+                    rastreadores y extractores que el bloque es código, no prosa.
+                </P>
+
+                <Callout title="El HTML semántico también ayuda a tu propia búsqueda">
+                    Si indexas tu documentación para búsqueda semántica, unas secciones <Code>h2</Code>/<Code>h3</Code> limpias son
+                    fragmentos naturales, cada uno con su propio título. Esa es la idea detrás de{' '}
+                    <A href="/academia/busqueda-visibilidad/generacion-estatica-x-busqueda-vectorial/">Generación estática × búsqueda vectorial</A>.
+                </Callout>
+
+                <H2>Dónde se detiene el marcado</H2>
+                <P>
+                    Los elementos semánticos describen la <em>estructura</em> de una página. Para describir qué <em>es</em> la página (un
+                    artículo de este autor, publicado en esta fecha, parte de esta serie), añade{' '}
+                    <A href="/academia/busqueda-visibilidad/datos-estructurados/">datos estructurados</A>. Y nada de este marcado sirve si solo existe después de
+                    que se ejecute JavaScript, por eso va de la mano de <A href="/academia/busqueda-visibilidad/ssr-generacion-estatica/">SSR y generación estática</A>.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

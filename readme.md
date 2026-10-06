@@ -13,11 +13,11 @@ En Lameyer.net puedes:
 
 - **Encontrar la mejor oferta en componentes.** La [tienda](https://lameyer.net/pages/components/) reúne componentes del PC, redes,
   equipo básico y herramientas, con precios en euros o pesos mexicanos según tu país, devolución en 30 días y garantía de 3 años.
-- **Aprender a diseñar, programar, desplegar y mantener tu propio software.** El [blog](https://lameyer.net/blog/) recorre paso a
-  paso cinco series: Modular Core, Serverless Edge, automatización de flujos, seguridad de APIs y búsqueda de código y visibilidad.
-- **Construir con el respaldo de la infraestructura de Lameyer.** En [Desarrollo](https://lameyer.net/pages/development/) y
-  [Stack](https://lameyer.net/pages/stack/) te contamos con qué trabajamos y cómo podemos acompañar tu proyecto, y en
-  [Comunidad](https://lameyer.net/pages/community/) encontrarás código abierto, talleres y formas de colaborar.
+- **Aprender a diseñar, programar, desplegar y mantener tu propio software.** La [academia](https://lameyer.net/academia/) recorre paso a
+  paso cinco series: Núcleo Modular, Edge Serverless, automatización de flujos, seguridad de APIs y búsqueda de código y visibilidad.
+- **Construir con el respaldo de la infraestructura de Lameyer.** En [Desarrollo](https://lameyer.net/pages/development/) te contamos
+  cómo podemos acompañar tu proyecto, y en [Comunidad](https://lameyer.net/pages/community/) encontrarás código abierto, talleres,
+  nuestro [Stack](https://lameyer.net/pages/stack/) y los canales de Skool y GitHub.
 - **Comprar con reglas claras.** Los [términos y condiciones](https://lameyer.net/pages/terminos/) se muestran según tu región,
   España o México.
 
@@ -30,6 +30,7 @@ Documentación publicada, versión a versión:
 | 1.0.3 | Fotos de producto | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.3.pdf) |
 | 1.0.5 | Versión consolidada: blog, tienda, España y México, sitio en español, términos por región | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.5.pdf) |
 | 1.0.6 | Medidas de seguridad (borrador en curso) | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.6.pdf) |
+| 1.0.7 | Academia, revisión de traducción, alineación de palabras clave y análisis de flujo de datos | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.7.pdf) |
 
 Estamos construyendo para ti. Si tienes una idea, una duda o quieres colaborar, escríbenos a contacto@lameyer.net.
 
@@ -42,7 +43,7 @@ Sin paso de build: las páginas usan Tailwind, React y Babel desde CDNs.
 
 ## Estructura de carpetas
 
-Cada página es una carpeta con un `index.html`, así las URLs quedan limpias (`/pages/stack/`, `/blog/security/rate-limiting/`)
+Cada página es una carpeta con un `index.html`, así las URLs quedan limpias (`/pages/stack/`, `/academia/seguridad-apis/limitacion-de-tasa/`)
 y todas las páginas se añaden igual: copiar una carpeta y editarla.
 
 ```
@@ -51,7 +52,7 @@ lameyer.net/
 ├── .nojekyll                     vacío: GitHub Pages sirve el repositorio tal cual (sin él, Jekyll ocultaría _docs/)
 ├── readme.md                     este archivo
 ├── index.html                    página de inicio (/)
-├── 404.html                      página no encontrada; redirige las URLs antiguas del blog
+├── 404.html                      página no encontrada; redirige las URLs antiguas del blog (/blog/ → /academia/)
 │
 ├── css/
 │   └── site.css                  UNA hoja de estilos para todo el sitio
@@ -59,7 +60,7 @@ lameyer.net/
 ├── js/
 │   ├── layout.jsx                compartido por TODAS las páginas: cabecera, banderas (país y divisa), pie,
 │   │                             formulario de contacto, PageHero, RegisterCTA, stack tecnológico, renderPage()
-│   ├── blog.jsx                  solo blog: SERIES, BLOG_TYPES, BLOG_POSTS, panel, plantilla de artículo
+│   ├── academia.jsx              solo academia: SERIES, ACADEMIA_TYPES, ACADEMIA_POSTS, panel, plantilla de artículo
 │   └── tienda.jsx                solo tienda: SELLER, RETURN_ADDRESSES, CURRENCIES, capa de datos (db, useCatalog),
 │                                 carrito, ProductCard, ProductPage, renderProduct()
 │
@@ -75,75 +76,76 @@ lameyer.net/
 │   ├── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
 │
-├── _docs/                        documentos de versión (PDF) y su fuente HTML en _docs/src/: v1.0.1–v1.0.5, v1.0.6 (en curso)
+├── _docs/                        documentos de versión (PDF) y su fuente HTML en _docs/src/: v1.0.1–v1.0.5, v1.0.6 (en curso), v1.0.7
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
 │   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
 │   ├── components/index.html     /pages/components/  tienda: filtros, búsqueda, carrito -> WhatsApp
 │   ├── components/<slug>/        /pages/components/<slug>/  una página por producto (generada)
 │   ├── terminos/index.html       /pages/terminos/    términos y condiciones por región, España / México (enlazados en el pie)
-│   ├── community/index.html      /pages/community/
-│   └── stack/index.html          /pages/stack/
+│   ├── community/index.html      /pages/community/   canales: Stack (interno), Skool y GitHub (externos)
+│   └── stack/index.html          /pages/stack/       fuera del menú; se llega desde Comunidad y la portada
 │
-└── blog/
-    ├── index.html                /blog/  panel de filtros (?series=core, ?series=security, ...)
+└── academia/
+    ├── index.html                /academia/  panel de filtros (?series=nucleo-modular, ?series=seguridad-apis, ...)
     │
-    ├── core/                     Modular Core
-    │   ├── modular-core-architecture/        visión general
-    │   ├── domain-modules-boundaries/
-    │   ├── contracts-typed-apis/
-    │   ├── shared-packages-workspaces/
-    │   ├── data-ownership-migrations/
-    │   └── contract-testing-versioning/
-    ├── serverless/               Serverless Edge
-    │   ├── serverless-edge-architecture/     visión general
-    │   ├── edge-functions-workers/
-    │   ├── routing-caching-auth-edge/
-    │   ├── edge-storage-kv-d1-r2/
-    │   ├── scheduled-jobs-cron-triggers/
-    │   ├── logs-tracing-cost/
-    │   ├── realtime-websockets-durable-objects/   paso 06 · Tiempo real
-    │   ├── ai-at-the-edge-workers-ai/             paso 07 · IA en el edge
-    │   ├── images-media-at-the-edge/              paso 08 · Multimedia
-    │   ├── deploy-test-rollout-workers/           paso 09 · Despliegue
-    │   ├── serverless-integration-paas/      cruce
-    │   ├── serverless-in-front-of-iaas/      cruce
-    │   └── multi-tenant-saas-metering/       cruce
-    ├── workflows/                Automatización de flujos
-    │   └── serverless-workflow-automation/
-    ├── security/                 Seguridad de APIs
-    │   ├── edge-layer-ddos-dns/
-    │   ├── waf-bot-layer-layer-7/
-    │   ├── api-endpoint-protection/
-    │   ├── rate-limiting/
-    │   └── cloudflare-tunnel/
-    └── search/                   Búsqueda de código y visibilidad
-        ├── code-search-repository-organization/
-        ├── semantic-vector-search/
-        ├── search-as-code-sac/
-        ├── benchmark-curation-reap-harvest/
-        ├── ssr-static-generation/
-        ├── semantic-html-markup/
-        ├── core-web-vitals-page-speed/
-        ├── crawlability-indexing/
-        ├── structured-data/
-        ├── benchmarks-x-search-as-code/          cruce
-        ├── static-generation-x-vector-search/    cruce
-        ├── structured-data-x-repositories/       cruce
-        ├── core-web-vitals-x-site-search/        cruce
-        └── crawlability-x-faceted-search/        cruce
+    ├── nucleo-modular/           Núcleo Modular
+    │   ├── arquitectura-nucleo-modular/                  visión general
+    │   ├── modulos-dominio-limites/
+    │   ├── contratos-apis-tipadas/
+    │   ├── paquetes-compartidos-espacios-trabajo/
+    │   ├── propiedad-datos-migraciones/
+    │   └── pruebas-contrato-versionado/
+    ├── edge-serverless/          Edge Serverless
+    │   ├── arquitectura-edge-serverless/                 visión general
+    │   ├── funciones-edge-workers/
+    │   ├── enrutado-cache-autenticacion-edge/
+    │   ├── almacenamiento-edge-kv-d1-r2/
+    │   ├── tareas-programadas-cron/
+    │   ├── logs-trazas-costes/
+    │   ├── tiempo-real-websockets-durable-objects/       paso 06 · Tiempo real
+    │   ├── ia-en-el-edge-workers-ai/                     paso 07 · IA en el edge
+    │   ├── imagenes-multimedia-edge/                     paso 08 · Multimedia
+    │   ├── desplegar-probar-lanzar-workers/              paso 09 · Despliegue
+    │   ├── funciones-x-paas-integracion/                 cruce
+    │   ├── edge-x-iaas-hibrido/                          cruce
+    │   └── medicion-x-saas-multiinquilino/               cruce
+    ├── automatizacion-flujos/    Automatización de flujos
+    │   └── automatizacion-serverless-flujos/
+    ├── seguridad-apis/           Seguridad de APIs
+    │   ├── capa-edge-ddos-dns/
+    │   ├── capa-waf-bots-capa-7/
+    │   ├── proteccion-endpoints-api/
+    │   ├── limitacion-de-tasa/
+    │   └── tunel-cloudflare/
+    └── busqueda-visibilidad/     Búsqueda de código y visibilidad
+        ├── busqueda-codigo-organizacion-repositorios/
+        ├── busqueda-semantica-vectorial/
+        ├── busqueda-como-codigo-sac/
+        ├── curacion-benchmarks-reap-harvest/
+        ├── ssr-generacion-estatica/
+        ├── marcado-html-semantico/
+        ├── core-web-vitals-velocidad-pagina/
+        ├── rastreabilidad-indexacion/
+        ├── datos-estructurados/
+        ├── benchmarks-x-busqueda-como-codigo/            cruce
+        ├── generacion-estatica-x-busqueda-vectorial/     cruce
+        ├── datos-estructurados-x-repositorios/           cruce
+        ├── core-web-vitals-x-busqueda-sitio/             cruce
+        └── rastreabilidad-x-busqueda-facetas/            cruce
 ```
 
 Reglas de nombres (mantienen todo localizable):
 
 - Los nombres de carpeta son palabras en minúsculas unidas por `-`: sin espacios, `&`, `()` ni mayúsculas, así la URL es el nombre de la carpeta tal cual.
-- El nombre de una carpeta del blog es el `slug` de la entrada en `BLOG_POSTS`. Buscar el slug encuentra tanto la carpeta como su registro.
-- La carpeta de la serie (`core`, `serverless`, `workflows`, `security`, `search`) es el `id` de la serie en `SERIES`.
-- Las carpetas y los slugs siguen en inglés para no romper los enlaces existentes; el contenido de las páginas está en español.
+- El nombre de una carpeta de la academia es el `slug` de la entrada en `ACADEMIA_POSTS`. Buscar el slug encuentra tanto la carpeta como su registro.
+- La carpeta de la serie (`nucleo-modular`, `edge-serverless`, `automatizacion-flujos`, `seguridad-apis`, `busqueda-visibilidad`) es el `id` de la serie en `SERIES`.
+- Carpetas, series y slugs están en español, sin tildes (1.0.7). Las URLs antiguas `/blog/...` redirigen desde `404.html`.
+- Términos de categorías, etiquetas y facetas: glosario de `_docs/src/v1.0.7.html` §4. Una faceta (`threats`) se escribe igual en todos los artículos que la comparten.
 
 ## Qué carga cada página
 
-| Página                     | css/site.css | js/layout.jsx | js/blog.jsx | js/tienda.jsx | GSAP |
+| Página                     | css/site.css | js/layout.jsx | js/academia.jsx | js/tienda.jsx | GSAP |
 |----------------------------|:------------:|:-------------:|:-----------:|:-------------:|:----:|
 | `index.html`               | ✓            | ✓             |             |               | ✓    |
 | `404.html`                 | ✓            | ✓             |             |               |      |
@@ -153,16 +155,19 @@ Reglas de nombres (mantienen todo localizable):
 | `pages/terminos/`          | ✓            | ✓             |             | ✓             |      |
 | `pages/community/`         | ✓            | ✓             |             |               |      |
 | `pages/stack/`             | ✓            | ✓             |             |               |      |
-| `blog/`                    | ✓            | ✓             | ✓           |               |      |
-| `blog/<serie>/<slug>/`     | ✓            | ✓             | ✓           |               |      |
+| `academia/`                | ✓            | ✓             | ✓           |               |      |
+| `academia/<serie>/<slug>/` | ✓            | ✓             | ✓           |               |      |
 
-El orden importa: `js/layout.jsx` siempre se carga primero, después `js/blog.jsx` (páginas del blog) o `js/tienda.jsx` (páginas de la tienda)
-y luego el script propio de la página, que termina con `renderPage(MiPagina)` (o `renderPost(...)` en las entradas del blog).
+El orden importa: `js/layout.jsx` siempre se carga primero, después `js/academia.jsx` (páginas de la academia) o `js/tienda.jsx` (páginas de la tienda)
+y luego el script propio de la página, que termina con `renderPage(MiPagina)` (o `renderPost(...)` en las entradas de la academia).
 No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior lo sustituye sin avisar.
 
 ## Cambios habituales
 
-- **Enlaces de la cabecera**: `NAV_LINKS` en `js/layout.jsx` (actualiza todas las páginas).
+- **Enlaces de la cabecera**: `NAV_LINKS` en `js/layout.jsx` (actualiza todas las páginas). `also` marca la entrada como activa en otras rutas
+  (Comunidad sigue activa en `/pages/stack/`, que no está en el menú).
+- **Canales de Comunidad**: `CHANNELS` en `pages/community/index.html`. Un `href` que empieza por `http` se abre en pestaña nueva.
+  La URL de Skool es provisional (`https://www.skool.com/`).
 - **Campos del formulario de contacto / URL de Google Apps Script**: `ContactForm` y `FORM_ENDPOINT` en `js/layout.jsx`.
   Los nombres de campo (`NOMBRE`, `ORGANIZACIÓN`, `TELÉFONO`, `EMAIL`, `TECNOLOGÍA`) deben coincidir con las columnas de la hoja de Google.
 - **Dirección de email**: `CONTACT_EMAIL` en `js/layout.jsx`.
@@ -186,7 +191,7 @@ No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior l
   3 azul oscuro `#0a192f` encabezados, texto principal, banner superior, secciones oscuras, hover de botones · 4 gris `#64748b` pies de texto.
   El final de `css/site.css` asigna clases de Tailwind a estos colores (`text-gray-900` → azul oscuro, `text-gray-500` → gris,
   `bg-blue-600` → azul, `hover:bg-blue-700` → azul oscuro). Las clases no listadas conservan los colores claros de Tailwind.
-- **Tarjetas del blog en el inicio**: `BLOG_HIGHLIGHTS` en `index.html` (una tarjeta por serie).
+- **Tarjetas de la academia en el inicio**: `ACADEMIA_HIGHLIGHTS` en `index.html` (una tarjeta por serie).
 - **Catálogo de la tienda (productos, precios, stock, categorías)**: `public/db/productos.json` y `public/db/categorias.json`.
   Esquema y procedimiento en `public/db/README.md`. Los cambios de precio, stock o texto no necesitan ninguna otra edición.
 - **Fotos de producto**: `img/productos/<id-producto>-400.webp` y `-800.webp` (cuadradas, fondo blanco, WebP calidad ~80),
@@ -201,7 +206,7 @@ No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior l
 ## Añadir una página
 
 1. Copia `pages/stack/` en `pages/<nombre-nuevo>/` y edita su `index.html`.
-2. Añade `{ href: '/pages/<nombre-nuevo>/', label: '...' }` a `NAV_LINKS` en `js/layout.jsx`.
+2. Si debe aparecer en el menú, añade `{ href: '/pages/<nombre-nuevo>/', label: '...' }` a `NAV_LINKS` en `js/layout.jsx`.
 
 ## Añadir un producto (entrada manual de prelanzamiento)
 
@@ -215,26 +220,26 @@ Para ocultar un producto pon `"active": false`; para mostrarlo agotado pon `"sto
 El script lista las carpetas de producto cuyo slug ya no está en la base de datos; bórralas a mano
 y añade `'/pages/components/<slug-antiguo>/': '/pages/components/'` a la lista `moved` de `404.html`.
 
-## Añadir una entrada al blog
+## Añadir una entrada a la academia
 
-1. Copia la carpeta de una entrada dentro de su serie, p. ej. `blog/security/rate-limiting/` en `blog/security/mi-nueva-entrada/`.
+1. Copia la carpeta de una entrada dentro de su serie, p. ej. `academia/seguridad-apis/limitacion-de-tasa/` en `academia/seguridad-apis/mi-nueva-entrada/`.
 2. En su `index.html` cambia `<title>`, la descripción, la URL canónica, `CONTROLS` y `Content`.
    La última línea sigue siendo `renderPost(CONTROLS, Content);`: la página encuentra su entrada a partir de su propia URL.
-3. Añade a `BLOG_POSTS` en `js/blog.jsx` un objeto con `slug: 'mi-nueva-entrada'` y un `type` de `BLOG_TYPES`.
+3. Añade a `ACADEMIA_POSTS` en `js/academia.jsx` un objeto con `slug: 'mi-nueva-entrada'` y un `type` de `ACADEMIA_TYPES`.
    Si se te olvida, la página te dice qué slug falta.
 
-## Añadir una serie al blog
+## Añadir una serie a la academia
 
-1. Añade la serie a `SERIES`, sus pasos a `BLOG_TYPES` y sus zonas a `ZONES` en `js/blog.jsx`.
-2. Crea `blog/<id-serie>/` y añade entradas como se indica arriba.
-3. Añade una tarjeta a `BLOG_HIGHLIGHTS` en `index.html`.
+1. Añade la serie a `SERIES`, sus pasos a `ACADEMIA_TYPES` y sus zonas a `ZONES` en `js/academia.jsx`.
+2. Crea `academia/<id-serie>/` y añade entradas como se indica arriba.
+3. Añade una tarjeta a `ACADEMIA_HIGHLIGHTS` en `index.html`.
 
 ## Renombrar o mover una entrada
 
 Cambia el nombre de la carpeta y el `slug`, y después añade `'/ruta/antigua/': '/ruta/nueva/'` a la lista `moved` de `404.html`
 para que los enlaces antiguos sigan funcionando.
 
-Enlaza siempre con barra final (`/pages/stack/`, `/blog/security/rate-limiting/`).
+Enlaza siempre con barra final (`/pages/stack/`, `/academia/seguridad-apis/limitacion-de-tasa/`).
 
 ## Pendiente: traducción y CMS headless
 
@@ -257,6 +262,17 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 `locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
 
 ## Versiones
+
+### 1.0.7 — 2026-10-06 · Academia, revisión de traducción y flujo de datos
+Detalle en `_docs/src/v1.0.7.html` (+ PDF).
+- **Menú:** Stack sale de `NAV_LINKS` (Desarrollo, Componentes, Comunidad, Academia); en `/pages/stack/` se resalta Comunidad.
+- **Comunidad · Canales:** tarjetas Stack (interna), Skool y GitHub (externas); se elimina la de correo. URL de Skool provisional.
+- **Blog → Academia:** `blog/` → `academia/`, `js/blog.jsx` → `js/academia.jsx`, `css/blog.css` → `css/academia.css`, identificadores
+  `BLOG_*` / `Blog*` → `ACADEMIA_*` / `Academia*`. Series y 39 slugs en español; `404.html` redirige las 67 rutas antiguas y traduce `?series=`.
+- **Revisión de traducción:** glosario aplicado a series, tipos, títulos, etiquetas, facetas y artículos (Núcleo Modular, Edge Serverless,
+  limitación de tasa, búsqueda como código, pruebas de contrato…), con concordancia de género corregida.
+- **Alineación de palabras clave:** los 8 cruces comparten al menos una palabra clave con cada tipo que cruzan (antes 10 pares sin ninguna).
+- **Análisis de flujo de datos:** dependencia de datos directa, dependencia de control y acoplamiento de datos del sitio (doc. §6).
 
 ### 1.0.6 — en preparación · Medidas de seguridad
 - Documento de versión **en curso**: `_docs/src/v1.0.6.html` (+ PDF). Parte del documento 5 (`_docs/src/v5-dev-security.html`:

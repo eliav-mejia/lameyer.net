@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curación de benchmarks (REAP / Harvest) - Academia Lameyer</title>
+    <meta name="description" content="Construir un benchmark de búsqueda de código a partir del historial del repositorio: cosechar consultas reales, filtrarlas con REAP y puntuar con Recall@k, MRR y nDCG.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/curacion-benchmarks-reap-harvest/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Cosecha consultas de issues, PRs y logs de búsqueda reales',
+            'Fija cada elemento a un snapshot de commit',
+            'Gradúa la relevancia, no solo acierto o fallo',
+            'Elimina las consultas que delatan la respuesta',
+            'Deduplica los elementos casi idénticos',
+            'Informa de Recall@k, MRR y nDCG@10 a la vez',
+        ];
+
+        const SOURCES = [
+            { source: 'Issue → PR fusionado', query: 'Título y primer párrafo de la issue', gold: 'Archivos y funciones que cambió el PR' },
+            { source: 'Logs de búsqueda', query: 'Lo que escribió la gente', gold: 'Los resultados que abrieron y mantuvieron abiertos' },
+            { source: 'Hilos de chat y preguntas', query: 'Preguntas tipo «¿dónde hacemos…?»', gold: 'Los enlaces al código de la respuesta aceptada' },
+            { source: 'Comentarios de revisión', query: 'Observaciones tipo «¿igual que en X?»', gold: 'El lugar al que apuntó quien revisaba' },
+        ];
+
+        const METRICS = [
+            { metric: 'Recall@k', measures: 'Proporción de consultas con al menos un resultado relevante en el top k.', use: 'Recuperación de primera etapa. ¿El conjunto de candidatos contenía la respuesta?' },
+            { metric: 'MRR', measures: 'Media de 1 / posición del primer resultado relevante.', use: 'Búsquedas de respuesta única como «¿dónde se define X?»' },
+            { metric: 'nDCG@10', measures: 'Relevancia graduada, descontada por posición y normalizada respecto al orden ideal.', use: 'Calidad global del ranking cuando varios resultados son útiles.' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Un benchmark es un conjunto fijo de consultas con respuestas buenas conocidas. Es la única forma de saber si un cambio
+                    en la <A href="/academia/busqueda-visibilidad/busqueda-semantica-vectorial/">búsqueda semántica</A> o en tu <A href="/academia/busqueda-visibilidad/busqueda-como-codigo-sac/">configuración
+                    de búsqueda</A> mejoró o empeoró los resultados. Los benchmarks públicos son una buena comprobación básica, pero no
+                    contienen tu código, tu vocabulario ni las preguntas de tus usuarios. El benchmark más útil es el que curas a partir del
+                    historial de tu propio repositorio.
+                </P>
+                <P>
+                    Dividimos la curación en dos fases: <strong className="text-gray-900">Harvest</strong> (cosecha) reúne muchos elementos
+                    candidatos a bajo coste, y <strong className="text-gray-900">REAP</strong> los filtra hasta obtener un conjunto fiable.
+                </P>
+
+                <H2>Harvest: explota el historial que ya tienes</H2>
+                <P>
+                    Cada issue cerrada con un pull request enlazado es una tarea de búsqueda natural: la issue describe un problema con
+                    palabras humanas y el diff muestra en qué parte del código estaba la respuesta. Conjuntos de datos públicos como
+                    SWE-bench se construyeron de forma parecida a partir de issues y pull requests de GitHub. Otras buenas fuentes:
+                </P>
+                <Table
+                    columns={[{ key: 'source', label: 'Fuente', accent: true }, { key: 'query', label: 'Consulta' }, { key: 'gold', label: 'Respuesta de referencia' }]}
+                    rows={SOURCES}
+                />
+                <CodeBlock title="benchmark/queries.jsonl (un elemento)">{`{"id": "q-0142",
+ "query": "los pagos con tarjeta se reintentan sin fin cuando el PSP agota el tiempo",
+ "snapshot": "9f3c2e1",
+ "source": "issue#2231 -> pr#2240",
+ "relevant": [
+   {"path": "src/payments/retry.py", "symbol": "PaymentRetrier.reattempt_charge", "grade": 3},
+   {"path": "src/payments/psp_client.py", "symbol": "PspClient.charge", "grade": 2},
+   {"path": "docs/payments/retries.md", "grade": 1}
+ ]}`}</CodeBlock>
+                <P>
+                    El campo <Code>snapshot</Code> importa. El código se mueve, así que cada elemento se evalúa contra el commit del que se
+                    cosechó, usando el código tal como estaba <em>antes</em> del arreglo.
+                </P>
+
+                <H2>REAP: de candidatos a benchmark</H2>
+                <P>
+                    Los elementos cosechados tienen ruido. Algunas issues son vagas, algunos PRs tocan veinte archivos sin relación, algunas
+                    consultas nombran el archivo que buscan. Pasamos cada candidato por cuatro comprobaciones, que abreviamos como REAP:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">R · Resolver.</strong> Haz checkout del snapshot y confirma que cada ruta y símbolo de referencia existe ahí. Descarta los elementos cuya respuesta solo apareció en el propio arreglo.</>,
+                    <><strong className="text-gray-900">E · Evaluar.</strong> Quédate solo con las consultas que una persona podría responder razonablemente. Descarta issues de una palabra, duplicados de otras issues y PRs que son sobre todo formato o actualizaciones de dependencias.</>,
+                    <><strong className="text-gray-900">A · Anotar.</strong> Gradúa cada resultado relevante: 3 = la respuesta, 2 = necesario para entenderla, 1 = contexto relacionado. Pide a una segunda persona que gradúe una muestra y mide con qué frecuencia coincidís.</>,
+                    <><strong className="text-gray-900">P · Podar.</strong> Elimina los elementos cuya consulta contiene el nombre del archivo o símbolo de referencia (prueban coincidencia de cadenas, no búsqueda), fusiona los casi duplicados y equilibra el conjunto entre repositorios y lenguajes.</>,
+                ]} />
+                <Callout title="Cuidado con la contaminación">
+                    Si una consulta incluye el identificador exacto que busca, cualquier búsqueda por palabras clave la resolverá a la
+                    perfección. Si tu benchmark se construye a partir de repositorios públicos, los modelos de embeddings también pueden
+                    haber visto las respuestas durante su entrenamiento. El historial privado y el paso de poda protegen contra ambas cosas.
+                </Callout>
+
+                <H2>Puntuación</H2>
+                <P>Ningún número cuenta toda la historia. Informa de tres:</P>
+                <Table
+                    columns={[{ key: 'metric', label: 'Métrica', accent: true }, { key: 'measures', label: 'Qué mide' }, { key: 'use', label: 'Úsala para' }]}
+                    rows={METRICS}
+                />
+                <CodeBlock title="metrics.py">{`import math
+
+def recall_at_k(ranked, relevant, k=10):
+    return float(any(doc in relevant for doc in ranked[:k]))
+
+def reciprocal_rank(ranked, relevant):
+    for i, doc in enumerate(ranked, start=1):
+        if doc in relevant:
+            return 1 / i
+    return 0.0
+
+def ndcg_at_k(ranked, grades, k=10):
+    """grades: dict de doc -> grado de relevancia (0-3)."""
+    dcg = sum(grades.get(doc, 0) / math.log2(i + 1) for i, doc in enumerate(ranked[:k], start=1))
+    ideal = sorted(grades.values(), reverse=True)[:k]
+    idcg = sum(g / math.log2(i + 1) for i, g in enumerate(ideal, start=1))
+    return dcg / idcg if idcg else 0.0`}</CodeBlock>
+
+                <H2>¿De qué tamaño y con qué frecuencia?</H2>
+                <P>
+                    Unos cientos de elementos bien curados valen más que miles con ruido. Empieza con 100 a 200, asegúrate de que cada
+                    repositorio y lenguaje que te importa está representado y añade elementos nuevos cada mes a partir de issues recientes
+                    para que el conjunto siga el ritmo de tu código. Reserva una pequeña parte que nunca uses para ajustar, para poder
+                    detectar el sobreajuste.
+                </P>
+
+                <H2>Del benchmark a la red de seguridad</H2>
+                <P>
+                    Un benchmark que ejecutas a mano una vez por trimestre detecta los problemas con meses de retraso. Ejecutarlo
+                    automáticamente en cada pull request de configuración de búsqueda lo convierte en un test de regresión. Consulta{' '}
+                    <A href="/academia/busqueda-visibilidad/benchmarks-x-busqueda-como-codigo/">Benchmarks × búsqueda como código</A>.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

@@ -519,7 +519,7 @@ const CatalogStatus = ({ status }) => (
 
 // --- PRODUCT PAGE: /pages/components/<slug>/ ---
 // Every product folder holds the same small index.html that ends with renderProduct();
-// the page finds its product from its own URL, like blog entries do.
+// the page finds its product from its own URL, like academia entries do.
 const slugFromUrl = () => window.location.pathname.replace(/\/+$/, '').split('/').pop();
 
 const ProductPage = () => {

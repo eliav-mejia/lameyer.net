@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capa WAF y bots (capa 7) - Academia Lameyer</title>
+    <meta name="description" content="Bloquear la inyección SQL, el XSS, el raspado de datos y el relleno de credenciales contra una API headless con el WAF y los controles de bots de Cloudflare.">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Despliega el Cloudflare Managed Ruleset',
+            'Añade el OWASP Core Ruleset y ajusta su umbral',
+            'Bloquea los métodos HTTP inesperados en el host de la API',
+            'Bloquea las peticiones sin tu cabecera de autenticación',
+            'Usa Block, no Challenge, en los hostnames de la API',
+            'Primero registra, después aplica',
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Una vez que el tráfico supera el <a href="/academia/seguridad-apis/capa-edge-ddos-dns/" className="text-blue-600 font-bold hover:underline">edge</a>,
+                    llega como peticiones HTTP/S completas. La capa 7 es donde Cloudflare lee esas peticiones: sus rutas,
+                    cabeceras y cuerpos. Aquí trabajan dos sistemas en paralelo. El Web Application Firewall (WAF) busca
+                    payloads maliciosos y los controles de bots buscan automatización maliciosa.
+                </P>
+
+                <H2>Conjuntos de reglas gestionadas: ataques conocidos, mantenidos por otros</H2>
+                <P>
+                    El WAF compara cada petición con conjuntos de reglas que el equipo de seguridad de Cloudflare mantiene al día:
+                </P>
+                <UL items={[
+                    <><strong className="text-gray-900">Cloudflare Managed Ruleset.</strong> Firmas para inyección SQL, cross-site scripting (XSS), ejecución remota de código y vulnerabilidades recién publicadas en software popular.</>,
+                    <><strong className="text-gray-900">OWASP Core Ruleset.</strong> Un modelo de puntuación: cada rasgo sospechoso suma puntos y la petición se bloquea cuando supera el umbral que elijas.</>,
+                ]} />
+                <P>
+                    Ambos conjuntos requieren un plan Pro o superior. Los planes gratuitos incluyen un Free Managed Ruleset más
+                    pequeño que cubre las vulnerabilidades más extendidas.
+                </P>
+                <P>
+                    Empieza con los dos en modo registro, observa Security Events durante unos días y pasa a bloqueo cuando estés
+                    seguro de que no se marcan llamadas legítimas a la API.
+                </P>
+
+                <H2>Reglas personalizadas: describe cómo es lo normal</H2>
+                <P>
+                    Una API headless tiene una forma muy predecible, lo que hace fácil bloquear todo lo que no encaja.
+                    Las reglas personalizadas se escriben en el lenguaje de reglas de Cloudflare. Dos buenos puntos de partida:
+                </P>
+                <CodeBlock title="Bloquear métodos inesperados · acción: Block">{`(http.host eq "api.example.com"
+ and not http.request.method in {"GET" "POST" "PUT" "PATCH" "DELETE"})`}</CodeBlock>
+                <CodeBlock title="Bloquear peticiones sin cabecera de clave de API · acción: Block">{`(http.host eq "api.example.com"
+ and not any(len(http.request.headers["x-api-key"][*]) > 0))`}</CodeBlock>
+                <P>
+                    La segunda regla no valida la clave (eso lo sigue haciendo tu backend), pero descarta el ruido anónimo antes de
+                    que te cueste una consulta a la base de datos.
+                </P>
+
+                <H2>Bots: la amenaza real para las claves expuestas</H2>
+                <P>
+                    La mayoría de los ataques a una API headless están automatizados: scrapers que recolectan datos y herramientas
+                    de relleno de credenciales que prueban listas filtradas de usuarios y contraseñas. La detección de bots de
+                    Cloudflare combina heurísticas de comportamiento, aprendizaje automático e inteligencia de amenazas de toda su
+                    red. En los planes con Bot Management, cada petición lleva una puntuación de bot de 1 (casi seguro automatizada)
+                    a 99 (casi seguro humana), que puedes usar en reglas como <Code>cf.bot_management.score lt 30</Code>.
+                </P>
+
+                <Callout title="Los challenges no funcionan en APIs">
+                    Los challenges gestionados y de JavaScript dan por hecho un navegador capaz de ejecutar un script. Un cliente
+                    legítimo de la API no puede resolverlos, así que un challenge en un hostname de API rompe tus integraciones.
+                    Usa Block para el tráfico de la API. Ten cuidado también con Bot Fight Mode en una zona solo de API: no se puede
+                    desactivar por ruta, así que pruébalo antes de activarlo.
+                </Callout>
+
+                <H2>Dónde se detiene el WAF</H2>
+                <P>
+                    El WAF detecta payloads que parecen maliciosos en general. No sabe qué se supone que acepta <em>tu</em> API.
+                    Validar las peticiones contra tu propio esquema es trabajo de la{' '}
+                    <a href="/academia/seguridad-apis/proteccion-endpoints-api/" className="text-blue-600 font-bold hover:underline">protección de endpoints de API</a>.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

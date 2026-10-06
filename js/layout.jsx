@@ -1,4 +1,4 @@
-// Shared by EVERY page of the site (home, /pages/*, /blog/*).
+// Shared by EVERY page of the site (home, /pages/*, /academia/*).
 // Load it first:  <script type="text/babel" src="/js/layout.jsx"></script>
 // Then the page's own script calls renderPage(MyPage).
 const { useState, useEffect, useLayoutEffect, useRef } = React;
@@ -10,15 +10,15 @@ const CONTACT_EMAIL = 'contacto@lameyer.net';
 const FORM_ENDPOINT = 'https://script.google.com/macros/s/AKfycbzaqYJQIIWYBcbq0FCo38ulhTuYxGZxVVUOv1CklQ9mEJ_hheLsjvL3CYG9YUdfRDYl/exec';
 
 // Header links. Every page lives in its own folder with an index.html.
+// /pages/stack/ is not in the menu: it is part of Comunidad (Canales), so `also` keeps Comunidad highlighted there.
 const NAV_LINKS = [
     { href: '/pages/development/', label: 'Desarrollo' },
     { href: '/pages/components/', label: 'Componentes' },
-    { href: '/pages/community/', label: 'Comunidad' },
-    { href: '/pages/stack/', label: 'Stack' },
-    { href: '/blog/', label: 'Blog' },
+    { href: '/pages/community/', label: 'Comunidad', also: ['/pages/stack/'] },
+    { href: '/academia/', label: 'Academia' },
 ];
 
-const isActive = (href) => window.location.pathname.startsWith(href.replace(/\/$/, ''));
+const isActive = (link) => [link.href, ...(link.also || [])].some(href => window.location.pathname.startsWith(href.replace(/\/$/, '')));
 
 // --- COUNTRY (flags in the header): Spain or Mexico, both in Spanish ---
 // The flag picks the shop currency (EUR or MXN, read by useCurrency in js/tienda.jsx).
@@ -436,8 +436,8 @@ const Layout = ({ children }) => {
                         <a
                             key={link.href}
                             href={link.href}
-                            aria-current={isActive(link.href) ? 'page' : undefined}
-                            className={`transition-colors hover:text-blue-600 ${isActive(link.href) ? 'text-blue-600' : 'opacity-60 hover:opacity-100'}`}
+                            aria-current={isActive(link) ? 'page' : undefined}
+                            className={`transition-colors hover:text-blue-600 ${isActive(link) ? 'text-blue-600' : 'opacity-60 hover:opacity-100'}`}
                         >
                             {link.label}
                         </a>
@@ -482,7 +482,7 @@ const Layout = ({ children }) => {
                         key={link.href}
                         href={link.href}
                         onClick={() => setIsMobileMenuOpen(false)}
-                        className={`text-3xl font-black tracking-tight hover:text-blue-600 transition-colors ${isActive(link.href) ? 'text-blue-600' : 'text-gray-900'}`}
+                        className={`text-3xl font-black tracking-tight hover:text-blue-600 transition-colors ${isActive(link) ? 'text-blue-600' : 'text-gray-900'}`}
                     >
                         {link.label}
                     </a>

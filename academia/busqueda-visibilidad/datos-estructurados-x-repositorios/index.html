@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Datos estructurados × repositorios - Academia Lameyer</title>
+    <meta name="description" content="Hacer que los repositorios de código sean legibles por máquinas con codemeta.json y schema.org SoftwareSourceCode, y reutilizar los mismos metadatos en los filtros de búsqueda internos.">
+    <link rel="canonical" href="https://lameyer.net/academia/busqueda-visibilidad/datos-estructurados-x-repositorios/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Añade codemeta.json en la raíz de cada repositorio',
+            'Usa identificadores de licencia SPDX',
+            'Sincroniza los topics de GitHub a partir de las keywords',
+            'Publica JSON-LD SoftwareSourceCode en las páginas de proyecto',
+            'Construye el catálogo interno a partir de los mismos archivos',
+            'Valida los metadatos en CI',
+        ];
+
+        const USES = [
+            { consumer: 'Búsqueda de código interna', reads: 'codemeta.json', gets: 'Filtros por lenguaje, estado, responsable y keywords' },
+            { consumer: 'GitHub', reads: 'Topics, archivo de licencia', gets: 'Páginas de topics, insignia de licencia, filtros de búsqueda de repositorios' },
+            { consumer: 'Buscadores', reads: 'JSON-LD en la página del proyecto', gets: 'Una descripción inequívoca del proyecto' },
+            { consumer: 'Investigación y archivos', reads: 'codemeta.json, CITATION.cff', gets: 'Metadatos de citación y preservación' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    La <A href="/academia/busqueda-visibilidad/busqueda-codigo-organizacion-repositorios/">visión general</A> de esta serie defendía que los filtros
+                    solo funcionan cuando los metadatos existen. <A href="/academia/busqueda-visibilidad/datos-estructurados/">Datos estructurados</A> mostró cómo
+                    describir una página web para las máquinas. Este cruce conecta ambas ideas: describe cada <em>repositorio</em> una sola
+                    vez, en un formato estándar, y deja que la búsqueda interna, GitHub y los buscadores públicos lean la misma descripción.
+                </P>
+
+                <H2>codemeta.json: metadatos que viven con el código</H2>
+                <P>
+                    CodeMeta es un estándar comunitario de metadatos de software basado en el vocabulario de schema.org. Un archivo{' '}
+                    <Code>codemeta.json</Code> se coloca en la raíz del repositorio, así que se versiona y se revisa junto con el código
+                    que describe:
+                </P>
+                <CodeBlock title="codemeta.json">{`{
+  "@context": "https://w3id.org/codemeta/3.0",
+  "@type": "SoftwareSourceCode",
+  "name": "payments-ledger-api",
+  "description": "Libro mayor de partida doble y servicio de reintento de pagos para el checkout de Acme.",
+  "codeRepository": "https://github.com/acme/payments-ledger-api",
+  "programmingLanguage": ["Python"],
+  "runtimePlatform": "Python 3.12",
+  "license": "https://spdx.org/licenses/Apache-2.0",
+  "version": "4.2.0",
+  "developmentStatus": "https://www.repostatus.org/#active",
+  "keywords": ["payments", "ledger", "idempotency", "retries"],
+  "maintainer": { "@type": "Organization", "name": "Acme Payments Team" }
+}`}</CodeBlock>
+
+                <H2>Una descripción, muchos lectores</H2>
+                <Table
+                    columns={[{ key: 'consumer', label: 'Lector', accent: true }, { key: 'reads', label: 'Lee' }, { key: 'gets', label: 'Resultado' }]}
+                    rows={USES}
+                />
+
+                <H2>Alimentar la búsqueda interna</H2>
+                <P>
+                    Un job nocturno recoge el <Code>codemeta.json</Code> de cada repositorio y lo convierte en facetas para tu búsqueda de
+                    código. «Servicios Python activos sobre pagos» pasa a ser un filtro en lugar de conocimiento tribal, y los repositorios
+                    cuyo <Code>developmentStatus</Code> sea un valor de repostatus.org como <Code>#inactive</Code> o <Code>#moved</Code> se
+                    pueden excluir por defecto. Como las definiciones de facetas forman parte de tu{' '}
+                    <A href="/academia/busqueda-visibilidad/busqueda-como-codigo-sac/">configuración de búsqueda</A>, añadir un nuevo campo de metadatos también es un cambio revisado.
+                </P>
+                <P>
+                    El mismo job puede mantener los topics de GitHub sincronizados con <Code>keywords</Code> usando{' '}
+                    <Code>gh repo edit --add-topic</Code>, para que la descripción del archivo y las etiquetas de GitHub nunca se contradigan.
+                </P>
+
+                <H2>Publicarlo: SoftwareSourceCode en las páginas de proyecto</H2>
+                <P>
+                    La mayor parte del público de un proyecto llega a través de una página de presentación o un sitio de documentación, no
+                    del repositorio. Pon allí los mismos datos como JSON-LD. Como los términos de CodeMeta son términos de schema.org, casi
+                    todo se puede copiar tal cual:
+                </P>
+                <CodeBlock title="Head de la página del proyecto">{`<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareSourceCode",
+  "name": "payments-ledger-api",
+  "description": "Libro mayor de partida doble y servicio de reintento de pagos para el checkout de Acme.",
+  "codeRepository": "https://github.com/acme/payments-ledger-api",
+  "programmingLanguage": "Python",
+  "runtimePlatform": "Python 3.12",
+  "license": "https://spdx.org/licenses/Apache-2.0",
+  "version": "4.2.0",
+  "keywords": "payments, ledger, idempotency, retries"
+}
+<\/script>`}</CodeBlock>
+                <Callout title="Ajusta las expectativas">
+                    Google no tiene un resultado enriquecido propio para <Code>SoftwareSourceCode</Code>, así que esto no cambiará el aspecto
+                    de tu resultado. Sí da a todo rastreador que lea schema.org una descripción precisa y coherente del proyecto, y no cuesta
+                    nada generarla a partir de un archivo que ya mantienes.
+                </Callout>
+
+                <H2>Haz que las páginas sean accesibles</H2>
+                <P>
+                    Los metadatos solo ayudan si la página del proyecto se rastrea. Genera una página por repositorio público, enlázalas
+                    desde una página de catálogo e inclúyelas en tu sitemap, como se describe en{' '}
+                    <A href="/academia/busqueda-visibilidad/rastreabilidad-indexacion/">Rastreabilidad e indexación</A>. Valida <Code>codemeta.json</Code> en CI
+                    para que un archivo roto nunca llegue al catálogo ni a la página.
+                </P>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>

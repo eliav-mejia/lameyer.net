@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IA en el edge (Workers AI, Vectorize, AI Gateway) - Academia Lameyer</title>
+    <meta name="description" content="Dónde va la inferencia en una plataforma serverless: modelos pequeños y embeddings en el edge, modelos grandes detrás de AI Gateway y recuperación sobre tus propios datos con Vectorize.">
+    <link rel="canonical" href="https://lameyer.net/academia/edge-serverless/ia-en-el-edge-workers-ai/">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root"></div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/academia.jsx"></script>
+    <script type="text/babel">
+        const CONTROLS = [
+            'Pasa cada llamada a un modelo por AI Gateway para tener caché, límites y logs',
+            'Ejecuta embeddings y clasificadores pequeños en Workers AI, cerca de los datos',
+            'Fundamenta las respuestas en tus propios documentos con Vectorize y cítalos',
+            'Define un presupuesto por inquilino antes del lanzamiento, no después de la primera factura',
+            'Nunca metas en un prompt secretos ni datos personales que no necesites',
+            'Valida la salida del modelo como cualquier otra entrada no confiable',
+        ];
+
+        const PLACEMENT = [
+            { task: 'Embeddings, clasificación, moderación', where: 'Workers AI (edge)', why: 'Pequeños, rápidos, se llaman en cada petición' },
+            { task: 'Respuestas cortas, resúmenes, extracción', where: 'Workers AI o modelo externo vía AI Gateway', why: 'Elige según la calidad necesaria frente al coste' },
+            { task: 'Razonamiento complejo, documentos largos', where: 'Modelo frontera externo vía AI Gateway', why: 'La calidad importa más que la latencia' },
+            { task: 'Trabajos masivos (reindexar, traducir un catálogo)', where: 'Cola + lotes, fuera del recorrido de la petición', why: 'Los usuarios nunca deberían esperarlos' },
+        ];
+
+        const Content = () => (
+            <>
+                <P>
+                    Añadir IA a un producto suele empezar con una clave de API pegada en un backend. Un mes después hay cinco proveedores,
+                    ni idea de qué cliente gastó qué y un prompt que filtra datos internos. En MC-SE, las llamadas a modelos reciben el mismo
+                    trato que cualquier otra dependencia: pasan por el edge, detrás de un gateway, con límites y logs. Este artículo explica{' '}
+                    <strong className="text-gray-900">dónde debería ejecutarse la inferencia</strong> y cómo fundamentarla en tus propios datos.
+                </P>
+
+                <H2>Pon cada tarea donde corresponde</H2>
+                <P>
+                    Workers AI ejecuta modelos abiertos en GPUs dentro de la red de Cloudflare, llamados a través de un binding sin claves que
+                    gestionar. Es ideal para las muchas llamadas pequeñas que hace un producto. Los modelos frontera de proveedores externos
+                    siguen ganando en las tareas difíciles; enrútalos a través de AI Gateway en lugar de llamar directamente al proveedor.
+                </P>
+                <Table
+                    columns={[{ key: 'task', label: 'Tarea' }, { key: 'where', label: 'Ejecútala en', accent: true }, { key: 'why', label: 'Por qué' }]}
+                    rows={PLACEMENT}
+                />
+
+                <H2>Recuperación sobre tus propios datos</H2>
+                <P>
+                    Un modelo que responde a partir de sus datos de entrenamiento se inventa detalles sobre tus productos. La generación
+                    aumentada por recuperación (RAG) lo soluciona: convierte tus documentos en embeddings, guárdalos en{' '}
+                    <strong className="text-gray-900">Vectorize</strong>, encuentra los pasajes más cercanos a la pregunta y entrega solo esos
+                    al modelo, con la instrucción de responder a partir de ellos.
+                </P>
+                <CodeBlock title="src/ask.ts">{`import { Hono } from 'hono';
+
+type Env = { AI: Ai; DOCS: VectorizeIndex };
+const app = new Hono<{ Bindings: Env }>();
+
+// Los ids de modelo cambian: consulta el catálogo de Workers AI antes de desplegar.
+const EMBED = '@cf/baai/bge-base-en-v1.5';
+const LLM = '@cf/meta/llama-3.1-8b-instruct';
+
+app.post('/v1/ask', async (c) => {
+  const { question } = await c.req.json<{ question: string }>();
+  if (!question || question.length > 500) return c.json({ error: 'invalid question' }, 400);
+
+  const { data } = await c.env.AI.run(EMBED, { text: [question] });
+  const hits = await c.env.DOCS.query(data[0], { topK: 4, returnMetadata: 'all' });
+  const context = hits.matches.map((m) => m.metadata?.text).join('\\n---\\n');
+
+  const answer = await c.env.AI.run(LLM, {
+    messages: [
+      { role: 'system', content: 'Responde solo a partir del contexto. Si no está ahí, di que no lo sabes.' },
+      { role: 'user', content: 'Contexto:\\n' + context + '\\n\\nPregunta: ' + question },
+    ],
+  }, { gateway: { id: 'lameyer-ai' } });     // AI Gateway lo registra, lo cachea y lo limita
+
+  return c.json({ answer, sources: hits.matches.map((m) => m.metadata?.url) });
+});
+
+export default app;`}</CodeBlock>
+                <CodeBlock title="wrangler.jsonc">{`{
+  "name": "ask",
+  "main": "src/ask.ts",
+  "compatibility_date": "2026-09-01",
+  "ai": { "binding": "AI" },
+  "vectorize": [{ "binding": "DOCS", "index_name": "docs" }]
+}`}</CodeBlock>
+
+                <H2>AI Gateway: una puerta para todos los modelos</H2>
+                <UL items={[
+                    <><strong className="text-gray-900">Caché.</strong> Los prompts idénticos (una pregunta frecuente, el resumen de un producto) se responden desde la caché en lugar de pagarse dos veces.</>,
+                    <><strong className="text-gray-900">Límites y presupuestos.</strong> Limita las peticiones por gateway; añade límites por inquilino en el Worker, como en <A href="/academia/edge-serverless/medicion-x-saas-multiinquilino/">SaaS multiinquilino</A>.</>,
+                    <><strong className="text-gray-900">Logs y analíticas.</strong> Cada prompt, respuesta, latencia y número de tokens en un solo lugar, para todos los proveedores.</>,
+                    <><strong className="text-gray-900">Alternativas.</strong> Si un proveedor falla o va lento, enruta a otro sin cambiar el código de la aplicación.</>,
+                ]} />
+                <Callout title="Trata la salida como no confiable">
+                    Un modelo puede ser manipulado por el texto de los documentos que lee (prompt injection). Nunca dejes que su salida
+                    ejecute comandos, construya SQL o llame a APIs internas sin la misma validación que aplicas a la entrada de un usuario.
+                    Mantén el prompt de sistema libre de secretos: da por hecho que se puede extraer.
+                </Callout>
+
+                <H2>Medirlo</H2>
+                <P>
+                    Controla el coste por inquilino y día, la tasa de aciertos de caché del gateway, la latencia P95 por modelo y la proporción
+                    de respuestas que citan al menos una fuente. Revisa cada semana una muestra de respuestas; una tasa de citas a la baja
+                    suele significar que el índice está desactualizado, no que el modelo haya empeorado.
+                </P>
+
+                <Callout title="Siguiente paso">
+                    Los productos son visuales además de textuales. <A href="/academia/edge-serverless/imagenes-multimedia-edge/">Imágenes y
+                    multimedia en el edge</A> muestra cómo servir imágenes y vídeo rápidos desde la misma plataforma.
+                </Callout>
+            </>
+        );
+
+        renderPost(CONTROLS, Content);
+    </script>
+</body>
+</html>
