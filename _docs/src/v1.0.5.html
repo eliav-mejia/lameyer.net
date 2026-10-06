@@ -2,52 +2,116 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Lameyer.net 1.0.11 — Términos por región + plan de i18n y CMS headless</title>
+<title>Lameyer.net 1.0.5 — Versión consolidada: todo lo posterior a 1.0.4</title>
 <link rel="stylesheet" href="doc.css">
 </head>
 <body>
 
 <header class="band">
     <div class="kicker">Lameyer.net · Documentación de desarrollo de software</div>
-    <h1>Versión <span class="v">1.0.11</span> — Términos por región + plan de i18n y CMS headless</h1>
-    <div class="sub">Los términos se muestran por región (España / México) según la bandera. Se preparan dos opciones de traducción y CMS headless, ambas <b>pendientes</b>, y un script de pre-traducción con DeepL.</div>
+    <h1>Versión <span class="v">1.0.5</span> — Versión consolidada</h1>
+    <div class="sub">Agrupa en una sola versión todo lo publicado después de 1.0.4 (antes 1.0.5 a 1.0.11): serie Serverless Edge, cuentas y cookies, tema blanco, tienda, banderas España / México, sitio en español, términos por región y el plan pendiente de i18n y CMS headless.</div>
 </header>
 
 <div class="meta">
-    <div><b>Versión</b><span>1.0.11 · staging</span></div>
-    <div><b>Fecha</b><span>2026-10-05</span></div>
-    <div><b>Estado</b><span>Términos: hecho · i18n/CMS: pendiente</span></div>
-    <div><b>Depende de</b><span>1.0.10 banderas España / México</span></div>
+    <div><b>Versión</b><span>1.0.5 · staging</span></div>
+    <div><b>Fechas</b><span>2026-10-03 → 2026-10-05</span></div>
+    <div><b>Commits</b><span><code>b2af7c1</code> … <code>59a81ca</code> · 8 commits</span></div>
+    <div><b>Cambios</b><span>111 archivos, +7.419 / −2.930</span></div>
 </div>
 
 <h2><span class="n">1</span>Resumen</h2>
 <p>
-    1.0.10 dejó todo el sitio en español y vinculó la divisa a la bandera (España → EUR, México → MXN). 1.0.11 aplica la misma bandera a
-    <code>/pages/terminos/</code>: el índice muestra una lista de cláusulas por región, con pestañas España y México. La pestaña España
-    contiene la <strong>política estándar española de comercio electrónico para productos electrónicos</strong>; la pestaña México, las
-    cláusulas de la Ley Federal de Protección al Consumidor (LFPC).
+    Entre el 3 y el 5 de octubre se publicaron siete versiones seguidas (1.0.5 a 1.0.11). Varias deshacían parte de la anterior: Google Translate
+    con cuatro banderas entró en 1.0.6 y salió en 1.0.10; USD, GBP e ILS entraron y salieron de la tienda. Además, el documento 5 de seguridad
+    ya tenía reservada la versión 1.0.6, que el readme usaba para otra cosa. Esta consolidación deja <strong>una sola versión 1.0.5 con el estado
+    final</strong> del sitio y libera 1.0.6 para las medidas de seguridad.
 </p>
-<p>
-    Además se documentan dos opciones para traducir el sitio y gestionar su contenido como un CMS headless, ambas <strong>pendientes de decisión</strong>:
-    <b>A</b> Vite + react-i18next (un namespace por página, carga diferida) y <b>B</b> Next.js + next-intl con generación estática y rutas <code>/es/…</code>.
-    Las dos usan un TMS de plan gratuito (Tolgee o Crowdin) y DeepL para pre-rellenar. El único código nuevo de esta parte es
-    <code>tools/i18n/deepl-prefill.mjs</code>, que funciona con cualquiera de las dos.
-</p>
-<div class="warn"><b>Revisión legal.</b> Las cláusulas de México y la sección RAEE de España son un borrador redactado a partir de la normativa citada.
-    Deben revisarlas un abogado antes de publicar, igual que los marcadores <code>[…]</code> del vendedor (incluido el nuevo <code>[Nº de registro RII-AEE]</code>).</div>
+<div class="note"><b>Solo se renumera la documentación.</b> El historial de Git no se reescribe: los mensajes de los commits antiguos siguen diciendo
+    «v1.0.6» … «v1.0.11». La tabla del §2 relaciona cada commit con esta versión.</div>
+<div class="warn"><b>Revisión legal.</b> Las cláusulas de México y la sección RAEE de España (§10) son un borrador redactado a partir de la normativa citada.
+    Deben revisarlas un abogado antes de publicar, igual que los marcadores <code>[…]</code> del vendedor (incluido <code>[Nº de registro RII-AEE]</code>).</div>
 
-<h2><span class="n">2</span>Archivos</h2>
+<h2><span class="n">2</span>Historial consolidado</h2>
 <table>
-    <tr><th style="width:36%">Archivo</th><th>Cambio</th></tr>
-    <tr><td><code>pages/terminos/index.html</code></td><td>Cláusulas por región: <code>REGIONS</code>, <code>SECTIONS</code> (con <code>regions</code> y títulos por región), <code>CLAUSES</code>, pestañas <code>RegionTabs</code> en el índice. Meta descripción actualizada.</td></tr>
-    <tr><td><code>js/tienda.jsx</code></td><td><code>TERMS_UPDATED</code> → 5 de octubre de 2026.</td></tr>
-    <tr><td><code>tools/i18n/deepl-prefill.mjs</code> <span class="tag t-high">nuevo</span></td><td>Pre-traducción con DeepL de las claves que faltan, por namespace. Node 18+, sin dependencias. Pendiente de uso hasta que existan los archivos <code>locales/</code>.</td></tr>
-    <tr><td><code>readme.md</code></td><td>Entrada 1.0.11, sección «Pendiente: traducción y CMS headless», <code>tools/i18n/</code> en el árbol, términos por región en «Cambios habituales».</td></tr>
-    <tr><td><code>_docs/src/v1.0.11.html</code> + <code>_docs/Lameyer-v1.0.11.pdf</code> <span class="tag t-high">nuevo</span></td><td>Este documento.</td></tr>
+    <tr><th style="width:12%">Antes</th><th style="width:12%">Commit</th><th>Contenido</th><th style="width:22%">Estado en 1.0.5</th></tr>
+    <tr><td>1.0.5</td><td><code>b2af7c1</code></td><td>Serie Serverless Edge: pasos 06–09 y cruces</td><td>Se mantiene (§4)</td></tr>
+    <tr><td>1.0.6</td><td>(en 1.0.7)</td><td>Banderas de EE. UU., España, México y Países Bajos con Google Translate; WhatsApp solo España</td><td>Banderas sustituidas en §8; WhatsApp se mantiene</td></tr>
+    <tr><td>1.0.7</td><td><code>b4372e9</code></td><td>Acceso / registro y consentimiento de cookies; idiomas ES ↔ EN</td><td>Pop-ups se mantienen (§5); idiomas sustituidos</td></tr>
+    <tr><td>1.0.8</td><td><code>f92487d</code></td><td>Tema blanco, paleta de cuatro colores; se retira ILS</td><td>Se mantiene (§6)</td></tr>
+    <tr><td>1.0.9</td><td><code>297bbac</code>, <code>c4d1ee1</code></td><td>Filtro en acordeón, tarjetas compactas, edición especial</td><td>Se mantiene (§7)</td></tr>
+    <tr><td>1.0.10</td><td><code>7671203</code></td><td>Solo España / México, divisa por bandera, geolocalización; sitio en español</td><td>Se mantiene (§8, §9)</td></tr>
+    <tr><td>1.0.11</td><td><code>59a81ca</code></td><td>Términos por región; plan de i18n y CMS headless; script DeepL</td><td>Se mantiene (§10–15)</td></tr>
 </table>
 
-<h2><span class="n">3</span>Términos por región (hecho)</h2>
-<h3>3.1 Cómo funciona</h3>
+<h2><span class="n">3</span>Archivos (diferencia neta con 1.0.4)</h2>
+<table>
+    <tr><th style="width:36%">Archivo o carpeta</th><th style="width:20%">Líneas</th><th>Cambio</th></tr>
+    <tr><td><code>js/layout.jsx</code></td><td>+411 / −38 · 754 en total</td><td>Banderas España / México, <code>useLocale()</code>, geolocalización, pop-ups de acceso y cookies, textos en español.</td></tr>
+    <tr><td><code>js/tienda.jsx</code></td><td>+137 / −49 · 739</td><td><code>CURRENCIES</code> EUR / MXN, <code>useCurrency()</code> sigue a la bandera, <code>CurrencyBadge</code>, <code>ProductTile</code>, <code>ProductRow</code>, stock.</td></tr>
+    <tr><td><code>js/blog.jsx</code></td><td>+430 / −244 · 1.110</td><td>Pasos 06–09 de Serverless Edge, zona <code>platform</code>, todo el panel y los metadatos traducidos, fechas <code>es-ES</code>, <code>slugify</code> sin tildes.</td></tr>
+    <tr><td><code>blog/serverless/</code> (13)</td><td>+1.787 / −38</td><td>Cuatro artículos nuevos y traducción del resto.</td></tr>
+    <tr><td><code>blog/core</code>, <code>search</code>, <code>security</code>, <code>workflows</code> (32)</td><td>+1.806 / −1.864</td><td>Traducción al español (<code>lang="es"</code>, título, descripción, contenido).</td></tr>
+    <tr><td><code>pages/components/</code> (41)</td><td>+618 / −113</td><td>Tienda con acordeón y edición especial; 40 fichas regeneradas.</td></tr>
+    <tr><td><code>pages/terminos/index.html</code></td><td>+341 / −143 · 419</td><td>Cláusulas por región con pestañas.</td></tr>
+    <tr><td><code>public/db/*.json</code></td><td>+438 / −56</td><td>Grupos de categorías, 13 categorías, campo <code>edition</code>, 10 productos de edición especial.</td></tr>
+    <tr><td><code>css/site.css</code></td><td>+136 / −19 · 194</td><td>Paleta de cuatro colores y mapeo de clases de Tailwind.</td></tr>
+    <tr><td><code>index.html</code>, <code>whatsapp-chat-snippet.html</code></td><td>+186 / −166</td><td>Widget de WhatsApp solo España; textos y comentarios en español.</td></tr>
+    <tr><td><code>tools/i18n/deepl-prefill.mjs</code> <span class="tag t-high">nuevo</span></td><td>+143</td><td>Pre-traducción con DeepL (pendiente de uso).</td></tr>
+    <tr><td><code>readme.md</code>, <code>public/db/README.md</code></td><td>+319 / −185</td><td>En español; versiones consolidadas.</td></tr>
+</table>
+
+<h2><span class="n">4</span>Blog · Serverless Edge</h2>
+<ul>
+    <li>La serie pasa de 5 a 9 pasos en <code>BLOG_TYPES</code>: 06 Tiempo real (WebSockets y Durable Objects), 07 IA en el edge (Workers AI, Vectorize, AI Gateway),
+        08 Imágenes y multimedia (R2, transformaciones, Stream), 09 Desplegar, probar y lanzar (Wrangler, Vitest, despliegues graduales).</li>
+    <li>Tres cruces sobre la oferta de plataforma: PaaS de integración, Edge × IaaS (híbrido) y SaaS multiinquilino con medición.</li>
+    <li>Nueva zona <code>platform</code> para el paso de despliegue; los artículos se encadenan con «Siguiente paso»: 05 → 06 → 07 → 08 → 09 → visión general.</li>
+</ul>
+
+<h2><span class="n">5</span>Cuentas y cookies</h2>
+<table>
+    <tr><th style="width:22%">Pieza</th><th>Comportamiento</th><th style="width:30%">Almacenamiento</th></tr>
+    <tr><td><code>AuthModal</code>, <code>auth</code></td><td>Pop-up con pestañas «Iniciar sesión» / «Crear cuenta» desde la cabecera y el menú móvil; foco atrapado, Escape cierra.</td><td><code>lm-users</code> (SHA-256 con sal), <code>lm-session</code> — solo staging, en el navegador</td></tr>
+    <tr><td><code>CookieConsent</code></td><td>Aparece en la primera visita; «Aceptar todas» / «Solo necesarias». Las analíticas solo deben cargarse si <code>hasCookieConsent()</code>.</td><td><code>lm-cookies</code>, <code>window.LM_COOKIES</code></td></tr>
+</table>
+<div class="note">Las cuentas de staging no tienen servidor: cualquiera con acceso al navegador puede leerlas. Su sustitución por Supabase Auth es parte de 1.0.6 (documento 5, §8).</div>
+
+<h2><span class="n">6</span>Diseño</h2>
+<p>Tema blanco con cuatro colores definidos como tokens al principio de <code>css/site.css</code>: blanco <code>#ffffff</code> (fondo), azul <code>#2563eb</code>
+    (botones, enlaces, acentos), azul oscuro <code>#0a192f</code> (encabezados, texto, banner superior, secciones oscuras) y gris <code>#64748b</code> (pies de texto).
+    El final del archivo asigna las clases de Tailwind usadas a esos colores.</p>
+
+<h2><span class="n">7</span>Tienda</h2>
+<ul>
+    <li><strong>Filtro en acordeón:</strong> barra lateral en escritorio y desplegable «Filtros» en móvil, con 4 grupos (Componentes del PC, Redes, Equipo básico,
+        Herramientas) y 13 categorías por tipo de pieza; opción «Solo productos en stock». Los contadores muestran lo que devolvería cada categoría.</li>
+    <li><strong>Tarjetas compactas</strong> (<code>ProductTile</code>): 4 × 2 en escritorio, 2 × 4 en móvil, 8 por página con paginación.</li>
+    <li><strong>Edición especial</strong> (<code>edition: "especial"</code>): lista sin foto en filas de una línea (<code>ProductRow</code>), borde con el color del stock:
+        1 unidad granate, 2 unidades azul, 3+ verde, agotado gris.</li>
+    <li>El carrito nunca guarda más unidades que el stock.</li>
+</ul>
+
+<h2><span class="n">8</span>Banderas, país y divisa</h2>
+<table>
+    <tr><th style="width:20%">Paso</th><th>Qué hace</th></tr>
+    <tr><td>1 · Bandera guardada</td><td>Si el visitante pulsó una bandera (<code>lm-locale</code>), se usa siempre.</td></tr>
+    <tr><td>2 · Zona horaria</td><td>Sin bandera: <code>America/*</code> y <code>Pacific/*</code> → México; el resto → España. Instantáneo y sin red.</td></tr>
+    <tr><td>3 · Geolocalización</td><td>Una consulta a GeoJS (<code>get.geojs.io</code>). ES o MX se usan tal cual; cualquier otro país va al más cercano por distancia a Madrid o Ciudad de México. Se guarda en <code>lm-geo</code> y no se repite.</td></tr>
+    <tr><td>Divisa</td><td>España → EUR, México → MXN (tipo del BCE vía Frankfurter, con respaldo). El cobro sigue en EUR; los pesos se muestran con «≈».</td></tr>
+</table>
+<p>El cambio de bandera se propaga con el evento <code>lm-locale</code> y entre pestañas con <code>storage</code>, sin recargar. Se borra la cookie <code>googtrans</code> que dejaba la versión con Google Translate.</p>
+
+<h2><span class="n">9</span>Sitio en español</h2>
+<ul>
+    <li>Blog completo: panel, 38 artículos, series, tipos, zonas, facetas y etiquetas (con un glosario común para que los filtros sigan agrupando igual).</li>
+    <li>Navegación (Desarrollo, Componentes, Comunidad), botones (REGISTRO), opciones del formulario de contacto, textos de los pop-ups.</li>
+    <li>Fechas del blog en <code>es-ES</code>; <code>slugify</code> elimina tildes, así que los anclajes de los encabezados quedan legibles.</li>
+    <li>Se mantienen en inglés los nombres de carpeta y los slugs (para no romper enlaces), los comentarios del código y la opción English del widget de WhatsApp.</li>
+</ul>
+
+<h2><span class="n">10</span>Términos por región</h2>
+<h3>10.1 Cómo funciona</h3>
 <p class="file">pages/terminos/index.html</p>
 <pre><code><span class="k">const</span> region = useLocale().country;            <span class="c">// 'ES' o 'MX', la bandera de la cabecera</span>
 <span class="k">const</span> sections = sectionsFor(region);          <span class="c">// filtra SECTIONS por `regions` y numera 01, 02…</span>
@@ -59,7 +123,7 @@ CLAUSES.vendedor  = Vendedor                             <span class="c">// clá
     <li><strong>Accesibilidad.</strong> <code>role="tablist"</code> / <code>tab</code> / <code>tabpanel</code> y <code>aria-selected</code>.</li>
 </ul>
 
-<h3>3.2 Índice por región</h3>
+<h3>10.2 Índice por región</h3>
 <table>
     <tr><th style="width:5%">#</th><th style="width:47%">España · política estándar española, electrónica</th><th>México · LFPC</th></tr>
     <tr><td>01</td><td>Datos del vendedor (LSSI-CE, Ley 34/2002)</td><td>Datos del vendedor (art. 76 bis LFPC)</td></tr>
@@ -78,10 +142,10 @@ CLAUSES.vendedor  = Vendedor                             <span class="c">// clá
 <div class="note">El cobro sigue en EUR también para México. La LFPC exige informar del precio total en moneda nacional; la cláusula lo cubre con la
     confirmación en MXN antes del pago, pero cobrar en pesos (pasarela local) es una decisión de negocio pendiente.</div>
 
-<h2><span class="n">4</span>Opción A — Vite + react-i18next <span class="tag t-med">pendiente</span></h2>
+<h2><span class="n">11</span>Opción A — Vite + react-i18next <span class="tag t-med">pendiente</span></h2>
 <p>Mantiene el sitio como SPA de React, pero con un paso de build: Vite compila el JSX (adiós a Babel en el navegador) y react-i18next
     carga los textos por página.</p>
-<h3>4.1 Estructura</h3>
+<h3>11.1 Estructura</h3>
 <pre><code>locales/
   es/ common.json  inicio.json  tienda.json  terminos.json  blog.json  blog-security-rate-limiting.json …
   en/ …                                   <span class="c">// relleno por DeepL, revisado en el TMS</span>
@@ -102,14 +166,14 @@ i18n.use(initReactI18next)
             interpolation: { escapeValue: <span class="k">false</span> }, react: { useSuspense: <span class="k">true</span> } });
 
 <span class="c">// en cada página: const { t } = useTranslation('terminos');  t('es.garantia.p1')</span></code></pre>
-<h3>4.2 Límites</h3>
+<h3>11.2 Límites</h3>
 <ul>
     <li>Sigue siendo renderizado en cliente: el HTML inicial sigue vacío para los rastreadores (ver el artículo «SSR y generación estática» del blog). Se puede prerenderizar con <code>vite-plugin-ssr</code>/<code>vike</code>, pero eso ya se acerca a la opción B.</li>
     <li>Las URLs no cambian de idioma; un segundo idioma necesitaría <code>?lng=</code> o rutas propias y <code>hreflang</code> a mano.</li>
     <li>Esfuerzo estimado: extraer ~1.500–2.000 cadenas a JSON y cambiar cada texto por <code>t()</code>; migración página a página posible.</li>
 </ul>
 
-<h2><span class="n">5</span>Opción B — Next.js + next-intl + generación estática + /es/ <span class="tag t-med">pendiente</span></h2>
+<h2><span class="n">12</span>Opción B — Next.js + next-intl + generación estática + /es/ <span class="tag t-med">pendiente</span></h2>
 <p>Pasa a Next.js (App Router) con exportación estática: cada página se genera en build como HTML completo bajo un prefijo de idioma,
     lo que además resuelve el HTML vacío del sitio actual.</p>
 <pre><code>app/[locale]/layout.tsx                       <span class="c">// NextIntlClientProvider, &lt;html lang={locale}&gt;</span>
@@ -133,8 +197,8 @@ setRequestLocale(locale);                                  <span class="c">// ha
     <li>Esfuerzo estimado: mayor que A (reescritura a componentes de Next, datos del blog y de la tienda en build), pero entrega HTML estático rastreable.</li>
 </ul>
 
-<h2><span class="n">6</span>TMS y pre-traducción con DeepL</h2>
-<h3>6.1 Tolgee o Crowdin (plan gratuito)</h3>
+<h2><span class="n">13</span>TMS y pre-traducción con DeepL</h2>
+<h3>13.1 Tolgee o Crowdin (plan gratuito)</h3>
 <table>
     <tr><th style="width:18%">TMS</th><th>Encaja porque</th><th style="width:30%">A tener en cuenta</th></tr>
     <tr><td><b>Tolgee</b></td><td>Integración directa con react-i18next (<code>@tolgee/i18next</code>) y edición en contexto sobre la propia página; CLI para subir y bajar JSON; código abierto, se puede autoalojar.</td><td>Revisar los límites actuales del plan gratuito en la nube (claves, puestos). Autoalojado no tiene esos límites.</td></tr>
@@ -144,14 +208,14 @@ setRequestLocale(locale);                                  <span class="c">// ha
 <pre><code>files:
   - source: /locales/es/*.json
     translation: /locales/%two_letters_code%/%original_file_name%</code></pre>
-<h3>6.2 Flujo propuesto</h3>
+<h3>13.2 Flujo propuesto</h3>
 <ol>
     <li>Se escribe o edita el texto en español (<code>locales/es/&lt;página&gt;.json</code>) en un pull request.</li>
     <li><code>node tools/i18n/deepl-prefill.mjs --target en</code> rellena solo las claves que faltan y las anota en <code>locales/en/_prefill.json</code>.</li>
     <li>El TMS importa las traducciones como <em>sin revisar</em>; una persona las corrige y aprueba.</li>
     <li>El TMS devuelve los JSON aprobados al repositorio (pull request de Crowdin o <code>tolgee pull</code>) y el build los publica.</li>
 </ol>
-<h3>6.3 tools/i18n/deepl-prefill.mjs</h3>
+<h3>13.3 tools/i18n/deepl-prefill.mjs</h3>
 <ul>
     <li>Solo rellena claves vacías o ausentes; nunca sobrescribe una traducción revisada. Mantiene el orden de claves del archivo fuente.</li>
     <li>Protege <code>{{name}}</code> (react-i18next), <code>{name}</code> (next-intl / ICU) y los términos de marca (<code>Lameyer</code>, <code>MC-SE</code>, <code>Modular Core</code>, <code>Serverless Edge</code>, más <code>--keep</code>) con etiquetas <code>&lt;x&gt;</code> que DeepL no traduce.</li>
@@ -159,7 +223,7 @@ setRequestLocale(locale);                                  <span class="c">// ha
     <li>Probado contra un servidor DeepL simulado: placeholders y marcas intactos, claves existentes conservadas, segunda ejecución sin cambios.</li>
 </ul>
 
-<h2><span class="n">7</span>Comparativa</h2>
+<h2><span class="n">14</span>Comparativa</h2>
 <table>
     <tr><th style="width:24%">Criterio</th><th>A · Vite + react-i18next</th><th>B · Next.js + next-intl</th></tr>
     <tr><td>HTML inicial para buscadores</td><td>Vacío (SPA) salvo prerenderizado extra</td><td>Completo, generado en build</td></tr>
@@ -172,7 +236,7 @@ setRequestLocale(locale);                                  <span class="c">// ha
     rutas <code>/es/</code> preparan un segundo idioma. A solo si hace falta traducir pronto sin cambiar de framework. En ambos casos el TMS y el
     script de DeepL son los mismos.</div>
 
-<h2><span class="n">8</span>Pendiente</h2>
+<h2><span class="n">15</span>Pendiente</h2>
 <table>
     <tr><th style="width:5%">#</th><th>Tarea</th><th style="width:16%">Prioridad</th></tr>
     <tr><td>1</td><td>Elegir opción A o B</td><td><span class="tag t-block">Bloquea</span></td></tr>
@@ -184,6 +248,7 @@ setRequestLocale(locale);                                  <span class="c">// ha
     <tr><td>7</td><td>Decidir si los pedidos de México se cobran en MXN</td><td><span class="tag t-low">Baja</span></td></tr>
 </table>
 
-<footer class="doc-foot"><span>Lameyer.net · 1.0.11</span><span>2026-10-05 · Sincronizado con readme.md (Versiones → 1.0.11)</span></footer>
+
+<footer class="doc-foot"><span>Lameyer.net · 1.0.5 (consolidada)</span><span>2026-10-05 · Sincronizado con readme.md (Versiones → 1.0.5)</span></footer>
 </body>
 </html>

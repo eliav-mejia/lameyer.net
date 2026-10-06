@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.6 — Medidas de seguridad (borrador)</title>
+<link rel="stylesheet" href="doc.css">
+<style>
+    .layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 6px 0 10px; }
+    .layers div { border: 1px solid var(--blue-line); border-top: 3px solid var(--blue-mid); border-radius: 3px; padding: 6px 8px; background: #fff; }
+    .layers div:last-child { border-top-color: var(--blue); background: var(--blue-soft); }
+    .layers b { display: block; font-size: 7pt; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 2px; }
+    .layers p { margin: 0; font-size: 7.8pt; }
+</style>
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Documentación de desarrollo de software</div>
+    <h1>Versión <span class="v">1.0.6</span> — Medidas de seguridad</h1>
+    <div class="sub">Borrador en curso. Une la base de seguridad del entorno de desarrollo (documento 5: agente de IA, Dev Container, hooks de Git, reglas del servidor) con las medidas del sitio público. Es la puerta previa al alta en Supabase y a las reglas de IAM.</div>
+</header>
+
+<div class="meta">
+    <div><b>Versión</b><span>1.0.6 · borrador</span></div>
+    <div><b>Fecha</b><span>2026-10-05 (inicio)</span></div>
+    <div><b>Base</b><span>Documento 5 · <code>v5-dev-security.html</code></span></div>
+    <div><b>Puerta para</b><span>Proyecto Supabase + IAM</span></div>
+</div>
+
+<div class="warn"><b>Nada de esta versión está implementado todavía.</b> Este documento recoge el estado comprobado y el plan. Cada medida pasa a «hecha» solo
+    cuando su prueba de la matriz (§6) está registrada en el pull request correspondiente.</div>
+
+<h2><span class="n">1</span>Resumen y alcance</h2>
+<p>
+    1.0.5 consolidó todo lo anterior y dejó libre la versión 1.0.6, que el documento 5 ya reservaba para la base de seguridad (su nota del §9 sobre el
+    número de versión queda resuelta). 1.0.6 tiene dos partes:
+</p>
+<div class="layers">
+    <div><b>Parte A · Desarrollo</b><p>Agente de IA aislado en un Dev Container, hooks de Git que no se pueden saltar en silencio y reglas en GitHub que sí bloquean. Especificado en el documento 5; aquí se resume (§3).</p></div>
+    <div><b>Parte B · Sitio público</b><p>DNS y proxy de Cloudflare, HTTPS estricto, cabeceras de seguridad, CSP, integridad de scripts, formularios, pedidos por WhatsApp, terceros y datos en el navegador (§4).</p></div>
+    <div><b>Puerta · Supabase</b><p>Solo con A y B en marcha se crea el proyecto Supabase, se sustituyen las cuentas de staging y se aplican las reglas de credenciales e IAM (documento 5, §8).</p></div>
+</div>
+
+<h2><span class="n">2</span>Estado actual comprobado (2026-10-05)</h2>
+<p>Comprobado sobre producción (<code>lameyer.net</code>) y sobre el repositorio en <code>59a81ca</code>. El readme decía que el sitio pasaba por el proxy de Cloudflare; no es así.</p>
+<table>
+    <tr><th style="width:24%">Punto</th><th style="width:40%">Evidencia</th><th>Riesgo</th></tr>
+    <tr><td>DNS y proxy</td><td>NS <code>dns1/dns2.registrar-servers.com</code> (Namecheap); A → <code>185.199.108–111.153</code> (GitHub Pages); respuesta <code>server: GitHub.com</code>, sin <code>cf-ray</code></td><td><span class="tag t-high">Alta</span> Ninguna capa de la serie «Seguridad de APIs» del blog protege hoy el propio sitio: sin WAF, sin rate limiting, sin cabeceras propias.</td></tr>
+    <tr><td>DNSSEC · CAA</td><td>Sin registro DS; sin CAA</td><td><span class="tag t-med">Media</span> Respuestas DNS falsificables; cualquier CA puede emitir para el dominio.</td></tr>
+    <tr><td>HTTPS</td><td><code>http://</code> → 301 a <code>https://</code> (GitHub Pages «Enforce HTTPS»); sin <code>Strict-Transport-Security</code></td><td><span class="tag t-med">Media</span> La primera visita por HTTP se puede interceptar (SSL stripping).</td></tr>
+    <tr><td>Cabeceras</td><td>Solo <code>cache-control: max-age=600</code>. Sin CSP, <code>X-Content-Type-Options</code>, <code>Referrer-Policy</code>, <code>Permissions-Policy</code> ni protección contra iframes</td><td><span class="tag t-high">Alta</span> Clickjacking sobre el login y el carrito; ningún freno a scripts inyectados.</td></tr>
+    <tr><td>Scripts de terceros</td><td>React, React DOM y Babel desde cdnjs <b>sin</b> <code>integrity</code> en ninguna página; Tailwind Play CDN; Babel compila el JSX en el navegador</td><td><span class="tag t-high">Alta</span> Un CDN comprometido ejecuta código en todas las páginas. Babel en el navegador obliga a permitir scripts en línea en la CSP.</td></tr>
+    <tr><td>XSS en el código</td><td>Sin <code>innerHTML</code>, <code>dangerouslySetInnerHTML</code>, <code>eval</code> ni <code>new Function</code> propios; React escapa el contenido; JSON-LD con <code>textContent</code></td><td><span class="tag t-low">Baja</span> Bien. Mantenerlo con la regla de CI del §4.3.</td></tr>
+    <tr><td>Enlaces externos</td><td>Todos los <code>target="_blank"</code> llevan <code>rel="noopener noreferrer"</code></td><td><span class="tag t-low">Baja</span> Bien.</td></tr>
+    <tr><td>Cuentas de staging</td><td><code>lm-users</code> guarda hashes SHA-256 con sal en <code>localStorage</code>; sesión en <code>lm-session</code></td><td><span class="tag t-med">Media</span> Aceptable en staging; no debe llegar a producción como «cuentas reales».</td></tr>
+    <tr><td>Formulario de contacto</td><td>POST <code>no-cors</code> a Google Apps Script; solo un campo trampa (honeypot); URL del script pública en <code>js/layout.jsx</code></td><td><span class="tag t-med">Media</span> Spam y relleno de la hoja; no hay límite de envíos.</td></tr>
+    <tr><td>Pedidos por WhatsApp</td><td>El mensaje (productos, precios, total) se construye en el navegador</td><td><span class="tag t-med">Media</span> Un cliente puede editar precios en el mensaje. El paso 2 de los términos (confirmación por Lameyer) es el control.</td></tr>
+    <tr><td>Terceros con datos</td><td>GeoJS (IP, al cargar si no hay bandera), Google Fonts (IP), Frankfurter, Simple Icons, Unsplash, <code>raw.githubusercontent.com</code> (logo), Google Apps Script, WhatsApp</td><td><span class="tag t-med">Media</span> La IP llega a terceros antes del consentimiento de cookies (GeoJS, Google Fonts).</td></tr>
+    <tr><td>Repositorio</td><td>Del documento 5 §1: commits desde la web de GitHub, copia de trabajo en OneDrive, sin <code>.gitignore</code>, sin hooks ni CI, sin reglas en <code>main</code>; <code>.claude/</code> sin seguimiento</td><td><span class="tag t-high">Alta</span> En cuanto existan secretos, nada impide subirlos.</td></tr>
+</table>
+
+<h2><span class="n">3</span>Parte A · Entorno de desarrollo (documento 5)</h2>
+<p>Se adopta el documento 5 sin cambios de diseño. El código completo (<code>devcontainer.json</code>, <code>Dockerfile</code>, <code>managed-settings.json</code>,
+    <code>agent-guard.sh</code>, hooks, <code>gitleaks.toml</code>, <code>guard.yml</code>) está en sus §3–5.</p>
+<table>
+    <tr><th style="width:18%">Capa</th><th>Medida</th><th style="width:22%">Doc. 5</th></tr>
+    <tr><td>1 · Agente</td><td>Claude Code solo dentro del contenedor; ajustes gestionados de root (deny + guardia <code>PreToolUse</code>) que el agente no puede editar; sin credenciales de GitHub ni Supabase; cortafuegos de salida con lista blanca.</td><td>§3.1–3.5</td></tr>
+    <tr><td>2 · Estación</td><td>Hooks <code>pre-commit</code>, <code>commit-msg</code>, <code>pre-push</code> de root en <code>/opt/lameyer/hooks</code>; gitleaks con reglas de Supabase; el agente solo hace commits en ramas <code>ai/*</code> y nunca hace push.</td><td>§4</td></tr>
+    <tr><td>3 · Servidor</td><td>Ruleset de <code>main</code> sin lista de excepciones, CI <code>guard</code> obligatorio, secret scanning con push protection, etiqueta <code>security-reviewed</code> para cambios en <code>.github/</code>, <code>.githooks/</code>, <code>.devcontainer/</code>.</td><td>§5</td></tr>
+</table>
+<div class="note"><b>Ajuste para 1.0.6.</b> La lista blanca del cortafuegos (doc. 5 §3.5) debe añadir los hosts nuevos desde 1.0.5 que usa la vista previa local:
+    <code>get.geojs.io</code>, <code>cdn.simpleicons.org</code>, <code>images.unsplash.com</code>, <code>raw.githubusercontent.com</code>. <code>api-free.deepl.com</code> no:
+    el script de DeepL se ejecuta en CI con su secreto, nunca en el contenedor.</div>
+
+<h2><span class="n">4</span>Parte B · Sitio público</h2>
+
+<h3>4.1 Cloudflare delante de GitHub Pages</h3>
+<ol>
+    <li>Añadir <code>lameyer.net</code> a Cloudflare (plan gratuito) y cambiar los NS en Namecheap a los que asigne Cloudflare.</li>
+    <li>Registros A/AAAA de GitHub Pages y <code>CNAME www</code> con <b>proxy activado</b> (nube naranja). Ningún registro sin proxy que apunte al origen.</li>
+    <li>SSL/TLS en <b>Full (strict)</b>; «Always Use HTTPS»; TLS mínimo 1.2.</li>
+    <li><b>DNSSEC</b> en Cloudflare y el registro DS en Namecheap.</li>
+    <li><b>CAA</b> solo para las autoridades que use Cloudflare para el certificado del edge (Cloudflare las añade al activar CAA) y la de GitHub Pages (Let's Encrypt).</li>
+</ol>
+<div class="note"><b>Verificar en la migración.</b> GitHub Pages emite su certificado por desafío HTTP. Mantener los registros sin proxy hasta que GitHub muestre el
+    certificado como emitido y comprobar después de activar el proxy que «Enforce HTTPS» sigue disponible y que la renovación funciona.</div>
+
+<h3>4.2 Cabeceras de seguridad</h3>
+<p>GitHub Pages no permite cabeceras propias, así que se añaden en Cloudflare con una regla de <i>Transform Rules → Response Header Modification</i> para todo el host:</p>
+<pre><code>Strict-Transport-Security: max-age=300                       <span class="c">// subir a 31536000 tras una semana sin incidencias; luego includeSubDomains</span>
+X-Content-Type-Options:    nosniff
+Referrer-Policy:           strict-origin-when-cross-origin
+Permissions-Policy:        camera=(), microphone=(), geolocation=(), payment=(), usb=()
+X-Frame-Options:           DENY                               <span class="c">// equivalente a frame-ancestors 'none' para navegadores antiguos</span>
+Cross-Origin-Opener-Policy: same-origin</code></pre>
+<p><code>geolocation=()</code> no afecta a la elección de país: el sitio usa la zona horaria y la IP, nunca la API de geolocalización del navegador.</p>
+
+<h3>4.3 Content-Security-Policy</h3>
+<p>Mientras Babel compile el JSX en el navegador, la CSP necesita <code>'unsafe-inline'</code> y <code>'unsafe-eval'</code> en <code>script-src</code>, lo que le quita la mayor
+    parte de su valor contra XSS. Plan en dos pasos:</p>
+<table>
+    <tr><th style="width:18%">Paso</th><th>Política</th></tr>
+    <tr><td>1 · Ahora, <code>Report-Only</code></td><td>Lista de orígenes reales para descubrir dependencias olvidadas sin romper nada (abajo).</td></tr>
+    <tr><td>2 · Con build</td><td>Tras la opción A o B de 1.0.5 (JSX compilado, Tailwind generado): <code>script-src 'self'</code> sin <code>unsafe-*</code>, aplicada (no Report-Only).</td></tr>
+</table>
+<p class="file">Content-Security-Policy-Report-Only (paso 1)</p>
+<pre><code>default-src 'self';
+script-src  'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com https://cdn.tailwindcss.com;
+style-src   'self' 'unsafe-inline' https://fonts.googleapis.com;
+font-src    https://fonts.gstatic.com;
+img-src     'self' data: https://cdn.simpleicons.org https://images.unsplash.com https://placehold.co https://raw.githubusercontent.com;
+connect-src 'self' https://api.frankfurter.dev https://get.geojs.io https://script.google.com https://script.googleusercontent.com;
+form-action 'self';  base-uri 'self';  object-src 'none';  frame-ancestors 'none';
+report-uri  https://&lt;endpoint-de-informes&gt;</code></pre>
+<p>El endpoint de informes puede ser un Worker de Cloudflare que guarde las violaciones en Workers Analytics Engine. CI añade una regla a
+    <code>checks.sh</code> (doc. 5 §4.4) que falla si aparece <code>dangerouslySetInnerHTML</code>, <code>innerHTML =</code>, <code>eval(</code> o <code>new Function</code> en <code>js/</code>, <code>pages/</code> o <code>blog/</code>.</p>
+
+<h3>4.4 Integridad de los scripts (SRI)</h3>
+<p>Calculado el 2026-10-05 sobre los archivos que sirve cdnjs. Añadir <code>integrity</code> y <code>crossorigin="anonymous"</code> en todas las páginas (y en la plantilla de
+    <code>tools/generar-paginas-producto.py</code>):</p>
+<pre><code>react/18.2.0/umd/react.production.min.js          sha384-tMH8h3BGESGckSAVGZ82T9n90ztNXxvdwvdM6UoR56cYcf+0iGXBliJ29D+wZ/x8
+react-dom/18.2.0/umd/react-dom.production.min.js  sha384-bm7MnzvK++ykSwVJ2tynSE5TRdN+xL418osEVF2DE/L/gfWHj91J2Sphe582B1Bh
+babel-standalone/7.23.5/babel.min.js              sha384-1qlE7MZPM2pHD/pBZCU/yB8UCP52RYL8bge/qNdfNBCWToySp8/M+JL2waXU4hjJ</code></pre>
+<p>El Play CDN de Tailwind genera el CSS al vuelo y no admite SRI: desaparece con el paso de build. Hasta entonces es el riesgo residual principal de la cadena de suministro.</p>
+
+<h3>4.5 Formularios</h3>
+<ul>
+    <li><b>Contacto:</b> añadir Cloudflare Turnstile al formulario y enviarlo a un Worker propio que valide el token, aplique un límite por IP
+        (binding de rate limiting, p. ej. 5 envíos / 10 min) y reenvíe a Apps Script con un secreto compartido. La URL de Apps Script deja de estar en el cliente.</li>
+    <li>Mantener el campo trampa; el Worker descarta en silencio los envíos que lo rellenen.</li>
+    <li>Apps Script: comprobar el secreto compartido y rechazar campos de más de 500 caracteres; anteponer <code>'</code> a valores que empiecen por <code>=</code>, <code>+</code>, <code>-</code> o <code>@</code> (inyección de fórmulas en Sheets).</li>
+</ul>
+
+<h3>4.6 Pedidos por WhatsApp</h3>
+<p>El navegador no es fuente de verdad. Control documentado: antes de confirmar un pedido, Lameyer comprueba cada SKU, precio y stock contra
+    <code>public/db/productos.json</code> (o la base de datos real), nunca contra el texto del mensaje. Cuando haya pago en línea, el importe se calcula en el servidor.</p>
+
+<h3>4.7 Terceros y privacidad</h3>
+<table>
+    <tr><th style="width:22%">Tercero</th><th>Recibe</th><th style="width:38%">Medida propuesta</th></tr>
+    <tr><td>Google Fonts</td><td>IP y página, en cada visita</td><td>Alojar Plus Jakarta Sans en <code>/fonts/</code>; quita además dos orígenes de la CSP.</td></tr>
+    <tr><td>GeoJS</td><td>IP, una vez, si no hay bandera</td><td>Decisión pendiente: mantenerla como funcional (ya informada en los términos) o pedirla solo tras el consentimiento y usar mientras tanto la zona horaria.</td></tr>
+    <tr><td>Simple Icons, Unsplash, GitHub (logo)</td><td>IP</td><td>Copiar los SVG y la imagen al repositorio.</td></tr>
+    <tr><td>Frankfurter</td><td>IP</td><td>Cachear el tipo de cambio en un Worker o en build; el cliente lo pide a <code>'self'</code>.</td></tr>
+    <tr><td>Apps Script, WhatsApp</td><td>Datos del formulario / del pedido</td><td>Ya informados en «Protección de datos»; tras §4.5, Apps Script solo recibe datos desde el Worker.</td></tr>
+</table>
+
+<h3>4.8 Datos en el navegador</h3>
+<table>
+    <tr><th style="width:20%">Clave</th><th>Contenido</th><th style="width:40%">Regla</th></tr>
+    <tr><td><code>lm-users</code>, <code>lm-session</code></td><td>Cuentas de staging (hash + sal)</td><td>Ocultar «Crear cuenta» en producción hasta Supabase Auth; borrar ambas claves en la primera carga tras el cambio.</td></tr>
+    <tr><td><code>lm-cart</code>, <code>lm-locale</code>, <code>lm-geo</code>, <code>lm-cookies</code></td><td>Carrito, bandera, país estimado, consentimiento</td><td>Sin datos personales; se mantienen. Nunca guardar tokens de Supabase fuera del almacenamiento que gestione su SDK.</td></tr>
+</table>
+
+<h3>4.9 Después de la puerta: Supabase e IAM</h3>
+<p>Sin cambios respecto al documento 5 §8: clave publicable en el cliente solo con RLS en todas las tablas; clave secreta solo en secretos de Worker o de entorno de
+    GitHub; contraseña de la base de datos en el gestor de contraseñas; token de la CLI solo en el equipo de la persona; migraciones revisadas y aplicadas por CI con
+    revisor obligatorio; dos miembros con MFA; proyectos de staging y producción separados.</p>
+
+<h2><span class="n">5</span>Plan de despliegue</h2>
+<table>
+    <tr><th style="width:16%">Fase</th><th>Trabajo</th><th style="width:26%">Hecho cuando</th></tr>
+    <tr><td>0–4 · Desarrollo</td><td>Higiene, hooks, servidor, contenedor y puerta del documento 5 §7.</td><td>Pruebas 1–13 superadas</td></tr>
+    <tr><td>5 · DNS</td><td>§4.1: Cloudflare, proxy, Full (strict), DNSSEC, CAA. Corregir la línea del readme sobre el proxy.</td><td>Pruebas 14–16</td></tr>
+    <tr><td>6 · Cabeceras</td><td>§4.2 aplicadas; §4.3 en Report-Only con endpoint de informes; §4.4 SRI.</td><td>Pruebas 17–19; una semana sin violaciones inesperadas</td></tr>
+    <tr><td>7 · Formularios</td><td>§4.5 Turnstile + Worker + endurecer Apps Script.</td><td>Pruebas 20–21</td></tr>
+    <tr><td>8 · Terceros</td><td>§4.7 fuentes, iconos e imágenes propias; decisión sobre GeoJS.</td><td>Prueba 22</td></tr>
+    <tr><td>9 · CSP estricta</td><td>Tras la opción A o B de 1.0.5: CSP aplicada sin <code>unsafe-*</code>.</td><td>Prueba 23</td></tr>
+</table>
+
+<h2><span class="n">6</span>Matriz de pruebas</h2>
+<p>Las pruebas 1–13 son las del documento 5 §6. Se añaden las del sitio público:</p>
+<table>
+    <tr><th style="width:4%">#</th><th>Intento / comprobación</th><th style="width:38%">Resultado esperado</th></tr>
+    <tr><td>14</td><td><code>curl -sI https://lameyer.net/</code></td><td>Aparece <code>cf-ray</code>; <code>server: cloudflare</code></td></tr>
+    <tr><td>15</td><td>Consulta DoH de <code>lameyer.net</code> tipo A</td><td>Respuesta con bandera <code>AD</code> (DNSSEC validado)</td></tr>
+    <tr><td>16</td><td>Consulta del registro CAA</td><td>Solo las autoridades previstas</td></tr>
+    <tr><td>17</td><td><code>curl -sI</code> en <code>/</code>, <code>/pages/terminos/</code> y un artículo del blog</td><td>Todas las cabeceras del §4.2 y la CSP Report-Only</td></tr>
+    <tr><td>18</td><td>Recorrido con navegador headless por todas las páginas</td><td>Cero violaciones de CSP inesperadas en el endpoint de informes</td></tr>
+    <tr><td>19</td><td>Cambiar un carácter del <code>integrity</code> de React en una copia local</td><td>El navegador bloquea el script</td></tr>
+    <tr><td>20</td><td>POST al Worker del formulario sin token de Turnstile</td><td>403, nada llega a la hoja</td></tr>
+    <tr><td>21</td><td>6 envíos válidos en 10 minutos desde la misma IP</td><td>El sexto recibe 429</td></tr>
+    <tr><td>22</td><td>Cargar el sitio con las peticiones a <code>fonts.googleapis.com</code> y <code>cdn.simpleicons.org</code> bloqueadas</td><td>Aspecto idéntico</td></tr>
+    <tr><td>23</td><td>Inyectar <code>&lt;script&gt;alert(1)&lt;/script&gt;</code> en una página de prueba</td><td>Bloqueado por la CSP aplicada</td></tr>
+</table>
+
+<h2><span class="n">7</span>Decisiones abiertas</h2>
+<ul>
+    <li>GeoJS antes o después del consentimiento (§4.7).</li>
+    <li>Endpoint de informes de CSP: Worker propio o servicio externo.</li>
+    <li>Dónde vive el Worker del formulario (misma zona, ruta <code>/api/contacto</code>).</li>
+    <li>Si los documentos 5 y 1.0.6 se fusionan en uno solo al cerrar la versión.</li>
+</ul>
+
+<h2><span class="n">8</span>Notas</h2>
+<ul>
+    <li>El documento 5 (<code>_docs/src/v5-dev-security.html</code> y su PDF) no se ha modificado ni añadido al repositorio; sigue sin seguimiento en Git.</li>
+    <li>Las comprobaciones del §2 son de una sola consulta desde una red; repetirlas al empezar cada fase.</li>
+    <li>Hashes SRI válidos solo para esas versiones exactas; al actualizar una librería hay que recalcularlos.</li>
+</ul>
+
+<footer class="doc-foot"><span>Lameyer.net · 1.0.6 · borrador</span><span>2026-10-05 · Sincronizado con readme.md (Versiones → 1.0.6)</span></footer>
+</body>
+</html>

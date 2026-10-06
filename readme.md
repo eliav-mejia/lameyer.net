@@ -1,7 +1,7 @@
 LaMeyer.net
 /* Sitio Web */
 
-Sitio estático en GitHub Pages (dominio propio `lameyer.net`, con proxy de Cloudflare).
+Sitio estático en GitHub Pages (dominio propio `lameyer.net`; DNS en Namecheap, todavía **sin** proxy de Cloudflare: ver 1.0.6).
 Sin paso de build: las páginas usan Tailwind, React y Babel desde CDNs.
 
 ## Estructura de carpetas
@@ -38,7 +38,7 @@ lameyer.net/
 │   ├── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
 │
-├── _docs/                        documentos de versión (PDF) y su fuente HTML en _docs/src/
+├── _docs/                        documentos de versión (PDF) y su fuente HTML en _docs/src/: v1.0.1–v1.0.5, v1.0.6 (en curso)
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
 │   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
@@ -201,7 +201,7 @@ Enlaza siempre con barra final (`/pages/stack/`, `/blog/security/rate-limiting/`
 
 ## Pendiente: traducción y CMS headless
 
-Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.11.html` (PDF: `_docs/Lameyer-v1.0.11.pdf`). Ninguna opción está implementada.
+Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.5.html`, §11–15 (PDF: `_docs/Lameyer-v1.0.5.pdf`). Ninguna opción está implementada.
 
 | Opción | Pila | Rutas | Estado |
 |--------|------|-------|--------|
@@ -221,63 +221,36 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 
 ## Versiones
 
-### 1.0.11 — 2026-10-05 · Términos por región + plan de i18n y CMS headless
-- `/pages/terminos/`: el índice tiene pestañas **España / México** sincronizadas con la bandera y muestra las cláusulas de cada región.
-  España: política estándar española de comercio electrónico para electrónica (LSSI-CE, TRLGDCU: desistimiento 14 días, garantía
-  3 años) y una cláusula nueva de **residuos electrónicos y pilas** (RAEE, uno por uno). México: LFPC (revocación 5 días hábiles,
-  garantía mínima 90 días, total en MXN antes del pago, envíos y aduanas, aviso de privacidad, PROFECO) y aviso de revocación.
-  Mismos anclajes en ambas regiones. Pendiente de revisión legal; nuevo marcador `[Nº de registro RII-AEE]`.
-- Nuevo `tools/i18n/deepl-prefill.mjs` (pendiente de uso) y sección «Pendiente: traducción y CMS headless» con las opciones A y B.
-- Documento de versión `_docs/src/v1.0.11.html` + PDF, sincronizado con este readme.
+### 1.0.6 — en preparación · Medidas de seguridad
+- Documento de versión **en curso**: `_docs/src/v1.0.6.html` (+ PDF). Parte del documento 5 (`_docs/src/v5-dev-security.html`:
+  agente de IA, Dev Container, hooks de Git, reglas del servidor) y añade las medidas del propio sitio.
+- Hallazgos ya comprobados en producción: el dominio **no** pasa por el proxy de Cloudflare (DNS en Namecheap, registros A directos
+  a GitHub Pages), sin DNSSEC ni registro CAA, y ninguna cabecera de seguridad (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`).
+- Nada de esta versión está implementado todavía; es la puerta previa al alta en Supabase y a las reglas de IAM.
 
-### 1.0.10 — 2026-10-05 · España y México, todo en español
-- Banderas de la cabecera: solo 🇪🇸 España y 🇲🇽 México, ambas en español. La bandera fija la divisa de la tienda
-  (EUR o MXN) y el cambio se aplica al momento, sin recargar. Se elimina Google Translate (y su cookie `googtrans`).
-- Sin bandera elegida, el país se propone por geolocalización: zona horaria del navegador y, después, país por IP (GeoJS),
-  corregido al país disponible más cercano. Se informa en los términos (Precios y divisas).
-- Tienda: `CURRENCIES` queda en EUR y MXN; el selector de divisa se sustituye por `CurrencyBadge` (muestra la bandera y
-  permite cambiar de país). Se retiran USD y GBP.
-- Todo el sitio traducido al español: blog (panel, 38 artículos, series, facetas y etiquetas), menú, botones, formulario,
-  este readme y `public/db/README.md`. Las fechas del blog se muestran en formato español y los ids de encabezado
-  eliminan las tildes.
-
-### 1.0.9 — 2026-10-04 · Diseño de la tienda, filtro en acordeón, edición especial
-- Tienda (`/pages/components/`): filtro en acordeón (barra lateral en escritorio, desplegable «Filtros» en móvil/tableta) con cuatro
-  grupos — Componentes del PC, Redes, Equipo básico, Herramientas — y 13 categorías por tipo de pieza (memoria, almacenamiento,
-  refrigeración, baterías, pantallas, placas, Wi-Fi, cableado, monitores, teclados y ratones, auriculares, mandos,
-  herramientas) en lugar de Oficina / Estudiante / Dev / Gamer / Otros. Además, una opción «Solo productos en stock».
-- Productos estándar en tarjetas compactas con foto más pequeña: 4 columnas × 2 filas en escritorio, 2 × 4 en móvil, 8 por página.
-- Lista «Edición especial» bajo la cuadrícula: sin foto; nombre, descripción, precio, etiqueta de categoría y distintivo de stock.
-  1 unidad = granate, 2 unidades = azul, agotado = gris (también en tarjetas y fichas de producto). 10 productos de ejemplo (`LM-EE-*`).
-- Las cantidades del carrito se limitan al stock. Campo `edition` y `groups` de categorías documentados en `public/db/README.md`.
-- Cabecera: por debajo de 1280 px el botón de acceso solo muestra su icono para que quepa el menú.
-
-### 1.0.8 — 2026-10-04 · Tema blanco + paleta de cuatro colores
-- Vuelta a un sitio blanco: fondo blanco, azul secundario, azul oscuro terciario, gris para pies de texto (`css/site.css`).
-  Banner de cabecera, sección Stack y cabecera del chat en azul oscuro; pie y menú móvil de nuevo en blanco; widget de chat claro.
-- Se elimina el séquel israelí (ILS) de las divisas de la tienda y de los términos; las divisas de referencia son USD, MXN y GBP.
-
-### 1.0.7 — 2026-10-04 · Acceso / registro + consentimiento de cookies
-- Pop-up de acceso / registro en todas las páginas (botón de la cabecera, menú móvil); cuentas de staging guardadas solo en el navegador.
-- Pop-up de consentimiento de cookies en la primera visita («Aceptar todas» / «Solo necesarias»), recordado entre páginas.
-- Idiomas limitados a español ↔ inglés (🇪🇸 / 🇺🇸); se eliminan México y Países Bajos.
-- Widget de WhatsApp: se elimina el código del selector de región; solo España, atención bilingüe ES/EN.
-
-### 1.0.6 — 2026-10-04 · Idiomas + WhatsApp solo España
-- Banderas en la cabecera de todas las páginas (escritorio y menú móvil): 🇺🇸 English, 🇪🇸 Español (España), 🇲🇽 Español (México), 🇳🇱 Nederlands.
-  Google Translate traduce todo el sitio automáticamente; la elección se recuerda entre páginas (`lm-locale`) y también fija
-  la divisa de la tienda (USD, EUR, MXN, EUR). El script de Google solo se carga cuando hay una traducción activa.
-- Protección de React en `js/layout.jsx` para que los cambios de Google en el DOM no rompan las páginas React; los precios y contadores de la tienda
-  llevan `translate="no"` para que sigan actualizándose.
-- Widget de WhatsApp: se eliminan Israel, EE. UU. y México; solo queda el número de España (selector de región oculto).
-
-### 1.0.5 — 2026-10-04 · Serverless Edge: cuatro categorías nuevas
-- La serie serverless pasa de 5 a 9 pasos (`BLOG_TYPES` en `js/blog.jsx`), cada uno con su carpeta e `index.html`
-  en `blog/serverless/` y una entrada en `BLOG_POSTS`:
-  06 Tiempo real (WebSockets y Durable Objects), 07 IA en el edge (Workers AI, Vectorize, AI Gateway),
-  08 Imágenes y multimedia en el edge (R2, transformaciones, Stream), 09 Desplegar, probar y lanzar (Wrangler, Vitest, CI, despliegues graduales).
-- Nueva zona `platform` («Plataforma (publicar y evolucionar)») para el paso de despliegue; tiempo real va en `state`, IA en el edge y multimedia en `compute`.
-- Los artículos se encadenan con enlaces «Siguiente paso»: 05 → 06 → 07 → 08 → 09 → vuelta a la visión general.
+### 1.0.5 — 2026-10-03 → 2026-10-05 · Versión consolidada (todo lo posterior a 1.0.4)
+Agrupa los cambios publicados antes como 1.0.5 a 1.0.11 (commits `b2af7c1` … `59a81ca`; 111 archivos, +7.419 / −2.930 líneas).
+Se describe el estado final; los pasos intermedios que luego se retiraron (Google Translate, banderas de EE. UU. y Países Bajos,
+divisas USD, GBP e ILS) ya no forman parte del sitio. Detalle en `_docs/src/v1.0.5.html` (+ PDF).
+- **Blog · Serverless Edge:** la serie pasa de 5 a 9 pasos (06 Tiempo real, 07 IA en el edge, 08 Imágenes y multimedia,
+  09 Desplegar, probar y lanzar) más 3 cruces, con la zona nueva `platform` y enlaces «Siguiente paso» encadenados.
+- **Cuentas y cookies:** pop-up de acceso / registro en todas las páginas (cuentas de staging solo en el navegador:
+  `lm-users`, `lm-session`) y pop-up de consentimiento de cookies (`lm-cookies`, «Aceptar todas» / «Solo necesarias»).
+- **Diseño:** tema blanco con paleta de cuatro colores (blanco, azul, azul oscuro, gris) en `css/site.css`.
+- **Tienda:** filtro en acordeón con 4 grupos y 13 categorías por tipo de pieza, opción «Solo productos en stock», tarjetas
+  compactas (8 por página), lista «Edición especial» en filas de una línea con colores de stock (1 granate, 2 azul, agotado gris),
+  cantidades del carrito limitadas al stock.
+- **Banderas, país y divisa:** solo 🇪🇸 España (EUR) y 🇲🇽 México (MXN), ambas en español. País propuesto por zona horaria y
+  geolocalización por IP (GeoJS, `lm-geo`), la bandera pulsada manda (`lm-locale`); el cambio es inmediato. `CURRENCIES` = EUR y MXN,
+  `CurrencyBadge` sustituye al selector. Sin Google Translate.
+- **Todo en español:** blog (panel, 38 artículos, series, facetas, etiquetas), navegación, botones, formulario, readme y
+  `public/db/README.md`. Fechas en formato español; ids de encabezado sin tildes.
+- **Términos por región:** pestañas España / México sincronizadas con la bandera. España: política estándar española de comercio
+  electrónico para electrónica, con cláusula nueva de residuos electrónicos y pilas (RAEE). México: cláusulas de la LFPC y aviso de
+  revocación. Mismos anclajes en ambas regiones. Pendiente de revisión legal; marcador nuevo `[Nº de registro RII-AEE]`.
+- **WhatsApp:** solo el número de España, atención en español e inglés, sin selector de región.
+- **i18n y CMS headless (pendiente):** opciones A (Vite + react-i18next) y B (Next.js + next-intl, `/es/`), TMS Tolgee o Crowdin y
+  `tools/i18n/deepl-prefill.mjs` para pre-rellenar con DeepL. Ver «Pendiente: traducción y CMS headless».
 
 ### 1.0.4 — 2026-10-03 · Fichas de producto + base de datos simulada · STAGING (prelanzamiento)
 - Estado: **staging / prueba de entrada manual de MVP prelanzamiento.** Los datos del catálogo, precios, stock y especificaciones son de ejemplo y deben

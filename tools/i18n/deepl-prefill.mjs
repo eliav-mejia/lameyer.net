@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Pre-fills missing translations with DeepL before they are reviewed in the TMS (Tolgee or Crowdin).
-// PENDING (1.0.11): the site has no locale files yet. It runs as soon as option A or B of
-// _docs/src/v1.0.11.html creates them: one JSON file per page (namespace) per language.
+// PENDING (1.0.5): the site has no locale files yet. It runs as soon as option A or B of
+// _docs/src/v1.0.5.html creates them: one JSON file per page (namespace) per language.
 //
 //   locales/es/terminos.json   source (Spanish, the language the site is written in)
 //   locales/en/terminos.json   target: only missing or empty keys are filled, nothing is overwritten
