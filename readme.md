@@ -1,6 +1,44 @@
 LaMeyer.net
 /* Sitio Web */
 
+## Bienvenido a Lameyer.net
+
+Lameyer.net es el punto de encuentro entre Lameyer y quienes construyen software. Somos una empresa global que trabaja con
+total transparencia, y queremos que cada desarrollador que llegue aquí se sienta acompañado por un socio de confianza: alguien
+que explica lo que hace, cómo lo hace y por qué.
+
+Por eso publicamos nuestra documentación en este mismo sitio. Cada versión deja constancia de lo que cambió, de las decisiones
+que tomamos y de lo que aún está pendiente, para que puedas ver cómo hemos crecido a tu lado. No eres un visitante: formas parte
+activa de este proyecto, y lo que construimos responde a lo que tú necesitas.
+
+En Lameyer.net puedes:
+
+- **Encontrar la mejor oferta en componentes.** La [tienda](https://lameyer.net/pages/components/) reúne componentes del PC, redes,
+  equipo básico y herramientas, con precios en euros o pesos mexicanos según tu país, devolución en 30 días y garantía de 3 años.
+- **Aprender a diseñar, programar, desplegar y mantener tu propio software.** El [blog](https://lameyer.net/blog/) recorre paso a
+  paso cinco series: Modular Core, Serverless Edge, automatización de flujos, seguridad de APIs y búsqueda de código y visibilidad.
+- **Construir con el respaldo de la infraestructura de Lameyer.** En [Desarrollo](https://lameyer.net/pages/development/) y
+  [Stack](https://lameyer.net/pages/stack/) te contamos con qué trabajamos y cómo podemos acompañar tu proyecto, y en
+  [Comunidad](https://lameyer.net/pages/community/) encontrarás código abierto, talleres y formas de colaborar.
+- **Comprar con reglas claras.** Los [términos y condiciones](https://lameyer.net/pages/terminos/) se muestran según tu región,
+  España o México.
+
+Documentación publicada, versión a versión:
+
+| Versión | Contenido | Documento |
+|---------|-----------|-----------|
+| 1.0.1 | Widget de chat de WhatsApp | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.1.pdf) |
+| 1.0.2 | Tienda de componentes y términos | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.2.pdf) |
+| 1.0.3 | Fotos de producto | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.3.pdf) |
+| 1.0.5 | Versión consolidada: blog, tienda, España y México, sitio en español, términos por región | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.5.pdf) |
+| 1.0.6 | Medidas de seguridad (borrador en curso) | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.6.pdf) |
+
+Estamos construyendo para ti. Si tienes una idea, una duda o quieres colaborar, escríbenos a contacto@lameyer.net.
+
+---
+
+## Notas técnicas
+
 Sitio estático en GitHub Pages (dominio propio `lameyer.net`; DNS en Namecheap, todavía **sin** proxy de Cloudflare: ver 1.0.6).
 Sin paso de build: las páginas usan Tailwind, React y Babel desde CDNs.
 
@@ -12,6 +50,7 @@ y todas las páginas se añaden igual: copiar una carpeta y editarla.
 ```
 lameyer.net/
 ├── CNAME                         dominio propio para GitHub Pages
+├── .nojekyll                     vacío: GitHub Pages sirve el repositorio tal cual (sin él, Jekyll ocultaría _docs/)
 ├── readme.md                     este archivo
 ├── index.html                    página de inicio (/)
 ├── 404.html                      página no encontrada; redirige las URLs antiguas del blog
