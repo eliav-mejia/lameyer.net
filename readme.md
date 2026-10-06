@@ -35,13 +35,16 @@ lameyer.net/
 │   └── productos/                fotos de producto <id-producto>-400.webp / -800.webp
 │
 ├── tools/
-│   └── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
+│   ├── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
+│   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
+│
+├── _docs/                        documentos de versión (PDF) y su fuente HTML en _docs/src/
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
 │   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
 │   ├── components/index.html     /pages/components/  tienda: filtros, búsqueda, carrito -> WhatsApp
 │   ├── components/<slug>/        /pages/components/<slug>/  una página por producto (generada)
-│   ├── terminos/index.html       /pages/terminos/    términos y condiciones (enlazados en el pie)
+│   ├── terminos/index.html       /pages/terminos/    términos y condiciones por región, España / México (enlazados en el pie)
 │   ├── community/index.html      /pages/community/
 │   └── stack/index.html          /pages/stack/
 │
@@ -153,6 +156,10 @@ No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior l
   referenciadas desde el objeto `image` del producto en `productos.json` junto con su autor y licencia
   (las fotos de Wikimedia Commons los necesitan; se listan en «Créditos de imágenes»). `"image": null` muestra el icono de la categoría.
 - **Datos del vendedor, direcciones de devolución, WhatsApp, divisas**: al principio de `js/tienda.jsx`. Los valores `[...]` sin rellenar se ven resaltados en la página de términos.
+- **Términos por región**: `pages/terminos/index.html`. `SECTIONS` es el índice (`regions: ['ES']` limita una cláusula a una región;
+  `title` puede ser `{ ES, MX }`) y `CLAUSES` asigna a cada id un componente común o uno por región (`{ ES: GarantiaES, MX: GarantiaMX }`).
+  La pestaña activa es la bandera de la cabecera; pulsar una pestaña cambia la bandera y la divisa. Mantén los mismos ids en ambas
+  regiones: las fichas y el carrito enlazan a `#devoluciones`, `#garantia`, `#envios` y `#precios`. Fecha: `TERMS_UPDATED` en `js/tienda.jsx`.
 
 ## Añadir una página
 
@@ -192,7 +199,36 @@ para que los enlaces antiguos sigan funcionando.
 
 Enlaza siempre con barra final (`/pages/stack/`, `/blog/security/rate-limiting/`).
 
+## Pendiente: traducción y CMS headless
+
+Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.11.html` (PDF: `_docs/Lameyer-v1.0.11.pdf`). Ninguna opción está implementada.
+
+| Opción | Pila | Rutas | Estado |
+|--------|------|-------|--------|
+| A | Vite + react-i18next, un namespace por página (`locales/<idioma>/<página>.json`) cargado de forma diferida con `import()` | sin prefijo, como hoy | pendiente |
+| B | Next.js + next-intl, generación estática (`output: 'export'`) | `/es/…` (`localePrefix: 'always'`), `hreflang`, redirecciones 301 desde las URLs actuales | pendiente · recomendada |
+
+Común a ambas: TMS en plan gratuito (**Tolgee** o **Crowdin**, por decidir) con el español como idioma de origen, y DeepL para pre-rellenar:
+
+```
+node tools/i18n/deepl-prefill.mjs --target en --dry-run          # cuenta claves y caracteres
+DEEPL_API_KEY=xxxx:fx node tools/i18n/deepl-prefill.mjs --target en
+```
+
+Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres de marca, y anota lo pre-traducido en
+`locales/<idioma>/_prefill.json` para revisarlo en el TMS. Pasos pendientes: elegir A o B, elegir TMS, extraer cadenas a
+`locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
+
 ## Versiones
+
+### 1.0.11 — 2026-10-05 · Términos por región + plan de i18n y CMS headless
+- `/pages/terminos/`: el índice tiene pestañas **España / México** sincronizadas con la bandera y muestra las cláusulas de cada región.
+  España: política estándar española de comercio electrónico para electrónica (LSSI-CE, TRLGDCU: desistimiento 14 días, garantía
+  3 años) y una cláusula nueva de **residuos electrónicos y pilas** (RAEE, uno por uno). México: LFPC (revocación 5 días hábiles,
+  garantía mínima 90 días, total en MXN antes del pago, envíos y aduanas, aviso de privacidad, PROFECO) y aviso de revocación.
+  Mismos anclajes en ambas regiones. Pendiente de revisión legal; nuevo marcador `[Nº de registro RII-AEE]`.
+- Nuevo `tools/i18n/deepl-prefill.mjs` (pendiente de uso) y sección «Pendiente: traducción y CMS headless» con las opciones A y B.
+- Documento de versión `_docs/src/v1.0.11.html` + PDF, sincronizado con este readme.
 
 ### 1.0.10 — 2026-10-05 · España y México, todo en español
 - Banderas de la cabecera: solo 🇪🇸 España y 🇲🇽 México, ambas en español. La bandera fija la divisa de la tienda

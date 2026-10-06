@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.11 — Términos por región + plan de i18n y CMS headless</title>
+<link rel="stylesheet" href="doc.css">
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Documentación de desarrollo de software</div>
+    <h1>Versión <span class="v">1.0.11</span> — Términos por región + plan de i18n y CMS headless</h1>
+    <div class="sub">Los términos se muestran por región (España / México) según la bandera. Se preparan dos opciones de traducción y CMS headless, ambas <b>pendientes</b>, y un script de pre-traducción con DeepL.</div>
+</header>
+
+<div class="meta">
+    <div><b>Versión</b><span>1.0.11 · staging</span></div>
+    <div><b>Fecha</b><span>2026-10-05</span></div>
+    <div><b>Estado</b><span>Términos: hecho · i18n/CMS: pendiente</span></div>
+    <div><b>Depende de</b><span>1.0.10 banderas España / México</span></div>
+</div>
+
+<h2><span class="n">1</span>Resumen</h2>
+<p>
+    1.0.10 dejó todo el sitio en español y vinculó la divisa a la bandera (España → EUR, México → MXN). 1.0.11 aplica la misma bandera a
+    <code>/pages/terminos/</code>: el índice muestra una lista de cláusulas por región, con pestañas España y México. La pestaña España
+    contiene la <strong>política estándar española de comercio electrónico para productos electrónicos</strong>; la pestaña México, las
+    cláusulas de la Ley Federal de Protección al Consumidor (LFPC).
+</p>
+<p>
+    Además se documentan dos opciones para traducir el sitio y gestionar su contenido como un CMS headless, ambas <strong>pendientes de decisión</strong>:
+    <b>A</b> Vite + react-i18next (un namespace por página, carga diferida) y <b>B</b> Next.js + next-intl con generación estática y rutas <code>/es/…</code>.
+    Las dos usan un TMS de plan gratuito (Tolgee o Crowdin) y DeepL para pre-rellenar. El único código nuevo de esta parte es
+    <code>tools/i18n/deepl-prefill.mjs</code>, que funciona con cualquiera de las dos.
+</p>
+<div class="warn"><b>Revisión legal.</b> Las cláusulas de México y la sección RAEE de España son un borrador redactado a partir de la normativa citada.
+    Deben revisarlas un abogado antes de publicar, igual que los marcadores <code>[…]</code> del vendedor (incluido el nuevo <code>[Nº de registro RII-AEE]</code>).</div>
+
+<h2><span class="n">2</span>Archivos</h2>
+<table>
+    <tr><th style="width:36%">Archivo</th><th>Cambio</th></tr>
+    <tr><td><code>pages/terminos/index.html</code></td><td>Cláusulas por región: <code>REGIONS</code>, <code>SECTIONS</code> (con <code>regions</code> y títulos por región), <code>CLAUSES</code>, pestañas <code>RegionTabs</code> en el índice. Meta descripción actualizada.</td></tr>
+    <tr><td><code>js/tienda.jsx</code></td><td><code>TERMS_UPDATED</code> → 5 de octubre de 2026.</td></tr>
+    <tr><td><code>tools/i18n/deepl-prefill.mjs</code> <span class="tag t-high">nuevo</span></td><td>Pre-traducción con DeepL de las claves que faltan, por namespace. Node 18+, sin dependencias. Pendiente de uso hasta que existan los archivos <code>locales/</code>.</td></tr>
+    <tr><td><code>readme.md</code></td><td>Entrada 1.0.11, sección «Pendiente: traducción y CMS headless», <code>tools/i18n/</code> en el árbol, términos por región en «Cambios habituales».</td></tr>
+    <tr><td><code>_docs/src/v1.0.11.html</code> + <code>_docs/Lameyer-v1.0.11.pdf</code> <span class="tag t-high">nuevo</span></td><td>Este documento.</td></tr>
+</table>
+
+<h2><span class="n">3</span>Términos por región (hecho)</h2>
+<h3>3.1 Cómo funciona</h3>
+<p class="file">pages/terminos/index.html</p>
+<pre><code><span class="k">const</span> region = useLocale().country;            <span class="c">// 'ES' o 'MX', la bandera de la cabecera</span>
+<span class="k">const</span> sections = sectionsFor(region);          <span class="c">// filtra SECTIONS por `regions` y numera 01, 02…</span>
+CLAUSES.garantia  = { ES: GarantiaES, MX: GarantiaMX }   <span class="c">// cláusula distinta por región</span>
+CLAUSES.vendedor  = Vendedor                             <span class="c">// cláusula común (recibe `region`)</span></code></pre>
+<ul>
+    <li><strong>Pestañas = bandera.</strong> Pulsar «México» en el índice llama a <code>chooseLocale()</code>: cambia también la bandera de la cabecera y la divisa de la tienda. Abrir los términos con la bandera de México muestra directamente la pestaña México.</li>
+    <li><strong>Mismos anclajes.</strong> Los ids (<code>#devoluciones</code>, <code>#garantia</code>, <code>#envios</code>, <code>#precios</code>) existen en ambas regiones, así que los enlaces de las fichas de producto y del carrito siguen funcionando. Al cargar, la página baja al anclaje cuando la cláusula ya está renderizada.</li>
+    <li><strong>Accesibilidad.</strong> <code>role="tablist"</code> / <code>tab</code> / <code>tabpanel</code> y <code>aria-selected</code>.</li>
+</ul>
+
+<h3>3.2 Índice por región</h3>
+<table>
+    <tr><th style="width:5%">#</th><th style="width:47%">España · política estándar española, electrónica</th><th>México · LFPC</th></tr>
+    <tr><td>01</td><td>Datos del vendedor (LSSI-CE, Ley 34/2002)</td><td>Datos del vendedor (art. 76 bis LFPC)</td></tr>
+    <tr><td>02</td><td>Objeto y aceptación</td><td>Objeto y aceptación</td></tr>
+    <tr><td>03</td><td>Productos</td><td>Productos + información en español y certificación de productos eléctricos</td></tr>
+    <tr><td>04</td><td>Precios y divisas (EUR, IVA incluido)</td><td>Precios y divisas (MXN orientativo, total en moneda nacional antes del pago)</td></tr>
+    <tr><td>05</td><td>Pedidos y pago</td><td>Pedidos y pago (confirmación en EUR y MXN)</td></tr>
+    <tr><td>06</td><td>Envíos y recogida (España, recogida en Madrid)</td><td>Envíos a México y aduanas</td></tr>
+    <tr><td>07</td><td>Devoluciones: desistimiento 14 días (TRLGDCU) + ampliación a 30</td><td>Revocación 5 días hábiles (art. 56 LFPC) + ampliación a 30</td></tr>
+    <tr><td>08</td><td>Garantía legal de conformidad: 3 años</td><td>Garantía de 3 años (mínimo legal 90 días, art. 77 LFPC)</td></tr>
+    <tr><td>09</td><td><span class="tag t-high">nuevo</span> Residuos electrónicos y pilas (RAEE, RD 110/2015, uno por uno)</td><td>—</td></tr>
+    <tr><td>10 / 09</td><td>Protección de datos (RGPD, LOPDGDD, AEPD)</td><td>Aviso de privacidad, derechos ARCO</td></tr>
+    <tr><td>11 / 10</td><td>Ley aplicable (OMIC, Junta Arbitral de Consumo de Madrid)</td><td>Ley aplicable (PROFECO, Concilianet)</td></tr>
+    <tr><td>12 / 11</td><td>Formulario de desistimiento</td><td>Aviso de revocación</td></tr>
+</table>
+<div class="note">El cobro sigue en EUR también para México. La LFPC exige informar del precio total en moneda nacional; la cláusula lo cubre con la
+    confirmación en MXN antes del pago, pero cobrar en pesos (pasarela local) es una decisión de negocio pendiente.</div>
+
+<h2><span class="n">4</span>Opción A — Vite + react-i18next <span class="tag t-med">pendiente</span></h2>
+<p>Mantiene el sitio como SPA de React, pero con un paso de build: Vite compila el JSX (adiós a Babel en el navegador) y react-i18next
+    carga los textos por página.</p>
+<h3>4.1 Estructura</h3>
+<pre><code>locales/
+  es/ common.json  inicio.json  tienda.json  terminos.json  blog.json  blog-security-rate-limiting.json …
+  en/ …                                   <span class="c">// relleno por DeepL, revisado en el TMS</span>
+src/i18n.ts</code></pre>
+<ul>
+    <li><strong>Un namespace por página</strong> (<code>terminos</code>, <code>tienda</code>, un namespace por artículo del blog) más <code>common</code> para cabecera, pie, cookies y acceso.</li>
+    <li><strong>Carga diferida:</strong> cada namespace es un <code>import()</code> dinámico; Vite lo convierte en un chunk propio que solo se descarga en la página que lo usa.</li>
+    <li>Los términos por región se modelan como claves dentro del namespace: <code>terminos:es.garantia.p1</code>, <code>terminos:mx.garantia.p1</code>.</li>
+</ul>
+<p class="file">src/i18n.ts</p>
+<pre><code><span class="k">import</span> i18n <span class="k">from</span> 'i18next';
+<span class="k">import</span> { initReactI18next } <span class="k">from</span> 'react-i18next';
+<span class="k">import</span> resourcesToBackend <span class="k">from</span> 'i18next-resources-to-backend';
+
+i18n.use(initReactI18next)
+    .use(resourcesToBackend((lng, ns) =&gt; <span class="k">import</span>(`../locales/${lng}/${ns}.json`)))   <span class="c">// un chunk por namespace</span>
+    .init({ lng: 'es', fallbackLng: 'es', ns: ['common'], defaultNS: 'common',
+            interpolation: { escapeValue: <span class="k">false</span> }, react: { useSuspense: <span class="k">true</span> } });
+
+<span class="c">// en cada página: const { t } = useTranslation('terminos');  t('es.garantia.p1')</span></code></pre>
+<h3>4.2 Límites</h3>
+<ul>
+    <li>Sigue siendo renderizado en cliente: el HTML inicial sigue vacío para los rastreadores (ver el artículo «SSR y generación estática» del blog). Se puede prerenderizar con <code>vite-plugin-ssr</code>/<code>vike</code>, pero eso ya se acerca a la opción B.</li>
+    <li>Las URLs no cambian de idioma; un segundo idioma necesitaría <code>?lng=</code> o rutas propias y <code>hreflang</code> a mano.</li>
+    <li>Esfuerzo estimado: extraer ~1.500–2.000 cadenas a JSON y cambiar cada texto por <code>t()</code>; migración página a página posible.</li>
+</ul>
+
+<h2><span class="n">5</span>Opción B — Next.js + next-intl + generación estática + /es/ <span class="tag t-med">pendiente</span></h2>
+<p>Pasa a Next.js (App Router) con exportación estática: cada página se genera en build como HTML completo bajo un prefijo de idioma,
+    lo que además resuelve el HTML vacío del sitio actual.</p>
+<pre><code>app/[locale]/layout.tsx                       <span class="c">// NextIntlClientProvider, &lt;html lang={locale}&gt;</span>
+app/[locale]/pages/terminos/page.tsx          <span class="c">// /es/pages/terminos/</span>
+app/[locale]/blog/[series]/[slug]/page.tsx    <span class="c">// /es/blog/security/rate-limiting/</span>
+i18n/routing.ts   i18n/request.ts   messages/es/*.json</code></pre>
+<p class="file">i18n/routing.ts · next.config.mjs</p>
+<pre><code><span class="k">export const</span> routing = defineRouting({ locales: ['es'], defaultLocale: 'es', localePrefix: 'always' });   <span class="c">// 'en' cuando se traduzca</span>
+
+<span class="c">// en cada page.tsx / layout.tsx</span>
+<span class="k">export function</span> generateStaticParams() { <span class="k">return</span> routing.locales.map(locale =&gt; ({ locale })); }
+setRequestLocale(locale);                                  <span class="c">// habilita el renderizado estático</span>
+
+<span class="c">// next.config.mjs</span>
+<span class="k">export default</span> withNextIntl({ output: 'export', trailingSlash: <span class="k">true</span>, images: { unoptimized: <span class="k">true</span> } });</code></pre>
+<ul>
+    <li><strong>Mensajes por página:</strong> un archivo por namespace en <code>messages/es/</code>, combinados en <code>i18n/request.ts</code>; cada página solo pasa al cliente los namespaces que usa.</li>
+    <li><strong>Exportación estática sin middleware:</strong> con <code>output: 'export'</code> el middleware de next-intl no se ejecuta, así que <code>/</code> necesita una página que redirija a <code>/es/</code>. Las URLs actuales (<code>/pages/…</code>, <code>/blog/…</code>) deben redirigir a <code>/es/…</code>: reglas de redirección de Cloudflare (301 reales) o la lista <code>moved</code> de <code>404.html</code>.</li>
+    <li><strong>SEO:</strong> <code>&lt;link rel="alternate" hreflang&gt;</code> y canónicas por idioma generadas desde <code>routing</code>; sitemap generado en build.</li>
+    <li><strong>Región ≠ idioma:</strong> España y México comparten <code>/es/</code>; la bandera sigue guardándose en el navegador (o en una cookie) y elige divisa y cláusulas. Rutas <code>/es-mx/</code> solo si algún día cambia el texto, no solo la divisa.</li>
+    <li>Esfuerzo estimado: mayor que A (reescritura a componentes de Next, datos del blog y de la tienda en build), pero entrega HTML estático rastreable.</li>
+</ul>
+
+<h2><span class="n">6</span>TMS y pre-traducción con DeepL</h2>
+<h3>6.1 Tolgee o Crowdin (plan gratuito)</h3>
+<table>
+    <tr><th style="width:18%">TMS</th><th>Encaja porque</th><th style="width:30%">A tener en cuenta</th></tr>
+    <tr><td><b>Tolgee</b></td><td>Integración directa con react-i18next (<code>@tolgee/i18next</code>) y edición en contexto sobre la propia página; CLI para subir y bajar JSON; código abierto, se puede autoalojar.</td><td>Revisar los límites actuales del plan gratuito en la nube (claves, puestos). Autoalojado no tiene esos límites.</td></tr>
+    <tr><td><b>Crowdin</b></td><td>Sincronización con GitHub mediante <code>crowdin.yml</code>: lee <code>locales/es/*.json</code> y abre pull requests con las traducciones; memoria de traducción y glosario.</td><td>El plan gratuito está pensado sobre todo para proyectos públicos; comprobar el límite de proyectos privados y palabras.</td></tr>
+</table>
+<p class="file">crowdin.yml (si se elige Crowdin)</p>
+<pre><code>files:
+  - source: /locales/es/*.json
+    translation: /locales/%two_letters_code%/%original_file_name%</code></pre>
+<h3>6.2 Flujo propuesto</h3>
+<ol>
+    <li>Se escribe o edita el texto en español (<code>locales/es/&lt;página&gt;.json</code>) en un pull request.</li>
+    <li><code>node tools/i18n/deepl-prefill.mjs --target en</code> rellena solo las claves que faltan y las anota en <code>locales/en/_prefill.json</code>.</li>
+    <li>El TMS importa las traducciones como <em>sin revisar</em>; una persona las corrige y aprueba.</li>
+    <li>El TMS devuelve los JSON aprobados al repositorio (pull request de Crowdin o <code>tolgee pull</code>) y el build los publica.</li>
+</ol>
+<h3>6.3 tools/i18n/deepl-prefill.mjs</h3>
+<ul>
+    <li>Solo rellena claves vacías o ausentes; nunca sobrescribe una traducción revisada. Mantiene el orden de claves del archivo fuente.</li>
+    <li>Protege <code>{{name}}</code> (react-i18next), <code>{name}</code> (next-intl / ICU) y los términos de marca (<code>Lameyer</code>, <code>MC-SE</code>, <code>Modular Core</code>, <code>Serverless Edge</code>, más <code>--keep</code>) con etiquetas <code>&lt;x&gt;</code> que DeepL no traduce.</li>
+    <li><code>--dry-run</code> cuenta claves y caracteres sin llamar a la API; útil para no pasar del plan gratuito de DeepL API (500.000 caracteres al mes). Clave <code>:fx</code> → endpoint gratuito automáticamente.</li>
+    <li>Probado contra un servidor DeepL simulado: placeholders y marcas intactos, claves existentes conservadas, segunda ejecución sin cambios.</li>
+</ul>
+
+<h2><span class="n">7</span>Comparativa</h2>
+<table>
+    <tr><th style="width:24%">Criterio</th><th>A · Vite + react-i18next</th><th>B · Next.js + next-intl</th></tr>
+    <tr><td>HTML inicial para buscadores</td><td>Vacío (SPA) salvo prerenderizado extra</td><td>Completo, generado en build</td></tr>
+    <tr><td>Rutas de idioma</td><td>No incluidas</td><td><code>/es/…</code> nativo, <code>hreflang</code></td></tr>
+    <tr><td>Carga de textos</td><td>Namespace por página, chunk diferido</td><td>Namespace por página, solo lo que usa cada ruta</td></tr>
+    <tr><td>Esfuerzo</td><td>Menor, migración gradual</td><td>Mayor, cambio de framework y de URLs</td></tr>
+    <tr><td>Alojamiento</td><td>GitHub Pages igual que hoy</td><td>GitHub Pages / Cloudflare Pages (exportación estática)</td></tr>
+</table>
+<div class="gap"><b>Recomendación (pendiente de decisión).</b> B como destino, porque el blog depende de que los buscadores lean el contenido y las
+    rutas <code>/es/</code> preparan un segundo idioma. A solo si hace falta traducir pronto sin cambiar de framework. En ambos casos el TMS y el
+    script de DeepL son los mismos.</div>
+
+<h2><span class="n">8</span>Pendiente</h2>
+<table>
+    <tr><th style="width:5%">#</th><th>Tarea</th><th style="width:16%">Prioridad</th></tr>
+    <tr><td>1</td><td>Elegir opción A o B</td><td><span class="tag t-block">Bloquea</span></td></tr>
+    <tr><td>2</td><td>Elegir TMS (Tolgee o Crowdin) y crear el proyecto con origen <code>es</code></td><td><span class="tag t-high">Alta</span></td></tr>
+    <tr><td>3</td><td>Extraer las cadenas a <code>locales/es/&lt;página&gt;.json</code> (empezar por <code>common</code> y <code>terminos</code>)</td><td><span class="tag t-high">Alta</span></td></tr>
+    <tr><td>4</td><td>Clave de DeepL API Free como secreto de CI (<code>DEEPL_API_KEY</code>)</td><td><span class="tag t-med">Media</span></td></tr>
+    <tr><td>5</td><td>Solo B: redirecciones 301 de las URLs actuales a <code>/es/…</code> y sitemap con <code>hreflang</code></td><td><span class="tag t-med">Media</span></td></tr>
+    <tr><td>6</td><td>Revisión legal de las cláusulas de México y de RAEE; número RII-AEE</td><td><span class="tag t-high">Alta</span></td></tr>
+    <tr><td>7</td><td>Decidir si los pedidos de México se cobran en MXN</td><td><span class="tag t-low">Baja</span></td></tr>
+</table>
+
+<footer class="doc-foot"><span>Lameyer.net · 1.0.11</span><span>2026-10-05 · Sincronizado con readme.md (Versiones → 1.0.11)</span></footer>
+</body>
+</html>

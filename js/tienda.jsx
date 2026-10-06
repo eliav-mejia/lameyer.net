@@ -28,7 +28,7 @@ const RETURN_ADDRESSES = [
 
 const RETURN_DAYS = 30;
 const TERMS_URL = '/pages/terminos/';
-const TERMS_UPDATED = '3 de octubre de 2026';
+const TERMS_UPDATED = '5 de octubre de 2026';
 
 // --- CURRENCIES ---
 // Prices are stored and charged in EUR. The currency follows the flag picked in the header (useLocale in layout.jsx):
