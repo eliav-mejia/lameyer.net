@@ -3,9 +3,7 @@ LaMeyer.net
 
 ## Bienvenido a Lameyer.net
 
-Lameyer.net es el punto de encuentro entre Lameyer y quienes construyen software. Somos una empresa global que trabaja con
-total transparencia, y queremos que cada desarrollador que llegue aquí se sienta acompañado por un socio de confianza: alguien
-que explica lo que hace, cómo lo hace y por qué.
+Lameyer.net es el punto de encuentro entre quienes construyen software y los operadores de procesos. Somos una empresa global que trabaja con total transparencia, y queremos que cada desarrollador que llegue aquí se sienta acompañado por un socio de confianza: alguien que explica lo que hace, cómo lo hace y por qué.
 
 Por eso publicamos nuestra documentación en este mismo sitio. Cada versión deja constancia de lo que cambió, de las decisiones
 que tomamos y de lo que aún está pendiente, para que puedas ver cómo hemos crecido a tu lado. No eres un visitante: formas parte
