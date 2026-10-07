@@ -72,7 +72,7 @@
 <h2><span class="n">5</span>Cuentas y cookies</h2>
 <table>
     <tr><th style="width:22%">Pieza</th><th>Comportamiento</th><th style="width:30%">Almacenamiento</th></tr>
-    <tr><td><code>AuthModal</code>, <code>auth</code></td><td>Pop-up con pestañas «Iniciar sesión» / «Crear cuenta» desde la cabecera y el menú móvil; foco atrapado, Escape cierra.</td><td><code>lm-users</code> (SHA-256 con sal), <code>lm-session</code> — solo staging, en el navegador</td></tr>
+    <tr><td><code>AuthModal</code>, <code>auth</code></td><td>Pop-up con pestañas «Iniciar sesión» / «Crear cuenta» desde la cabecera y el menú móvil; foco atrapado, Escape cierra.</td><td>Cuentas de staging, solo en el navegador</td></tr>
     <tr><td><code>CookieConsent</code></td><td>Aparece en la primera visita; «Aceptar todas» / «Solo necesarias». Las analíticas solo deben cargarse si <code>hasCookieConsent()</code>.</td><td><code>lm-cookies</code>, <code>window.LM_COOKIES</code></td></tr>
 </table>
 <div class="note">Las cuentas de staging no tienen servidor: cualquiera con acceso al navegador puede leerlas. Su sustitución por Supabase Auth es parte de 1.0.6 (documento 5, §8).</div>

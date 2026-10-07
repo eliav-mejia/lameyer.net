@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Lameyer.net 1.0.8 — Acceso para clientes y documentación</title>
+<link rel="stylesheet" href="doc.css">
+<style>
+    .layers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 6px 0 10px; }
+    .layers div { border: 1px solid var(--blue-line); border-top: 3px solid var(--blue-mid); border-radius: 3px; padding: 6px 8px; background: #fff; }
+    .layers b { display: block; font-size: 7pt; letter-spacing: .12em; text-transform: uppercase; color: var(--blue); margin-bottom: 2px; }
+    .layers p { margin: 0; font-size: 7.8pt; }
+</style>
+</head>
+<body>
+
+<header class="band">
+    <div class="kicker">Lameyer.net · Documentación de desarrollo de software</div>
+    <h1>Versión <span class="v">1.0.8</span> — Acceso para clientes y documentación</h1>
+    <div class="sub">La tienda de componentes pasa a ser un espacio para clientes con cuenta. La academia invita a iniciar sesión sin exigirlo.
+        La documentación se separa en una edición pública y otra interna.</div>
+</header>
+
+<div class="meta">
+    <div><b>Versión</b><span>1.0.8</span></div>
+    <div><b>Fecha</b><span>2026-10-07</span></div>
+    <div><b>Base</b><span><code>d01e0aa</code> (1.0.7)</span></div>
+    <div><b>Alcance</b><span>Acceso · Academia · documentación</span></div>
+</div>
+
+<h2><span class="n">1</span>Resumen</h2>
+<div class="layers">
+    <div><b>Componentes</b><p>La tienda y las fichas de producto piden iniciar sesión o crear una cuenta. Los términos y condiciones siguen abiertos a todo el mundo.</p></div>
+    <div><b>Academia</b><p>Al entrar se ofrece iniciar sesión o crear una cuenta. Se puede seguir sin cuenta y el aviso no vuelve a aparecer en esa visita.</p></div>
+    <div><b>Documentación</b><p>Las ediciones publicadas describen el alcance y el enfoque. El detalle de seguridad se mantiene en documentación interna.</p></div>
+</div>
+
+<h2><span class="n">2</span>Cambios</h2>
+<table>
+    <tr><th style="width:26%">Archivo</th><th>Cambio</th></tr>
+    <tr><td><code>js/acceso.jsx</code> (nuevo)</td><td>Decide en qué páginas aparece el pop-up de acceso y si es obligatorio u opcional (<code>ACCESS_RULES</code>). Textos en <code>ACCESS_TXT</code>.</td></tr>
+    <tr><td><code>js/layout.jsx</code></td><td>El pop-up de inicio de sesión admite un modo sin cierre, un texto propio y un pie. El aviso de cookies queda siempre por encima de los demás pop-ups.</td></tr>
+    <tr><td>Todas las páginas</td><td>Cargan <code>js/acceso.jsx</code> justo después de <code>js/layout.jsx</code>, también las fichas generadas por <code>tools/generar-paginas-producto.py</code>.</td></tr>
+    <tr><td><code>_docs/src/v1.0.6.html</code></td><td>Pasa a edición pública resumida.</td></tr>
+    <tr><td><code>blog/</code></td><td>Se elimina la carpeta vacía que quedaba del cambio a Academia; <code>/blog/…</code> sigue redirigiendo a <code>/academia/…</code> desde <code>404.html</code>.</td></tr>
+    <tr><td><code>tools/generar-pdf.sh</code> (nuevo)</td><td>Genera el PDF de un documento HTML con el navegador en modo headless.</td></tr>
+</table>
+
+<h2><span class="n">3</span>Documentación pública e interna</h2>
+<p>Cada versión puede tener dos ediciones. La pública vive en <code>_docs/</code> y se publica con el sitio: qué cambia, para quién y con qué enfoque.
+    La interna recoge configuraciones, hallazgos y pruebas; no forma parte del repositorio ni del sitio.</p>
+
+<h2><span class="n">4</span>Pendiente</h2>
+<ul>
+    <li>Pasar del acceso de prueba a un servicio de cuentas definitivo (ver 1.0.6).</li>
+</ul>
+
+<footer class="doc-foot"><span>Lameyer.net · 1.0.8</span><span>2026-10-07 · Sincronizado con readme.md (Versiones → 1.0.8)</span></footer>
+</body>
+</html>

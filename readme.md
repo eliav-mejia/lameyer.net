@@ -29,8 +29,9 @@ Documentación publicada, versión a versión:
 | 1.0.2 | Tienda de componentes y términos | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.2.pdf) |
 | 1.0.3 | Fotos de producto | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.3.pdf) |
 | 1.0.5 | Versión consolidada: blog, tienda, España y México, sitio en español, términos por región | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.5.pdf) |
-| 1.0.6 | Medidas de seguridad (borrador en curso) | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.6.pdf) |
+| 1.0.6 | Medidas de seguridad (resumen público) | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.6.pdf) |
 | 1.0.7 | Academia, revisión de traducción, alineación de palabras clave y análisis de flujo de datos | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.7.pdf) |
+| 1.0.8 | Acceso para clientes en Componentes, acceso opcional en Academia, documentación pública e interna | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.8.pdf) |
 
 Estamos construyendo para ti. Si tienes una idea, una duda o quieres colaborar, escríbenos a contacto@lameyer.net.
 
@@ -38,7 +39,7 @@ Estamos construyendo para ti. Si tienes una idea, una duda o quieres colaborar, 
 
 ## Notas técnicas
 
-Sitio estático en GitHub Pages (dominio propio `lameyer.net`; DNS en Namecheap, todavía **sin** proxy de Cloudflare: ver 1.0.6).
+Sitio estático en GitHub Pages (dominio propio `lameyer.net`).
 Sin paso de build: las páginas usan Tailwind, React y Babel desde CDNs.
 
 ## Estructura de carpetas
@@ -50,6 +51,7 @@ y todas las páginas se añaden igual: copiar una carpeta y editarla.
 lameyer.net/
 ├── CNAME                         dominio propio para GitHub Pages
 ├── .nojekyll                     vacío: GitHub Pages sirve el repositorio tal cual (sin él, Jekyll ocultaría _docs/)
+├── .gitignore                    deja fuera _interno/ y .claude/
 ├── readme.md                     este archivo
 ├── index.html                    página de inicio (/)
 ├── 404.html                      página no encontrada; redirige las URLs antiguas del blog (/blog/ → /academia/)
@@ -60,6 +62,8 @@ lameyer.net/
 ├── js/
 │   ├── layout.jsx                compartido por TODAS las páginas: cabecera, banderas (país y divisa), pie,
 │   │                             formulario de contacto, PageHero, RegisterCTA, stack tecnológico, renderPage()
+│   ├── acceso.jsx                compartido por TODAS las páginas, justo después de layout.jsx: pop-ups de acceso por sección
+│   │                             (ACCESS_RULES: obligatorio en /pages/components/, opcional en /academia/)
 │   ├── academia.jsx              solo academia: SERIES, ACADEMIA_TYPES, ACADEMIA_POSTS, panel, plantilla de artículo
 │   └── tienda.jsx                solo tienda: SELLER, RETURN_ADDRESSES, CURRENCIES, capa de datos (db, useCatalog),
 │                                 carrito, ProductCard, ProductPage, renderProduct()
@@ -74,9 +78,13 @@ lameyer.net/
 │
 ├── tools/
 │   ├── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
+│   ├── generar-pdf.sh                HTML → PDF con Edge/Chrome headless (documentos de _docs/ y _interno/)
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
 │
-├── _docs/                        documentos de versión (PDF) y su fuente HTML en _docs/src/: v1.0.1–v1.0.5, v1.0.6 (en curso), v1.0.7
+├── _docs/                        PÚBLICO. Documentos de versión (PDF) y su fuente HTML en _docs/src/: v1.0.1–v1.0.8
+│                                 Ediciones públicas: alcance y enfoque, sin detalle de seguridad
+│
+├── _interno/                     LOCAL, NO SE PUBLICA (.gitignore). Detalle de seguridad: ver _interno/README.md
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
 │   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
@@ -158,7 +166,9 @@ Reglas de nombres (mantienen todo localizable):
 | `academia/`                | ✓            | ✓             | ✓           |               |      |
 | `academia/<serie>/<slug>/` | ✓            | ✓             | ✓           |               |      |
 
-El orden importa: `js/layout.jsx` siempre se carga primero, después `js/academia.jsx` (páginas de la academia) o `js/tienda.jsx` (páginas de la tienda)
+Todas las páginas cargan además `js/acceso.jsx` justo después de `js/layout.jsx`.
+
+El orden importa: `js/layout.jsx` siempre se carga primero, después `js/acceso.jsx`, `js/academia.jsx` (páginas de la academia) o `js/tienda.jsx` (páginas de la tienda)
 y luego el script propio de la página, que termina con `renderPage(MiPagina)` (o `renderPost(...)` en las entradas de la academia).
 No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior lo sustituye sin avisar.
 
@@ -181,8 +191,12 @@ No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior l
 - **Widget de WhatsApp**: `NUMBER` y `STRINGS` en `index.html` (y `whatsapp-chat-snippet.html`). Solo España
   (+34 602 55 76 85), atención en español e inglés; sin selector de región.
 - **Pop-up de acceso / registro**: `AuthModal` y `auth` en `js/layout.jsx`, se abre desde la cabecera (y el menú móvil).
-  STAGING: las cuentas se guardan solo en el navegador del visitante (`lm-users`, SHA-256 con sal; sesión en `lm-session`).
-  Sustituye las funciones de `auth` por un backend real antes del lanzamiento. Textos del pop-up: `TXT`.
+  STAGING: cuentas de prueba; sustituye las funciones de `auth` por un servicio de cuentas real antes del lanzamiento. Textos del pop-up: `TXT`.
+- **Pop-ups de acceso por sección**: `ACCESS_RULES` en `js/acceso.jsx`, una regla por prefijo de ruta.
+  `required` (Componentes): la página no se muestra hasta iniciar sesión y el pop-up no se puede cerrar.
+  `optional` (Academia): se puede cerrar o seguir sin cuenta; no vuelve a salir en la misma sesión del navegador.
+  Textos: `ACCESS_TXT`. No añadas nunca una regla a `/pages/terminos/`: los términos deben estar siempre accesibles.
+- **Orden de los pop-ups**: aviso de cookies por encima de todo, después acceso / login; nunca dos pop-ups de acceso a la vez.
 - **Pop-up de cookies**: `CookieConsent` en `js/layout.jsx`. Elección en `lm-cookies` / `window.LM_COOKIES`
   (`all` o `necessary`); carga analíticas solo cuando `hasCookieConsent()` sea true.
 - **Stack tecnológico**: `TECH_STACK` en `js/layout.jsx` (página de inicio y `/pages/stack/`).
@@ -205,7 +219,8 @@ No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior l
 
 ## Añadir una página
 
-1. Copia `pages/stack/` en `pages/<nombre-nuevo>/` y edita su `index.html`.
+1. Copia `pages/stack/` en `pages/<nombre-nuevo>/` y edita su `index.html` (mantén `js/layout.jsx` y `js/acceso.jsx` en ese orden).
+   Si la página necesita acceso, añade su ruta a `ACCESS_RULES` en `js/acceso.jsx`.
 2. Si debe aparecer en el menú, añade `{ href: '/pages/<nombre-nuevo>/', label: '...' }` a `NAV_LINKS` en `js/layout.jsx`.
 
 ## Añadir un producto (entrada manual de prelanzamiento)
@@ -263,6 +278,17 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 
 ## Versiones
 
+### 1.0.8 — 2026-10-07 · Acceso para clientes y documentación pública / interna
+Detalle en `_docs/src/v1.0.8.html` (+ PDF).
+- **Componentes:** pop-up de acceso **obligatorio** en `/pages/components/` y en todas las fichas: sin cuenta no se muestra la tienda
+  y el pop-up no se puede cerrar (solo enlaces a Inicio y Términos).
+- **Academia:** pop-up de acceso **opcional** en `/academia/`: se cierra o se sigue sin cuenta, y no vuelve a salir en esa sesión.
+- **Nuevo `js/acceso.jsx`** (reglas y textos), cargado en todas las páginas y en la plantilla de `tools/generar-paginas-producto.py`.
+  `AuthModal` admite `locked`, `notice` y `footer`. El aviso de cookies queda por encima de los demás pop-ups.
+- **Documentación:** `_docs/` publica ediciones resumidas (1.0.6 reescrita); el detalle de seguridad pasa a `_interno/`, solo local.
+  Nuevo `tools/generar-pdf.sh`.
+- **Blog → Academia:** se elimina la carpeta `blog/` vacía que quedaba; `/blog/…` sigue redirigiendo desde `404.html`.
+
 ### 1.0.7 — 2026-10-06 · Academia, revisión de traducción y flujo de datos
 Detalle en `_docs/src/v1.0.7.html` (+ PDF).
 - **Menú:** Stack sale de `NAV_LINKS` (Desarrollo, Componentes, Comunidad, Academia); en `/pages/stack/` se resalta Comunidad.
@@ -275,11 +301,8 @@ Detalle en `_docs/src/v1.0.7.html` (+ PDF).
 - **Análisis de flujo de datos:** dependencia de datos directa, dependencia de control y acoplamiento de datos del sitio (doc. §6).
 
 ### 1.0.6 — en preparación · Medidas de seguridad
-- Documento de versión **en curso**: `_docs/src/v1.0.6.html` (+ PDF). Parte del documento 5 (`_docs/src/v5-dev-security.html`:
-  agente de IA, Dev Container, hooks de Git, reglas del servidor) y añade las medidas del propio sitio.
-- Hallazgos ya comprobados en producción: el dominio **no** pasa por el proxy de Cloudflare (DNS en Namecheap, registros A directos
-  a GitHub Pages), sin DNSSEC ni registro CAA, y ninguna cabecera de seguridad (CSP, HSTS, `X-Content-Type-Options`, `Referrer-Policy`).
-- Nada de esta versión está implementado todavía; es la puerta previa al alta en Supabase y a las reglas de IAM.
+- Edición pública resumida en `_docs/src/v1.0.6.html` (+ PDF): alcance, enfoque y fases. El detalle se mantiene en documentación interna.
+- Es la puerta previa al servicio de cuentas definitivo.
 
 ### 1.0.5 — 2026-10-03 → 2026-10-05 · Versión consolidada (todo lo posterior a 1.0.4)
 Agrupa los cambios publicados antes como 1.0.5 a 1.0.11 (commits `b2af7c1` … `59a81ca`; 111 archivos, +7.419 / −2.930 líneas).
@@ -287,8 +310,8 @@ Se describe el estado final; los pasos intermedios que luego se retiraron (Googl
 divisas USD, GBP e ILS) ya no forman parte del sitio. Detalle en `_docs/src/v1.0.5.html` (+ PDF).
 - **Blog · Serverless Edge:** la serie pasa de 5 a 9 pasos (06 Tiempo real, 07 IA en el edge, 08 Imágenes y multimedia,
   09 Desplegar, probar y lanzar) más 3 cruces, con la zona nueva `platform` y enlaces «Siguiente paso» encadenados.
-- **Cuentas y cookies:** pop-up de acceso / registro en todas las páginas (cuentas de staging solo en el navegador:
-  `lm-users`, `lm-session`) y pop-up de consentimiento de cookies (`lm-cookies`, «Aceptar todas» / «Solo necesarias»).
+- **Cuentas y cookies:** pop-up de acceso / registro en todas las páginas (cuentas de staging)
+  y pop-up de consentimiento de cookies (`lm-cookies`, «Aceptar todas» / «Solo necesarias»).
 - **Diseño:** tema blanco con paleta de cuatro colores (blanco, azul, azul oscuro, gris) en `css/site.css`.
 - **Tienda:** filtro en acordeón con 4 grupos y 13 categorías por tipo de pieza, opción «Solo productos en stock», tarjetas
   compactas (8 por página), lista «Edición especial» en filas de una línea con colores de stock (1 granate, 2 azul, agotado gris),

@@ -202,7 +202,9 @@ const UserIcon = ({ className = 'w-4 h-4' }) => (
 );
 
 // Pop-up window with "Log in" and "Sign up" tabs; shows the account (and Log out) once logged in.
-const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
+// js/acceso.jsx reuses it as the access pop-up: `locked` hides the close button and ignores Escape and clicks outside,
+// `notice` adds a line above the form and `footer` goes under it.
+const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notice = null, footer = null }) => {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
     const dialogRef = useRef(null);
@@ -210,7 +212,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
     useEffect(() => {
         const opener = document.activeElement;
         const onKey = (e) => {
-            if (e.key === 'Escape') onClose();
+            if (e.key === 'Escape' && !locked) onClose();
             if (e.key !== 'Tab' || !dialogRef.current) return;
             // Keep keyboard focus inside the pop-up
             const items = dialogRef.current.querySelectorAll('button, input, a[href]');
@@ -242,7 +244,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
         setError('');
         try {
             onUser(mode === 'signup' ? await auth.signup(data) : await auth.login(data));
-            onClose();
+            if (!locked) onClose();
         } catch (err) {
             setError(err.message);
             setBusy(false);
@@ -253,11 +255,13 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
     const tabClass = (on) => `flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors ${on ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-blue-600'}`;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a192f]/60 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a192f]/60 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => !locked && e.target === e.currentTarget && onClose()}>
             <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="auth-title" className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-8">
-                <button type="button" onClick={onClose} aria-label={TXT.close} className="absolute top-5 right-5 p-2 rounded-xl text-gray-500 hover:text-blue-600 transition-colors">
-                    <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
-                </button>
+                {!locked && (
+                    <button type="button" onClick={onClose} aria-label={TXT.close} className="absolute top-5 right-5 p-2 rounded-xl text-gray-500 hover:text-blue-600 transition-colors">
+                        <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                    </button>
+                )}
 
                 {user ? (
                     <div className="text-center pt-2">
@@ -274,7 +278,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
                 ) : (
                     <>
                         <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-2 pr-10">{mode === 'signup' ? TXT.signup : TXT.login}</h2>
-                        <p className="text-sm text-gray-500 font-medium mb-6">{mode === 'signup' ? TXT.signupIntro : TXT.loginIntro}</p>
+                        <p className="text-sm text-gray-500 font-medium mb-6">{notice || (mode === 'signup' ? TXT.signupIntro : TXT.loginIntro)}</p>
 
                         <div className="flex gap-1 p-1 mb-6 rounded-full border border-gray-200" role="tablist">
                             <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => setMode('login')} className={tabClass(mode === 'login')}>{TXT.login}</button>
@@ -312,6 +316,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose }) => {
                                 {mode === 'signup' ? TXT.login : TXT.signup}
                             </button>
                         </p>
+                        {footer}
                     </>
                 )}
             </div>
@@ -340,7 +345,7 @@ const CookieConsent = () => {
 
     return (
         <div role="dialog" aria-modal="false" aria-labelledby="cookies-title" aria-describedby="cookies-text"
-            className="fixed z-[95] left-4 right-4 bottom-4 sm:left-6 sm:right-auto sm:bottom-6 sm:max-w-md bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-6 animate-fade-in">
+            className="fixed z-[110] left-4 right-4 bottom-4 sm:left-6 sm:right-auto sm:bottom-6 sm:max-w-md bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-6 animate-fade-in">
             <h2 id="cookies-title" className="text-lg font-black text-gray-900 tracking-tight mb-2">{TXT.cookiesTitle}</h2>
             <p id="cookies-text" className="text-sm text-gray-500 font-medium leading-relaxed mb-5">
                 {TXT.cookiesText}{' '}
@@ -381,6 +386,8 @@ const Layout = ({ children }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState(auth.current);
     const [authMode, setAuthMode] = useState(null);   // null (closed), 'login' or 'signup'
+    // Access pop-up for this page (js/acceso.jsx); pages that do not load acceso.jsx have none.
+    const access = typeof accessRuleFor === 'function' ? accessRuleFor(window.location.pathname) : null;
 
     const openAuth = (mode = 'login') => {
         setAuthMode(mode);
@@ -504,7 +511,7 @@ const Layout = ({ children }) => {
             </div>
 
             <main className="relative z-[2] pt-32 px-4 md:px-8">
-                {children}
+                {access ? <AccessGate rule={access} user={user} onUser={setUser}>{children}</AccessGate> : children}
             </main>
 
             <footer className="py-12 border-t border-gray-200 text-center text-gray-400 text-sm font-semibold tracking-widest bg-white relative z-20">

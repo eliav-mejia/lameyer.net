@@ -49,6 +49,7 @@ TEMPLATE = """<!DOCTYPE html>
     </div>
 
     <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/acceso.jsx"></script>
     <script type="text/babel" src="/js/tienda.jsx"></script>
     <script type="text/babel">
         renderProduct();

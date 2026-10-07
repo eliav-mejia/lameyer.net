@@ -1,0 +1,5 @@
+# Documentación interna: detalle de seguridad. Solo en el equipo local; nunca en el repositorio ni en el sitio.
+_interno/
+
+# Configuración local del editor / agente
+.claude/
