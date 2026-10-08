@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lameyer.net — Arquitectura Etapa 2 · Pagos seguros</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lameyer-claro.css">
+<style>
+    @page {
+        @bottom-left  { content: "Lameyer.net · Arquitectura Etapa 2 · Edición pública"; font: 6.6pt 'Plus Jakarta Sans', sans-serif; color: #94a3b8; letter-spacing: .08em; }
+        @bottom-right { content: "Página " counter(page) " / " counter(pages); font: 600 6.6pt 'Plus Jakarta Sans', sans-serif; color: #475569; letter-spacing: .08em; }
+    }
+    /* Referencia por folio al documento interno (_clientes/Lameyer-Arquitectura-Etapa-2.pdf) */
+    h2 { display: flex; align-items: baseline; gap: 4px; }
+    h2 .ref { margin-left: auto; font-size: 6.4pt; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+              color: var(--slate-600); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+    /* Flujo de pago */
+    .flow { display: grid; grid-template-columns: repeat(5, 1fr); gap: 14px; margin: 6px 0 8px; break-inside: avoid; }
+    .flow div { position: relative; background: var(--glass); border: 1px solid var(--line); border-radius: 8px; padding: 7px 8px; font-size: 7.4pt; }
+    .flow div:not(:last-child)::after { content: "→"; position: absolute; right: -12px; top: 50%; transform: translateY(-50%); color: var(--slate-300); font-weight: 800; }
+    .flow b { display: block; font-size: 6.4pt; letter-spacing: .14em; text-transform: uppercase; color: var(--slate-600); margin-bottom: 2px; }
+    .flow .srv { box-shadow: inset 0 2px 0 var(--ink); }
+    .new { font-size: 6.2pt; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--ink);
+           border: 1px solid var(--ink); border-radius: 3px; padding: 0 3px; }
+    @media screen and (max-width: 640px) { .flow { grid-template-columns: 1fr; } .flow div::after { display: none; } h2 { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+<div class="circuit" aria-hidden="true"></div>
+<main class="page">
+
+<div class="banner">Documentación pública · Etapa 2 · Pagos seguros · Octubre 2026</div>
+<nav class="nav">
+    <div class="logo">Lameyer<span>.net</span></div>
+    <div class="links">Arquitectura · Carpetas · Seguridad · <b>Privacidad</b></div>
+</nav>
+
+<header class="hero">
+    <div class="kicker">Lameyer.net · Desarrollo web · Etapa 2</div>
+    <h1>Arquitectura y estructura de carpetas<br><em>para la etapa de pagos seguros</em></h1>
+    <p class="lead">Cómo pasa un sitio de recorridos de prueba a cobros, pedidos, inventario y cuentas reales: arquitectura,
+        alcance según el tipo de sitio, carpetas nuevas, calendario y reglas de seguridad y privacidad.</p>
+    <div class="meta">
+        <div><b>Desarrollado por</b><span>Lameyer.net</span></div>
+        <div><b>Representante legal</b><span>Alejandro Mejía Cisneros</span></div>
+        <div><b>Fecha</b><span>7 de octubre de 2026</span></div>
+        <div><b>Referencia</b><span>AE2 · folios 1 – 4</span></div>
+    </div>
+</header>
+
+<div class="callout"><b>Sobre esta guía · políticas de privacidad</b>
+    <p>Edición pública del documento de arquitectura de la <strong>Etapa 2 · Pagos seguros</strong>. Se redactó siguiendo las
+        políticas de privacidad de Lameyer.net, que aplican tanto a esta documentación como a los sitios que desarrollamos:</p>
+    <ul>
+        <li><strong>Qué omitimos aquí:</strong> nombres de clientes y sus proyectos, proveedores de pago y de infraestructura, claves,
+            direcciones de servicios, configuraciones y hallazgos de seguridad. Todos los ejemplos son genéricos.</li>
+        <li><strong>Datos mínimos:</strong> cada sitio pide solo los datos necesarios para vender, entregar o atender una cita.</li>
+        <li><strong>Datos de tarjeta:</strong> los recibe y procesa únicamente la pasarela de pago, en su propia página; nunca pasan por
+            nuestros servidores ni se guardan en nuestras bases de datos.</li>
+        <li><strong>Acceso a la información:</strong> cada persona ve solo sus pedidos, citas y perfil; el equipo accede con mínimo
+            privilegio y verificación en dos pasos.</li>
+        <li><strong>Transparencia:</strong> antes de cobrar, cada sitio publica su aviso de privacidad (LFPDPPP en México, RGPD en la UE)
+            con la finalidad del tratamiento, la transferencia a la pasarela de pago y los plazos de conservación.</li>
+        <li><strong>Tus derechos:</strong> acceso, rectificación, cancelación u oposición (y portabilidad en la UE) se ejercen escribiendo a
+            contacto@lameyer.net o al responsable indicado en el aviso de cada sitio.</li>
+    </ul>
+    <p style="margin:0">El detalle técnico, los proveedores y el alcance por cliente están en el documento interno
+        <strong>AE2</strong> (<code>_clientes/Lameyer-Arquitectura-Etapa-2.pdf</code>), que no se publica. Cada sección indica el folio
+        de AE2 del que parte.</p>
+</div>
+
+<h2><span class="n">01</span>Qué cambia en la Etapa 2<span class="ref">AE2 · f. 1</span></h2>
+<p>En la Etapa 1 todo es de prueba: las cuentas, la bolsa, los pedidos y las citas se quedan en el navegador de quien prueba y
+    los pedidos se confirman a mano. La Etapa 2 sustituye esas piezas por servicios reales, una por una, sin tocar el diseño aprobado.</p>
+<table>
+    <tr><th style="width:22%">Pieza</th><th style="width:36%">Etapa 1 (prueba)</th><th>Etapa 2 (real)</th></tr>
+    <tr><td><strong>Cuentas</strong></td><td>Usuario guardado en el navegador</td><td>Servicio de autenticación: correo verificado, sesión segura, recuperación de contraseña</td></tr>
+    <tr><td><strong>Catálogo y precios</strong></td><td>Archivos de datos de ejemplo</td><td>Base de datos con seguridad por fila</td></tr>
+    <tr><td><strong>Cobro</strong></td><td>Mensaje de pedido (por ejemplo, WhatsApp)</td><td>Página de pago alojada por la pasarela; la tarjeta nunca pasa por nuestros servidores</td></tr>
+    <tr><td><strong>Precio final</strong></td><td>Calculado en el navegador</td><td>Calculado en el servidor antes de crear el cobro</td></tr>
+    <tr><td><strong>Pedidos e inventario</strong></td><td>Sin stock real</td><td>Pedido y descuento de stock al confirmarse el pago</td></tr>
+    <tr><td><strong>Citas</strong></td><td>Agenda por navegador (posibles dobles)</td><td>Agenda en base de datos que impide reservas solapadas</td></tr>
+    <tr><td><strong>Correos</strong></td><td>No hay</td><td>Confirmación de pedido y de cita desde el servidor</td></tr>
+</table>
+
+<h2><span class="n">02</span>Arquitectura de pagos<span class="ref">AE2 · f. 2</span></h2>
+<div class="flow">
+    <div><b>Navegador</b>Bolsa y checkout. Solo usa claves públicas.</div>
+    <div class="srv"><b>Función de servidor</b>Relee precios y crea el pedido «pendiente».</div>
+    <div><b>Pasarela de pago</b>Cobra en su propia página.</div>
+    <div class="srv"><b>Notificación firmada</b>Se verifica y marca el pedido «pagado» una sola vez.</div>
+    <div><b>Base de datos</b>Pedido, stock y cita con seguridad por fila.</div>
+</div>
+<div class="grid2">
+    <div class="callout"><b>Reglas de arquitectura</b>
+        <ul>
+            <li>El navegador <strong>nunca</strong> usa claves privadas.</li>
+            <li>El precio se calcula <strong>siempre en el servidor</strong> a partir de la base de datos.</li>
+            <li>Cada notificación de pago se verifica y se registra para no cobrar ni descontar stock dos veces.</li>
+        </ul></div>
+    <div class="callout"><b>Entornos</b>
+        <ul>
+            <li><strong>Prueba:</strong> pasarela en modo de prueba y base de datos separada, sin datos reales.</li>
+            <li><strong>Producción:</strong> claves reales solo en el servidor; ninguna persona las ve completas.</li>
+            <li>Los cambios de base de datos son los mismos en ambos entornos y están versionados.</li>
+        </ul></div>
+</div>
+
+<h2><span class="n">03</span>Alcance según el tipo de sitio<span class="ref">AE2 · f. 2</span></h2>
+<table>
+    <tr><th style="width:12%">Variante</th><th style="width:28%">Tipo de sitio</th><th>Qué se construye en la Etapa 2</th></tr>
+    <tr><td><strong>A</strong></td><td>Sitio de marca</td><td>Sin cambios: no maneja pagos</td></tr>
+    <tr><td><strong>B</strong></td><td>Portafolio editorial</td><td>Solicitudes enviadas desde el servidor; anticipo opcional si el negocio lo pide</td></tr>
+    <tr><td><strong>C</strong></td><td>Tienda o plataforma de contenido</td><td>Cuentas reales, cobro en varias divisas, historial de pedidos</td></tr>
+    <tr><td><strong>D</strong></td><td>Tienda + reservas</td><td>Cuentas reales, tienda, cobro, citas sin solapamiento y correos de confirmación</td></tr>
+    <tr><td><strong>E</strong></td><td>Plataforma común</td><td>Módulo de tienda conectado a la base de datos y a las funciones de pago</td></tr>
+</table>
+
+<h2><span class="n">04</span>Estructura de carpetas<span class="ref">AE2 · f. 2 – 3</span></h2>
+<p>Ejemplo genérico para un sitio con tienda y reservas (variantes C y D). Los nombres son ilustrativos.</p>
+<div class="grid2">
+<section class="keep">
+<pre>sitio/
+├── js/
+│   ├── servicios/base-de-datos.js   <span class="new">nuevo</span>
+│   ├── acceso.jsx       → sesión real
+│   ├── tienda.jsx       → datos reales
+│   └── reservas.jsx     → agenda real
+├── pages/
+│   ├── checkout/                    <span class="new">nuevo</span>
+│   ├── pedido-confirmado/           <span class="new">nuevo</span>
+│   └── cuenta/pedidos/ · citas/     <span class="new">nuevo</span>
+├── public/db/           solo ejemplos
+├── base-de-datos/
+│   ├── migraciones/                 <span class="new">nuevo</span>
+│   └── funciones/                   <span class="new">nuevo</span>
+├── _docs/               documentación pública
+└── _interno/            no se publica</pre>
+</section>
+<section class="keep">
+<pre>plataforma/etapa-2-pagos-seguros/
+├── pasarelas/      modo de prueba y precios
+│                   (sin claves)
+├── notificaciones/ eventos aceptados,
+│                   verificación, duplicados
+├── funciones/      crear-pago · confirmar-pago
+│                   · enviar-confirmacion
+└── pruebas/        aprobado, rechazado,
+                    reembolso, duplicado</pre>
+<p class="muted">Las claves nunca se guardan en estas carpetas: el repositorio solo incluye una plantilla con los nombres de las
+    variables, sin valores.</p>
+</section>
+</div>
+
+<h2><span class="n">05</span>Calendario y reuniones<span class="ref">AE2 · f. 3</span></h2>
+<p><strong>11 de enero – 26 de febrero de 2027</strong> (7 semanas), después de congelar la arquitectura base. Plan propuesto:</p>
+<div class="grid2">
+<section class="keep">
+<ul class="timeline">
+    <li><span class="d">Semana 1 · 11 ene</span>Arranque; cuentas de prueba en la pasarela; responsables de aprobar</li>
+    <li><span class="d">Semana 2</span>Base de datos de prueba y cuentas reales</li>
+    <li><span class="d">Semanas 3 – 4</span>Checkout, funciones de servidor y notificaciones de pago</li>
+    <li><span class="d">Semana 5</span>Pruebas: aprobado, rechazado, reembolso, duplicados</li>
+    <li><span class="d">Semana 6</span>Piloto con pagos reales de bajo monto y personas de confianza</li>
+    <li class="freeze"><span class="d">Semana 7 · 26 feb</span>Aprobación, acta y paso a producción</li>
+</ul>
+</section>
+<section class="keep">
+<table>
+    <tr><th>Reunión</th><th class="num">Duración</th><th>Resultado</th></tr>
+    <tr><td>Arranque Etapa 2</td><td class="num">60 – 90 min</td><td>Pasarela, monedas, políticas de devolución</td></tr>
+    <tr><td>Revisión del flujo de pago</td><td class="num">60 min</td><td>Recorrido de checkout aprobado</td></tr>
+    <tr><td>Avance semanal</td><td class="num">45 min</td><td>Lista de cambios priorizada</td></tr>
+    <tr><td>Revisión de pruebas</td><td class="num">60 min</td><td>Casos de prueba superados</td></tr>
+    <tr><td>Aprobación</td><td class="num">60 min</td><td>Acta firmada</td></tr>
+</table>
+</section>
+</div>
+
+<h2><span class="n">06</span>Seguridad y privacidad en la Etapa 2<span class="ref">AE2 · f. 3</span></h2>
+<div class="grid2">
+    <div class="callout"><b>Lo que hacemos nosotros</b>
+        <ul>
+            <li>Seguridad por fila activa en todas las tablas antes del primer dato real.</li>
+            <li>Claves privadas solo en el servidor y fuera del repositorio.</li>
+            <li>Notificaciones de pago verificadas y protegidas contra duplicados.</li>
+            <li>Registros sin datos personales ni de tarjeta.</li>
+            <li>Verificación en dos pasos en todas las cuentas de servicio del equipo.</li>
+        </ul></div>
+    <div class="callout"><b>Lo que cuidamos contigo</b>
+        <ul>
+            <li>Aviso de privacidad actualizado: pagos, transferencia a la pasarela, plazos de conservación.</li>
+            <li>Términos de venta: devoluciones, cancelación de citas y anticipos.</li>
+            <li>Datos de salud solo con consentimiento expreso; si no son necesarios, no se piden.</li>
+            <li>Respaldo diario y restauración probada antes del piloto.</li>
+        </ul></div>
+</div>
+<p class="muted"><strong>Pasa a otras etapas:</strong> facturación electrónica y contabilidad (Etapa 3); pruebas de penetración,
+    cortafuegos y auditor externo (Etapa 4); integraciones con otros sistemas (Etapa 5).</p>
+
+<h2><span class="n">07</span>Criterios de aprobación<span class="ref">AE2 · f. 4</span></h2>
+<ul class="checks">
+    <li>Un pago aprobado crea un pedido «pagado», descuenta stock y envía la confirmación una sola vez.</li>
+    <li>Una notificación repetida o fuera de orden no duplica cobros, pedidos ni descuentos de stock.</li>
+    <li>Cambiar el precio en el navegador no cambia el importe cobrado.</li>
+    <li>Una persona con sesión no puede leer pedidos, citas ni perfiles de otra.</li>
+    <li>Dos personas no pueden reservar el mismo espacio a la misma hora.</li>
+    <li>El aviso de privacidad y los términos de venta están publicados y aprobados por el cliente.</li>
+    <li>El piloto con pagos reales terminó sin incidencias abiertas.</li>
+</ul>
+
+<div class="foot">
+    <span>Lameyer.net · representada legalmente por Alejandro Mejía Cisneros · Ref. AE2 (<code>_clientes/Lameyer-Arquitectura-Etapa-2.pdf</code>)</span>
+    <span>contacto@lameyer.net · lameyer.net/academia</span>
+</div>
+
+</main>
+</body>
+</html>

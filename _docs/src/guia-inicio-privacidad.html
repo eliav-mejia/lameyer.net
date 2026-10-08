@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Lameyer.net — Guía de inicio y privacidad · Etapa 1</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="lameyer-claro.css">
+<style>
+    :root { --blue: #2563eb; --blue-soft: #eff6ff; --blue-line: #bfdbfe; }
+    /* Referencia por folio a la guía original (_clientes/Lameyer-Guia-de-Inicio-y-Privacidad.pdf) */
+    h2 { display: flex; align-items: baseline; gap: 4px; }
+    h2 .ref { margin-left: auto; font-size: 6.4pt; font-weight: 600; letter-spacing: .14em; text-transform: uppercase;
+              color: var(--slate-600); border: 1px solid var(--line); border-radius: 999px; padding: 1px 7px; white-space: nowrap; }
+    /* Sección destacada con guion grueso azul */
+    .destacado { border-left: 6px solid var(--blue); padding: 2px 0 2px 12px; margin: 18px 0 8px; }
+    .destacado h2 { margin-top: 0; border-bottom-color: var(--blue-line); }
+    .destacado h2 .n { color: var(--blue); font-weight: 800; }
+    /* Pasos */
+    .steps { counter-reset: s; list-style: none; padding: 0; margin: 4px 0 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+    .steps li { counter-increment: s; position: relative; padding: 8px 10px 8px 34px; margin: 0;
+                background: var(--glass); border: 1px solid var(--line); border-radius: 8px; break-inside: avoid; }
+    .steps li::before { content: counter(s, decimal-leading-zero); position: absolute; left: 10px; top: 8px;
+                        font-weight: 300; color: var(--slate-300); }
+    .destacado .steps li::before { color: var(--blue); font-weight: 600; }
+    .checks { list-style: none; padding: 0; }
+    .checks li { padding-left: 16px; position: relative; }
+    .checks li::before { content: ""; position: absolute; left: 0; top: 4px; width: 8px; height: 8px;
+                         border: 1px solid var(--slate-600); border-radius: 2px; }
+    .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid3 .callout { margin: 0; }
+    .yes, .no { font-weight: 700; }
+    .no { color: var(--slate-600); }
+    @media screen and (max-width: 640px) { .steps, .grid3 { grid-template-columns: 1fr; } h2 { flex-wrap: wrap; } }
+</style>
+</head>
+<body>
+<div class="circuit" aria-hidden="true"></div>
+<main class="page">
+
+<div class="banner">Guía para clientes · Etapa 1 · Octubre 2026</div>
+<nav class="nav">
+    <div class="logo">Lameyer<span>.net</span></div>
+    <div class="links">Arquitectura · Etapas · Privacidad · <b>Empezar</b></div>
+</nav>
+
+<header class="hero">
+    <div class="kicker">Lameyer.net · Guía de inicio · Etapa 1</div>
+    <h1>Cómo construimos tu sitio web<br><em>con la privacidad desde el primer día</em></h1>
+    <p class="lead">Una guía para quien quiere empezar su servicio con nosotros. Explica la arquitectura base que construimos en la
+        Etapa 1, qué pueden esperar las personas que usarán tu sitio, las cinco etapas, los tipos de estructura web, cómo protegemos
+        tu información y la de tus clientes, y qué preparar para la primera reunión.</p>
+    <div class="meta">
+        <div><b>Desarrollado por</b><span>Lameyer.net</span></div>
+        <div><b>Representante legal</b><span>Alejandro Mejía Cisneros</span></div>
+        <div><b>Fecha</b><span>7 de octubre de 2026</span></div>
+        <div><b>Referencia</b><span>GIP · folios 1 – 5</span></div>
+    </div>
+</header>
+
+<div class="callout"><b>Sobre esta guía</b>
+    <p>Esta guía se centra en la <strong>Etapa 1 · Arquitectura base</strong>, el punto de partida de todo proyecto. En ella
+        construimos el diseño, la estructura, la navegación, el contenido y los recorridos de prueba de tu sitio (compra, reserva,
+        contacto). Dura de <strong>2 a 8 semanas</strong> según la estructura elegida, más un margen del 25 % para cambios no
+        previstos, e incluye <strong>de 6 a 9 reuniones</strong> contigo.</p>
+    <ul>
+        <li><strong>Qué recibes:</strong> un sitio navegable en móvil y escritorio, con tu dominio, mapa del sitio y diseño aprobados,
+            y las opiniones de 3 a 5 usuarios reales.</li>
+        <li><strong>Qué no incluye todavía:</strong> pagos en línea, facturación, inventario sincronizado ni datos reales de clientes;
+            llegan en las etapas siguientes.</li>
+        <li><strong>Cómo termina:</strong> con un acta de aprobación firmada y la arquitectura congelada. Solo entonces empieza la Etapa 2.</li>
+    </ul>
+    <p style="margin:0">No menciona clientes, dominios, configuraciones, proveedores de infraestructura ni detalles técnicos de ningún
+        sitio real; todos los ejemplos son genéricos. Es una edición ampliada de la <strong>Guía de Inicio y Privacidad</strong>
+        (<code>_clientes/Lameyer-Guia-de-Inicio-y-Privacidad.pdf</code>, en adelante <strong>GIP</strong>); cada sección indica el
+        folio de la GIP del que parte.</p>
+</div>
+
+<h2><span class="n">01</span>Para quién es<span class="ref">GIP · f. 1</span></h2>
+<div class="grid2">
+    <div class="callout"><b>Si quieres empezar con nosotros</b>Sabrás cuánto dura cada etapa, cuántas reuniones tendremos, qué
+        tienes que preparar y qué recibirás al final de la primera etapa.</div>
+    <div class="callout"><b>Si nos ves en la Academia</b>Aprenderás a elegir la estructura web adecuada para un negocio, a
+        planear un sitio por etapas y a proteger los datos desde el diseño.</div>
+</div>
+
+<h2><span class="n">02</span>Arquitectura base<span class="ref">GIP · f. 1, 3</span></h2>
+<p>La arquitectura base es el esqueleto de tu sitio: todo lo que se ve y se recorre, ya organizado para que las etapas siguientes
+    (pagos, contabilidad, seguridad e integraciones) se conecten sin rehacer el trabajo.</p>
+<table>
+    <tr><th style="width:26%">Pieza</th><th>Qué incluye</th></tr>
+    <tr><td><strong>Identidad visual</strong></td><td>Paleta, tipografías, logotipo y estilo de fotos aplicados en todas las páginas.</td></tr>
+    <tr><td><strong>Estructura y navegación</strong></td><td>Mapa del sitio, menús, direcciones web limpias y páginas legales (términos y aviso de privacidad).</td></tr>
+    <tr><td><strong>Componentes reutilizables</strong></td><td>Cabecera, pie, tarjetas y formularios que se cambian en un solo lugar.</td></tr>
+    <tr><td><strong>Datos separados del diseño</strong></td><td>Productos, servicios y precios viven aparte del diseño, listos para pasar a una base de datos real en la Etapa 2.</td></tr>
+    <tr><td><strong>Recorridos de prueba</strong></td><td>Compra, reserva, cuenta y contacto funcionan de principio a fin, pero sin cobrar ni guardar datos reales.</td></tr>
+    <tr><td><strong>Calidad mínima</strong></td><td>Diseño para móvil y escritorio, accesibilidad (contraste, teclado, movimiento reducido) y carga rápida.</td></tr>
+</table>
+
+<h3>Qué esperar según quién usa el sistema</h3>
+<div class="grid3">
+    <div class="callout"><b>Visitantes y clientes finales</b>
+        <ul>
+            <li>Pueden navegar, ver el catálogo y probar el recorrido completo.</li>
+            <li>Los pedidos se envían como mensaje (por ejemplo, WhatsApp) y se confirman a mano.</li>
+            <li>Las cuentas, pedidos y citas de prueba se quedan en su propio navegador.</li>
+            <li><span class="no">Todavía no:</span> pagar con tarjeta, recibir factura ni reservar horarios definitivos.</li>
+        </ul></div>
+    <div class="callout"><b>Tu equipo</b>
+        <ul>
+            <li>Revisa textos, fotos, precios y orden de secciones cada semana.</li>
+            <li>Pide cambios por un solo canal para que no se pierdan.</li>
+            <li>Ve los datos de ejemplo marcados como <em>[verificar]</em> hasta que los confirma.</li>
+            <li><span class="no">Todavía no:</span> panel de administración, inventario sincronizado ni correos automáticos.</li>
+        </ul></div>
+    <div class="callout"><b>Responsable de aprobar</b>
+        <ul>
+            <li>Una sola persona aprueba contenido, precios y estructura.</li>
+            <li>Participa en la prueba con usuarios y firma el acta de cierre.</li>
+            <li>Decide qué ideas pasan a etapas posteriores.</li>
+            <li><span class="no">Evitar:</span> invitar a clientes reales a registrarse o reservar antes de la Etapa 2.</li>
+        </ul></div>
+</div>
+<p class="muted"><strong>Por qué así:</strong> en la Etapa 1 nadie corre riesgos. Si dos personas reservan la misma hora desde
+    equipos distintos, o alguien deja datos personales, no se pierde nada: aún no hay datos reales. Así validamos el recorrido
+    antes de conectar dinero e información sensible.</p>
+
+<h2><span class="n">03</span>Las cinco etapas<span class="ref">GIP · f. 1</span></h2>
+<p>No construimos todo a la vez. Primero fijamos una base sólida y la aprobamos contigo. Después añadimos, una por una, las piezas
+    que manejan dinero, datos o servicios externos, porque son las que más protección necesitan.</p>
+<table>
+    <tr><th style="width:7%">Etapa</th><th style="width:22%">Nombre</th><th>Qué se construye</th><th class="num" style="width:13%">Duración típica</th></tr>
+    <tr><td><strong>1</strong></td><td><strong>Arquitectura base</strong></td><td>Diseño, estructura, navegación, contenido y recorridos de prueba (compra, reserva, contacto)</td><td class="num">2 – 8 semanas</td></tr>
+    <tr><td><strong>2</strong></td><td><strong>Pagos seguros</strong></td><td>Pasarela de pago, checkout, pedidos e inventario reales, cuentas de cliente reales</td><td class="num">6 – 7 semanas</td></tr>
+    <tr><td><strong>3</strong></td><td><strong>Contabilidad</strong></td><td>ERP, facturación electrónica (CFDI 4.0), conciliación de pagos, reportes</td><td class="num">6 – 8 semanas</td></tr>
+    <tr><td><strong>4</strong></td><td><strong>Seguridad reforzada</strong></td><td>Roles y permisos (IAM), cortafuegos, gestión de claves, registros de auditoría, pruebas de penetración, auditor externo</td><td class="num">7 – 8 semanas</td></tr>
+    <tr><td><strong>5</strong></td><td><strong>Integraciones</strong></td><td>Microservicios con ERP, CRM, automatización, mensajería, soporte y gestión de proyectos</td><td class="num">8 – 16 semanas</td></tr>
+</table>
+<p class="muted"><strong>Regla principal:</strong> ninguna etapa empieza hasta que la anterior esté aprobada por escrito. La meta final
+    es una plataforma <strong>React + Tailwind CSS + HTML + JavaScript</strong> con tienda en línea, reservas y/o chat en vivo,
+    lista para conectarse a sistemas abiertos y de terceros.</p>
+
+<h2><span class="n">04</span>Tipos de estructura web<span class="ref">GIP · f. 2</span></h2>
+<p>Elegimos la estructura según lo que necesita tu negocio hoy y lo que necesitará mañana. Estas son las cinco variantes con las que trabajamos.</p>
+
+<div class="card">
+    <span class="site">2 – 3 semanas</span><span class="tag">Variante A</span>
+    <h3>Sitio de marca: HTML + CSS + JavaScript</h3>
+    <div class="pc">
+        <div><b>Ventajas</b><ul><li>Lo más rápido y lo mejor para buscadores.</li><li>Hosting muy barato o gratuito.</li><li>Muy poca superficie de ataque.</li></ul></div>
+        <div><b>Desventajas</b><ul><li>Cambiar el menú obliga a editar todas las páginas.</li><li>Sin carrito, cuentas ni reservas.</li></ul></div>
+    </div>
+    <p class="ideal"><strong>Ideal para:</strong> marcas, catálogos informativos, páginas de campaña.</p>
+</div>
+<div class="card">
+    <span class="site">3 – 4 semanas</span><span class="tag">Variante B</span>
+    <h3>Portafolio editorial con protección de imágenes</h3>
+    <div class="pc">
+        <div><b>Ventajas</b><ul><li>La imagen es protagonista; varias marcas en un mismo sitio.</li><li>Señales de derechos de autor frente a la IA.</li></ul></div>
+        <div><b>Desventajas</b><ul><li>La protección de fotos solo disuade: no evita capturas de pantalla.</li><li>Las reglas de protección dependen del servidor elegido.</li></ul></div>
+    </div>
+    <p class="ideal"><strong>Ideal para:</strong> fotografía, moda, arte, marcas de lujo.</p>
+</div>
+<div class="card">
+    <span class="site">6 – 8 semanas</span><span class="tag">Variante C</span>
+    <h3>Prototipo de tienda o plataforma de contenido con React</h3>
+    <div class="pc">
+        <div><b>Ventajas</b><ul><li>Componentes reutilizables y fáciles de editar.</li><li>Datos separados del diseño: pasar a una base real es sencillo.</li><li>Multipaís y multidivisa.</li></ul></div>
+        <div><b>Desventajas</b><ul><li>Carga más lenta mientras no tenga proceso de build.</li><li>Pagos y cuentas son de prueba hasta la Etapa 2.</li></ul></div>
+    </div>
+    <p class="ideal"><strong>Ideal para:</strong> tiendas en línea, cursos, comunidades.</p>
+</div>
+<div class="card">
+    <span class="site">5 – 6 semanas</span><span class="tag">Variante D</span>
+    <h3>Tienda + reservas con base de datos preparada</h3>
+    <div class="pc">
+        <div><b>Ventajas</b><ul><li>Agenda en línea y tienda en el mismo sitio.</li><li>Base de datos protegida por diseño antes de recibir datos reales.</li><li>Evita citas duplicadas.</li></ul></div>
+        <div><b>Desventajas</b><ul><li>Si se piden datos de salud, requiere consentimiento expreso y protección extra.</li><li>La agenda se abre al público solo en la Etapa 2.</li></ul></div>
+    </div>
+    <p class="ideal"><strong>Ideal para:</strong> estética, salud, bienestar, consultorías.</p>
+</div>
+<div class="card">
+    <span class="site">Meta final</span><span class="tag">Variante E</span>
+    <h3>Plataforma React + Vite + Tailwind con build</h3>
+    <div class="pc">
+        <div><b>Ventajas</b><ul><li>Rápida y con políticas de seguridad estrictas.</li><li>Módulos activables: tienda, reservas, chat.</li></ul></div>
+        <div><b>Desventajas</b><ul><li>Requiere despliegue automatizado y más mantenimiento.</li><li>Necesita pre-renderizado para buen SEO.</li></ul></div>
+    </div>
+</div>
+
+<section class="keep">
+<h3>¿Cuál me conviene?</h3>
+<table>
+    <tr><th>Si tu negocio necesita…</th><th>Empieza con</th></tr>
+    <tr><td>Presentarse, generar confianza y recibir contactos</td><td><strong>Variante A</strong></td></tr>
+    <tr><td>Mostrar un trabajo visual y proteger sus imágenes</td><td><strong>Variante B</strong></td></tr>
+    <tr><td>Vender productos o publicar cursos y artículos</td><td><strong>Variante C</strong></td></tr>
+    <tr><td>Vender y además agendar citas o servicios</td><td><strong>Variante D</strong></td></tr>
+    <tr><td>Todo lo anterior, a escala y conectado a otros sistemas</td><td><strong>Variante E</strong> (después de la Etapa 1)</td></tr>
+</table>
+</section>
+
+<h2><span class="n">05</span>Cómo trabajamos la Etapa 1<span class="ref">GIP · f. 3</span></h2>
+<p>La Etapa 1 se organiza en reuniones cortas con un resultado escrito cada una. Entre reuniones avanzamos en el sitio y tú revisas.</p>
+<table>
+    <tr><th>Reunión</th><th>Cuándo</th><th class="num">Duración</th><th>Participantes</th><th>Resultado</th></tr>
+    <tr><td>Arranque</td><td>Semana 1</td><td class="num">90 min</td><td>Tú, dirección del proyecto, desarrollo</td><td>Objetivos, público, marca, contenidos que entregas y alcance</td></tr>
+    <tr><td>Estructura</td><td>Semana 2</td><td class="num">60 min</td><td>Tú, desarrollo</td><td>Mapa del sitio y secciones aprobados</td></tr>
+    <tr><td>Diseño</td><td>Semana 3</td><td class="num">60 – 75 min</td><td>Tú, desarrollo</td><td>Paleta, tipografías y página de inicio aprobadas</td></tr>
+    <tr><td>Avance</td><td>Cada semana</td><td class="num">45 – 60 min</td><td>Tú, desarrollo</td><td>Lista de cambios priorizada</td></tr>
+    <tr><td>Prueba con usuarios</td><td>Penúltima semana</td><td class="num">60 – 90 min</td><td>3 – 5 usuarios + tú</td><td>Opiniones de uso real</td></tr>
+    <tr><td>Aprobación</td><td>Última semana</td><td class="num">60 min</td><td>Tú, dirección del proyecto</td><td>Acta firmada y arquitectura congelada</td></tr>
+</table>
+<p>En total, <strong>de 6 a 9 reuniones</strong> (7 a 10 horas). Los sitios con tienda, reservas o academia están en el extremo alto.</p>
+
+<div class="grid2">
+<section class="keep">
+<h3>Semana a semana</h3>
+<ul class="timeline">
+    <li><span class="d">Semana 1</span>Arranque y entrega de contenidos</li>
+    <li><span class="d">Semana 2</span>Mapa del sitio y estructura de páginas</li>
+    <li><span class="d">Semana 3</span>Diseño de la página de inicio</li>
+    <li><span class="d">Semanas 4 – penúltima</span>Construcción de páginas y recorridos; rondas de cambios</li>
+    <li><span class="d">Penúltima semana</span>Prueba con 3 a 5 usuarios reales</li>
+    <li class="freeze"><span class="d">Última semana</span>Ajustes finales, acta y arquitectura congelada</li>
+</ul>
+</section>
+<section class="keep">
+<h3>Reglas para controlar los cambios</h3>
+<ul>
+    <li>Cada reunión termina con una <strong>lista escrita de cambios</strong>, en orden de prioridad.</li>
+    <li>Los cambios de <strong>contenido</strong> (textos, fotos, precios) no tienen límite en esta etapa.</li>
+    <li>Los cambios de <strong>estructura</strong> (secciones o recorridos nuevos) después de aprobar el mapa del sitio se estiman aparte y pueden mover la fecha.</li>
+    <li>Lo que pertenezca a otra etapa (pagos, facturación, integraciones) se apunta y <strong>no se construye ahora</strong>.</li>
+    <li>Los cambios menores entre reuniones se piden por <strong>un solo canal</strong>.</li>
+</ul>
+</section>
+</div>
+
+<div class="grid2">
+    <div class="callout"><b>Lo que necesitamos de ti</b>
+        <ul>
+            <li>Contenidos completos en la semana 1: si llegan tarde, la fecha se mueve el mismo número de días.</li>
+            <li>Una sola persona que apruebe contenido y precios, y asista a las reuniones clave.</li>
+            <li>Confirmar los datos marcados como <em>[verificar]</em>: precios, textos legales, ingredientes o especificaciones.</li>
+        </ul></div>
+    <div class="callout"><b>Cómo sabemos que la etapa está lista</b>
+        <ul>
+            <li>Todas las páginas del mapa aprobado están publicadas y se ven bien en móvil y escritorio.</li>
+            <li>Los recorridos de prueba funcionan de principio a fin.</li>
+            <li>Los hallazgos de la prueba con usuarios están resueltos o apuntados para la Etapa 2.</li>
+            <li>El acta de aprobación está firmada.</li>
+        </ul></div>
+</div>
+<p class="muted">Esperamos <strong>muchos cambios</strong>: es la primera vez que ves tu sitio y es normal ajustar textos, fotos,
+    colores y precios. Por eso sumamos un <strong>margen del 25 %</strong> al calendario; si no se usa, la Etapa 2 se adelanta.</p>
+
+<h2><span class="n">06</span>Privacidad desde el diseño<span class="ref">GIP · f. 3</span></h2>
+<p>Proteger la información de tu negocio y de tus clientes no es una etapa al final: empieza el primer día.</p>
+<div class="grid2">
+    <div class="callout"><b>Lo que hacemos nosotros</b>
+        <ul>
+            <li><strong>Sin datos reales en la Etapa 1.</strong> Las cuentas, pedidos y citas de prueba no salen del navegador de quien prueba.</li>
+            <li><strong>Dos niveles de documentación.</strong> La pública explica qué cambia y para quién; el detalle técnico y de seguridad nunca se publica.</li>
+            <li><strong>Claves privadas fuera del navegador</strong> y fuera del código: viven solo en servidores con permisos propios.</li>
+            <li><strong>Base de datos con seguridad por fila:</strong> cada persona ve solo su información.</li>
+            <li><strong>Datos mínimos:</strong> pedimos solo lo necesario para el servicio.</li>
+            <li><strong>Accesos con mínimo privilegio</strong> y verificación en dos pasos para el equipo.</li>
+            <li><strong>Auditor externo</strong> antes del lanzamiento con pagos y datos reales.</li>
+        </ul></div>
+    <div class="callout"><b>Lo que cuidamos contigo</b>
+        <ul>
+            <li><strong>Aviso de privacidad</strong> conforme a la LFPDPPP (México) o al RGPD (España, UE).</li>
+            <li><strong>Consentimiento de cookies</strong> antes de cualquier medición publicitaria.</li>
+            <li><strong>Datos sensibles</strong> (por ejemplo, de salud): consentimiento expreso, o mejor, no pedirlos en línea.</li>
+            <li><strong>Derechos de imagen</strong> y uso de marcas confirmados con su titular.</li>
+            <li><strong>Un solo responsable</strong> en tu equipo para aprobar contenido, precios y recibir alertas.</li>
+            <li><strong>Contraseñas y accesos</strong> compartidos solo por un canal privado, nunca por correo ni chat abierto.</li>
+        </ul></div>
+</div>
+
+<section class="keep">
+<h3>Qué nunca publicamos</h3>
+<table>
+    <tr><th style="width:38%">Información</th><th>Por qué</th></tr>
+    <tr><td>Nombres de proveedores de infraestructura y su configuración</td><td>Facilita a un atacante saber dónde y cómo buscar</td></tr>
+    <tr><td>Claves, contraseñas, rutas internas y direcciones de servicios</td><td>Dan acceso directo a sistemas o datos</td></tr>
+    <tr><td>Hallazgos de seguridad y cómo saltarse un control</td><td>Son instrucciones para atacar mientras se corrigen</td></tr>
+    <tr><td>Datos personales de clientes, aunque sean de prueba</td><td>Obligación legal y de confianza</td></tr>
+    <tr><td>Lista de clientes y sus proyectos sin autorización</td><td>Confidencialidad comercial</td></tr>
+</table>
+</section>
+
+<section class="destacado">
+<h2><span class="n">07</span>Cómo empezar con nosotros<span class="ref">GIP · f. 4</span></h2>
+<ol class="steps">
+    <li><strong>Contacto.</strong> Escríbenos a contacto@lameyer.net con una descripción breve de tu negocio.</li>
+    <li><strong>Llamada de diagnóstico</strong> (30 min, sin costo): necesidades, tiempos y variante recomendada.</li>
+    <li><strong>Propuesta y acuerdo de confidencialidad</strong>: alcance, fechas, presupuesto y aviso de privacidad del proyecto.</li>
+    <li><strong>Reunión de arranque</strong> y entrega de contenidos.</li>
+    <li><strong>Construcción y revisiones semanales</strong> de la Etapa 1.</li>
+    <li><strong>Aprobación</strong> por escrito y planificación de la Etapa 2.</li>
+</ol>
+<div class="keep">
+<h3>Qué preparar para la reunión de arranque</h3>
+<div class="grid2">
+    <ul class="checks">
+        <li>Logotipo en alta calidad y colores de marca</li>
+        <li>Fotografías propias o con licencia</li>
+        <li>Textos: quiénes son, qué ofrecen, a quién</li>
+        <li>Lista de productos o servicios con precios</li>
+        <li>Dominio (si ya existe) y quién lo administra</li>
+    </ul>
+    <ul class="checks">
+        <li>Datos legales: razón social, RFC o NIF, dirección</li>
+        <li>Tres sitios que te gusten y por qué</li>
+        <li>Medios de contacto: correo, teléfono, WhatsApp</li>
+        <li>Persona responsable de aprobar</li>
+        <li>Sistemas que ya usan (ERP, CRM, pagos)</li>
+    </ul>
+</div>
+</div>
+</section>
+
+<h2><span class="n">08</span>Preguntas frecuentes<span class="ref">GIP · f. 5</span></h2>
+<div class="grid2">
+    <div>
+        <h3>¿Puedo cobrar desde el primer día?</h3>
+        <p>En la Etapa 1 los pedidos se confirman manualmente (por ejemplo, por WhatsApp). Los pagos en línea llegan en la Etapa 2, cuando están verificados y protegidos.</p>
+        <h3>¿Quién es dueño del sitio?</h3>
+        <p>Tu contenido, tu marca y tu dominio son tuyos. Las condiciones del código se detallan en la propuesta.</p>
+    </div>
+    <div>
+        <h3>¿Aparecerá mi proyecto en su portafolio?</h3>
+        <p>Solo si nos lo autorizas por escrito. Sin autorización, no mencionamos tu nombre ni tu sitio.</p>
+        <h3>¿Qué pasa si cambio de idea a mitad de camino?</h3>
+        <p>Es normal. Los cambios de contenido están incluidos; los de estructura se estiman y se acuerdan antes de hacerlos.</p>
+    </div>
+</div>
+
+<div class="foot">
+    <span>Lameyer.net · representada legalmente por Alejandro Mejía Cisneros · Ref. GIP (<code>_clientes/Lameyer-Guia-de-Inicio-y-Privacidad.pdf</code>)</span>
+    <span>contacto@lameyer.net · lameyer.net/academia</span>
+</div>
+
+</main>
+</body>
+</html>

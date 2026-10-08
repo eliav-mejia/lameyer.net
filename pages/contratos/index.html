@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Contratación y Marco Legal - Lameyer</title>
+<meta name="description" content="Por qué en Lameyer los contratos se firman con antelación y por qué nuestro representante y apoderado legal está en España: protección de datos y ciberseguridad bajo el marco europeo, español y mexicano.">
+<link rel="canonical" href="https://lameyer.net/pages/contratos/">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --bg: #ffffff;
+        --ink: #1a202c;
+        --slate: #475569;
+        --muted: #94a3b8;
+        --line: rgba(148, 163, 184, 0.35);
+        --soft: rgba(148, 163, 184, 0.08);
+        --ease: cubic-bezier(0.4, 0, 0.2, 1);
+        color-scheme: light;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { background: var(--bg); scroll-behavior: smooth; scroll-padding-top: 120px; }
+    body {
+        margin: 0;
+        font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--ink);
+        line-height: 1.6;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+    }
+    ::selection { background: rgba(148, 163, 184, 0.3); }
+
+    /* Circuit-board grid: fixed, full viewport, never interactive */
+    .circuit-bg {
+        position: fixed; inset: 0; z-index: 0; pointer-events: none;
+        background-color: var(--bg);
+        background-image:
+            radial-gradient(circle, rgba(71, 85, 105, 0.6) 2.5px, transparent 3px),
+            linear-gradient(to right, rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.3) 1px, transparent 1px),
+            linear-gradient(to right, rgba(148, 163, 184, 0.1) 1px, transparent 1px),
+            linear-gradient(to bottom, rgba(148, 163, 184, 0.1) 1px, transparent 1px);
+        background-size: 80px 80px, 80px 80px, 80px 80px, 20px 20px, 20px 20px;
+        background-position: -40px -40px, 0 0, 0 0, 0 0, 0 0;
+        -webkit-mask-image: radial-gradient(ellipse at center, #000 70%, transparent 100%);
+                mask-image: radial-gradient(ellipse at center, #000 70%, transparent 100%);
+    }
+
+    /* Rising, fading decorative particles */
+    .particles { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+    .particles span {
+        position: absolute; bottom: -10px; width: 4px; height: 4px; border-radius: 50%;
+        background: rgba(71, 85, 105, 0.35);
+        animation: rise 14s linear infinite;
+    }
+    .particles span:nth-child(1) { left: 12%; animation-delay: 0s; }
+    .particles span:nth-child(2) { left: 31%; animation-delay: 4s; animation-duration: 18s; }
+    .particles span:nth-child(3) { left: 54%; animation-delay: 8s; }
+    .particles span:nth-child(4) { left: 73%; animation-delay: 2s; animation-duration: 20s; }
+    .particles span:nth-child(5) { left: 90%; animation-delay: 10s; }
+    @keyframes rise {
+        0%   { transform: translateY(0); opacity: 0; }
+        15%  { opacity: 1; }
+        100% { transform: translateY(-100vh); opacity: 0; }
+    }
+
+    /* Announcement banner + frosted navigation */
+    .banner {
+        position: fixed; top: 0; left: 0; right: 0; z-index: 30; height: 40px;
+        display: flex; align-items: center; justify-content: center; padding: 0 16px;
+        background: var(--ink); color: #e2e8f0;
+        font-size: 12px; letter-spacing: 0.04em; text-align: center;
+        white-space: nowrap;
+    }
+    .banner span { overflow: hidden; text-overflow: ellipsis; min-width: 0;
+    }
+    .nav {
+        position: fixed; top: 40px; left: 0; right: 0; z-index: 27;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    /* Blur lives on a pseudo-element: backdrop-filter on .nav itself would trap the fixed mobile drawer inside the bar */
+    .nav::before {
+        content: ''; position: absolute; inset: 0; z-index: -1;
+        background: rgba(255, 255, 255, 0.7);
+        -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+    }
+    .nav-inner {
+        max-width: 1040px; margin: 0 auto; height: 64px; padding: 0 16px;
+        display: flex; align-items: center; justify-content: space-between;
+    }
+    .brand { font-weight: 800; font-size: 18px; color: var(--ink); text-decoration: none; letter-spacing: -0.02em; }
+    .brand small { font-weight: 400; color: var(--muted); }
+    .links { display: flex; gap: 28px; }
+    .links a { color: var(--slate); text-decoration: none; font-size: 14px; font-weight: 600; transition: color 0.2s; }
+    .links a:hover { color: var(--ink); }
+
+    .burger {
+        display: none; position: relative; z-index: 40; width: 40px; height: 40px;
+        border: 0; background: transparent; cursor: pointer; padding: 0;
+    }
+    .burger span {
+        position: absolute; left: 10px; width: 20px; height: 2px; border-radius: 2px;
+        background: var(--ink); transition: transform 0.4s var(--ease), opacity 0.3s var(--ease);
+    }
+    .burger span:nth-child(1) { top: 13px; }
+    .burger span:nth-child(2) { top: 19px; }
+    .burger span:nth-child(3) { top: 25px; }
+    .menu-open .burger span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    .menu-open .burger span:nth-child(2) { opacity: 0; }
+    .menu-open .burger span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .scrim {
+        position: fixed; inset: 0; z-index: 26; background: rgba(26, 32, 44, 0.2);
+        opacity: 0; pointer-events: none; transition: opacity 0.4s var(--ease);
+    }
+    .menu-open .scrim { opacity: 1; pointer-events: auto; }
+
+    @media (max-width: 760px) {
+        .burger { display: block; }
+        .links {
+            position: fixed; top: 0; right: 0; bottom: 0; z-index: 35;
+            width: min(80vw, 300px); padding: 128px 28px 28px;
+            flex-direction: column; gap: 22px;
+            background: rgba(255, 255, 255, 0.92);
+            -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+            border-left: 1px solid rgba(0, 0, 0, 0.05);
+            transform: translateX(100%); transition: transform 0.4s var(--ease);
+            overflow-y: auto;
+        }
+        .links a { font-size: 17px; }
+        .menu-open .links { transform: translateX(0); }
+    }
+
+    /* Content */
+    main { position: relative; z-index: 2; max-width: 1040px; margin: 0 auto; padding: 152px 16px 64px; }
+    .fade { opacity: 0; transform: translateY(10px); animation: fadeUp 0.5s ease-out forwards; }
+    .fade.d1 { animation-delay: 0.08s; } .fade.d2 { animation-delay: 0.16s; } .fade.d3 { animation-delay: 0.24s; }
+    @keyframes fadeUp { to { opacity: 1; transform: none; } }
+
+    .kicker { font-size: 12px; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+    h1 { font-size: clamp(30px, 5vw, 46px); line-height: 1.12; letter-spacing: -0.03em; font-weight: 800; margin: 12px 0 20px; max-width: 760px; }
+    .lead {
+        font-size: clamp(17px, 2.1vw, 20px); line-height: 1.55; color: var(--slate);
+        max-width: 820px; margin: 0; padding-left: 18px; border-left: 2px solid var(--ink);
+    }
+    .lead strong { color: var(--ink); font-weight: 600; }
+
+    .sheet {
+        margin-top: 48px; padding: 40px clamp(20px, 4vw, 48px);
+        background: rgba(255, 255, 255, 0.88);
+        border: 1px solid var(--line); border-radius: 16px;
+        box-shadow: 0 1px 2px rgba(26, 32, 44, 0.04), 0 12px 32px -16px rgba(26, 32, 44, 0.12);
+    }
+    .sheet-head { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); padding-bottom: 16px; margin-bottom: 24px; }
+    .sheet-no { font-family: ui-monospace, 'SFMono-Regular', Consolas, monospace; font-size: 12px; color: var(--muted); letter-spacing: 0.08em; }
+    h2 { font-size: clamp(22px, 3vw, 28px); letter-spacing: -0.02em; margin: 0; font-weight: 800; }
+    h3 { font-size: 16px; margin: 32px 0 12px; font-weight: 800; letter-spacing: -0.01em; }
+    p { margin: 0 0 14px; }
+    .muted { color: var(--slate); }
+
+    .steps { list-style: none; padding: 0; margin: 20px 0 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; counter-reset: step; }
+    .steps li { position: relative; padding: 18px 18px 16px 58px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+    .steps li::before {
+        counter-increment: step; content: counter(step, decimal-leading-zero);
+        position: absolute; left: 16px; top: 18px; width: 28px; height: 28px; border-radius: 50%;
+        display: grid; place-items: center; font-size: 11px; font-weight: 800; color: #fff; background: var(--slate);
+    }
+    .steps b { display: block; margin-bottom: 4px; }
+    .steps p { margin: 0; font-size: 14px; color: var(--slate); }
+
+    .rule { margin-top: 24px; padding: 18px 20px; border-radius: 12px; background: var(--ink); color: #e2e8f0; }
+    .rule b { color: #fff; }
+    .rule p { margin: 0; font-size: 15px; }
+    .rule p + p { margin-top: 8px; color: var(--muted); font-size: 14px; }
+
+    .checks { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 24px; }
+    .checks li { position: relative; padding-left: 22px; font-size: 14px; color: var(--slate); }
+    .checks li::before { content: ''; position: absolute; left: 2px; top: 8px; width: 8px; height: 8px; border: 2px solid var(--slate); border-radius: 2px; }
+
+    .table-wrap { overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; margin: 0 -4px; }
+    .table-wrap::-webkit-scrollbar { display: none; }
+    table { width: 100%; min-width: 640px; border-collapse: collapse; font-size: 14px; }
+    th { text-align: left; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; padding: 0 12px 10px; border-bottom: 1px solid var(--line); }
+    td { padding: 12px; border-bottom: 1px solid var(--line); vertical-align: top; color: var(--slate); }
+    td:first-child { color: var(--ink); font-weight: 600; width: 30%; }
+    td:first-child span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); }
+    tr:last-child td { border-bottom: 0; }
+    .group td { padding-top: 20px; font-size: 11px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+
+    .bodies { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+    .body { padding: 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); }
+    .body b { display: block; font-size: 14px; }
+    .body small { display: block; font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+    .body p { margin: 0; font-size: 13px; color: var(--slate); }
+
+    .closing { margin-top: 28px; padding: 20px; border-radius: 12px; background: var(--soft); border: 1px solid var(--line); }
+    .closing p { margin: 0; }
+    .note { margin-top: 20px; font-size: 12px; color: var(--muted); }
+
+    footer { position: relative; z-index: 2; text-align: center; padding: 24px 16px 40px; font-size: 12px; color: var(--muted); }
+
+    @media (max-width: 860px) { .bodies { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    @media (max-width: 640px) {
+        .steps, .checks, .bodies { grid-template-columns: 1fr; }
+        .sheet { margin-top: 32px; padding: 28px 18px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        .fade { animation: none; opacity: 1; transform: none; }
+        .particles { display: none; }
+    }
+
+    /* Print: two plain sheets */
+    @media print {
+        @page { size: A4; margin: 16mm; }
+        .circuit-bg, .particles, .banner, .nav, .scrim, footer { display: none !important; }
+        main { padding: 0; max-width: none; }
+        .fade { animation: none; opacity: 1; transform: none; }
+        .sheet { box-shadow: none; border: 0; padding: 0; margin-top: 18px; background: none; }
+        #marco-legal { break-before: page; }
+        .table-wrap { overflow: visible; }
+        table { min-width: 0; font-size: 11.5px; }
+        .rule { background: none; color: var(--ink); border: 1.5px solid var(--ink); }
+        .rule b { color: var(--ink); }
+        .steps li, .body { break-inside: avoid; }
+        body { font-size: 12.5px; }
+    }
+</style>
+</head>
+<body>
+
+<div class="circuit-bg" aria-hidden="true"></div>
+<div class="particles" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+
+<div class="banner"><span>Documento para clientes · Contratación de proyectos de desarrollo</span></div>
+
+<nav class="nav" aria-label="Principal">
+    <div class="nav-inner">
+        <a class="brand" href="/">Lameyer<small>.net</small></a>
+        <button class="burger" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="menu">
+            <span></span><span></span><span></span>
+        </button>
+        <div class="links" id="menu">
+            <a href="#resumen">Resumen</a>
+            <a href="#antelacion">Antelación</a>
+            <a href="#marco-legal">Marco legal</a>
+            <a href="/">Inicio</a>
+        </div>
+    </div>
+</nav>
+<div class="scrim" aria-hidden="true"></div>
+
+<main>
+    <!-- Summary: the one-paragraph version -->
+    <section id="resumen">
+        <div class="kicker fade">Lameyer.net · Contratación y marco legal</div>
+        <h1 class="fade d1">Firmar con antelación es proteger tu proyecto</h1>
+        <p class="lead fade d2">
+            Firmamos los contratos con antelación porque cada proyecto exige <strong>analizar tu negocio, sostener reuniones previas
+            y obtener la firma de nuestro apoderado legal en España</strong>. Ese tiempo no es burocracia: es lo que coloca tus datos bajo
+            el marco europeo, español y mexicano de protección de datos y ciberseguridad, da peso a tu empresa ante inversionistas
+            y nos convierte en un <strong>aliado a mediano y largo plazo</strong>.
+        </p>
+    </section>
+
+    <!-- Sheet 1 -->
+    <section class="sheet fade d3" id="antelacion">
+        <div class="sheet-head">
+            <span class="sheet-no">HOJA 1 / 2</span>
+            <h2>Por qué el contrato va antes que el código</h2>
+        </div>
+
+        <p>
+            Sabemos que, cuando una idea está lista, cualquier espera se siente larga. Por eso preferimos ser claros desde el principio:
+            un desarrollo bien hecho empieza mucho antes de escribir la primera línea de código, y ese trabajo previo queda reflejado en el contrato.
+        </p>
+
+        <ol class="steps">
+            <li>
+                <b>Análisis del negocio</b>
+                <p>Entendemos tus procesos, usuarios, riesgos y qué datos personales se tratarán. De aquí salen el alcance, el presupuesto
+                    y el acuerdo de encargo del tratamiento (art. 28 RGPD).</p>
+            </li>
+            <li>
+                <b>Reuniones previas</b>
+                <p>Suelen ser extensas, y es intencional: requisitos, prioridades, criterios de aceptación y responsables. Cada hora aquí
+                    evita semanas de retrabajo después.</p>
+            </li>
+            <li>
+                <b>Redacción y revisión</b>
+                <p>Contrato de servicios, confidencialidad, propiedad intelectual, niveles de servicio, encargo del tratamiento y, cuando
+                    aplica, cláusulas para transferencias internacionales de datos.</p>
+            </li>
+            <li>
+                <b>Firma y copia firmada</b>
+                <p>El contrato lo firma nuestro representante y apoderado legal en España. La validación, la firma de ambas partes y
+                    el envío de la copia firmada siguen un proceso formal que toma tiempo.</p>
+            </li>
+        </ol>
+
+        <div class="rule">
+            <p><b>Nuestra regla:</b> no iniciamos ningún desarrollo sin contrato firmado por ambas partes.</p>
+            <p>No es desconfianza. Es la condición que protege tu inversión, tu información y el trabajo del equipo. Recomendamos iniciar
+                la contratación con al menos <b>4 a 6 semanas</b> de antelación a la fecha en que necesitas empezar.</p>
+        </div>
+
+        <h3>Cómo puedes agilizar el proceso</h3>
+        <ul class="checks">
+            <li>Tener a mano razón social, datos fiscales y representante legal.</li>
+            <li>Designar un interlocutor con capacidad de decisión.</li>
+            <li>Compartir documentación de procesos y sistemas actuales.</li>
+            <li>Acordar un plazo para revisar el borrador del contrato.</li>
+        </ul>
+    </section>
+
+    <!-- Sheet 2 -->
+    <section class="sheet" id="marco-legal">
+        <div class="sheet-head">
+            <span class="sheet-no">HOJA 2 / 2</span>
+            <h2>Por qué nuestro apoderado legal está en España</h2>
+        </div>
+
+        <p>
+            Contar con representación legal en España sitúa nuestra relación contractual dentro de uno de los marcos de protección de datos
+            más exigentes del mundo, el de la Unión Europea, sin dejar de cumplir la legislación mexicana. En la práctica, tu base de datos
+            queda protegida por obligaciones exigibles: deber de confidencialidad, medidas de seguridad documentadas, notificación de brechas
+            a la autoridad en un máximo de 72 horas (art. 33 RGPD) y supervisión de organismos públicos especializados. Para un inversionista,
+            esto es una señal de madurez que pesa en cualquier revisión (<em>due diligence</em>) de tu empresa.
+        </p>
+
+        <h3>Marco normativo de referencia</h3>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>Norma</th><th>Qué regula</th><th>Qué significa para ti</th></tr></thead>
+                <tbody>
+                    <tr class="group"><td colspan="3">Protección de datos personales</td></tr>
+                    <tr>
+                        <td>Constitución Española<span>Artículo 18.4</span></td>
+                        <td>La ley limita el uso de la informática para garantizar el honor y la intimidad.</td>
+                        <td>La protección de datos es un derecho fundamental, no solo una obligación técnica.</td>
+                    </tr>
+                    <tr>
+                        <td>RGPD<span>Reglamento (UE) 2016/679</span></td>
+                        <td>Tratamiento de datos personales en la Unión Europea.</td>
+                        <td>Principios de minimización y seguridad, derechos de los titulares y un contrato de encargo que nos obliga frente a ti.</td>
+                    </tr>
+                    <tr>
+                        <td>LOPDGDD<span>Ley Orgánica 3/2018</span></td>
+                        <td>Adapta el RGPD a España y reconoce derechos digitales.</td>
+                        <td>Deber de confidencialidad expreso para todo el personal que accede a tus datos.</td>
+                    </tr>
+                    <tr>
+                        <td>Legislación mexicana<span>LFPDPPP 2025 · Convenio 108</span></td>
+                        <td>Datos personales en posesión de particulares; México es parte del Convenio 108 del Consejo de Europa.</td>
+                        <td>Aviso de privacidad y derechos ARCO respetados para tus usuarios en México.</td>
+                    </tr>
+                    <tr class="group"><td colspan="3">Ciberseguridad y seguridad de la información</td></tr>
+                    <tr>
+                        <td>ENS<span>Real Decreto 311/2022</span></td>
+                        <td>Seguridad de los sistemas del sector público y de sus proveedores.</td>
+                        <td>Medidas de seguridad por niveles (básico, medio, alto) como referencia de buenas prácticas.</td>
+                    </tr>
+                    <tr>
+                        <td>Directiva NIS2<span>(UE) 2022/2555 · Marco Nacional de Ciberseguridad</span></td>
+                        <td>Ciberseguridad de entidades esenciales e importantes y de su cadena de suministro.</td>
+                        <td>Gestión de riesgos, notificación de incidentes y proveedores evaluados.</td>
+                    </tr>
+                    <tr>
+                        <td>Reglamento DORA<span>(UE) 2022/2554</span></td>
+                        <td>Resiliencia operativa digital del sector financiero.</td>
+                        <td>Si eres entidad financiera, cláusulas contractuales exigidas a tus proveedores tecnológicos.</td>
+                    </tr>
+                    <tr>
+                        <td>Ley PIC<span>Ley 8/2011</span></td>
+                        <td>Protección de infraestructuras críticas.</td>
+                        <td>Si operas servicios esenciales, coordinación con los planes de seguridad exigidos.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h3>Organismos que respaldan este marco</h3>
+        <div class="bodies">
+            <div class="body">
+                <b>AEPD</b><small>Agencia Española de Protección de Datos</small>
+                <p>Autoridad de control: supervisa el cumplimiento, recibe reclamaciones y notificaciones de brechas.</p>
+            </div>
+            <div class="body">
+                <b>CCN-CERT</b><small>Centro Criptológico Nacional</small>
+                <p>Respuesta a incidentes y guías CCN-STIC que desarrollan el ENS.</p>
+            </div>
+            <div class="body">
+                <b>INCIBE / INCIBE-CERT</b><small>Instituto Nacional de Ciberseguridad</small>
+                <p>Respuesta a incidentes para empresas y ciudadanos.</p>
+            </div>
+            <div class="body">
+                <b>CNPIC</b><small>Centro Nacional de Protección de Infraestructuras Críticas</small>
+                <p>Coordina la protección de las infraestructuras críticas.</p>
+            </div>
+        </div>
+
+        <div class="closing">
+            <p><b>Un aliado a mediano y largo plazo.</b> El nivel de protección crece con nuestra relación: conforme tu proyecto evoluciona,
+                ampliamos medidas, revisiones y documentación para que tu base de datos siga respaldada por un socio estable.</p>
+        </div>
+
+        <p class="note">
+            Documento informativo; no constituye asesoría legal. ENS, NIS2, DORA y Ley PIC aplican según el sector y la naturaleza de cada
+            cliente; su alcance se determina en el análisis previo y queda reflejado en el contrato. Versión 1.0 · 7 de octubre de 2026.
+        </p>
+    </section>
+</main>
+
+<footer>© 2026 Lameyer.net</footer>
+
+<script>
+    // Off-canvas menu: the burger, the scrim and any link close it.
+    (function () {
+        var root = document.documentElement;
+        var burger = document.querySelector('.burger');
+        function set(open) {
+            root.classList.toggle('menu-open', open);
+            burger.setAttribute('aria-expanded', String(open));
+            burger.setAttribute('aria-label', open ? 'Cerrar menú' : 'Abrir menú');
+        }
+        burger.addEventListener('click', function () { set(!root.classList.contains('menu-open')); });
+        document.querySelector('.scrim').addEventListener('click', function () { set(false); });
+        document.querySelectorAll('.links a').forEach(function (a) { a.addEventListener('click', function () { set(false); }); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+    })();
+</script>
+</body>
+</html>
