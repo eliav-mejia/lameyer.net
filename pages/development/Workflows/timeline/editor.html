@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Editor de datos · Timeline</title>
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="lameyer-fondo.css">
+    <style>
+        html, body { overflow: auto; }
+        body { font-size: 14px; }
+        .marco { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 28px 20px 80px;
+                 display: grid; grid-template-columns: minmax(0, 1fr) 400px; gap: 24px; align-items: start; }
+        header.top { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; }
+        header.top h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.03em; }
+        header.top h1 span { font-weight: 300; color: var(--slate-300); }
+        .logo { font-weight: 800; letter-spacing: .12em; font-size: 13px; color: var(--ink); text-decoration: none; }
+        .logo span { color: var(--slate-300); font-weight: 300; letter-spacing: .02em; }
+        .top .acciones-top { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+
+        .caja { border-radius: 16px; padding: 18px; margin-bottom: 16px; }
+        .caja h2 { margin: 0 0 12px; font-size: 16px; font-weight: 800; display: flex; align-items: center; gap: 8px; }
+        .caja h2 .n { font-weight: 300; color: var(--slate-300); }
+        .caja h2 .der { margin-left: auto; display: flex; gap: 6px; }
+        .rejilla { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px 12px; }
+        .rejilla .ancho { grid-column: 1 / -1; }
+        label { display: flex; flex-direction: column; gap: 4px; font-size: 10px; font-weight: 700; letter-spacing: .12em;
+                text-transform: uppercase; color: var(--slate-600); }
+        label small { font-weight: 500; letter-spacing: 0; text-transform: none; color: var(--slate-400); font-size: 11px; }
+        input, select, textarea { font: 500 13px/1.4 inherit; font-family: inherit; color: var(--ink); background: #fff;
+                border: 1px solid var(--line); border-radius: 8px; padding: 7px 9px; width: 100%; box-sizing: border-box; }
+        input:focus, select:focus, textarea:focus { outline: 2px solid rgba(37, 99, 235, .35); border-color: var(--accent); }
+        textarea { min-height: 70px; resize: vertical; }
+        input.mal { border-color: #e05252; background: #fff7f7; }
+
+        button, .boton { font: 700 12px/1 inherit; font-family: inherit; color: var(--ink); background: var(--glass);
+                border: 1px solid var(--line); border-radius: 999px; padding: 8px 12px; cursor: pointer; text-decoration: none;
+                display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+        button:hover, .boton:hover { border-color: var(--ink); }
+        button.primario { background: var(--ink); color: #fff; border-color: var(--ink); }
+        button.primario:disabled { opacity: .4; cursor: not-allowed; }
+        button.mini { padding: 5px 9px; font-size: 11px; }
+        button.quitar:hover { border-color: #e05252; color: #b42318; }
+
+        .etapa { border-left: 3px solid var(--ink); }
+        .etapa.futura { border-left-style: dashed; border-left-color: var(--slate-300); }
+        .deps { display: flex; flex-wrap: wrap; gap: 6px; text-transform: none; letter-spacing: 0; }
+        .deps label { flex-direction: row; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: 999px;
+                      padding: 4px 9px; font-size: 12px; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--ink); cursor: pointer; }
+        .deps input { width: auto; margin: 0; }
+        .deps .vacio { font-size: 12px; color: var(--slate-400); font-weight: 500; }
+
+        .rama { background: rgba(255, 255, 255, .7); border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-top: 10px; }
+        .rama.critica { border-color: var(--accent); box-shadow: inset 3px 0 0 var(--accent); }
+        .rama .cab { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-size: 12px; font-weight: 700; color: var(--slate-600); }
+        .rama .cab .der { margin-left: auto; display: flex; gap: 6px; }
+        .rama .fila2 { display: grid; grid-template-columns: 2fr 1fr 1.2fr; gap: 10px; }
+        .rama .fila2 .ancho { grid-column: 1 / -1; }
+        .pct { display: flex; align-items: center; gap: 8px; }
+        .pct input[type=range] { padding: 0; border: 0; accent-color: var(--ink); }
+        .pct input[type=number] { width: 70px; flex: none; }
+        .crit { display: flex; align-items: center; gap: 6px; text-transform: none; letter-spacing: 0; font-size: 12px; color: var(--ink); }
+        .crit input[type=checkbox] { width: auto; margin: 0; }
+        .crit input[type=number] { width: 64px; }
+        .lineas-in { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+        .pista { font-size: 11px; color: var(--slate-400); margin: 2px 0 0; font-weight: 500; letter-spacing: 0; text-transform: none; }
+
+        aside.lado { position: sticky; top: 16px; display: flex; flex-direction: column; gap: 14px; max-height: calc(100vh - 32px); }
+        .resumen table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        .resumen td { padding: 5px 4px; border-top: 1px solid var(--line); vertical-align: top; }
+        .resumen td.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+        .chip { font-size: 9px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; border-radius: 999px; padding: 1px 6px; border: 1px solid; white-space: nowrap; }
+        .chip.si { color: var(--accent); }
+        .chip.no { color: var(--slate-400); border-style: dashed; }
+        .mensajes p { margin: 3px 0; font-size: 12px; }
+        .mensajes .e { color: #b42318; }
+        .mensajes .a { color: #8a5a00; }
+        .mensajes .ok { color: #13795b; font-weight: 700; }
+        pre.codigo { margin: 0; flex: 1; min-height: 120px; overflow: auto; font: 11px/1.45 'Cascadia Mono', Consolas, monospace;
+                     background: #0f172a; color: #e2e8f0; border-radius: 12px; padding: 12px; white-space: pre; }
+        .guardar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+        .estado-guardar { font-size: 12px; color: var(--slate-600); width: 100%; }
+        .estado-guardar code { font-size: 11px; }
+        .estado-guardar.e { color: #b42318; }
+
+        @media (max-width: 1000px) {
+            .marco { grid-template-columns: 1fr; }
+            aside.lado { position: static; max-height: none; }
+            .rama .fila2 { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="circuit-bg"></div>
+    <div class="marco">
+        <header class="top">
+            <a class="logo" href="/pages/development/">LAMEYER<span>/timeline</span></a>
+            <h1>Editor de datos <span>· formato de _plantilla.js</span></h1>
+            <div class="acciones-top">
+                <select id="sCargar" title="Cargar un conjunto existente para editarlo o copiarlo"></select>
+                <button id="bNuevo" title="Empezar desde la plantilla">Nuevo</button>
+                <a class="boton" id="aVer" href="index.html">Ver animación →</a>
+            </div>
+        </header>
+
+        <main id="form"></main>
+
+        <aside class="lado">
+            <div class="caja glass resumen">
+                <h2>Revisión</h2>
+                <div class="mensajes" id="mensajes"></div>
+                <div id="resumen"></div>
+            </div>
+            <div class="caja glass">
+                <h2>Guardar <span class="n" id="nombreArchivo"></span></h2>
+                <div class="guardar">
+                    <button class="primario" id="bGuardar">Guardar en datos/</button>
+                    <button id="bDescargar">Descargar .js</button>
+                    <button id="bCopiar">Copiar</button>
+                    <div class="estado-guardar" id="estadoGuardar"></div>
+                </div>
+            </div>
+            <pre class="codigo" id="codigo"></pre>
+        </aside>
+    </div>
+
+    <script src="reglas.js"></script>
+    <script src="datos/indice.js"></script>
+    <script src="editor.js"></script>
+</body>
+</html>

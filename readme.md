@@ -88,6 +88,8 @@ lameyer.net/
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
 │   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
+│   ├── development/Workflows/timeline/   /pages/development/Workflows/timeline/  línea de tiempo animada del flujo principal
+│   │                             del cliente (sin build; copia del motor de animations/timeline/, solo datos/flujo-principal.js)
 │   ├── components/index.html     /pages/components/  tienda: filtros, búsqueda, carrito -> WhatsApp
 │   ├── components/<slug>/        /pages/components/<slug>/  una página por producto (generada)
 │   ├── terminos/index.html       /pages/terminos/    términos y condiciones por región, España / México (enlazados en el pie)
