@@ -3,3 +3,19 @@ _interno/
 
 # Configuración local del editor / agente
 .claude/
+
+# Secretos: claves de API, variables locales y códigos de recuperación (2FA) nunca entran al repositorio.
+# Los códigos de respaldo de Stripe, GitHub, Supabase, etc. viven solo en el gestor de contraseñas. Ver SECURITY.md.
+.env
+.env.*
+!.env.example
+.dev.vars
+.dev.vars.*
+*.pem
+*.key
+*backup_code*
+*backup-code*
+*recovery_code*
+*recovery-code*
+*codigos-respaldo*
+*codigo-recuperacion*
