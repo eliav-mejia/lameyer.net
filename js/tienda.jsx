@@ -533,7 +533,9 @@ const ProductPage = () => {
     // Title + schema.org Product data for search engines
     useEffect(() => {
         if (!product) return;
-        document.title = `${product.name} · ${product.compat} - Lameyer`;
+        // Same rule as tools/generar-paginas-producto.py: keep the compatibility only if the title fits in 60 characters.
+        const fullTitle = `${product.name} · ${product.compat} - Lameyer`;
+        document.title = fullTitle.length <= 60 ? fullTitle : `${product.name} - Lameyer`;
         const ld = document.createElement('script');
         ld.type = 'application/ld+json';
         ld.textContent = JSON.stringify({

@@ -7,9 +7,18 @@
     <link rel="icon" href="/favicon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
-    <title>Lameyer - Firma Tecnológica</title>
+    <title>Soluciones web y manejo de datos serverless | Lameyer</title>
     <meta name="description" content="Lameyer: soluciones web y manejo de datos. Conecta tus flujos de trabajo con lógica Serverless: Núcleo Modular + Edge Serverless (MC-SE).">
     <link rel="canonical" href="https://lameyer.net/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lameyer">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Soluciones web y manejo de datos serverless | Lameyer">
+    <meta property="og:description" content="Lameyer: soluciones web y manejo de datos. Conecta tus flujos de trabajo con lógica Serverless: Núcleo Modular + Edge Serverless (MC-SE).">
+    <meta property="og:url" content="https://lameyer.net/">
+    <meta property="og:image" content="https://lameyer.net/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Organization","@id":"https://lameyer.net/#organizacion","name":"Lameyer","url":"https://lameyer.net/","logo":"https://lameyer.net/icon-512.png","email":"contacto@lameyer.net"},{"@type":"WebSite","@id":"https://lameyer.net/#sitio","name":"Lameyer","url":"https://lameyer.net/","inLanguage":"es","publisher":{"@id":"https://lameyer.net/#organizacion"}}]}</script>
 
     <script>
         // Old hash links (lameyer.net/#/development, ...) now live in real folders
@@ -39,7 +48,20 @@
 </head>
 <body>
 
-    <div id="root"></div>
+    <div id="root">
+        <noscript>
+            <h1>Soluciones web y manejo de datos</h1>
+            <p>Conecta tus flujos de trabajo con lógica Serverless: Núcleo Modular + Edge Serverless (MC-SE).</p>
+            <nav aria-label="Principal">
+                <ul>
+                    <li><a href="/pages/development/">Desarrollo</a></li>
+                    <li><a href="/pages/components/">Componentes</a></li>
+                    <li><a href="/pages/community/">Comunidad</a></li>
+                    <li><a href="/academia/">Academia</a></li>
+                </ul>
+            </nav>
+        </noscript>
+    </div>
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>
@@ -102,7 +124,8 @@
             const dashOffset = BEAM_LENGTH - scrollProgress * (pathLength + BEAM_LENGTH);
 
             return (
-                <section ref={containerRef} className="relative h-[800vh] w-full bg-slate-50/50">
+                <section ref={containerRef} className="relative h-[800vh] w-full bg-slate-50/50" aria-labelledby="circuito-title">
+                    <h2 id="circuito-title" className="sr-only">Infraestructura conectada: datos, seguridad y monitoreo</h2>
                     <div className="sticky top-0 h-screen w-full flex items-center justify-center pointer-events-none overflow-hidden">
                         <svg viewBox="0 0 600 1100" className="w-full h-[75%] max-w-4xl transition-opacity duration-1000">
                             <path d={circuitD} stroke="#e2e8f0" strokeWidth="6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
@@ -237,9 +260,9 @@
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
                         <div>
                             <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Academia · Casos y soluciones MC-SE</p>
-                            <h3 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
+                            <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
                                 Conecta tus flujos<br/><span className="text-blue-600">con lógica Serverless</span>
-                            </h3>
+                            </h2>
                         </div>
                         <a
                             href="/academia/"

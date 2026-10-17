@@ -1,0 +1,9 @@
+# Lameyer — https://lameyer.net/robots.txt
+# robots.txt is a request, not a lock: well-behaved crawlers obey it; scrapers may not.
+
+User-agent: *
+Disallow: /tools/
+Disallow: /whatsapp-chat-snippet.html
+Allow: /
+
+Sitemap: https://lameyer.net/sitemap.xml

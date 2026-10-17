@@ -416,6 +416,7 @@ const Layout = ({ children }) => {
             <div className="circuit-bg"></div>
             <Particles />
 
+            <header>
             {/* Top Banner */}
             <div className="fixed top-0 w-full h-10 bg-[#0a192f] border-b border-white/5 z-[60] flex items-center justify-between px-8 overflow-hidden">
                 <span className="text-[9px] md:text-[10px] font-bold text-blue-400 uppercase tracking-[0.2em] whitespace-nowrap flex items-center gap-2">
@@ -432,24 +433,25 @@ const Layout = ({ children }) => {
             </div>
 
             {/* Navigation */}
-            <nav className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'menu-open' : ''}`}>
+            <nav aria-label="Principal" className={`fixed left-0 w-full z-[70] px-6 md:px-8 py-4 flex justify-between items-center glass shadow-sm transition-all top-[40px] ${isMobileMenuOpen ? 'menu-open' : ''}`}>
                 <a href="/" className="block z-50">
-                    <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Logo de Lameyer" className="h-10 md:h-12 w-auto object-contain" />
+                    <img src="https://raw.githubusercontent.com/cypher-the-meyer/themeyer.eu/main/themeyerlogo" alt="Lameyer" width="500" height="500" className="h-10 md:h-12 w-auto object-contain" />
                 </a>
 
                 {/* Desktop Links */}
-                <div className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase">
+                <ul className="hidden md:flex space-x-8 text-sm font-semibold tracking-widest uppercase">
                     {NAV_LINKS.map(link => (
-                        <a
-                            key={link.href}
-                            href={link.href}
-                            aria-current={isActive(link) ? 'page' : undefined}
-                            className={`transition-colors hover:text-blue-600 ${isActive(link) ? 'text-blue-600' : 'opacity-60 hover:opacity-100'}`}
-                        >
-                            {link.label}
-                        </a>
+                        <li key={link.href}>
+                            <a
+                                href={link.href}
+                                aria-current={isActive(link) ? 'page' : undefined}
+                                className={`transition-colors hover:text-blue-600 ${isActive(link) ? 'text-blue-600' : 'opacity-60 hover:opacity-100'}`}
+                            >
+                                {link.label}
+                            </a>
+                        </li>
                     ))}
-                </div>
+                </ul>
 
                 <div className="flex items-center space-x-3 md:space-x-4">
                     <LanguageSwitcher />
@@ -484,16 +486,20 @@ const Layout = ({ children }) => {
             {/* Mobile Menu: off-canvas panel sliding in from the right, under the header so the X stays visible */}
             <div id="mobile-menu" className={`mobile-menu fixed inset-0 pt-36 pb-12 bg-white/95 backdrop-blur-xl z-[65] md:hidden flex flex-col items-center justify-center space-y-8 overflow-y-auto no-scrollbar ${isMobileMenuOpen ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0 pointer-events-none'}`}>
 
-                {NAV_LINKS.map(link => (
-                    <a
-                        key={link.href}
-                        href={link.href}
-                        onClick={() => setIsMobileMenuOpen(false)}
-                        className={`text-3xl font-black tracking-tight hover:text-blue-600 transition-colors ${isActive(link) ? 'text-blue-600' : 'text-gray-900'}`}
-                    >
-                        {link.label}
-                    </a>
-                ))}
+                <ul className="flex flex-col items-center space-y-8">
+                    {NAV_LINKS.map(link => (
+                        <li key={link.href}>
+                            <a
+                                href={link.href}
+                                onClick={() => setIsMobileMenuOpen(false)}
+                                aria-current={isActive(link) ? 'page' : undefined}
+                                className={`text-3xl font-black tracking-tight hover:text-blue-600 transition-colors ${isActive(link) ? 'text-blue-600' : 'text-gray-900'}`}
+                            >
+                                {link.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
                 <button
                     onClick={handleRegisterClick}
                     className="bg-blue-600 text-white px-10 py-4 rounded-full text-lg font-bold shadow-xl mt-4"
@@ -509,6 +515,7 @@ const Layout = ({ children }) => {
                 </button>
                 <LanguageSwitcher withLabels />
             </div>
+            </header>
 
             <main className="relative z-[2] pt-32 px-4 md:px-8">
                 {access ? <AccessGate rule={access} user={user} onUser={setUser}>{children}</AccessGate> : children}
@@ -741,9 +748,9 @@ const TechTile = ({ tech }) => (
 const StackSection = () => (
     <section className="py-40 bg-slate-900 px-4 relative z-20">
         <div className="max-w-7xl mx-auto text-center">
-            <h3 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-20">
+            <h2 className="text-4xl md:text-6xl font-black text-white tracking-tighter mb-20">
                 Stack Tecnológico
-            </h3>
+            </h2>
 
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-6">
                 {TECH_STACK.map((tech) => <TechTile key={tech.name} tech={tech} />)}

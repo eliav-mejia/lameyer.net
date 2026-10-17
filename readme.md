@@ -78,6 +78,8 @@ lameyer.net/
 │
 ├── tools/
 │   ├── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
+│   ├── generar-seo-academia.mjs      Open Graph, JSON-LD y <noscript> de /academia/ a partir de js/academia.jsx
+│   ├── generar-sitemap.py            sitemap.xml con cada página pública (robots.txt lo anuncia)
 │   ├── generar-pdf.sh                HTML → PDF con Edge/Chrome headless (documentos de _docs/ y _interno/)
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
 │
@@ -224,13 +226,16 @@ No vuelvas a declarar en otro archivo nada de `layout.jsx`: la copia posterior l
 1. Copia `pages/stack/` en `pages/<nombre-nuevo>/` y edita su `index.html` (mantén `js/layout.jsx` y `js/acceso.jsx` en ese orden).
    Si la página necesita acceso, añade su ruta a `ACCESS_RULES` en `js/acceso.jsx`.
 2. Si debe aparecer en el menú, añade `{ href: '/pages/<nombre-nuevo>/', label: '...' }` a `NAV_LINKS` en `js/layout.jsx`.
+3. SEO (guía en `builds/seo/`): `<title>` de 50-60 caracteres, descripción de 150-160, URL canónica, etiquetas `og:*` y
+   `twitter:card`, un `<noscript>` con el `<h1>` dentro de `<div id="root">` y un solo `<h1>` en la página renderizada.
+   Después ejecuta `python tools/generar-sitemap.py`.
 
 ## Añadir un producto (entrada manual de prelanzamiento)
 
 1. Añade un objeto a `public/db/productos.json` con un `id`, `slug` y `sku` nuevos (campos en `public/db/README.md`).
 2. Añade `img/productos/<id>-400.webp` y `-800.webp`, o pon `"image": null`.
 3. Ejecuta `python tools/generar-paginas-producto.py` para crear `pages/components/<slug>/index.html`
-   (o copia la carpeta de un producto existente y cambia su `<title>`, descripción y URL canónica).
+   (título ≤ 60 y descripción ≤ 160 caracteres, Open Graph y BreadcrumbList) y luego `python tools/generar-sitemap.py`.
 4. Haz commit y push.
 
 Para ocultar un producto pon `"active": false`; para mostrarlo agotado pon `"stock": 0`.
@@ -244,6 +249,7 @@ y añade `'/pages/components/<slug-antiguo>/': '/pages/components/'` a la lista 
    La última línea sigue siendo `renderPost(CONTROLS, Content);`: la página encuentra su entrada a partir de su propia URL.
 3. Añade a `ACADEMIA_POSTS` en `js/academia.jsx` un objeto con `slug: 'mi-nueva-entrada'` y un `type` de `ACADEMIA_TYPES`.
    Si se te olvida, la página te dice qué slug falta.
+4. Ejecuta `node tools/generar-seo-academia.mjs` (Open Graph, JSON-LD y `<noscript>`) y `python tools/generar-sitemap.py`.
 
 ## Añadir una serie a la academia
 
@@ -279,6 +285,12 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 `locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
 
 ## Versiones
+
+### 1.0.9 — 2026-10-16 · Estructura SEO
+- `<header>` y menús como `<nav>` + `<ul>` en `js/layout.jsx`; encabezados de la portada en orden (H1 → H2 → H3).
+- Open Graph, `twitter:card` y JSON-LD en todas las páginas públicas (Organization, WebSite, TechArticle, BreadcrumbList).
+- `<noscript>` con `<h1>`, resumen y enlaces en las páginas React; títulos y descripciones ajustados a 60 / 160 caracteres.
+- Nuevos `robots.txt`, `sitemap.xml`, `tools/generar-seo-academia.mjs` y `tools/generar-sitemap.py`.
 
 ### 1.0.8 — 2026-10-07 · Acceso para clientes y documentación pública / interna
 Detalle en `_docs/src/v1.0.8.html` (+ PDF).

@@ -842,7 +842,8 @@ const AcademiaDashboard = () => {
             </section>
 
             {/* Filters + results */}
-            <section className="max-w-7xl mx-auto pb-24 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 relative z-20">
+            <section className="max-w-7xl mx-auto pb-24 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 relative z-20" aria-labelledby="entradas-title">
+                <h2 id="entradas-title" className="sr-only">Entradas de la academia</h2>
                 <aside className="lg:sticky lg:top-40 self-start p-8 rounded-[2rem] bg-white/90 backdrop-blur-md border border-gray-100 shadow-xl shadow-gray-200/40">
                     <label htmlFor="academia-search" className="block text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3">Buscar</label>
                     <input
@@ -1080,9 +1081,11 @@ const AcademiaPostLayout = ({ path, controls, children }) => {
                 </aside>
             </section>
 
-            <nav className="max-w-6xl mx-auto flex flex-col md:flex-row gap-6 pb-8 relative z-20" aria-label={`Más ${s.typesLabel.toLowerCase()}`}>
-                <NavCard p={prev} dir="prev" />
-                <NavCard p={next} dir="next" />
+            <nav className="max-w-6xl mx-auto pb-8 relative z-20" aria-label={`Más ${s.typesLabel.toLowerCase()}`}>
+                <ul className="flex flex-col md:flex-row gap-6">
+                    <li className="flex-1 flex"><NavCard p={prev} dir="prev" /></li>
+                    <li className="flex-1 flex"><NavCard p={next} dir="next" /></li>
+                </ul>
             </nav>
 
             <RegisterCTA title={s.cta.title} text={s.cta.text} />
