@@ -88,9 +88,9 @@ lameyer.net/
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
 │
 ├── _docs/                        Fuente HTML de las versiones v1.0.1–v1.0.8 (_docs/src/) y dos guías en PDF
-│                                 Los PDF de versión se guardan en _interno/implementaciones/ (desde 1.0.10)
+│                                 Los PDF de versión se guardan en _interno/deployed/ (desde 1.0.10)
 │
-├── _interno/                     LOCAL, NO SE PUBLICA (.gitignore). propuestas/, implementaciones/ (PDF de versión),
+├── _interno/                     LOCAL, NO SE PUBLICA (.gitignore). propuestas/, deployed/ (PDF de versión),
 │                                 seguridad/: ver _interno/README.md
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
@@ -271,7 +271,7 @@ Enlaza siempre con barra final (`/pages/stack/`, `/academia/seguridad-apis/limit
 
 ## Pendiente: traducción y CMS headless
 
-Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.5.html`, §11–15. Ninguna opción está implementada.
+Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.5.html`, §11–15. Ninguna opción está desplegada.
 
 | Opción | Pila | Rutas | Estado |
 |--------|------|-------|--------|
@@ -292,14 +292,14 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 ## Versiones
 
 ### 1.0.10 — 2026-11-05 · Documentación de versiones interna
-Detalle en `_interno/implementaciones/Lameyer-v1.0.10.pdf` (local).
-- Los PDF de versión (1.0.1–1.0.8) salen de `_docs/` y del sitio; se guardan en `_interno/implementaciones/`, junto con 1.0.9 y 1.0.10.
-- `_interno/` se organiza en `propuestas/` (cambios aún no implementados), `implementaciones/` (versiones publicadas) y `seguridad/`.
+Detalle en `_interno/deployed/Lameyer-v1.0.10.pdf` (local).
+- Los PDF de versión (1.0.1–1.0.8) salen de `_docs/` y del sitio; se guardan en `_interno/deployed/`, junto con 1.0.9 y 1.0.10.
+- `_interno/` se organiza en `propuestas/` (cambios aún no desplegados), `deployed/` (versiones publicadas) y `seguridad/`.
 - Este readme deja de enlazar los PDF: la tabla de versiones queda como historial y los documentos se envían bajo petición.
 - Las fuentes HTML de 1.0.1–1.0.8 y las guías `Lameyer-Arquitectura-Etapa-2.pdf` y `Lameyer-Guia-de-Inicio-y-Privacidad.pdf` siguen en `_docs/`.
 
 ### 1.0.9 — 2026-10-16 → 2026-11-05 · Estructura SEO, WhatsApp con encuesta y página en blanco (rama `seo-estructura`)
-Detalle en `_interno/implementaciones/Lameyer-v1.0.9.pdf` (local).
+Detalle en `_interno/deployed/Lameyer-v1.0.9.pdf` (local).
 - Botón de WhatsApp azul con icono y etiqueta; encuesta previa (empleados, presupuesto inicial, presupuesto mensual, sistema) en ES/EN,
   cuyas respuestas se añaden al mensaje.
 - Página en blanco: rutas relativas en la portada, GSAP solo si cargó, `PageErrorBoundary` en `renderPage()` y aviso con «Recargar»
@@ -310,7 +310,7 @@ Detalle en `_interno/implementaciones/Lameyer-v1.0.9.pdf` (local).
 - Nuevos `robots.txt`, `sitemap.xml`, `tools/generar-seo-academia.mjs` y `tools/generar-sitemap.py`.
 
 ### 1.0.8 — 2026-10-07 · Acceso para clientes y documentación pública / interna
-Detalle en `_docs/src/v1.0.8.html` (PDF en `_interno/implementaciones/`).
+Detalle en `_docs/src/v1.0.8.html` (PDF en `_interno/deployed/`).
 - **Componentes:** pop-up de acceso **obligatorio** en `/pages/components/` y en todas las fichas: sin cuenta no se muestra la tienda
   y el pop-up no se puede cerrar (solo enlaces a Inicio y Términos).
 - **Academia:** pop-up de acceso **opcional** en `/academia/`: se cierra o se sigue sin cuenta, y no vuelve a salir en esa sesión.
@@ -321,7 +321,7 @@ Detalle en `_docs/src/v1.0.8.html` (PDF en `_interno/implementaciones/`).
 - **Blog → Academia:** se elimina la carpeta `blog/` vacía que quedaba; `/blog/…` sigue redirigiendo desde `404.html`.
 
 ### 1.0.7 — 2026-10-06 · Academia, revisión de traducción y flujo de datos
-Detalle en `_docs/src/v1.0.7.html` (PDF en `_interno/implementaciones/`).
+Detalle en `_docs/src/v1.0.7.html` (PDF en `_interno/deployed/`).
 - **Menú:** Stack sale de `NAV_LINKS` (Desarrollo, Componentes, Comunidad, Academia); en `/pages/stack/` se resalta Comunidad.
 - **Comunidad · Canales:** tarjetas Stack (interna), Skool y GitHub (externas); se elimina la de correo. URL de Skool provisional.
 - **Blog → Academia:** `blog/` → `academia/`, `js/blog.jsx` → `js/academia.jsx`, `css/blog.css` → `css/academia.css`, identificadores
@@ -332,13 +332,13 @@ Detalle en `_docs/src/v1.0.7.html` (PDF en `_interno/implementaciones/`).
 - **Análisis de flujo de datos:** dependencia de datos directa, dependencia de control y acoplamiento de datos del sitio (doc. §6).
 
 ### 1.0.6 — en preparación · Medidas de seguridad
-- Edición pública resumida en `_docs/src/v1.0.6.html` (PDF en `_interno/implementaciones/`): alcance, enfoque y fases. El detalle se mantiene en documentación interna.
+- Edición pública resumida en `_docs/src/v1.0.6.html` (PDF en `_interno/deployed/`): alcance, enfoque y fases. El detalle se mantiene en documentación interna.
 - Es la puerta previa al servicio de cuentas definitivo.
 
 ### 1.0.5 — 2026-10-03 → 2026-10-05 · Versión consolidada (todo lo posterior a 1.0.4)
 Agrupa los cambios publicados antes como 1.0.5 a 1.0.11 (commits `b2af7c1` … `59a81ca`; 111 archivos, +7.419 / −2.930 líneas).
 Se describe el estado final; los pasos intermedios que luego se retiraron (Google Translate, banderas de EE. UU. y Países Bajos,
-divisas USD, GBP e ILS) ya no forman parte del sitio. Detalle en `_docs/src/v1.0.5.html` (PDF en `_interno/implementaciones/`).
+divisas USD, GBP e ILS) ya no forman parte del sitio. Detalle en `_docs/src/v1.0.5.html` (PDF en `_interno/deployed/`).
 - **Blog · Serverless Edge:** la serie pasa de 5 a 9 pasos (06 Tiempo real, 07 IA en el edge, 08 Imágenes y multimedia,
   09 Desplegar, probar y lanzar) más 3 cruces, con la zona nueva `platform` y enlaces «Siguiente paso» encadenados.
 - **Cuentas y cookies:** pop-up de acceso / registro en todas las páginas (cuentas de staging)

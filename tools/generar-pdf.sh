@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Genera el PDF de un documento HTML con Edge o Chrome en modo headless (desde WSL o Git Bash en Windows).
-#   tools/generar-pdf.sh _interno/implementaciones/src/v1.0.10.html _interno/implementaciones/Lameyer-v1.0.10.pdf
+#   tools/generar-pdf.sh _interno/deployed/src/v1.0.10.html _interno/deployed/Lameyer-v1.0.10.pdf
 set -euo pipefail
 [ $# -eq 2 ] || { echo "uso: $0 <entrada.html> <salida.pdf>" >&2; exit 1; }
 
