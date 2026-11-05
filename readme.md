@@ -5,8 +5,8 @@ LaMeyer.net
 
 Lameyer.net es el punto de encuentro entre quienes construyen software y los operadores de procesos. Somos una empresa global que trabaja con total transparencia, y queremos que cada desarrollador que llegue aquí se sienta acompañado por un socio de confianza: alguien que explica lo que hace, cómo lo hace y por qué.
 
-Por eso publicamos nuestra documentación en este mismo sitio. Cada versión deja constancia de lo que cambió, de las decisiones
-que tomamos y de lo que aún está pendiente, para que puedas ver cómo hemos crecido a tu lado. No eres un visitante: formas parte
+Por eso documentamos cada versión: qué cambió, qué decisiones tomamos y qué queda pendiente, para que puedas ver cómo
+hemos crecido a tu lado. No eres un visitante: formas parte
 activa de este proyecto, y lo que construimos responde a lo que tú necesitas.
 
 En Lameyer.net puedes:
@@ -21,17 +21,21 @@ En Lameyer.net puedes:
 - **Comprar con reglas claras.** Los [términos y condiciones](https://lameyer.net/pages/terminos/) se muestran según tu región,
   España o México.
 
-Documentación publicada, versión a versión:
+Historial de versiones:
 
-| Versión | Contenido | Documento |
-|---------|-----------|-----------|
-| 1.0.1 | Widget de chat de WhatsApp | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.1.pdf) |
-| 1.0.2 | Tienda de componentes y términos | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.2.pdf) |
-| 1.0.3 | Fotos de producto | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.3.pdf) |
-| 1.0.5 | Versión consolidada: blog, tienda, España y México, sitio en español, términos por región | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.5.pdf) |
-| 1.0.6 | Medidas de seguridad (resumen público) | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.6.pdf) |
-| 1.0.7 | Academia, revisión de traducción, alineación de palabras clave y análisis de flujo de datos | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.7.pdf) |
-| 1.0.8 | Acceso para clientes en Componentes, acceso opcional en Academia, documentación pública e interna | [PDF](https://lameyer.net/_docs/Lameyer-v1.0.8.pdf) |
+| Versión | Contenido |
+|---------|-----------|
+| 1.0.1 | Widget de chat de WhatsApp |
+| 1.0.2 | Tienda de componentes y términos |
+| 1.0.3 | Fotos de producto |
+| 1.0.5 | Versión consolidada: blog, tienda, España y México, sitio en español, términos por región |
+| 1.0.6 | Medidas de seguridad |
+| 1.0.7 | Academia, revisión de traducción, alineación de palabras clave y análisis de flujo de datos |
+| 1.0.8 | Acceso para clientes en Componentes, acceso opcional en Academia |
+| 1.0.9 | Estructura SEO, botón de WhatsApp con encuesta previa, protección contra la página en blanco |
+| 1.0.10 | Documentación de versiones pasa a uso interno |
+
+Los documentos de cada versión están disponibles bajo petición en contacto@lameyer.net.
 
 Estamos construyendo para ti. Si tienes una idea, una duda o quieres colaborar, escríbenos a contacto@lameyer.net.
 
@@ -83,10 +87,11 @@ lameyer.net/
 │   ├── generar-pdf.sh                HTML → PDF con Edge/Chrome headless (documentos de _docs/ y _interno/)
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
 │
-├── _docs/                        PÚBLICO. Documentos de versión (PDF) y su fuente HTML en _docs/src/: v1.0.1–v1.0.8
-│                                 Ediciones públicas: alcance y enfoque, sin detalle de seguridad
+├── _docs/                        Fuente HTML de las versiones v1.0.1–v1.0.8 (_docs/src/) y dos guías en PDF
+│                                 Los PDF de versión se guardan en _interno/implementaciones/ (desde 1.0.10)
 │
-├── _interno/                     LOCAL, NO SE PUBLICA (.gitignore). Detalle de seguridad: ver _interno/README.md
+├── _interno/                     LOCAL, NO SE PUBLICA (.gitignore). propuestas/, implementaciones/ (PDF de versión),
+│                                 seguridad/: ver _interno/README.md
 │
 ├── pages/                        una carpeta por sección, servida en /pages/<nombre>/
 │   ├── development/index.html    /pages/development/  (formulario de contacto -> Google Sheets)
@@ -266,7 +271,7 @@ Enlaza siempre con barra final (`/pages/stack/`, `/academia/seguridad-apis/limit
 
 ## Pendiente: traducción y CMS headless
 
-Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.5.html`, §11–15 (PDF: `_docs/Lameyer-v1.0.5.pdf`). Ninguna opción está implementada.
+Detalle, código de ejemplo y comparativa en `_docs/src/v1.0.5.html`, §11–15. Ninguna opción está implementada.
 
 | Opción | Pila | Rutas | Estado |
 |--------|------|-------|--------|
@@ -286,14 +291,26 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 
 ## Versiones
 
-### 1.0.9 — 2026-10-16 · Estructura SEO
+### 1.0.10 — 2026-11-05 · Documentación de versiones interna
+Detalle en `_interno/implementaciones/Lameyer-v1.0.10.pdf` (local).
+- Los PDF de versión (1.0.1–1.0.8) salen de `_docs/` y del sitio; se guardan en `_interno/implementaciones/`, junto con 1.0.9 y 1.0.10.
+- `_interno/` se organiza en `propuestas/` (cambios aún no implementados), `implementaciones/` (versiones publicadas) y `seguridad/`.
+- Este readme deja de enlazar los PDF: la tabla de versiones queda como historial y los documentos se envían bajo petición.
+- Las fuentes HTML de 1.0.1–1.0.8 y las guías `Lameyer-Arquitectura-Etapa-2.pdf` y `Lameyer-Guia-de-Inicio-y-Privacidad.pdf` siguen en `_docs/`.
+
+### 1.0.9 — 2026-10-16 → 2026-11-05 · Estructura SEO, WhatsApp con encuesta y página en blanco (rama `seo-estructura`)
+Detalle en `_interno/implementaciones/Lameyer-v1.0.9.pdf` (local).
+- Botón de WhatsApp azul con icono y etiqueta; encuesta previa (empleados, presupuesto inicial, presupuesto mensual, sistema) en ES/EN,
+  cuyas respuestas se añaden al mensaje.
+- Página en blanco: rutas relativas en la portada, GSAP solo si cargó, `PageErrorBoundary` en `renderPage()` y aviso con «Recargar»
+  si `#root` queda vacío. La burbuja de WhatsApp espera a que la página se vea.
 - `<header>` y menús como `<nav>` + `<ul>` en `js/layout.jsx`; encabezados de la portada en orden (H1 → H2 → H3).
 - Open Graph, `twitter:card` y JSON-LD en todas las páginas públicas (Organization, WebSite, TechArticle, BreadcrumbList).
 - `<noscript>` con `<h1>`, resumen y enlaces en las páginas React; títulos y descripciones ajustados a 60 / 160 caracteres.
 - Nuevos `robots.txt`, `sitemap.xml`, `tools/generar-seo-academia.mjs` y `tools/generar-sitemap.py`.
 
 ### 1.0.8 — 2026-10-07 · Acceso para clientes y documentación pública / interna
-Detalle en `_docs/src/v1.0.8.html` (+ PDF).
+Detalle en `_docs/src/v1.0.8.html` (PDF en `_interno/implementaciones/`).
 - **Componentes:** pop-up de acceso **obligatorio** en `/pages/components/` y en todas las fichas: sin cuenta no se muestra la tienda
   y el pop-up no se puede cerrar (solo enlaces a Inicio y Términos).
 - **Academia:** pop-up de acceso **opcional** en `/academia/`: se cierra o se sigue sin cuenta, y no vuelve a salir en esa sesión.
@@ -304,7 +321,7 @@ Detalle en `_docs/src/v1.0.8.html` (+ PDF).
 - **Blog → Academia:** se elimina la carpeta `blog/` vacía que quedaba; `/blog/…` sigue redirigiendo desde `404.html`.
 
 ### 1.0.7 — 2026-10-06 · Academia, revisión de traducción y flujo de datos
-Detalle en `_docs/src/v1.0.7.html` (+ PDF).
+Detalle en `_docs/src/v1.0.7.html` (PDF en `_interno/implementaciones/`).
 - **Menú:** Stack sale de `NAV_LINKS` (Desarrollo, Componentes, Comunidad, Academia); en `/pages/stack/` se resalta Comunidad.
 - **Comunidad · Canales:** tarjetas Stack (interna), Skool y GitHub (externas); se elimina la de correo. URL de Skool provisional.
 - **Blog → Academia:** `blog/` → `academia/`, `js/blog.jsx` → `js/academia.jsx`, `css/blog.css` → `css/academia.css`, identificadores
@@ -315,13 +332,13 @@ Detalle en `_docs/src/v1.0.7.html` (+ PDF).
 - **Análisis de flujo de datos:** dependencia de datos directa, dependencia de control y acoplamiento de datos del sitio (doc. §6).
 
 ### 1.0.6 — en preparación · Medidas de seguridad
-- Edición pública resumida en `_docs/src/v1.0.6.html` (+ PDF): alcance, enfoque y fases. El detalle se mantiene en documentación interna.
+- Edición pública resumida en `_docs/src/v1.0.6.html` (PDF en `_interno/implementaciones/`): alcance, enfoque y fases. El detalle se mantiene en documentación interna.
 - Es la puerta previa al servicio de cuentas definitivo.
 
 ### 1.0.5 — 2026-10-03 → 2026-10-05 · Versión consolidada (todo lo posterior a 1.0.4)
 Agrupa los cambios publicados antes como 1.0.5 a 1.0.11 (commits `b2af7c1` … `59a81ca`; 111 archivos, +7.419 / −2.930 líneas).
 Se describe el estado final; los pasos intermedios que luego se retiraron (Google Translate, banderas de EE. UU. y Países Bajos,
-divisas USD, GBP e ILS) ya no forman parte del sitio. Detalle en `_docs/src/v1.0.5.html` (+ PDF).
+divisas USD, GBP e ILS) ya no forman parte del sitio. Detalle en `_docs/src/v1.0.5.html` (PDF en `_interno/implementaciones/`).
 - **Blog · Serverless Edge:** la serie pasa de 5 a 9 pasos (06 Tiempo real, 07 IA en el edge, 08 Imágenes y multimedia,
   09 Desplegar, probar y lanzar) más 3 cruces, con la zona nueva `platform` y enlaces «Siguiente paso» encadenados.
 - **Cuentas y cookies:** pop-up de acceso / registro en todas las páginas (cuentas de staging)
