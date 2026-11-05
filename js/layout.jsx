@@ -759,10 +759,32 @@ const StackSection = () => (
     </section>
 );
 
+// Catches a crash in one page's content (e.g. a CDN library that failed to load) so React
+// doesn't unmount everything and leave a blank white page; header and footer stay visible.
+class PageErrorBoundary extends React.Component {
+    constructor(props) { super(props); this.state = { failed: false }; }
+    static getDerivedStateFromError() { return { failed: true }; }
+    componentDidCatch(error) { console.error('[lameyer] Error al renderizar la página:', error); }
+    render() {
+        if (!this.state.failed) return this.props.children;
+        return (
+            <section className="min-h-[60vh] flex items-center justify-center px-6 text-center">
+                <div>
+                    <h1 className="text-2xl font-extrabold text-[#0a192f] mb-3">La página no pudo cargarse</h1>
+                    <p className="text-slate-500 mb-6">Recarga la página. Si el problema continúa, escríbenos a contacto@lameyer.net.</p>
+                    <button type="button" onClick={() => location.reload()} className="px-6 py-3 rounded-full bg-blue-600 text-white font-bold">Recargar</button>
+                </div>
+            </section>
+        );
+    }
+}
+
 const renderPage = (Page) => {
     ReactDOM.createRoot(document.getElementById('root')).render(
         <Layout>
-            <Page />
+            <PageErrorBoundary>
+                <Page />
+            </PageErrorBoundary>
         </Layout>
     );
 };

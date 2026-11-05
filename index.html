@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="/favicon.ico" sizes="48x48">
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-    <link rel="manifest" href="/site.webmanifest">
+    <link rel="icon" href="favicon.ico" sizes="48x48">
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="site.webmanifest">
     <title>Soluciones web y manejo de datos serverless | Lameyer</title>
     <meta name="description" content="Lameyer: soluciones web y manejo de datos. Conecta tus flujos de trabajo con lógica Serverless: Núcleo Modular + Edge Serverless (MC-SE).">
     <link rel="canonical" href="https://lameyer.net/">
@@ -37,7 +37,7 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/css/site.css">
+    <link rel="stylesheet" href="css/site.css">
 
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
     <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
@@ -63,8 +63,8 @@
         </noscript>
     </div>
 
-    <script type="text/babel" src="/js/layout.jsx"></script>
-    <script type="text/babel" src="/js/acceso.jsx"></script>
+    <script type="text/babel" src="js/layout.jsx"></script>
+    <script type="text/babel" src="js/acceso.jsx"></script>
     <script type="text/babel">
         // One card per academia series (the five MC-SE categories); keep in sync with SERIES in /js/academia.jsx.
         const ACADEMIA_HIGHLIGHTS = [
@@ -294,8 +294,11 @@
 
         const HomePage = () => {
             useEffect(() => {
-                gsap.registerPlugin(ScrollTrigger);
-                gsap.from("#hero-content", { duration: 1.5, y: 50, opacity: 0, ease: "power4.out" });
+                // GSAP comes from a CDN: if it fails to load, skip the animation instead of crashing the whole page.
+                if (window.gsap && window.ScrollTrigger) {
+                    gsap.registerPlugin(ScrollTrigger);
+                    gsap.from("#hero-content", { duration: 1.5, y: 50, opacity: 0, ease: "power4.out" });
+                }
 
                 // Arriving from another page's REGISTER button (/#form-section):
                 // the form only exists after React renders, so scroll to it here.
@@ -341,6 +344,33 @@
 
         renderPage(HomePage);
     </script>
+    <!-- ===== Guardia de página en blanco =====
+         Si layout.jsx / acceso.jsx no cargan (ruta mal resuelta, CDN caído, error de sintaxis JSX),
+         #root queda vacío y la página se ve en blanco. Esto lo detecta y muestra un aviso visible
+         en lugar de una página en blanco con solo el botón de WhatsApp encima. -->
+    <script>
+        (function () {
+            function rendered() {
+                var r = document.getElementById('root');
+                return !!r && Array.prototype.some.call(r.children, function (el) { return el.tagName !== 'NOSCRIPT' && !el.hasAttribute('data-lm-guard'); });
+            }
+            window.lmPageRendered = rendered;
+            window.addEventListener('load', function () {
+                setTimeout(function () {
+                    if (rendered()) return;
+                    var where = location.protocol === 'file:' ? 'file://' : location.pathname;
+                    console.error('[lameyer] Página en blanco: #root vacío. ¿Se cargaron js/layout.jsx y js/acceso.jsx? Origen: ' + where);
+                    var box = document.createElement('div');
+                    box.setAttribute('role', 'alert'); box.setAttribute('data-lm-guard', '');
+                    box.style.cssText = 'max-width:560px;margin:15vh auto;padding:32px;font-family:system-ui,sans-serif;color:#0a192f;border:1px solid #e2e8f0;border-radius:24px;text-align:center';
+                    box.innerHTML = '<h1 style="font-size:1.25rem;margin:0 0 12px">La página no pudo cargarse</h1>' +
+                        '<p style="margin:0 0 20px;color:#64748b;line-height:1.5">Recarga la página. Si el problema continúa, escríbenos a <a href="mailto:contacto@lameyer.net">contacto@lameyer.net</a>.</p>' +
+                        '<button type="button" onclick="location.reload()" style="padding:12px 24px;border:0;border-radius:999px;background:#2563eb;color:#fff;font-weight:700;cursor:pointer">Recargar</button>';
+                    document.getElementById('root').appendChild(box);
+                }, 4000);
+            });
+        })();
+    </script>
     <!-- ===================== Widget de chat de WhatsApp de Lameyer ===================== -->
     <!-- Autónomo: pégalo justo antes de </body>. Abre wa.me (el enlace directo oficial de Meta). -->
     <style>
@@ -349,10 +379,13 @@
         .lm-chat[hidden] { display: none; }
         .lm-chat *, .lm-chat *::before, .lm-chat *::after { box-sizing: border-box; }
 
+        .lm-chat__dock { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 60px; margin-left: auto; }
         .lm-chat__launcher { width: 60px; height: 60px; border: 0; border-radius: 999px; cursor: pointer; display: grid; place-items: center;
-            background: var(--lm-blue); color: #fff; box-shadow: 0 18px 40px -12px rgba(37, 99, 235, .55); transition: transform .25s, background .25s; margin-left: auto; position: relative; }
+            background: var(--lm-blue); color: #fff; box-shadow: 0 18px 40px -12px rgba(37, 99, 235, .55); transition: transform .25s, background .25s; position: relative; }
+        .lm-chat__tag { font-size: .62rem; font-weight: 600; letter-spacing: .06em; color: var(--lm-ink); background: rgba(255, 255, 255, .9); padding: 1px 7px; border-radius: 999px; line-height: 1.5; pointer-events: none; }
+        .lm-chat.is-open .lm-chat__tag { visibility: hidden; }
         .lm-chat__launcher:hover { transform: scale(1.06); background: var(--lm-navy); }
-        .lm-chat__launcher:focus-visible, .lm-chat__close:focus-visible, .lm-chat__lang:focus-visible, .lm-chat__start:focus-visible, .lm-chat__msg:focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 2px; }
+        .lm-chat__launcher:focus-visible, .lm-chat__close:focus-visible, .lm-chat__lang:focus-visible, .lm-chat__start:focus-visible, .lm-chat__msg:focus-visible, .lm-chat__select:focus-visible, .lm-chat__next:focus-visible, .lm-chat__back:focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 2px; }
         .lm-chat__launcher svg { width: 28px; height: 28px; transition: transform .25s, opacity .2s; position: absolute; }
         .lm-chat__launcher .lm-i-close { opacity: 0; transform: rotate(-90deg); }
         .lm-chat.is-open .lm-chat__launcher .lm-i-chat { opacity: 0; transform: rotate(90deg); }
@@ -360,7 +393,7 @@
         .lm-chat__dot { position: absolute; top: 4px; right: 4px; width: 14px; height: 14px; border-radius: 999px; background: var(--lm-wa); border: 2px solid #fff; }
         .lm-chat.is-open .lm-chat__dot { display: none; }
 
-        .lm-chat__panel { position: absolute; right: 0; bottom: 76px; width: 360px; max-width: calc(100vw - 32px); border-radius: 2rem; overflow: hidden;
+        .lm-chat__panel { position: absolute; right: 0; bottom: 96px; width: 360px; max-width: calc(100vw - 32px); border-radius: 2rem; overflow: hidden;
             background: rgba(255, 255, 255, .95); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); border: 1px solid rgba(10, 25, 47, .06);
             box-shadow: 0 30px 60px -20px rgba(10, 25, 47, .35); transform-origin: bottom right;
             opacity: 0; transform: translateY(12px) scale(.96); pointer-events: none; visibility: hidden; transition: opacity .25s, transform .25s, visibility 0s .25s; }
@@ -385,19 +418,35 @@
         .lm-chat__lang:hover { border-color: var(--lm-blue); }
         .lm-chat__lang[aria-checked="true"] { background: var(--lm-blue); border-color: var(--lm-blue); color: #fff; }
         .lm-chat__lang[aria-checked="true"] span { color: #dbeafe; }
-        .lm-chat__msg { width: 100%; min-height: 76px; resize: vertical; border: 1px solid var(--lm-line); border-radius: 16px; padding: 10px 12px; font: inherit; font-size: .9rem; color: var(--lm-ink); background: #fff; margin: 0 0 16px; }
+        .lm-chat__msg { width: 100%; min-height: 150px; resize: vertical; border: 1px solid var(--lm-line); border-radius: 16px; padding: 10px 12px; font: inherit; font-size: .9rem; color: var(--lm-ink); background: #fff; margin: 0 0 16px; }
         .lm-chat__start { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; padding: 15px 20px; border-radius: 999px;
             background: var(--lm-blue); color: #fff; text-decoration: none; font-weight: 800; font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; transition: background .2s, transform .2s; }
         .lm-chat__start:hover { background: var(--lm-navy); transform: translateY(-1px); }
         .lm-chat__start svg { width: 18px; height: 18px; }
         .lm-chat__foot { margin: 12px 0 0; text-align: center; font-size: .7rem; color: var(--lm-muted); }
+        .lm-chat__step[hidden] { display: none; }
+        .lm-chat__q { margin: 0 0 12px; }
+        .lm-chat__q .lm-chat__label { margin-bottom: 5px; }
+        .lm-chat__select { width: 100%; appearance: none; -webkit-appearance: none; border: 1px solid var(--lm-line); border-radius: 12px; padding: 8px 32px 8px 12px; cursor: pointer;
+            font: inherit; font-size: .7rem; font-weight: 300; letter-spacing: .12em; text-transform: uppercase; color: var(--lm-ink); line-height: 1.4;
+            background: #fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center / 14px; transition: border-color .2s; }
+        .lm-chat__select:hover { border-color: var(--lm-blue); }
+        .lm-chat__select:invalid { color: var(--lm-muted); }
+        .lm-chat__select option { text-transform: uppercase; font-weight: 300; color: var(--lm-ink); }
+        .lm-chat__q.is-missing .lm-chat__select { border-color: #dc2626; }
+        .lm-chat__err { margin: -4px 0 12px; font-size: .72rem; color: #dc2626; }
+        .lm-chat__next { display: block; width: 100%; margin-top: 4px; padding: 15px 20px; border: 0; border-radius: 999px; cursor: pointer; background: var(--lm-blue); color: #fff;
+            font: inherit; font-weight: 800; font-size: .75rem; letter-spacing: .14em; text-transform: uppercase; transition: background .2s, transform .2s; }
+        .lm-chat__next:hover { background: var(--lm-navy); transform: translateY(-1px); }
+        .lm-chat__back { display: block; margin: 12px auto 0; background: transparent; border: 0; cursor: pointer; font: inherit; font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--lm-muted); padding: 4px 8px; border-radius: 8px; }
+        .lm-chat__back:hover { color: var(--lm-blue); }
 
         @media (max-width: 480px) {
             .lm-chat { right: 16px; bottom: 16px; }
-            .lm-chat__panel { width: calc(100vw - 32px); bottom: 72px; }
+            .lm-chat__panel { width: calc(100vw - 32px); bottom: 92px; max-height: calc(100vh - 128px); overflow-y: auto; }
         }
         @media (prefers-reduced-motion: reduce) {
-            .lm-chat__launcher, .lm-chat__launcher svg, .lm-chat__panel, .lm-chat__start { transition: none; }
+            .lm-chat__launcher, .lm-chat__launcher svg, .lm-chat__panel, .lm-chat__start, .lm-chat__next { transition: none; }
         }
     </style>
 
@@ -422,6 +471,20 @@
                     <button class="lm-chat__lang" type="button" role="radio" data-lang="en" lang="en"><b>EN</b><span>English</span></button>
                 </div>
 
+                <form class="lm-chat__step lm-chat__survey" novalidate>
+                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-team" data-i18n="qTeam">¿Cuántos empleados?</label>
+                        <select class="lm-chat__select" id="lm-q-team" name="team" required></select></div>
+                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-setup" data-i18n="qSetup">Presupuesto inicial aproximado</label>
+                        <select class="lm-chat__select" id="lm-q-setup" name="setup" required></select></div>
+                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-monthly" data-i18n="qMonthly">Presupuesto mensual aproximado (retainer)</label>
+                        <select class="lm-chat__select" id="lm-q-monthly" name="monthly" required></select></div>
+                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-system" data-i18n="qSystem">¿Qué sistema necesitas?</label>
+                        <select class="lm-chat__select" id="lm-q-system" name="system" required></select></div>
+                    <p class="lm-chat__err" role="alert" hidden data-i18n="err">Responde las cuatro preguntas para continuar.</p>
+                    <button class="lm-chat__next" type="submit" data-i18n="next">Continuar</button>
+                </form>
+
+                <div class="lm-chat__step lm-chat__compose" hidden>
                 <label class="lm-chat__label" for="lm-chat-msg" data-i18n="message">Mensaje</label>
                 <textarea class="lm-chat__msg" id="lm-chat-msg" maxlength="500"></textarea>
 
@@ -430,14 +493,19 @@
                     <span data-i18n="start">Iniciar chat</span>
                 </a>
                 <p class="lm-chat__foot" data-i18n="foot">Se abrirá WhatsApp en una nueva pestaña.</p>
+                <button class="lm-chat__back" type="button" data-i18n="back">← Editar respuestas</button>
+                </div>
             </div>
         </div>
 
+        <div class="lm-chat__dock">
         <button class="lm-chat__launcher" type="button" aria-label="Abrir chat de WhatsApp" aria-expanded="false" aria-controls="lm-chat-panel">
-            <svg class="lm-i-chat" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.8 7L4 20.5l1.5-4.9A8 8 0 1 1 21 12z"/><path d="M8.5 10.5h7M8.5 13.5h4.5"/></svg>
+            <svg class="lm-i-chat" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.2-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a1 1 0 0 0-.7.3 3 3 0 0 0-.9 2.2 5.2 5.2 0 0 0 1.1 2.8 11.9 11.9 0 0 0 4.6 4c1.7.7 2.4.8 3.2.7.5-.1 1.5-.6 1.8-1.2.2-.6.2-1.1.1-1.2l-.4-.2z"/></svg>
             <svg class="lm-i-close" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>
             <span class="lm-chat__dot" aria-hidden="true"></span>
         </button>
+        <span class="lm-chat__tag" aria-hidden="true">WhatsApp</span>
+        </div>
     </div>
 
     <script>
@@ -458,7 +526,20 @@
                     close: 'Cerrar chat',
                     open: 'Abrir chat de WhatsApp',
                     closeWa: 'Cerrar chat de WhatsApp',
-                    text: 'Hola Lameyer, me gustaría información sobre sus servicios.'
+                    text: 'Hola Lameyer, me gustaría información sobre sus servicios.',
+                    qTeam: '¿Cuántos empleados?',
+                    qSetup: 'Presupuesto inicial aproximado',
+                    qMonthly: 'Presupuesto mensual aproximado (retainer)',
+                    qSystem: '¿Qué sistema necesitas?',
+                    pick: 'Selecciona',
+                    err: 'Responde las cuatro preguntas para continuar.',
+                    next: 'Continuar',
+                    back: '← Editar respuestas',
+                    team: ['1–5', '6–20', '21–50', '51–200', 'Más de 200'],
+                    setup: ['Menos de 1.000 €', '1.000 – 3.000 €', '3.000 – 10.000 €', '10.000 – 25.000 €', 'Más de 25.000 €'],
+                    monthly: ['Menos de 300 €', '300 – 750 €', '750 – 1.500 €', '1.500 – 3.000 €', 'Más de 3.000 €'],
+                    system: ['CRM', 'Web', 'Inventarios', 'Otras automatizaciones'],
+                    sumTeam: 'Empleados', sumSetup: 'Presupuesto inicial', sumMonthly: 'Presupuesto mensual', sumSystem: 'Sistema'
                 },
                 en: {
                     status: 'Support in Spanish & English · Spain',
@@ -470,7 +551,20 @@
                     close: 'Close chat',
                     open: 'Open WhatsApp chat',
                     closeWa: 'Close WhatsApp chat',
-                    text: 'Hi Lameyer, I would like information about your services.'
+                    text: 'Hi Lameyer, I would like information about your services.',
+                    qTeam: 'How many employees?',
+                    qSetup: 'Approximate initial budget',
+                    qMonthly: 'Approximate monthly budget (retainer)',
+                    qSystem: 'What system is required?',
+                    pick: 'Select',
+                    err: 'Answer all four questions to continue.',
+                    next: 'Continue',
+                    back: '← Edit answers',
+                    team: ['1–5', '6–20', '21–50', '51–200', 'More than 200'],
+                    setup: ['Under €1,000', '€1,000 – 3,000', '€3,000 – 10,000', '€10,000 – 25,000', 'Over €25,000'],
+                    monthly: ['Under €300', '€300 – 750', '€750 – 1,500', '€1,500 – 3,000', 'Over €3,000'],
+                    system: ['CRM', 'Web', 'Inventory', 'Other automations'],
+                    sumTeam: 'Employees', sumSetup: 'Initial budget', sumMonthly: 'Monthly budget', sumSystem: 'System'
                 }
             };
             var LANGS = ['es', 'en'];
@@ -483,6 +577,12 @@
             var group = root.querySelector('.lm-chat__langs');
             var msg = root.querySelector('.lm-chat__msg');
             var start = root.querySelector('.lm-chat__start');
+            var survey = root.querySelector('.lm-chat__survey');
+            var compose = root.querySelector('.lm-chat__compose');
+            var errEl = root.querySelector('.lm-chat__err');
+            var backBtn = root.querySelector('.lm-chat__back');
+            var QS = [['team', 'sumTeam'], ['setup', 'sumSetup'], ['monthly', 'sumMonthly'], ['system', 'sumSystem']];
+            var answers = {}; // option index per question, kept across language switches
 
             var lang = /^en\b/i.test(navigator.language || '') ? 'en' : 'es';
             var edited = false;
@@ -492,6 +592,29 @@
             function link() {
                 var text = msg.value.trim();
                 start.href = 'https://wa.me/' + NUMBER + (text ? '?text=' + encodeURIComponent(text) : '');
+            }
+
+            function fillSelects() {
+                QS.forEach(function (q) {
+                    var sel = survey.elements[q[0]];
+                    sel.innerHTML = '';
+                    var ph = new Option(t('pick'), ''); ph.disabled = true; sel.add(ph);
+                    t(q[0]).forEach(function (label, i) { sel.add(new Option(label, String(i))); });
+                    sel.value = answers[q[0]] != null ? String(answers[q[0]]) : '';
+                });
+            }
+
+            function summary() {
+                return QS.map(function (q) { return '• ' + t(q[1]) + ': ' + t(q[0])[answers[q[0]]]; }).join('\n');
+            }
+
+            function defaultText() { return t('text') + '\n\n' + summary(); }
+            function isDefault(v) { return LANGS.some(function (l) { var keep = lang; lang = l; var d = defaultText(); lang = keep; return v === d; }); }
+
+            function showStep(toCompose) {
+                survey.hidden = toCompose;
+                compose.hidden = !toCompose;
+                (toCompose ? msg : survey.elements.team).focus();
             }
 
             function setLauncherLabel() {
@@ -508,8 +631,10 @@
                     b.setAttribute('aria-checked', on ? 'true' : 'false');
                     b.tabIndex = on ? 0 : -1;
                 });
+                var wasDefault = !edited || isDefaultPrev(); // checked before the selects are rebuilt
+                fillSelects();
                 // Swap the prefilled message only if the visitor hasn't written their own, or it's still a default.
-                if (!edited || LANGS.some(function (l) { return msg.value === STRINGS[l].text; })) { msg.value = t('text'); edited = false; }
+                if (complete() && wasDefault) { msg.value = defaultText(); edited = false; }
                 setLauncherLabel();
                 link();
             }
@@ -528,13 +653,40 @@
                 group.querySelector('[data-lang="' + next + '"]').focus();
             });
 
+            function complete() { return QS.every(function (q) { return answers[q[0]] != null; }); }
+            function isDefaultPrev() { return complete() && isDefault(msg.value); }
+
+            QS.forEach(function (q) {
+                survey.elements[q[0]].addEventListener('change', function (e) {
+                    answers[q[0]] = e.target.value === '' ? null : +e.target.value;
+                    e.target.parentNode.classList.remove('is-missing');
+                    if (complete()) errEl.hidden = true;
+                });
+            });
+
+            survey.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var first = null;
+                QS.forEach(function (q) {
+                    var miss = answers[q[0]] == null;
+                    survey.elements[q[0]].parentNode.classList.toggle('is-missing', miss);
+                    if (miss && !first) first = survey.elements[q[0]];
+                });
+                if (first) { errEl.hidden = false; first.focus(); return; }
+                errEl.hidden = true;
+                if (!edited || isDefault(msg.value) || !msg.value.trim()) { msg.value = defaultText(); edited = false; }
+                link();
+                showStep(true);
+            });
+            backBtn.addEventListener('click', function () { showStep(false); });
+
             msg.addEventListener('input', function () { edited = true; link(); });
 
             function setOpen(open) {
                 root.classList.toggle('is-open', open);
                 launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
                 setLauncherLabel();
-                if (open) start.focus(); else launcher.focus();
+                if (open) (compose.hidden ? survey.elements.team : start).focus(); else launcher.focus();
             }
             launcher.addEventListener('click', function () { setOpen(!root.classList.contains('is-open')); });
             closeBtn.addEventListener('click', function () { setOpen(false); });
@@ -543,7 +695,13 @@
             });
 
             setLang(lang);
-            root.hidden = false;
+            // On pages built by React (#root), show the bubble only once the page has rendered,
+            // so a failed load never leaves a lone WhatsApp button on a blank page.
+            if (typeof window.lmPageRendered === 'function') {
+                (function wait() { if (window.lmPageRendered()) root.hidden = false; else setTimeout(wait, 200); })();
+            } else {
+                root.hidden = false;
+            }
         })();
     </script>
     <!-- =================== /Widget de chat de WhatsApp de Lameyer =================== -->
