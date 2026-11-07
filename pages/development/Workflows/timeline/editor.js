@@ -140,7 +140,7 @@
         ${campo('Subunidad', 'subunidad', S.subunidad, { pista: 'Cómo se llama cada rama: Rama, Módulo, Taller…' })}
         <label>Umbral para avanzar<div class="pct"><input type="number" min="1" max="100" step="1" data-k="umbral" data-t="pct" value="${Math.round(S.umbral * 100)}"> %</div>
           <small>Una ${esc(u.toLowerCase())} entra en el ciclo cuando sus dependencias llegan a este avance</small></label>
-        ${campo('Origen', 'origen', S.origen, { pista: 'Rótulo de la tarjeta (indice.js), p. ej. sites/_plataforma' })}
+        ${campo('Origen', 'origen', S.origen, { pista: 'Rótulo de la tarjeta (indice.js), p. ej. builds/sites/_plataforma' })}
         ${campo('Descripción', 'descripcion', S.descripcion, { clase: 'ancho', pista: 'Texto de la tarjeta en la galería (indice.js)' })}
         ${campo('Bloque · nombre', 'bloque.nombre', S.bloque.nombre, { pista: 'Opcional: agrupa todas las etapas (vacío = sin bloque)', extra: 'placeholder="Núcleo Modular + Edge Serverless"' })}
         ${campo('Bloque · número', 'bloque.num', S.bloque.num, { pista: 'Bloque 1, 2…' })}
