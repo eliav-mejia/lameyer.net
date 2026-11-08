@@ -33,7 +33,7 @@
     <div id="root">
         <noscript>
             <h1>Repuestos y Componentes</h1>
-            <p>Componentes del PC, redes y equipo básico: memoria, almacenamiento, monitores, teclados, auriculares y más. Envío en España y recogida en Madrid.</p>
+            <p>Componentes del PC, redes y equipo básico: memoria, almacenamiento, monitores, teclados, auriculares y más. Envío a domicilio en todo Madrid y a toda la República Mexicana.</p>
             <nav aria-label="Principal">
                 <ul>
                     <li><a href="/pages/development/">Desarrollo</a></li>
@@ -134,6 +134,7 @@
         );
 
         const ShopPage = () => {
+            const ship = useShipping();   // home-delivery area of the selected flag (js/tienda.jsx)
             const catalog = useCatalog();
             const money = useCurrency();
             const cartState = useCart(catalog);
@@ -184,14 +185,14 @@
                         eyebrow="COMPONENTES · MADRID"
                         title="Repuestos y"
                         accent="Componentes"
-                        intro="Componentes del PC, redes y equipo básico: memoria, almacenamiento, monitores, teclados, auriculares y más. Envío en España y recogida en Madrid."
+                        intro="Componentes del PC, redes y equipo básico: memoria, almacenamiento, monitores, teclados, auriculares y más. Envío a domicilio en todo Madrid y a toda la República Mexicana."
                     />
 
                     {/* Trust strip */}
                     <section className="relative z-20 mb-12">
                         <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
                             {[
-                                ['📦', 'Envío desde Madrid', 'A toda España'],
+                                ['📦', 'Envío a domicilio', ship.strip],
                                 ['↩️', `Devolución ${RETURN_DAYS} días`, 'Sujeta a revisión'],
                                 ['🛡️', 'Garantía legal 3 años', 'Productos nuevos'],
                                 ['💱', 'Precios en EUR o MXN', 'Según la bandera'],

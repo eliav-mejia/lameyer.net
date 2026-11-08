@@ -65,7 +65,7 @@
             { id: 'productos', title: 'Productos' },
             { id: 'precios', title: 'Precios y divisas' },
             { id: 'pedidos', title: 'Pedidos y pago' },
-            { id: 'envios', title: { ES: 'Envíos y recogida', MX: 'Envíos a México y aduanas' } },
+            { id: 'envios', title: { ES: 'Envíos a domicilio', MX: 'Envíos a México y aduanas' } },
             { id: 'devoluciones', title: { ES: 'Devoluciones (30 días)', MX: 'Revocación y devoluciones (30 días)' } },
             { id: 'garantia', title: 'Garantía legal' },
             { id: 'raee', title: 'Residuos electrónicos y pilas', regions: ['ES'] },
@@ -185,9 +185,8 @@
         );
 
         const EnviosES = ({ n }) => (
-            <Section id="envios" n={n} title="Envíos y recogida">
-                <p>Los pedidos se preparan en Madrid y se envían a direcciones de España. El plazo y el coste dependen del destino y se indican en la confirmación del pedido. Salvo pacto en contrario, la entrega se realizará en un plazo máximo de 30 días naturales desde la confirmación.</p>
-                <p>También es posible la <strong className="text-gray-900">recogida en Madrid</strong>, en el lugar y horario que se acuerden al confirmar el pedido.</p>
+            <Section id="envios" n={n} title="Envíos a domicilio">
+                <p>Los pedidos se preparan en Madrid y se entregan <strong className="text-gray-900">solo a domicilio, en todo Madrid</strong> (códigos postales que empiezan por 28). No se realizan envíos a otras provincias ni recogidas en persona. El plazo y el coste dependen del destino y se indican en la confirmación del pedido. Salvo pacto en contrario, la entrega se realizará en un plazo máximo de 30 días naturales desde la confirmación.</p>
                 <p>Al recibir el paquete, el cliente debe comprobar que no presenta daños visibles y, si los hay, indicarlo al transportista y comunicárnoslo lo antes posible.</p>
             </Section>
         );
@@ -253,7 +252,7 @@
             <Section id="raee" n={n} title="Residuos electrónicos y pilas">
                 <p>Los aparatos eléctricos y electrónicos, sus componentes y las baterías <strong className="text-gray-900">no deben tirarse a la basura doméstica</strong>. El símbolo del contenedor tachado en el producto o su embalaje indica que debe entregarse en un punto de recogida selectiva.</p>
                 <ul className="list-disc pl-5 space-y-2">
-                    <li><strong className="text-gray-900">Uno por uno:</strong> conforme al Real Decreto 110/2015, sobre residuos de aparatos eléctricos y electrónicos (RAEE), al comprar un aparato puedes entregarnos sin coste el aparato usado de tipo equivalente que sustituye. En la recogida en Madrid lo recogemos en el momento; en los envíos, indícalo al hacer el pedido y te diremos cómo enviarlo.</li>
+                    <li><strong className="text-gray-900">Uno por uno:</strong> conforme al Real Decreto 110/2015, sobre residuos de aparatos eléctricos y electrónicos (RAEE), al comprar un aparato puedes entregarnos sin coste el aparato usado de tipo equivalente que sustituye. Indícalo al hacer el pedido y te diremos cómo entregárnoslo.</li>
                     <li><strong className="text-gray-900">Baterías:</strong> aceptamos sin coste las baterías usadas del mismo tipo que las que vendemos, conforme a la normativa de pilas y acumuladores. Envíalas descargadas y con los contactos aislados con cinta.</li>
                     <li>También puedes llevarlos a un punto limpio de tu municipio.</li>
                 </ul>
@@ -303,7 +302,7 @@ Por la presente le comunico que desisto de mi contrato de venta del siguiente bi
 
         const EnviosMX = ({ n }) => (
             <Section id="envios" n={n} title="Envíos a México y aduanas">
-                <p>Los pedidos se preparan en Madrid y se envían a México mediante mensajería internacional con seguimiento. El plazo estimado y el coste se indican en la confirmación del pedido; salvo pacto en contrario, la entrega se realizará en un plazo máximo de 30 días naturales desde la confirmación.</p>
+                <p>Los pedidos se preparan en Madrid y se envían a domicilio a <strong className="text-gray-900">cualquier punto de la República Mexicana</strong> mediante mensajería internacional con seguimiento. El plazo estimado y el coste se indican en la confirmación del pedido; salvo pacto en contrario, la entrega se realizará en un plazo máximo de 30 días naturales desde la confirmación.</p>
                 <p>Los envíos internacionales pueden estar sujetos a <strong className="text-gray-900">impuestos de importación (IVA y, en su caso, aranceles) y gastos de gestión aduanera</strong>. Lameyer informará antes del pago de los que conozca y de quién los paga; si se cobran al recibir el paquete, el cliente lo sabrá antes de aceptar el pedido.</p>
                 <p>Al recibir el paquete, el cliente debe comprobar que no presenta daños visibles y, si los hay, indicarlo al transportista y comunicárnoslo lo antes posible.</p>
             </Section>

@@ -51,6 +51,23 @@ const store = {
     },
 };
 
+// Delivery: home delivery only (no pickup). The area follows the flag (useLocale in js/layout.jsx):
+// España → every address in Madrid (postal codes 28xxx) · México → any address in the República Mexicana.
+// Keep in sync with the «envios» clauses in /pages/terminos/.
+const SHIPPING = {
+    ES: {
+        place: 'Madrid', area: 'todo Madrid', chip: 'Envío a domicilio en Madrid', strip: 'En todo Madrid',
+        postalOk: (cp) => /^28\d{3}$/.test(cp), placeholder: '28001',
+        postalError: 'Solo enviamos a domicilios de Madrid (códigos postales 28xxx).',
+    },
+    MX: {
+        place: 'México', area: 'toda la República Mexicana', chip: 'Envío a toda la República', strip: 'A toda la República Mexicana',
+        postalOk: (cp) => /^\d{5}$/.test(cp) && cp !== '00000', placeholder: '06600',
+        postalError: 'Escribe un código postal mexicano de 5 dígitos.',
+    },
+};
+const useShipping = () => SHIPPING[useLocale().country] || SHIPPING.ES;
+
 // Currency of the selected flag + live rates. Returns { currency, locale, format, ratesDate }.
 const useCurrency = () => {
     const locale = useLocale();
@@ -351,7 +368,7 @@ const CartDrawer = ({ cartState, catalog, money }) => {
     const { lines, setQty, open, setOpen } = cartState;
     const onClose = () => setOpen(false);
     const [name, setName] = useState('');
-    const [delivery, setDelivery] = useState('envio');
+    const ship = useShipping();
     const [postal, setPostal] = useState('');
     const [accepted, setAccepted] = useState(false);
     const closeRef = useRef(null);
@@ -366,8 +383,9 @@ const CartDrawer = ({ cartState, catalog, money }) => {
 
     const total = lines.reduce((sum, l) => sum + l.product.price_eur * l.qty, 0);
     const foreign = money.currency.code !== 'EUR';
-    const validPostal = /^\d{5}$/.test(postal.trim());
-    const ready = lines.length > 0 && accepted && name.trim() && (delivery === 'recogida' || validPostal);
+    const cp = postal.trim();
+    const validPostal = ship.postalOk(cp);
+    const ready = lines.length > 0 && accepted && name.trim() && validPostal;
 
     const message = [
         'Hola Lameyer, quiero hacer este pedido:',
@@ -376,7 +394,7 @@ const CartDrawer = ({ cartState, catalog, money }) => {
         '',
         `Total: ${eur(total)} (IVA incluido)` + (foreign ? ` · ≈ ${money.format(total)}` : ''),
         `Nombre: ${name.trim()}`,
-        delivery === 'envio' ? `Entrega: envío a domicilio · CP ${postal.trim()}` : 'Entrega: recogida en Madrid',
+        `Entrega: envío a domicilio · ${ship.place} · CP ${cp}`,
         '',
         `He leído y acepto los Términos y Condiciones: https://lameyer.net${TERMS_URL}`,
     ].join('\n');
@@ -430,23 +448,18 @@ const CartDrawer = ({ cartState, catalog, money }) => {
                                 <label htmlFor="co-name" className="block text-xs font-bold text-gray-700 mb-1.5">Nombre *</label>
                                 <input id="co-name" value={name} onChange={e => setName(e.target.value)} autoComplete="name" className={inputClass} />
                             </div>
-                            <fieldset>
-                                <legend className="block text-xs font-bold text-gray-700 mb-1.5">Entrega *</legend>
-                                <div className="grid grid-cols-2 gap-2">
-                                    {[['envio', 'Envío en España'], ['recogida', 'Recogida en Madrid']].map(([id, label]) => (
-                                        <label key={id} className={`cursor-pointer px-3 py-3 rounded-2xl border text-xs font-bold text-center transition-colors focus-within:ring-2 focus-within:ring-blue-500/40 ${delivery === id ? 'border-blue-600 bg-blue-600 text-white' : 'border-gray-200 text-gray-600 hover:border-blue-500'}`}>
-                                            <input type="radio" name="delivery" value={id} checked={delivery === id} onChange={() => setDelivery(id)} className="sr-only" />
-                                            {label}
-                                        </label>
-                                    ))}
-                                </div>
-                            </fieldset>
-                            {delivery === 'envio' && (
-                                <div>
-                                    <label htmlFor="co-cp" className="block text-xs font-bold text-gray-700 mb-1.5">Código postal *</label>
-                                    <input id="co-cp" value={postal} onChange={e => setPostal(e.target.value.replace(/\D/g, ''))} inputMode="numeric" autoComplete="postal-code" maxLength="5" placeholder="28001" className={inputClass} />
-                                </div>
-                            )}
+                            <div>
+                                <p className="block text-xs font-bold text-gray-700 mb-1.5">Entrega</p>
+                                <p className="px-4 py-3 rounded-2xl border border-blue-600 bg-blue-50 text-xs font-bold text-blue-700">
+                                    Envío a domicilio · {ship.area}
+                                </p>
+                            </div>
+                            <div>
+                                <label htmlFor="co-cp" className="block text-xs font-bold text-gray-700 mb-1.5">Código postal *</label>
+                                <input id="co-cp" value={postal} onChange={e => setPostal(e.target.value.replace(/\D/g, ''))} inputMode="numeric" autoComplete="postal-code" maxLength="5" placeholder={ship.placeholder}
+                                    aria-invalid={cp.length === 5 && !validPostal} aria-describedby="co-cp-error" className={inputClass} />
+                                {cp.length === 5 && !validPostal && <p id="co-cp-error" role="alert" className="mt-1.5 text-[11px] font-bold text-red-600">{ship.postalError}</p>}
+                            </div>
                         </div>
                     )}
                 </div>
@@ -526,6 +539,7 @@ const ProductPage = () => {
     const catalog = useCatalog();
     const money = useCurrency();
     const cartState = useCart(catalog);
+    const ship = useShipping();   // with the other hooks: never after an early return
     const [qty, setQty] = useState(1);
     const slug = slugFromUrl();
     const product = catalog.status === 'ready' ? catalog.bySlug(slug) : null;
@@ -662,7 +676,7 @@ const ProductPage = () => {
                             {[
                                 ['↩️', `Devolución ${RETURN_DAYS} días`, `${TERMS_URL}#devoluciones`],
                                 ['🛡️', 'Garantía legal 3 años', `${TERMS_URL}#garantia`],
-                                ['📦', 'Envío desde Madrid', `${TERMS_URL}#envios`],
+                                ['📦', ship.chip, `${TERMS_URL}#envios`],
                             ].map(([icon, label, href]) => (
                                 <li key={label}>
                                     <a href={href} className="flex items-center gap-2 p-3 rounded-2xl bg-white border border-gray-100 font-bold text-gray-700 hover:border-blue-500 hover:text-blue-600 transition-colors">

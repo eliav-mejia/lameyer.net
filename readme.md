@@ -35,6 +35,7 @@ Historial de versiones:
 | 1.0.9 | Estructura SEO, botón de WhatsApp con encuesta previa, protección contra la página en blanco |
 | 1.0.10 | Documentación de versiones pasa a uso interno |
 | 1.1.0 | Cuentas de cliente con inicio de sesión real, página de ajustes de la cuenta |
+| 1.1.1 | Catálogo agotado; entrega solo a domicilio: todo Madrid (España) o toda la República Mexicana (México) |
 
 Los documentos de cada versión están disponibles bajo petición en contacto@lameyer.net.
 
@@ -291,6 +292,12 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 `locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
 
 ## Versiones
+
+### 1.1.1 — 2026-11-08 · Catálogo agotado y entrega solo a domicilio
+Detalle en `_interno/deployed/Lameyer-v1.1.1.pdf` (local).
+- Todos los componentes figuran como agotados: no se pueden añadir al carrito; queda «Avísame por WhatsApp».
+- El carrito solo ofrece envío a domicilio (sin recogida). Con la bandera de España: todo Madrid (códigos postales 28xxx); con la de México: toda la República Mexicana.
+- Fichas de producto, página de Componentes y Términos y condiciones dicen lo mismo según la bandera.
 
 ### 1.1.0 — 2026-11-07 · Cuentas de cliente
 Detalle en `_interno/deployed/Lameyer-v1.1.0.pdf` (local).

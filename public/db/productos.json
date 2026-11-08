@@ -1,7 +1,7 @@
 {
   "_schema": "lameyer.shop/v1",
   "_note": "Base de datos simulada (MVP pre-lanzamiento). Editar a mano; ver public/db/README.md.",
-  "updated_at": "2026-10-04",
+  "updated_at": "2026-11-08",
   "products": [
     {
       "id": "of-kb-hp840",
@@ -19,7 +19,7 @@
       "price_eur": 34.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 12,
+      "stock": 0,
       "active": true,
       "description": "Teclado de sustitución con distribución española (incluye Ñ) y retroiluminación blanca. Se monta en el chasis superior del portátil y se conecta mediante dos cables flexibles.",
       "specs": {
@@ -57,7 +57,7 @@
       "price_eur": 49.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 8,
+      "stock": 0,
       "active": true,
       "description": "Batería externa trasera de alta capacidad. Sustituye a la batería extraíble del ThinkPad sin herramientas y funciona junto a la batería interna (sistema Power Bridge).",
       "specs": {
@@ -95,7 +95,7 @@
       "price_eur": 24.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 25,
+      "stock": 0,
       "active": true,
       "description": "Cargador de pared USB-C con Power Delivery. Negocia automáticamente el voltaje con el portátil, el móvil o la tableta, por lo que sirve para varios dispositivos.",
       "specs": {
@@ -157,7 +157,7 @@
       "price_eur": 17.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 10,
+      "stock": 0,
       "active": true,
       "description": "Ventilador de refrigeración de sustitución. Soluciona ruidos, vibraciones y sobrecalentamiento causados por un ventilador desgastado.",
       "specs": {
@@ -193,7 +193,7 @@
       "price_eur": 79.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 6,
+      "stock": 0,
       "active": true,
       "description": "Panel LCD IPS Full HD de sustitución con acabado mate antirreflejos. Comprueba el conector (30 pines eDP) y las pestañas de fijación de tu panel original antes de comprar.",
       "specs": {
@@ -229,7 +229,7 @@
       "price_eur": 59.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 7,
+      "stock": 0,
       "active": true,
       "description": "Batería interna de sustitución para MacBook Air de 13\". Incluye celdas con circuito de protección y se instala con destornilladores pentalobe y Torx.",
       "specs": {
@@ -265,7 +265,7 @@
       "price_eur": 32.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 9,
+      "stock": 0,
       "active": true,
       "description": "Teclado de sustitución con distribución española y teclado numérico. Recomendado para teclas que no responden o derrames de líquido.",
       "specs": {
@@ -299,7 +299,7 @@
       "price_eur": 21.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 20,
+      "stock": 0,
       "active": true,
       "description": "Cargador USB-C Power Delivery compacto para Chromebooks, portátiles ligeros, móviles y tabletas.",
       "specs": {
@@ -332,7 +332,7 @@
       "price_eur": 89.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 5,
+      "stock": 0,
       "active": true,
       "description": "Pantalla OLED completa (panel y táctil ensamblados) con colores y brillo equivalentes al original. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida; no afecta al funcionamiento.",
       "specs": {
@@ -368,7 +368,7 @@
       "price_eur": 39.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 30,
+      "stock": 0,
       "active": true,
       "description": "Módulo de memoria SO-DIMM DDR4 para ampliar portátiles y mini PC. Funciona a velocidades inferiores (2400/2666/2933 MHz) si tu equipo no admite 3200 MHz.",
       "specs": {
@@ -403,7 +403,7 @@
       "price_eur": 89.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 14,
+      "stock": 0,
       "active": true,
       "description": "Módulo SO-DIMM DDR5 de alta capacidad para entornos de desarrollo, máquinas virtuales y contenedores. Compatible hacia abajo con 4800 y 5200 MHz.",
       "specs": {
@@ -439,7 +439,7 @@
       "price_eur": 74.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 18,
+      "stock": 0,
       "active": true,
       "description": "SSD NVMe PCIe 4.0 de 1 TB en formato M.2 2280. En ranuras PCIe 3.0 funciona a la velocidad máxima de esa interfaz.",
       "specs": {
@@ -474,7 +474,7 @@
       "price_eur": 22.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 15,
+      "stock": 0,
       "active": true,
       "description": "Carcasa de aluminio para convertir un SSD M.2 en un disco externo USB-C. Montaje sin herramientas y disipación pasiva.",
       "specs": {
@@ -510,7 +510,7 @@
       "price_eur": 9.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 40,
+      "stock": 0,
       "active": true,
       "description": "Kit de mantenimiento térmico: jeringa de pasta térmica no conductora y láminas de thermal pads recortables para chips de memoria, VRM y SSD.",
       "specs": {
@@ -545,7 +545,7 @@
       "price_eur": 24.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 16,
+      "stock": 0,
       "active": true,
       "description": "Tarjeta inalámbrica Wi-Fi 6E tribanda (2,4 / 5 / 6 GHz) con Bluetooth 5.3. Mejora la velocidad y la latencia respecto a tarjetas Wi-Fi 5.",
       "specs": {
@@ -581,7 +581,7 @@
       "price_eur": 19.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 22,
+      "stock": 0,
       "active": true,
       "description": "Transceptor óptico SFP+ 10GBASE-SR para fibra multimodo con conector LC dúplex. Ideal para enlaces dentro del rack o del edificio.",
       "specs": {
@@ -616,7 +616,7 @@
       "price_eur": 9.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 50,
+      "stock": 0,
       "active": true,
       "description": "Pack de tres latiguillos Cat6 de 3 m con conductores de cobre y protectores de conector. Gigabit garantizado y 10 Gbps en tramos cortos.",
       "specs": {
@@ -651,7 +651,7 @@
       "price_eur": 18.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 11,
+      "stock": 0,
       "active": true,
       "description": "Kit para fabricar tus propios cables de red: crimpadora con pelacables y cortador, 50 conectores RJ45 Cat6 y 50 capuchones.",
       "specs": {
@@ -686,7 +686,7 @@
       "price_eur": 11.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 24,
+      "stock": 0,
       "active": true,
       "description": "Fuente de alimentación de sustitución para routers, ONT y switches. Comprueba voltaje, polaridad y tamaño de conector de tu fuente original.",
       "specs": {
@@ -720,7 +720,7 @@
       "price_eur": 14.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 13,
+      "stock": 0,
       "active": true,
       "description": "Par de joysticks con sensores magnéticos Hall Effect que eliminan el drift causado por el desgaste de los potenciómetros. Requiere soldadura.",
       "specs": {
@@ -753,7 +753,7 @@
       "price_eur": 12.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 21,
+      "stock": 0,
       "active": true,
       "description": "Pack de dos joysticks analógicos de sustitución para Joy-Con con drift o stick roto. Instalación sin soldadura con destornillador Y00.",
       "specs": {
@@ -786,7 +786,7 @@
       "price_eur": 24.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 6,
+      "stock": 0,
       "active": true,
       "description": "Ventilador centrífugo de sustitución para PS5. Recomendado si la consola hace ruido excesivo, se sobrecalienta o el ventilador no gira.",
       "specs": {
@@ -819,7 +819,7 @@
       "price_eur": 16.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 19,
+      "stock": 0,
       "active": true,
       "description": "Batería recargable para el compartimento de pilas del mando. Se carga en el propio mando con el cable USB-C incluido.",
       "specs": {
@@ -853,7 +853,7 @@
       "price_eur": 19.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 17,
+      "stock": 0,
       "active": true,
       "description": "Pack de 70 switches lineales prelubricados de recorrido suave, para sustituir switches dañados o personalizar tu teclado.",
       "specs": {
@@ -889,7 +889,7 @@
       "price_eur": 29.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 15,
+      "stock": 0,
       "active": true,
       "description": "Batería de sustitución con celdas de grado A y adhesivos incluidos. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida en el estado de la batería.",
       "specs": {
@@ -922,7 +922,7 @@
       "price_eur": 34.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 12,
+      "stock": 0,
       "active": true,
       "description": "Batería de sustitución con celdas de grado A y adhesivos incluidos. Tras la sustitución, iOS puede mostrar el aviso de pieza desconocida en el estado de la batería.",
       "specs": {
@@ -955,7 +955,7 @@
       "price_eur": 69.9,
       "grade": "premium",
       "edition": "estandar",
-      "stock": 4,
+      "stock": 0,
       "active": true,
       "description": "Pantalla OLED completa montada en marco, con táctil y lector de huellas en pantalla funcional. El marco facilita una instalación más rápida y segura.",
       "specs": {
@@ -989,7 +989,7 @@
       "price_eur": 14.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 10,
+      "stock": 0,
       "active": true,
       "description": "Placa secundaria con conector USB-C y micrófono. Soluciona problemas de carga, conexión con el PC o un conector flojo.",
       "specs": {
@@ -1023,7 +1023,7 @@
       "price_eur": 19.9,
       "grade": "estandar",
       "edition": "estandar",
-      "stock": 26,
+      "stock": 0,
       "active": true,
       "description": "Kit de reparación con mango de aluminio y 56 puntas magnéticas de acero S2 (Phillips, Torx, pentalobe, tri-wing, hexagonal…), más herramientas de apertura.",
       "specs": {
@@ -1058,7 +1058,7 @@
       "price_eur": 249.0,
       "grade": "premium",
       "edition": "especial",
-      "stock": 2,
+      "stock": 0,
       "active": true,
       "description": "Monitor de 27 pulgadas 2560 × 1440 con panel IPS de 165 Hz y 1 ms GtG. Serie limitada con peana de aluminio regulable en altura y giro.",
       "specs": {
@@ -1086,7 +1086,7 @@
       "price_eur": 119.0,
       "grade": "estandar",
       "edition": "especial",
-      "stock": 1,
+      "stock": 0,
       "active": true,
       "description": "Monitor de oficina y estudio de 24 pulgadas Full HD con panel IPS a 100 Hz, marcos finos y montaje VESA 100 × 100.",
       "specs": {
@@ -1115,7 +1115,7 @@
       "price_eur": 79.9,
       "grade": "premium",
       "edition": "especial",
-      "stock": 1,
+      "stock": 0,
       "active": true,
       "description": "Auriculares cerrados con conexión dual 2,4 GHz de baja latencia y Bluetooth 5.3, micrófono desmontable y hasta 40 horas de batería.",
       "specs": {
@@ -1168,7 +1168,7 @@
       "price_eur": 129.0,
       "grade": "premium",
       "edition": "especial",
-      "stock": 2,
+      "stock": 0,
       "active": true,
       "description": "Teclado mecánico compacto con carcasa de aluminio, montaje gasket, switches lineales hot-swap de 5 pines y distribución española ISO.",
       "specs": {
@@ -1194,7 +1194,7 @@
       "price_eur": 49.9,
       "grade": "estandar",
       "edition": "especial",
-      "stock": 2,
+      "stock": 0,
       "active": true,
       "description": "Ratón inalámbrico ultraligero con sensor óptico de 26 000 DPI, pies de PTFE y batería recargable por USB-C.",
       "specs": {
@@ -1221,7 +1221,7 @@
       "price_eur": 89.9,
       "grade": "premium",
       "edition": "especial",
-      "stock": 1,
+      "stock": 0,
       "active": true,
       "description": "Switch de sobremesa con ocho puertos RJ45 a 2,5 Gbps, carcasa metálica sin ventilador y conexión plug and play.",
       "specs": {
@@ -1273,7 +1273,7 @@
       "price_eur": 139.0,
       "grade": "premium",
       "edition": "especial",
-      "stock": 2,
+      "stock": 0,
       "active": true,
       "description": "SSD de 2 TB con lecturas de hasta 7 000 MB/s y disipador de aluminio de perfil bajo, apto para la ranura de expansión de PS5.",
       "specs": {
@@ -1299,7 +1299,7 @@
       "price_eur": 39.9,
       "grade": "estandar",
       "edition": "especial",
-      "stock": 1,
+      "stock": 0,
       "active": true,
       "description": "Tres ventiladores de 120 mm con rodamiento hidráulico, iluminación ARGB direccionable y concentrador incluido.",
       "specs": {
