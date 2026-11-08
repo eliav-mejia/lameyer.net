@@ -609,19 +609,8 @@ const Layout = ({ children }) => {
 
     const toggleMenu = () => setIsMobileMenuOpen(prev => !prev);
 
-    const handleRegisterClick = () => {
-        const formElement = document.getElementById('form-section');
-
-        if (formElement) {
-            // This page has the contact form
-            formElement.scrollIntoView({ behavior: 'smooth' });
-        } else {
-            // The form lives on the home page
-            window.location.href = '/#form-section';
-        }
-
-        if (isMobileMenuOpen) setIsMobileMenuOpen(false);
-    };
+    // "REGISTRO" (desktop and mobile menu) opens the account pop-up on the "Crear cuenta" tab. openAuth closes the mobile menu.
+    const handleRegisterClick = () => openAuth('signup');
 
     return (
         <div className="relative min-h-screen">
@@ -841,7 +830,7 @@ const ContactForm = () => {
     );
 };
 
-// Section with id="form-section": the target of every REGISTER button.
+// Section with id="form-section": the contact form (linked as /#form-section). REGISTRO in the menu opens the sign-up pop-up instead.
 const ContactSection = ({ title = 'Hablemos de su proyecto', text = 'Complete el formulario y nuestro equipo de expertos se pondrá en contacto con usted.' }) => (
     <section id="form-section" className="scroll-mt-32 py-32 px-2 md:px-8 relative z-20">
         <div className="max-w-4xl mx-auto glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl border border-white">

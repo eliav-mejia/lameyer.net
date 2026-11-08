@@ -37,6 +37,7 @@ Historial de versiones:
 | 1.1.0 | Cuentas de cliente con inicio de sesión real, página de ajustes de la cuenta |
 | 1.1.1 | Catálogo agotado; entrega solo a domicilio: todo Madrid (España) o toda la República Mexicana (México) |
 | 1.1.2 | Envío a domicilio a toda España con la bandera de España |
+| 1.1.3 | «Registro» abre la ventana de Crear cuenta; encuesta de WhatsApp de una pregunta a la vez |
 
 Los documentos de cada versión están disponibles bajo petición en contacto@lameyer.net.
 
@@ -293,6 +294,12 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 `locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
 
 ## Versiones
+
+### 1.1.3 — 2026-11-08 · Registro y encuesta de WhatsApp
+Detalle en `_interno/deployed/Lameyer-v1.1.3.pdf` (local).
+- El botón «Registro» del menú (escritorio y móvil) abre la ventana de cuenta en «Crear cuenta», en lugar de llevar al formulario de contacto.
+- Encuesta del chat de WhatsApp: primero «¿Qué sistema necesitas?», después empleados, presupuesto inicial y mensual. Cada pregunta respondida se pliega en una línea (se puede tocar para cambiarla) y solo queda abierta la siguiente, así el chat no necesita desplazarse.
+- El mensaje de WhatsApp lista las respuestas en ese mismo orden.
 
 ### 1.1.2 — 2026-11-08 · Envío a domicilio a toda España
 Detalle en `_interno/deployed/Lameyer-v1.1.2.pdf` (local).

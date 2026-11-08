@@ -426,7 +426,17 @@
         .lm-chat__start:hover { background: var(--lm-navy); transform: translateY(-1px); }
         .lm-chat__start svg { width: 18px; height: 18px; }
         .lm-chat__foot { margin: 12px 0 0; text-align: center; font-size: .7rem; color: var(--lm-muted); }
-        .lm-chat__step[hidden] { display: none; }
+        .lm-chat__step[hidden], .lm-chat [hidden] { display: none !important; }
+        /* Answered questions collapse to one line (tap to edit); only the current question is open, so the chat never needs scrolling. */
+        .lm-chat__q.is-done { margin-bottom: 6px; }
+        .lm-chat__done { display: flex; align-items: center; gap: 8px; width: 100%; border: 1px solid var(--lm-line); border-radius: 12px; padding: 7px 12px;
+            background: #f8fafc; cursor: pointer; font: inherit; text-align: left; color: var(--lm-ink); transition: border-color .2s; }
+        .lm-chat__done:hover { border-color: var(--lm-blue); }
+        .lm-chat__done:focus-visible { outline: 3px solid rgba(37, 99, 235, .45); outline-offset: 2px; }
+        .lm-chat__done::before { content: "✓"; color: #16a34a; font-weight: 800; font-size: .75rem; flex: none; }
+        .lm-chat__done::after { content: "✎"; color: var(--lm-muted); font-size: .8rem; flex: none; }
+        .lm-chat__done-k { font-size: .62rem; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--lm-muted); flex: none; }
+        .lm-chat__done-v { flex: 1; min-width: 0; font-size: .72rem; font-weight: 600; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
         .lm-chat__q { margin: 0 0 12px; }
         .lm-chat__q .lm-chat__label { margin-bottom: 5px; }
         .lm-chat__select { width: 100%; appearance: none; -webkit-appearance: none; border: 1px solid var(--lm-line); border-radius: 12px; padding: 8px 32px 8px 12px; cursor: pointer;
@@ -476,16 +486,20 @@
                 </div>
 
                 <form class="lm-chat__step lm-chat__survey" novalidate>
-                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-team" data-i18n="qTeam">¿Cuántos empleados?</label>
-                        <select class="lm-chat__select" id="lm-q-team" name="team" required></select></div>
-                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-setup" data-i18n="qSetup">Presupuesto inicial aproximado</label>
-                        <select class="lm-chat__select" id="lm-q-setup" name="setup" required></select></div>
-                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-monthly" data-i18n="qMonthly">Presupuesto mensual aproximado (retainer)</label>
-                        <select class="lm-chat__select" id="lm-q-monthly" name="monthly" required></select></div>
-                    <div class="lm-chat__q"><label class="lm-chat__label" for="lm-q-system" data-i18n="qSystem">¿Qué sistema necesitas?</label>
+                    <div class="lm-chat__q"><button class="lm-chat__done" type="button" hidden></button>
+                        <label class="lm-chat__label" for="lm-q-system" data-i18n="qSystem">¿Qué sistema necesitas?</label>
                         <select class="lm-chat__select" id="lm-q-system" name="system" required></select></div>
+                    <div class="lm-chat__q" hidden><button class="lm-chat__done" type="button" hidden></button>
+                        <label class="lm-chat__label" for="lm-q-team" data-i18n="qTeam">¿Cuántos empleados?</label>
+                        <select class="lm-chat__select" id="lm-q-team" name="team" required></select></div>
+                    <div class="lm-chat__q" hidden><button class="lm-chat__done" type="button" hidden></button>
+                        <label class="lm-chat__label" for="lm-q-setup" data-i18n="qSetup">Presupuesto inicial aproximado</label>
+                        <select class="lm-chat__select" id="lm-q-setup" name="setup" required></select></div>
+                    <div class="lm-chat__q" hidden><button class="lm-chat__done" type="button" hidden></button>
+                        <label class="lm-chat__label" for="lm-q-monthly" data-i18n="qMonthly">Presupuesto mensual aproximado (retainer)</label>
+                        <select class="lm-chat__select" id="lm-q-monthly" name="monthly" required></select></div>
                     <p class="lm-chat__err" role="alert" hidden data-i18n="err">Responde las cuatro preguntas para continuar.</p>
-                    <button class="lm-chat__next" type="submit" data-i18n="next">Continuar</button>
+                    <button class="lm-chat__next" type="submit" data-i18n="next" hidden>Continuar</button>
                 </form>
 
                 <div class="lm-chat__step lm-chat__compose" hidden>
@@ -536,6 +550,7 @@
                     qMonthly: 'Presupuesto mensual aproximado (retainer)',
                     qSystem: '¿Qué sistema necesitas?',
                     pick: 'Selecciona',
+                    edit: 'Editar',
                     err: 'Responde las cuatro preguntas para continuar.',
                     next: 'Continuar',
                     back: '← Editar respuestas',
@@ -561,6 +576,7 @@
                     qMonthly: 'Approximate monthly budget (retainer)',
                     qSystem: 'What system is required?',
                     pick: 'Select',
+                    edit: 'Edit',
                     err: 'Answer all four questions to continue.',
                     next: 'Continue',
                     back: '← Edit answers',
@@ -585,7 +601,10 @@
             var compose = root.querySelector('.lm-chat__compose');
             var errEl = root.querySelector('.lm-chat__err');
             var backBtn = root.querySelector('.lm-chat__back');
-            var QS = [['team', 'sumTeam'], ['setup', 'sumSetup'], ['monthly', 'sumMonthly'], ['system', 'sumSystem']];
+            var nextBtn = root.querySelector('.lm-chat__next');
+            // Order of the questions (and of the summary in the WhatsApp message): system first.
+            var QS = [['system', 'sumSystem'], ['team', 'sumTeam'], ['setup', 'sumSetup'], ['monthly', 'sumMonthly']];
+            var editing = null; // index of an answered question reopened with its ✎ row
             var answers = {}; // option index per question, kept across language switches
 
             var lang = /^en\b/i.test(navigator.language || '') ? 'en' : 'es';
@@ -615,10 +634,44 @@
             function defaultText() { return t('text') + '\n\n' + summary(); }
             function isDefault(v) { return LANGS.some(function (l) { var keep = lang; lang = l; var d = defaultText(); lang = keep; return v === d; }); }
 
+            // One question open at a time: the one being edited, else the first unanswered. Answered ones collapse to a ✓ row,
+            // later ones stay hidden until their turn, and «Continuar» appears once all four are answered.
+            function activeIndex() {
+                if (editing != null) return editing;
+                for (var i = 0; i < QS.length; i++) if (answers[QS[i][0]] == null) return i;
+                return -1;
+            }
+            function render() {
+                var act = activeIndex();
+                QS.forEach(function (q, i) {
+                    var sel = survey.elements[q[0]];
+                    var box = sel.parentNode;
+                    var done = box.querySelector('.lm-chat__done');
+                    var answered = answers[q[0]] != null;
+                    var open = i === act;
+                    box.hidden = !open && !answered;
+                    box.classList.toggle('is-done', answered && !open);
+                    box.querySelector('.lm-chat__label').hidden = !open;
+                    sel.hidden = !open;
+                    done.hidden = open || !answered;
+                    if (answered) {
+                        var k = document.createElement('span'); k.className = 'lm-chat__done-k'; k.textContent = t(q[1]);
+                        var v = document.createElement('span'); v.className = 'lm-chat__done-v'; v.textContent = t(q[0])[answers[q[0]]];
+                        done.replaceChildren(k, v);
+                        done.setAttribute('aria-label', t('edit') + ': ' + t(q[1]) + ', ' + t(q[0])[answers[q[0]]]);
+                    }
+                });
+                nextBtn.hidden = !complete();
+            }
+            function focusActive() {
+                var act = activeIndex();
+                (act >= 0 ? survey.elements[QS[act][0]] : nextBtn).focus();
+            }
+
             function showStep(toCompose) {
                 survey.hidden = toCompose;
                 compose.hidden = !toCompose;
-                (toCompose ? msg : survey.elements.team).focus();
+                if (toCompose) msg.focus(); else focusActive();
             }
 
             function setLauncherLabel() {
@@ -637,6 +690,7 @@
                 });
                 var wasDefault = !edited || isDefaultPrev(); // checked before the selects are rebuilt
                 fillSelects();
+                render();
                 // Swap the prefilled message only if the visitor hasn't written their own, or it's still a default.
                 if (complete() && wasDefault) { msg.value = defaultText(); edited = false; }
                 setLauncherLabel();
@@ -665,6 +719,15 @@
                     answers[q[0]] = e.target.value === '' ? null : +e.target.value;
                     e.target.parentNode.classList.remove('is-missing');
                     if (complete()) errEl.hidden = true;
+                    editing = null;
+                    render();
+                    // Keyboard / mouse: move on to the next question. On touch screens focusing a select can pop its picker open, so don't.
+                    if (window.matchMedia && window.matchMedia('(pointer: fine)').matches) focusActive();
+                });
+                survey.elements[q[0]].parentNode.querySelector('.lm-chat__done').addEventListener('click', function () {
+                    editing = QS.indexOf(q);
+                    render();
+                    survey.elements[q[0]].focus();
                 });
             });
 
@@ -676,7 +739,7 @@
                     survey.elements[q[0]].parentNode.classList.toggle('is-missing', miss);
                     if (miss && !first) first = survey.elements[q[0]];
                 });
-                if (first) { errEl.hidden = false; first.focus(); return; }
+                if (first) { errEl.hidden = false; editing = null; render(); focusActive(); return; }
                 errEl.hidden = true;
                 if (!edited || isDefault(msg.value) || !msg.value.trim()) { msg.value = defaultText(); edited = false; }
                 link();
@@ -690,7 +753,7 @@
                 root.classList.toggle('is-open', open);
                 launcher.setAttribute('aria-expanded', open ? 'true' : 'false');
                 setLauncherLabel();
-                if (open) (compose.hidden ? survey.elements.team : start).focus(); else launcher.focus();
+                if (open) { if (compose.hidden) focusActive(); else start.focus(); } else launcher.focus();
             }
             launcher.addEventListener('click', function () { setOpen(!root.classList.contains('is-open')); });
             closeBtn.addEventListener('click', function () { setOpen(false); });
