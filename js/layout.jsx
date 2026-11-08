@@ -166,7 +166,7 @@ const TXT = {
 // Google/Microsoft/email, an access-gated page or the pop-up being opened. Pages without accounts stay light.
 // Full notes: _interno/deployed/src/v1.1.0.html · Academy L4 «Social Login & RLS».
 const SUPABASE_URL = 'https://kcxjeinzwcpgfuolxadt.supabase.co';
-const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XJH9fIFGiyYrRjGdkprL5w_UIUGqRZM';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_UcZO-7XNSe8XnfG7WNyOBw_lPjTx9A7';   // rotated 2026-11-07: if this key is deleted in Supabase, every login fails
 const SUPABASE_JS = {
     src: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js',
     integrity: 'sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK',
@@ -191,9 +191,13 @@ const AUTH_ERRORS = [
     [/same password|different from the old/i, 'La nueva contraseña debe ser distinta de la actual.'],
     [/provider is not enabled|unsupported provider/i, 'Ese método de acceso no está disponible todavía.'],
     [/failed to fetch|network/i, 'Sin conexión con el servidor de cuentas. Revisa tu conexión.'],
+    [/unregistered api key|invalid api key|no api key/i, 'El servicio de cuentas no está disponible ahora mismo. Inténtalo más tarde.'],
+    [/error sending|sending.*email|not authorized|smtp/i, 'No pudimos enviar el correo de confirmación. Inténtalo más tarde.'],
+    [/database error/i, 'No se pudo crear la cuenta. Inténtalo más tarde.'],
 ];
 const authError = (err) => {
     const msg = (err && err.message) || '';
+    console.error('[lameyer] Supabase Auth:', (err && (err.code || err.status)) || '', msg);   // raw cause for diagnosis (no tokens in it)
     const hit = AUTH_ERRORS.find(([re]) => re.test(msg));
     return new Error(hit ? hit[1] : 'No se pudo completar la operación. Inténtalo de nuevo.');
 };
