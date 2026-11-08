@@ -54,7 +54,7 @@
             'Registra los cambios con changesets',
         ];
 
-        const KINDS = [
+        const PAQUETES = [
             { pkg: '@acme/kernel', holds: 'Dinero, IDs, fechas, tipo Result', rule: 'Diminuto y estable. Los cambios necesitan revisión de arquitectura.' },
             { pkg: '@contracts/billing', holds: 'Esquemas + tipos OpenAPI generados', rule: 'Propiedad del equipo del módulo billing.' },
             { pkg: '@acme/logger', holds: 'Logging estructurado con IDs de petición', rule: 'Funciona en Node y en Workers.' },
@@ -78,7 +78,7 @@
                 </P>
                 <Table
                     columns={[{ key: 'pkg', label: 'Paquete', mono: true }, { key: 'holds', label: 'Contiene' }, { key: 'rule', label: 'Regla' }]}
-                    rows={KINDS}
+                    rows={PAQUETES}
                 />
                 <Callout title="Duplicar es más barato que la abstracción equivocada">
                     Que dos módulos tengan código parecido no es motivo para crear un paquete. Si el código cambia por motivos de negocio

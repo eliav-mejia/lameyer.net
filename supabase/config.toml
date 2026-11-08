@@ -1,0 +1,91 @@
+# lameyer.net · Supabase project kcxjeinzwcpgfuolxadt
+# Source of truth for the local CLI (`supabase start`) and for Branching previews (one per pull request).
+# Production values are ALSO set in the dashboard: check them against this file after every deploy
+# (checklist: _interno/deployed/src/v1.1.0.html §4). No secrets here: only env(...).
+# Values from Academy L4 «Social Login & RLS» and builds/sites/_plataforma/etapas/etapa-8-inicio-de-sesion/.
+project_id = "lameyer-net"
+
+[api]
+enabled = true
+schemas = ["public", "graphql_public"]
+extra_search_path = ["public", "extensions"]
+max_rows = 200
+
+[db]
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "https://lameyer.net"
+# EXACT list of return addresses. Every email link and Google/Microsoft return lands on /cuenta/. No wildcards.
+additional_redirect_urls = ["https://lameyer.net/cuenta/"]
+jwt_expiry = 900                                # 15 min
+enable_refresh_token_rotation = true
+refresh_token_reuse_interval = 10               # s; reuse outside the window revokes the whole token family
+enable_signup = true
+enable_anonymous_sign_ins = false               # anonymous users are "authenticated" too: off
+enable_manual_linking = false                   # same verified email links automatically; nothing else
+minimum_password_length = 12
+password_requirements = "lower_upper_letters_digits_symbols"
+
+[auth.rate_limit]                               # per IP
+email_sent = 2                                  # default Supabase SMTP: raise to 30 only with own SMTP
+sms_sent = 0
+token_refresh = 150                             # per 5 min
+sign_in_sign_ups = 20                           # per 5 min
+token_verifications = 20                        # per 5 min
+
+[auth.captcha]                                  # PENDING: Cloudflare Turnstile (site key in js/layout.jsx + secret here)
+enabled = false
+provider = "turnstile"
+secret = "env(TURNSTILE_SECRET_KEY)"
+
+[auth.email]
+enable_signup = true
+enable_confirmations = true                     # verified email before the first session
+double_confirm_changes = true                   # email change: confirm on old AND new address
+secure_password_change = true                   # changing the password needs a recent sign-in
+max_frequency = "60s"
+otp_length = 6
+otp_expiry = 600
+
+# PENDING: own SMTP (no-responder@lameyer.net) with SPF, DKIM, DMARC. Until then Supabase's test SMTP sends ~2 emails/hour.
+# [auth.email.smtp]
+# enabled = true
+# host = "env(SMTP_HOST)"
+# port = 587
+# user = "env(SMTP_USER)"
+# pass = "env(SMTP_PASS)"
+# admin_email = "no-responder@lameyer.net"
+# sender_name = "Lameyer"
+
+[auth.sms]
+enable_signup = false
+
+[auth.mfa]
+max_enrolled_factors = 10
+
+[auth.mfa.totp]
+enroll_enabled = true
+verify_enabled = true
+
+[auth.mfa.phone]                                # SMS: SIM swapping, cost
+enroll_enabled = false
+verify_enabled = false
+
+# Social providers. The site shows a button ONLY for providers enabled in the project (reads /auth/v1/settings).
+# Callback to register at Google and Microsoft: https://kcxjeinzwcpgfuolxadt.supabase.co/auth/v1/callback
+[auth.external.google]
+enabled = false
+client_id = "env(GOOGLE_CLIENT_ID)"
+secret = "env(GOOGLE_CLIENT_SECRET)"
+skip_nonce_check = false
+
+[auth.external.azure]                           # Microsoft Entra ID; add optional claims email + xms_edov
+enabled = false
+client_id = "env(AZURE_CLIENT_ID)"
+secret = "env(AZURE_CLIENT_SECRET)"
+url = "https://login.microsoftonline.com/common"
+
+[functions.eliminar-cuenta]
+verify_jwt = true                               # auth: 'user' (JWT) in the function too

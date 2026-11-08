@@ -2,7 +2,8 @@
 //   <script type="text/babel" src="/js/layout.jsx"></script>
 //   <script type="text/babel" src="/js/acceso.jsx"></script>
 // Layout (js/layout.jsx) asks accessRuleFor(path) which rule applies and wraps the page in <AccessGate>.
-// The login form itself is AuthModal (js/layout.jsx); this file only decides when it opens and whether it can be closed.
+// The login form itself is AuthModal (js/layout.jsx, Supabase Auth); this file only decides when it opens and whether it can be closed.
+// It hides content as a courtesy: anything really private must also be protected by RLS in Supabase (supabase/migrations/).
 
 // First matching prefix wins. Pages without a rule (inicio, términos, comunidad...) open freely.
 //   required: the page content is not rendered until the visitor logs in; the pop-up cannot be closed.
@@ -71,7 +72,8 @@ const AccessGate = ({ rule, user, onUser, children }) => {
 
     // A login or logout in another tab applies here too.
     useEffect(() => {
-        const onStorage = (e) => { if (e.key === 'lm-session' || e.key === 'lm-users' || e.key === null) onUser(auth.current()); };
+        // SESSION_KEY = the Supabase session in localStorage (js/layout.jsx)
+        const onStorage = (e) => { if (e.key === SESSION_KEY || e.key === null) onUser(auth.current()); };
         window.addEventListener('storage', onStorage);
         return () => window.removeEventListener('storage', onStorage);
     }, []);

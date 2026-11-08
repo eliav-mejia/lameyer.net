@@ -145,54 +145,194 @@ const LanguageSwitcher = ({ withLabels = false }) => {
 // --- POP-UP TEXT ---
 const TXT = {
     login: 'Iniciar sesión', signup: 'Crear cuenta', account: 'Mi cuenta', logout: 'Cerrar sesión', close: 'Cerrar',
-    name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 8 caracteres',
+    name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos',
+    withGoogle: 'Continuar con Google', withMicrosoft: 'Continuar con Microsoft', orEmail: 'o con tu email',
+    forgot: '¿Olvidaste tu contraseña?', resetTitle: 'Recuperar acceso', resetIntro: 'Te enviaremos un enlace para elegir una contraseña nueva.',
+    resetSend: 'Enviar enlace', resetSent: 'Si existe una cuenta con ese email, recibirás un enlace en unos minutos.', back: 'Volver',
+    checkEmailTitle: 'Revisa tu correo', checkEmail: 'Te enviamos un enlace de confirmación a', checkEmailHint: 'Ábrelo en este mismo navegador para entrar directamente.',
+    settings: 'Ajustes de la cuenta', privacyNote: 'Al crear tu cuenta aceptas los', terms: 'términos y condiciones',
     loginIntro: 'Accede a tu cuenta de Lameyer.', signupIntro: 'Crea tu cuenta para guardar tus pedidos y proyectos.',
     noAccount: '¿No tienes cuenta?', haveAccount: '¿Ya tienes cuenta?', loggedInAs: 'Has iniciado sesión como',
-    errWrong: 'Email o contraseña incorrectos.', errExists: 'Ya existe una cuenta con ese email.', errShort: 'La contraseña debe tener al menos 8 caracteres.',
-    errStorage: 'Tu navegador bloquea el almacenamiento local; no se puede iniciar sesión.', errCrypto: 'Abre la web por https para iniciar sesión.',
-    working: 'Procesando...',
+        working: 'Procesando...',
     cookiesTitle: 'Usamos cookies',
     cookiesText: 'Usamos cookies necesarias para que la web funcione (país, carrito, sesión). Con tu permiso, también usaremos cookies para medir y mejorar la web.',
     cookiesAccept: 'Aceptar todas', cookiesReject: 'Solo necesarias', cookiesMore: 'Más información',
 };
 
-// --- ACCOUNTS (login / sign up) ---
-// STAGING: there is no server yet, so accounts live only in this browser's localStorage ('lm-users'), with salted
-// SHA-256 password hashes, and the session in 'lm-session'. Replace the three functions in `auth` with calls to a real
-// backend (Workers + D1, Supabase...) before launch; the pop-up does not need to change.
-const authStore = {
-    read: (key, fallback) => { try { const v = localStorage.getItem(key); return v === null ? fallback : JSON.parse(v); } catch (e) { return fallback; } },
-    write: (key, value) => { localStorage.setItem(key, JSON.stringify(value)); },   // throws if storage is blocked
+// --- ACCOUNTS (login / sign up) · Supabase Auth ---
+// Project kcxjeinzwcpgfuolxadt. The URL and the PUBLISHABLE key are public by design: what a visitor can read or write
+// is decided by Row Level Security in the database (supabase/migrations/). The secret key never comes near this file.
+// supabase-js is loaded on demand (pinned + SRI) only when it is needed: a stored session, a ?code= return from
+// Google/Microsoft/email, an access-gated page or the pop-up being opened. Pages without accounts stay light.
+// Full notes: _interno/deployed/src/v1.1.0.html · Academy L4 «Social Login & RLS».
+const SUPABASE_URL = 'https://kcxjeinzwcpgfuolxadt.supabase.co';
+const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_XJH9fIFGiyYrRjGdkprL5w_UIUGqRZM';
+const SUPABASE_JS = {
+    src: 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.118.0/dist/umd/supabase.js',
+    integrity: 'sha384-TcHRA3zBbn+Lexh5n+Oil4guNPOS3rjNDpGRAN46u/s/mB2IZ50ceC6TYDU2yvgK',
+};
+const SESSION_KEY = 'sb-kcxjeinzwcpgfuolxadt-auth-token';   // where supabase-js keeps the session (localStorage)
+const ACCOUNT_PATH = '/cuenta/';                             // every email link and OAuth return lands here (exact URL in Supabase)
+const RETURN_KEY = 'lm-volver';                              // sessionStorage: page to go back to after /cuenta/
+const RECOVERY_KEY = 'lm-recuperar';                         // localStorage: time a reset link was requested here
+
+// The old staging accounts (password hashes in this browser) are retired: remove them once.
+try { localStorage.removeItem('lm-users'); localStorage.removeItem('lm-session'); } catch (e) {}
+
+const AUTH_ERRORS = [
+    [/invalid login credentials/i, 'Email o contraseña incorrectos.'],
+    [/email not confirmed/i, 'Confirma tu email: te enviamos un enlace al registrarte.'],
+    [/already registered|already been registered/i, 'Ya existe una cuenta con ese email.'],
+    [/password should be at least|weak password|password.*characters/i, 'La contraseña es demasiado débil: usa al menos 12 caracteres con mayúsculas, minúsculas, números y símbolos.'],
+    [/pwned|leaked|compromised/i, 'Esa contraseña apareció en una filtración conocida. Elige otra.'],
+    [/rate limit|too many|security purposes/i, 'Demasiados intentos. Espera un minuto y vuelve a probar.'],
+    [/captcha/i, 'No se pudo verificar que eres una persona. Recarga la página.'],
+    [/reauthenticat|recent login|nonce/i, 'Por seguridad, cierra sesión y vuelve a entrar antes de cambiar la contraseña.'],
+    [/same password|different from the old/i, 'La nueva contraseña debe ser distinta de la actual.'],
+    [/provider is not enabled|unsupported provider/i, 'Ese método de acceso no está disponible todavía.'],
+    [/failed to fetch|network/i, 'Sin conexión con el servidor de cuentas. Revisa tu conexión.'],
+];
+const authError = (err) => {
+    const msg = (err && err.message) || '';
+    const hit = AUTH_ERRORS.find(([re]) => re.test(msg));
+    return new Error(hit ? hit[1] : 'No se pudo completar la operación. Inténtalo de nuevo.');
 };
 
-const hashPassword = async (password, salt) => {
-    if (!window.crypto || !crypto.subtle) throw new Error(TXT.errCrypto);
-    const bytes = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(`${salt}:${password}`));
-    return Array.from(new Uint8Array(bytes), b => b.toString(16).padStart(2, '0')).join('');
+let supabaseClientPromise = null;
+const loadSupabase = () => supabaseClientPromise || (supabaseClientPromise = new Promise((resolve, reject) => {
+    const make = () => resolve(window.supabase.createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+        auth: { flowType: 'pkce', detectSessionInUrl: true, persistSession: true, autoRefreshToken: true },
+    }));
+    if (window.supabase && window.supabase.createClient) return make();
+    const tag = document.createElement('script');
+    tag.src = SUPABASE_JS.src;
+    tag.integrity = SUPABASE_JS.integrity;
+    tag.crossOrigin = 'anonymous';
+    tag.onload = make;
+    tag.onerror = () => { supabaseClientPromise = null; reject(new Error('Sin conexión con el servidor de cuentas. Revisa tu conexión.')); };
+    document.head.appendChild(tag);
+}));
+
+// User object the whole site uses: { id, name, email, providers }. Display only; decisions are made by RLS.
+const toUser = (u) => u ? {
+    id: u.id,
+    email: u.email || '',
+    name: (u.user_metadata && (u.user_metadata.full_name || u.user_metadata.name)) || (u.email || '').split('@')[0] || 'Cuenta',
+    providers: (u.app_metadata && u.app_metadata.providers) || [],
+} : null;
+
+// Which sign-in methods are switched on in Supabase (Authentication → Sign In / Providers). Buttons appear only for those.
+let providersPromise = null;
+const loadProviders = () => providersPromise || (providersPromise = fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY } })
+    .then(r => r.ok ? r.json() : { external: {} })
+    .then(s => ({ google: !!s.external.google, azure: !!s.external.azure, email: !!s.external.email, signup: !s.disable_signup }))
+    .catch(() => ({ google: false, azure: false, email: true, signup: true })));
+
+const rememberReturn = () => {
+    const here = window.location.pathname + window.location.search + window.location.hash;
+    if (!here.startsWith(ACCOUNT_PATH)) { try { sessionStorage.setItem(RETURN_KEY, here); } catch (e) {} }
 };
+const accountUrl = () => `${window.location.origin}${ACCOUNT_PATH}`;
 
 const auth = {
+    // Instant guess from the stored session, so the header shows the name without waiting. Never used for access.
     current: () => {
-        const email = authStore.read('lm-session', null);
-        const user = email && authStore.read('lm-users', {})[email];
-        return user ? { name: user.name, email } : null;
+        try {
+            const raw = localStorage.getItem(SESSION_KEY);
+            const s = raw && JSON.parse(raw);
+            return s && s.user ? toUser(s.user) : null;
+        } catch (e) { return null; }
     },
+    // Load the client only when an account can be involved on this page.
+    needed: () => {
+        try { if (localStorage.getItem(SESSION_KEY)) return true; } catch (e) {}
+        return /[?&](code|error_description|token_hash)=/.test(window.location.search) || window.location.pathname.startsWith(ACCOUNT_PATH);
+    },
+    client: loadSupabase,
+    providers: loadProviders,
+    // Asks the Auth server (getUser), so a revoked or expired session shows as logged out.
+    verify: async () => {
+        const sb = await loadSupabase();
+        const { data, error } = await sb.auth.getUser();
+        return error ? null : toUser(data.user);
+    },
+    onChange: async (callback) => {
+        const sb = await loadSupabase();
+        const { data } = sb.auth.onAuthStateChange((_event, session) => callback(toUser(session && session.user)));
+        return () => data.subscription.unsubscribe();
+    },
+    // → { user } when logged in at once, or { pending: email } when Supabase sent a confirmation link first.
     signup: async ({ name, email, password }) => {
-        if (password.length < 8) throw new Error(TXT.errShort);
-        const users = authStore.read('lm-users', {});
-        if (users[email]) throw new Error(TXT.errExists);
-        const salt = Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
-        users[email] = { name, salt, hash: await hashPassword(password, salt), created: new Date().toISOString() };
-        try { authStore.write('lm-users', users); authStore.write('lm-session', email); } catch (e) { throw new Error(TXT.errStorage); }
-        return { name, email };
+        const sb = await loadSupabase();
+        rememberReturn();
+        const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: name }, emailRedirectTo: accountUrl() } });
+        if (error) throw authError(error);
+        // An existing confirmed email comes back with no identities (Supabase hides that the account exists).
+        if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) return { pending: email };
+        return data.session ? { user: toUser(data.user) } : { pending: email };
     },
     login: async ({ email, password }) => {
-        const user = authStore.read('lm-users', {})[email];
-        if (!user || user.hash !== await hashPassword(password, user.salt)) throw new Error(TXT.errWrong);
-        try { authStore.write('lm-session', email); } catch (e) { throw new Error(TXT.errStorage); }
-        return { name: user.name, email };
+        const sb = await loadSupabase();
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) throw authError(error);
+        return { user: toUser(data.user) };
     },
-    logout: () => { try { localStorage.removeItem('lm-session'); } catch (e) {} },
+    // Google → 'google', Microsoft → 'azure'. The browser leaves the site and comes back to /cuenta/?code=…
+    oauth: async (provider) => {
+        const sb = await loadSupabase();
+        rememberReturn();
+        const options = provider === 'azure'
+            ? { redirectTo: accountUrl(), scopes: 'email' }
+            : { redirectTo: accountUrl(), queryParams: { prompt: 'select_account' } };
+        const { error } = await sb.auth.signInWithOAuth({ provider, options });
+        if (error) throw authError(error);
+    },
+    resetPassword: async (email) => {
+        const sb = await loadSupabase();
+        // Same exact /cuenta/ URL as every other link (no query: Redirect URLs are matched exactly). /cuenta/ sees
+        // RECOVERY_KEY and asks for the new password first. PKCE: the link only signs in from this same browser.
+        const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: accountUrl() });
+        if (error) throw authError(error);
+        try { localStorage.setItem(RECOVERY_KEY, String(Date.now())); } catch (e) {}
+    },
+    logout: async (scope = 'local') => {
+        try { const sb = await loadSupabase(); await sb.auth.signOut({ scope }); }
+        catch (e) { try { localStorage.removeItem(SESSION_KEY); } catch (e2) {} }
+    },
+};
+
+const GoogleIcon = () => (
+    <svg className="w-5 h-5" viewBox="0 0 48 48" aria-hidden="true">
+        <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z" />
+        <path fill="#FF3D00" d="m6.3 14.7 6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z" />
+        <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z" />
+        <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z" />
+    </svg>
+);
+const MicrosoftIcon = () => (
+    <svg className="w-5 h-5" viewBox="0 0 23 23" aria-hidden="true">
+        <path fill="#f25022" d="M1 1h10v10H1z" /><path fill="#7fba00" d="M12 1h10v10H12z" /><path fill="#00a4ef" d="M1 12h10v10H1z" /><path fill="#ffb900" d="M12 12h10v10H12z" />
+    </svg>
+);
+
+// "Continuar con Google / Microsoft". Only the providers enabled in Supabase are shown; none enabled = nothing rendered.
+const SocialButtons = ({ onError }) => {
+    const [providers, setProviders] = useState(null);
+    const [busy, setBusy] = useState('');
+    useEffect(() => { let alive = true; loadProviders().then(p => alive && setProviders(p)); return () => { alive = false; }; }, []);
+    if (!providers || (!providers.google && !providers.azure)) return null;
+    const go = async (provider) => {
+        setBusy(provider);
+        try { await auth.oauth(provider); } catch (err) { onError(err.message); setBusy(''); }
+    };
+    const btn = "w-full flex items-center justify-center gap-3 py-3.5 rounded-full border border-gray-200 bg-white text-gray-800 font-bold text-sm hover:border-blue-500 transition-colors disabled:opacity-60";
+    return (
+        <div className="space-y-3 mb-6">
+            {providers.google && <button type="button" disabled={!!busy} onClick={() => go('google')} className={btn}><GoogleIcon />{busy === 'google' ? TXT.working : TXT.withGoogle}</button>}
+            {providers.azure && <button type="button" disabled={!!busy} onClick={() => go('azure')} className={btn}><MicrosoftIcon />{busy === 'azure' ? TXT.working : TXT.withMicrosoft}</button>}
+            <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-gray-400"><span className="flex-1 h-px bg-gray-200" />{TXT.orEmail}<span className="flex-1 h-px bg-gray-200" /></div>
+        </div>
+    );
 };
 
 const UserIcon = ({ className = 'w-4 h-4' }) => (
@@ -201,12 +341,13 @@ const UserIcon = ({ className = 'w-4 h-4' }) => (
     </svg>
 );
 
-// Pop-up window with "Log in" and "Sign up" tabs; shows the account (and Log out) once logged in.
+// Pop-up window with "Log in" and "Sign up" tabs (+ "forgot password"); shows the account (settings, Log out) once logged in.
 // js/acceso.jsx reuses it as the access pop-up: `locked` hides the close button and ignores Escape and clicks outside,
 // `notice` adds a line above the form and `footer` goes under it.
 const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notice = null, footer = null }) => {
     const [error, setError] = useState('');
     const [busy, setBusy] = useState(false);
+    const [sent, setSent] = useState(null);    // { kind: 'confirm' | 'reset', email }
     const dialogRef = useRef(null);
 
     useEffect(() => {
@@ -223,6 +364,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notic
         document.addEventListener('keydown', onKey);
         const overflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
+        auth.client().catch(() => {});   // start loading supabase-js while the visitor types
         return () => {
             document.removeEventListener('keydown', onKey);
             document.body.style.overflow = overflow;
@@ -230,29 +372,37 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notic
         };
     }, []);
 
-    useEffect(() => { setError(''); }, [mode]);
+    useEffect(() => { setError(''); setSent(null); }, [mode]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         const form = new FormData(e.target);
         const data = {
-            name: (form.get('name') || '').trim(),
+            name: (form.get('name') || '').trim().slice(0, 80),
             email: (form.get('email') || '').trim().toLowerCase(),
             password: form.get('password') || '',
         };
         setBusy(true);
         setError('');
         try {
-            onUser(mode === 'signup' ? await auth.signup(data) : await auth.login(data));
-            if (!locked) onClose();
+            if (mode === 'reset') {
+                await auth.resetPassword(data.email);
+                setSent({ kind: 'reset', email: data.email });
+            } else {
+                const result = mode === 'signup' ? await auth.signup(data) : await auth.login(data);
+                if (result.pending) setSent({ kind: 'confirm', email: result.pending });
+                else { onUser(result.user); if (!locked) onClose(); }
+            }
         } catch (err) {
             setError(err.message);
-            setBusy(false);
         }
+        setBusy(false);
     };
 
     const inputClass = "w-full px-5 py-3.5 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all";
     const tabClass = (on) => `flex-1 py-2.5 rounded-full text-xs font-black uppercase tracking-widest transition-colors ${on ? 'bg-blue-600 text-white' : 'text-gray-500 hover:text-blue-600'}`;
+    const primary = "w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs transition-all disabled:opacity-60";
+    const title = mode === 'signup' ? TXT.signup : mode === 'reset' ? TXT.resetTitle : TXT.login;
 
     return (
         <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a192f]/60 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => !locked && e.target === e.currentTarget && onClose()}>
@@ -271,50 +421,84 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notic
                         <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-2">{TXT.account}</h2>
                         <p className="text-sm text-gray-500 font-medium mb-1">{TXT.loggedInAs}</p>
                         <p className="text-gray-900 font-bold mb-8 break-all">{user.name} · {user.email}</p>
-                        <button type="button" autoFocus onClick={() => { auth.logout(); onUser(null); onClose(); }} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs transition-all">
+                        <a href={ACCOUNT_PATH} className={`block mb-3 ${primary}`}>{TXT.settings}</a>
+                        <button type="button" autoFocus onClick={async () => { await auth.logout(); onUser(null); onClose(); }} className="w-full py-4 rounded-full border border-gray-200 text-gray-700 hover:text-blue-600 hover:border-blue-500 font-black uppercase tracking-widest text-xs transition-colors">
                             {TXT.logout}
                         </button>
                     </div>
+                ) : sent ? (
+                    <div className="text-center pt-2" role="status">
+                        <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-4">{sent.kind === 'reset' ? TXT.resetTitle : TXT.checkEmailTitle}</h2>
+                        {sent.kind === 'reset' ? (
+                            <p className="text-sm text-gray-600 font-medium mb-8">{TXT.resetSent}</p>
+                        ) : (
+                            <>
+                                <p className="text-sm text-gray-600 font-medium mb-1">{TXT.checkEmail}</p>
+                                <p className="text-gray-900 font-bold mb-4 break-all">{sent.email}</p>
+                                <p className="text-xs text-gray-500 font-medium mb-8">{TXT.checkEmailHint}</p>
+                            </>
+                        )}
+                        <button type="button" autoFocus onClick={() => { setSent(null); setError(''); setMode('login'); }} className={primary}>{TXT.back}</button>
+                        {footer}
+                    </div>
                 ) : (
                     <>
-                        <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-2 pr-10">{mode === 'signup' ? TXT.signup : TXT.login}</h2>
-                        <p className="text-sm text-gray-500 font-medium mb-6">{notice || (mode === 'signup' ? TXT.signupIntro : TXT.loginIntro)}</p>
+                        <h2 id="auth-title" className="text-2xl font-black text-gray-900 tracking-tight mb-2 pr-10">{title}</h2>
+                        <p className="text-sm text-gray-500 font-medium mb-6">{mode === 'reset' ? TXT.resetIntro : (notice || (mode === 'signup' ? TXT.signupIntro : TXT.loginIntro))}</p>
 
-                        <div className="flex gap-1 p-1 mb-6 rounded-full border border-gray-200" role="tablist">
-                            <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => setMode('login')} className={tabClass(mode === 'login')}>{TXT.login}</button>
-                            <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => setMode('signup')} className={tabClass(mode === 'signup')}>{TXT.signup}</button>
-                        </div>
+                        {mode !== 'reset' && (
+                            <div className="flex gap-1 p-1 mb-6 rounded-full border border-gray-200" role="tablist">
+                                <button type="button" role="tab" aria-selected={mode === 'login'} onClick={() => setMode('login')} className={tabClass(mode === 'login')}>{TXT.login}</button>
+                                <button type="button" role="tab" aria-selected={mode === 'signup'} onClick={() => setMode('signup')} className={tabClass(mode === 'signup')}>{TXT.signup}</button>
+                            </div>
+                        )}
+
+                        {mode !== 'reset' && <SocialButtons onError={setError} />}
 
                         <form key={mode} onSubmit={handleSubmit} className="space-y-4">
                             {mode === 'signup' && (
                                 <div>
                                     <label htmlFor="auth-name" className="block text-sm font-bold text-gray-700 mb-2">{TXT.name}</label>
-                                    <input id="auth-name" name="name" type="text" required autoComplete="name" autoFocus className={inputClass} />
+                                    <input id="auth-name" name="name" type="text" required maxLength={80} autoComplete="name" autoFocus className={inputClass} />
                                 </div>
                             )}
                             <div>
                                 <label htmlFor="auth-email" className="block text-sm font-bold text-gray-700 mb-2">{TXT.email}</label>
-                                <input id="auth-email" name="email" type="email" required autoComplete="email" autoFocus={mode === 'login'} className={inputClass} />
+                                <input id="auth-email" name="email" type="email" required autoComplete="email" autoFocus={mode !== 'signup'} className={inputClass} />
                             </div>
-                            <div>
-                                <label htmlFor="auth-password" className="block text-sm font-bold text-gray-700 mb-2">{TXT.password}</label>
-                                <input id="auth-password" name="password" type="password" required minLength={mode === 'signup' ? 8 : undefined}
-                                    autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} className={inputClass} />
-                                {mode === 'signup' && <p className="mt-2 text-xs text-gray-500 font-medium">{TXT.passwordHint}</p>}
-                            </div>
+                            {mode !== 'reset' && (
+                                <div>
+                                    <label htmlFor="auth-password" className="block text-sm font-bold text-gray-700 mb-2">{TXT.password}</label>
+                                    <input id="auth-password" name="password" type="password" required minLength={mode === 'signup' ? 12 : undefined}
+                                        autoComplete={mode === 'signup' ? 'new-password' : 'current-password'} className={inputClass} />
+                                    {mode === 'signup' && <p className="mt-2 text-xs text-gray-500 font-medium">{TXT.passwordHint}</p>}
+                                    {mode === 'login' && (
+                                        <button type="button" onClick={() => setMode('reset')} className="mt-2 text-xs font-bold text-blue-600 hover:underline">{TXT.forgot}</button>
+                                    )}
+                                </div>
+                            )}
 
                             {error && <p role="alert" className="text-sm font-bold text-red-600">{error}</p>}
 
-                            <button type="submit" disabled={busy} className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white font-black rounded-full uppercase tracking-widest text-xs transition-all disabled:opacity-60">
-                                {busy ? TXT.working : (mode === 'signup' ? TXT.signup : TXT.login)}
+                            <button type="submit" disabled={busy} className={primary}>
+                                {busy ? TXT.working : (mode === 'signup' ? TXT.signup : mode === 'reset' ? TXT.resetSend : TXT.login)}
                             </button>
+                            {mode === 'signup' && (
+                                <p className="text-xs text-gray-500 font-medium text-center">{TXT.privacyNote} <a href="/pages/terminos/" className="font-bold text-blue-600 hover:underline">{TXT.terms}</a>.</p>
+                            )}
                         </form>
 
                         <p className="mt-6 text-center text-sm text-gray-500 font-medium">
-                            {mode === 'signup' ? TXT.haveAccount : TXT.noAccount}{' '}
-                            <button type="button" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')} className="font-bold text-blue-600 hover:underline">
-                                {mode === 'signup' ? TXT.login : TXT.signup}
-                            </button>
+                            {mode === 'reset' ? (
+                                <button type="button" onClick={() => setMode('login')} className="font-bold text-blue-600 hover:underline">{TXT.back}</button>
+                            ) : (
+                                <>
+                                    {mode === 'signup' ? TXT.haveAccount : TXT.noAccount}{' '}
+                                    <button type="button" onClick={() => setMode(mode === 'signup' ? 'login' : 'signup')} className="font-bold text-blue-600 hover:underline">
+                                        {mode === 'signup' ? TXT.login : TXT.signup}
+                                    </button>
+                                </>
+                            )}
                         </p>
                         {footer}
                     </>
@@ -385,6 +569,14 @@ const Particles = () => (
 const Layout = ({ children }) => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [user, setUser] = useState(auth.current);
+    // Confirm the stored session with the Auth server and follow logins/logouts (also from other tabs).
+    useEffect(() => {
+        if (!auth.needed()) return;
+        let stop = null, alive = true;
+        auth.verify().then(u => alive && setUser(u)).catch(() => {});
+        auth.onChange(u => alive && setUser(u)).then(fn => { stop = fn; }).catch(() => {});
+        return () => { alive = false; if (stop) stop(); };
+    }, []);
     const [authMode, setAuthMode] = useState(null);   // null (closed), 'login' or 'signup'
     // Access pop-up for this page (js/acceso.jsx); pages that do not load acceso.jsx have none.
     const access = typeof accessRuleFor === 'function' ? accessRuleFor(window.location.pathname) : null;

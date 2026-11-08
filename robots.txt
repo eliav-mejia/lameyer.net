@@ -3,6 +3,7 @@
 
 User-agent: *
 Disallow: /tools/
+Disallow: /cuenta/
 Disallow: /whatsapp-chat-snippet.html
 Allow: /
 

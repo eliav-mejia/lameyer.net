@@ -1,8 +1,15 @@
 # Documentación interna: detalle de seguridad. Solo en el equipo local; nunca en el repositorio ni en el sitio.
 _interno/
 
-# Configuración local del editor / agente
+# Configuración local del editor / agente (skills instaladas con `npx skills add`: se restauran desde skills-lock.json)
 .claude/
+
+# Dependencias de Node (package.json + package-lock.json sí entran)
+node_modules/
+
+# Supabase CLI: estado local
+supabase/.temp/
+supabase/.branches/
 
 # Secretos: claves de API, variables locales y códigos de recuperación (2FA) nunca entran al repositorio.
 # Los códigos de respaldo de Stripe, GitHub, Supabase, etc. viven solo en el gestor de contraseñas. Ver SECURITY.md.

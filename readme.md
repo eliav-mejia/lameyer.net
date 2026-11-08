@@ -34,6 +34,7 @@ Historial de versiones:
 | 1.0.8 | Acceso para clientes en Componentes, acceso opcional en Academia |
 | 1.0.9 | Estructura SEO, botón de WhatsApp con encuesta previa, protección contra la página en blanco |
 | 1.0.10 | Documentación de versiones pasa a uso interno |
+| 1.1.0 | Cuentas de cliente con inicio de sesión real, página de ajustes de la cuenta |
 
 Los documentos de cada versión están disponibles bajo petición en contacto@lameyer.net.
 
@@ -290,6 +291,14 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 `locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
 
 ## Versiones
+
+### 1.1.0 — 2026-11-07 · Cuentas de cliente
+Detalle en `_interno/deployed/Lameyer-v1.1.0.pdf` (local).
+- Las cuentas dejan de guardarse en el navegador: alta, acceso y recuperación de contraseña pasan a Supabase Auth, con confirmación por email.
+- Preparado el acceso con Google y Microsoft: los botones aparecen cuando se activa cada proveedor.
+- Nueva página «Mi cuenta» (`/cuenta/`): nombre, email, contraseña, métodos de acceso, cerrar sesión en todos los dispositivos y eliminar la cuenta.
+- Nueva carpeta `supabase/` (esquema de la base de datos con seguridad por fila y una función de servidor), desplegable desde GitHub.
+- Las claves privadas no están en el repositorio; `.env.example` lista las variables sin valores.
 
 ### 1.0.10 — 2026-11-05 · Documentación de versiones interna
 Detalle en `_interno/deployed/Lameyer-v1.0.10.pdf` (local).
