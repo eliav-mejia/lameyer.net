@@ -25,7 +25,7 @@ const CUENTA = {
     deleteBtn: 'Eliminar mi cuenta', deleteFail: 'No se pudo eliminar la cuenta. Inténtalo más tarde o escríbenos.',
     working: 'Procesando…', error: 'No se pudo guardar. Inténtalo de nuevo.',
 };
-const PROVIDER_LABEL = { email: 'Email y contraseña', google: 'Google', azure: 'Microsoft', apple: 'Apple', github: 'GitHub' };
+const PROVIDER_LABEL = { email: 'Email y contraseña', google: 'Google', azure: 'Microsoft', linkedin_oidc: 'LinkedIn', apple: 'Apple', github: 'GitHub' };
 const RECOVERY_MAX_MS = 60 * 60 * 1000;   // a reset link requested in this browser in the last hour
 
 const readReturn = () => {

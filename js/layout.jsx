@@ -146,7 +146,7 @@ const LanguageSwitcher = ({ withLabels = false }) => {
 const TXT = {
     login: 'Iniciar sesión', signup: 'Crear cuenta', account: 'Mi cuenta', logout: 'Cerrar sesión', close: 'Cerrar',
     name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos',
-    withGoogle: 'Continuar con Google', withMicrosoft: 'Continuar con Microsoft', orEmail: 'o con tu email',
+    withGoogle: 'Continuar con Google', withMicrosoft: 'Continuar con Microsoft', withLinkedIn: 'Continuar con LinkedIn', orEmail: 'o con tu email',
     forgot: '¿Olvidaste tu contraseña?', resetTitle: 'Recuperar acceso', resetIntro: 'Te enviaremos un enlace para elegir una contraseña nueva.',
     resetSend: 'Enviar enlace', resetSent: 'Si existe una cuenta con ese email, recibirás un enlace en unos minutos.', back: 'Volver',
     checkEmailTitle: 'Revisa tu correo', checkEmail: 'Te enviamos un enlace de confirmación a', checkEmailHint: 'Ábrelo en este mismo navegador para entrar directamente.',
@@ -229,8 +229,8 @@ const toUser = (u) => u ? {
 let providersPromise = null;
 const loadProviders = () => providersPromise || (providersPromise = fetch(`${SUPABASE_URL}/auth/v1/settings`, { headers: { apikey: SUPABASE_PUBLISHABLE_KEY } })
     .then(r => r.ok ? r.json() : { external: {} })
-    .then(s => ({ google: !!s.external.google, azure: !!s.external.azure, email: !!s.external.email, signup: !s.disable_signup }))
-    .catch(() => ({ google: false, azure: false, email: true, signup: true })));
+    .then(s => ({ google: !!s.external.google, azure: !!s.external.azure, linkedin: !!s.external.linkedin_oidc, email: !!s.external.email, signup: !s.disable_signup }))
+    .catch(() => ({ google: false, azure: false, linkedin: false, email: true, signup: true })));
 
 const rememberReturn = () => {
     const here = window.location.pathname + window.location.search + window.location.hash;
@@ -281,13 +281,14 @@ const auth = {
         if (error) throw authError(error);
         return { user: toUser(data.user) };
     },
-    // Google → 'google', Microsoft → 'azure'. The browser leaves the site and comes back to /cuenta/?code=…
+    // Google → 'google', Microsoft → 'azure', LinkedIn → 'linkedin_oidc'. The browser leaves the site and comes back to /cuenta/?code=…
+    // Scopes: Google and LinkedIn send openid email profile by default; Microsoft needs 'email' asked for explicitly.
     oauth: async (provider) => {
         const sb = await loadSupabase();
         rememberReturn();
-        const options = provider === 'azure'
-            ? { redirectTo: accountUrl(), scopes: 'email' }
-            : { redirectTo: accountUrl(), queryParams: { prompt: 'select_account' } };
+        const options = provider === 'azure' ? { redirectTo: accountUrl(), scopes: 'email' }
+            : provider === 'google' ? { redirectTo: accountUrl(), queryParams: { prompt: 'select_account' } }
+            : { redirectTo: accountUrl() };
         const { error } = await sb.auth.signInWithOAuth({ provider, options });
         if (error) throw authError(error);
     },
@@ -319,12 +320,19 @@ const MicrosoftIcon = () => (
     </svg>
 );
 
-// "Continuar con Google / Microsoft". Only the providers enabled in Supabase are shown; none enabled = nothing rendered.
+const LinkedInIcon = () => (
+    <svg className="w-5 h-5" viewBox="0 0 24 24" aria-hidden="true">
+        <rect width="24" height="24" rx="4" fill="#0A66C2" />
+        <path fill="#fff" d="M7.1 9.6h2.3V17H7.1zM8.25 5.9a1.34 1.34 0 1 1 0 2.68 1.34 1.34 0 0 1 0-2.68zM10.85 9.6h2.2v1h.03c.31-.58 1.06-1.2 2.18-1.2 2.33 0 2.76 1.53 2.76 3.53V17h-2.3v-3.6c0-.86-.02-1.97-1.2-1.97-1.2 0-1.38.94-1.38 1.9V17h-2.3z" />
+    </svg>
+);
+
+// "Continuar con Google / Microsoft / LinkedIn". Only the providers enabled in Supabase are shown; none enabled = nothing rendered.
 const SocialButtons = ({ onError }) => {
     const [providers, setProviders] = useState(null);
     const [busy, setBusy] = useState('');
     useEffect(() => { let alive = true; loadProviders().then(p => alive && setProviders(p)); return () => { alive = false; }; }, []);
-    if (!providers || (!providers.google && !providers.azure)) return null;
+    if (!providers || (!providers.google && !providers.azure && !providers.linkedin)) return null;
     const go = async (provider) => {
         setBusy(provider);
         try { await auth.oauth(provider); } catch (err) { onError(err.message); setBusy(''); }
@@ -334,6 +342,7 @@ const SocialButtons = ({ onError }) => {
         <div className="space-y-3 mb-6">
             {providers.google && <button type="button" disabled={!!busy} onClick={() => go('google')} className={btn}><GoogleIcon />{busy === 'google' ? TXT.working : TXT.withGoogle}</button>}
             {providers.azure && <button type="button" disabled={!!busy} onClick={() => go('azure')} className={btn}><MicrosoftIcon />{busy === 'azure' ? TXT.working : TXT.withMicrosoft}</button>}
+            {providers.linkedin && <button type="button" disabled={!!busy} onClick={() => go('linkedin_oidc')} className={btn}><LinkedInIcon />{busy === 'linkedin_oidc' ? TXT.working : TXT.withLinkedIn}</button>}
             <div className="flex items-center gap-3 text-[11px] font-black uppercase tracking-widest text-gray-400"><span className="flex-1 h-px bg-gray-200" />{TXT.orEmail}<span className="flex-1 h-px bg-gray-200" /></div>
         </div>
     );
