@@ -15,7 +15,7 @@ const CUENTA = {
     email: 'Email', newEmail: 'Nuevo email', changeEmail: 'Cambiar email',
     emailSent: 'Te enviamos un enlace a tu email actual y otro al nuevo. El cambio se aplica al confirmar en ambos.',
     password: 'Contraseña', newPassword: 'Nueva contraseña', repeat: 'Repite la contraseña', changePassword: 'Cambiar contraseña',
-    passwordHint: 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos. Si entras con Google o Microsoft, así añades también acceso por email.',
+    passwordHint: 'Mínimo 12 caracteres, con mayúsculas, minúsculas y números. Si entras con Google o Microsoft, así añades también acceso por email.',
     passwordSaved: 'Contraseña actualizada.', mismatch: 'Las contraseñas no coinciden.',
     methods: 'Métodos de acceso', methodsHint: 'Una cuenta puede entrar con varios métodos si usan el mismo email verificado.',
     since: 'desde',

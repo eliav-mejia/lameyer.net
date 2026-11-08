@@ -145,7 +145,7 @@ const LanguageSwitcher = ({ withLabels = false }) => {
 // --- POP-UP TEXT ---
 const TXT = {
     login: 'Iniciar sesión', signup: 'Crear cuenta', account: 'Mi cuenta', logout: 'Cerrar sesión', close: 'Cerrar',
-    name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 12 caracteres, con mayúsculas, minúsculas, números y símbolos',
+    name: 'Nombre', email: 'Email', password: 'Contraseña', passwordHint: 'Mínimo 12 caracteres, con mayúsculas, minúsculas y números',
     withGoogle: 'Continuar con Google', withMicrosoft: 'Continuar con Microsoft', withLinkedIn: 'Continuar con LinkedIn', orEmail: 'o con tu email',
     forgot: '¿Olvidaste tu contraseña?', resetTitle: 'Recuperar acceso', resetIntro: 'Te enviaremos un enlace para elegir una contraseña nueva.',
     resetSend: 'Enviar enlace', resetSent: 'Si existe una cuenta con ese email, recibirás un enlace en unos minutos.', back: 'Volver',
@@ -183,7 +183,14 @@ const AUTH_ERRORS = [
     [/invalid login credentials/i, 'Email o contraseña incorrectos.'],
     [/email not confirmed/i, 'Confirma tu email: te enviamos un enlace al registrarte.'],
     [/already registered|already been registered/i, 'Ya existe una cuenta con ese email.'],
-    [/password should be at least|weak password|password.*characters/i, 'La contraseña es demasiado débil: usa al menos 12 caracteres con mayúsculas, minúsculas, números y símbolos.'],
+    // Supabase "weak_password": length → "should be at least N characters"; classes → "at least one character of each: <sets>".
+    // The sets listed are the ones the project requires (Authentication → Email → Password requirements), so the text follows the panel.
+    [/should be at least (\d+) characters/i, (m) => `La contraseña debe tener al menos ${m[1]} caracteres.`],
+    [/at least one character of each/i, (m, msg) => {
+        const sets = [/[a-z]{5}/.test(msg) && 'minúsculas', /[A-Z]{5}/.test(msg) && 'mayúsculas', /0123/.test(msg) && 'números', /[!@#$%^&*]/.test(msg) && 'símbolos'].filter(Boolean);
+        return `La contraseña debe incluir ${sets.length > 1 ? sets.slice(0, -1).join(', ') + ' y ' + sets[sets.length - 1] : sets[0] || 'más tipos de caracteres'}.`;
+    }],
+    [/weak password|weak_password|password is too weak/i, 'La contraseña es demasiado débil. Usa una más larga y variada.'],
     [/pwned|leaked|compromised/i, 'Esa contraseña apareció en una filtración conocida. Elige otra.'],
     [/rate limit|too many|security purposes/i, 'Demasiados intentos. Espera un minuto y vuelve a probar.'],
     [/captcha/i, 'No se pudo verificar que eres una persona. Recarga la página.'],
@@ -199,7 +206,8 @@ const authError = (err) => {
     const msg = (err && err.message) || '';
     console.error('[lameyer] Supabase Auth:', (err && (err.code || err.status)) || '', msg);   // raw cause for diagnosis (no tokens in it)
     const hit = AUTH_ERRORS.find(([re]) => re.test(msg));
-    return new Error(hit ? hit[1] : 'No se pudo completar la operación. Inténtalo de nuevo.');
+    if (!hit) return new Error('No se pudo completar la operación. Inténtalo de nuevo.');
+    return new Error(typeof hit[1] === 'function' ? hit[1](msg.match(hit[0]), msg) : hit[1]);
 };
 
 let supabaseClientPromise = null;
