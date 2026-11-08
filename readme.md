@@ -36,6 +36,7 @@ Historial de versiones:
 | 1.0.10 | Documentación de versiones pasa a uso interno |
 | 1.1.0 | Cuentas de cliente con inicio de sesión real, página de ajustes de la cuenta |
 | 1.1.1 | Catálogo agotado; entrega solo a domicilio: todo Madrid (España) o toda la República Mexicana (México) |
+| 1.1.2 | Envío a domicilio a toda España con la bandera de España |
 
 Los documentos de cada versión están disponibles bajo petición en contacto@lameyer.net.
 
@@ -292,6 +293,11 @@ Solo rellena claves vacías o ausentes, protege `{{var}}`, `{var}` y los nombres
 `locales/es/` (empezar por `common` y `terminos`), guardar `DEEPL_API_KEY` como secreto de CI y, solo en B, las redirecciones a `/es/`.
 
 ## Versiones
+
+### 1.1.2 — 2026-11-08 · Envío a domicilio a toda España
+Detalle en `_interno/deployed/Lameyer-v1.1.2.pdf` (local).
+- Con la bandera de España, el envío a domicilio cubre toda España (antes, solo Madrid). México sigue igual: toda la República Mexicana.
+- Carrito, fichas, página de Componentes y Términos y condiciones actualizados. Sigue sin haber recogida en persona.
 
 ### 1.1.1 — 2026-11-08 · Catálogo agotado y entrega solo a domicilio
 Detalle en `_interno/deployed/Lameyer-v1.1.1.pdf` (local).

@@ -52,13 +52,13 @@ const store = {
 };
 
 // Delivery: home delivery only (no pickup). The area follows the flag (useLocale in js/layout.jsx):
-// España → every address in Madrid (postal codes 28xxx) · México → any address in the República Mexicana.
+// España → any address in Spain (postal codes 01xxx–52xxx) · México → any address in the República Mexicana.
 // Keep in sync with the «envios» clauses in /pages/terminos/.
 const SHIPPING = {
     ES: {
-        place: 'Madrid', area: 'todo Madrid', chip: 'Envío a domicilio en Madrid', strip: 'En todo Madrid',
-        postalOk: (cp) => /^28\d{3}$/.test(cp), placeholder: '28001',
-        postalError: 'Solo enviamos a domicilios de Madrid (códigos postales 28xxx).',
+        place: 'España', area: 'toda España', chip: 'Envío a domicilio en España', strip: 'A toda España',
+        postalOk: (cp) => /^(0[1-9]|[1-4]\d|5[0-2])\d{3}$/.test(cp), placeholder: '28001',
+        postalError: 'Escribe un código postal español de 5 dígitos (01000–52999).',
     },
     MX: {
         place: 'México', area: 'toda la República Mexicana', chip: 'Envío a toda la República', strip: 'A toda la República Mexicana',
