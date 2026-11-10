@@ -12,10 +12,16 @@
          viven solo en el navegador (localStorage). -->
     <script>
         (() => {
-            const dir = p => p.replace(/[^/]*$/, '');   // /…/canvas/app.html y /…/canvas/index.html → /…/canvas/
-            let dentro = false;
-            try { dentro = window.top !== window && dir(window.top.location.pathname) === dir(location.pathname); } catch (e) {}
-            if (!dentro) { try { window.top.location.replace(dir(location.pathname)); } catch (e) { location.replace('about:blank'); } }   // enmarcado por otro sitio: no se muestra
+            // Abierto desde el disco (file://) no hay sitio ni sesión: el canvas funciona solo, en blanco y sin guardar.
+            if (location.protocol === 'file:') return;
+            // Carpeta de la página: /…/canvas/app.html, /…/canvas/index.html, /…/canvas/ y /…/canvas → /…/canvas/
+            const dir = p => /\.html?$/i.test(p) ? p.replace(/[^/]*$/, '') : p.replace(/\/?$/, '/');
+            const aqui = dir(location.pathname);
+            let dentro = false, mismoOrigen = true;
+            try { dentro = window.top !== window && dir(window.top.location.pathname) === aqui; } catch (e) { mismoOrigen = false; }
+            if (dentro) return;
+            if (!mismoOrigen) { location.replace('about:blank'); return; }   // enmarcado por otro sitio: no se muestra
+            window.top.location.replace(aqui);                               // suelto o en otra página: a la página con sesión
         })();
     </script>
     <link rel="stylesheet" href="lameyer-fondo.css">
@@ -52,7 +58,12 @@
     <script>
     (() => {
       const BLOQUES = window.CANVAS || [];
-      const CLAVE = 'lameyer-canvas/1';
+      // Un canvas por cuenta: index.html pone el id de la sesión en window.lameyerCanvasCuenta antes de montar el iframe.
+      // Sin cuenta reconocida no se lee ni se guarda nada: canvas en blanco solo en memoria.
+      // Nunca se lee la clave antigua compartida 'lameyer-canvas/1' (notas de otra persona en este navegador).
+      let cuenta = null;
+      try { cuenta = window.parent !== window && window.parent.lameyerCanvasCuenta || null; } catch {}
+      const CLAVE = cuenta ? `lameyer-canvas/2/${cuenta}` : null;
       const $ = id => document.getElementById(id);
       const lienzo = $('lienzo'), popup = $('popup'), velo = $('velo');
       const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -61,8 +72,9 @@
 
       // --- Notas (localStorage, con tolerancia a errores) ---
       let notas = {};
-      try { notas = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch { notas = {}; }
-      const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(notas)); } catch {} };
+      try { notas = (CLAVE && JSON.parse(localStorage.getItem(CLAVE))) || {}; } catch { notas = {}; }
+      const nuevo = !Object.values(notas).some(l => Array.isArray(l) && l.length);   // canvas nuevo: sin ninguna nota
+      const guardar = () => { if (CLAVE) try { localStorage.setItem(CLAVE, JSON.stringify(notas)); } catch {} };
 
       // --- Bloques ---
       lienzo.innerHTML = BLOQUES.map((b, i) => `
@@ -99,7 +111,7 @@
       });
 
       // --- Interruptor Descripción / Mis notas ---
-      const VISTA = 'lameyer-canvas/vista';
+      const VISTA = CLAVE && `${CLAVE}/vista`;
       const interruptor = $('vista');
       function ponerVista(v, animar) {
         const notasOn = v === 'notas';
@@ -108,15 +120,16 @@
         if (animar) botones.forEach(el => {          // ola azul que recorre cada bloque, escalonada
           el.classList.remove('ola'); void el.offsetWidth; el.classList.add('ola');
         });
-        try { localStorage.setItem(VISTA, v); } catch {}
+        if (VISTA) try { localStorage.setItem(VISTA, v); } catch {}
       }
       interruptor.addEventListener('click', e => {
         const b = e.target.closest('[data-vista]');
         if (b && b.getAttribute('aria-checked') !== 'true') ponerVista(b.dataset.vista, true);
       });
       botones.forEach(el => el.addEventListener('animationend', e => { if (e.animationName === 'ola') el.classList.remove('ola'); }));
-      let vistaInicial = 'desc';
-      try { vistaInicial = localStorage.getItem(VISTA) === 'notas' ? 'notas' : 'desc'; } catch {}
+      // Canvas nuevo → abre en «Mis notas», vacío y listo para llenar; si ya tiene notas, la última vista elegida.
+      let vistaInicial = 'notas';
+      if (!nuevo) try { vistaInicial = localStorage.getItem(VISTA) === 'desc' ? 'desc' : 'notas'; } catch {}
       ponerVista(vistaInicial, false);
 
       // --- Pop-up que nace desde el bloque ---

@@ -11,6 +11,9 @@
     <!-- Private page for logged-in users: js/acceso.jsx (rule 'required') shows the login pop-up until there is a session. -->
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
+    <!-- Opened from disk (file://) the site scripts (/js/…) and in-browser Babel cannot load and the page stays white:
+         open the canvas on its own instead (blank, notes not saved, no account). -->
+    <script>if (location.protocol === 'file:') location.replace('app.html' + location.hash);</script>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
@@ -35,12 +38,22 @@
     <script type="text/babel">
         // The canvas itself (copy of animations/canvas/) lives in app.html and is only mounted once AccessGate lets the page render.
         // An iframe keeps its full-window CSS (html, body, main, h1) away from the site's Layout.
-        // Notes stay in this browser (localStorage 'lameyer-canvas/1', shared by the iframe because it is the same origin).
-        const CanvasPage = () => (
+        // Notes stay in this browser, one canvas per account (localStorage 'lameyer-canvas/2/<user id>'); a new account starts empty.
+        // Each account gets its own canvas: app.html reads window.lameyerCanvasCuenta (same origin) and keys its notes by it.
+        // AccessGate only renders this page with a session, so auth.current() is the logged-in user here.
+        // app.html next to this page, also when it is served as /…/canvas (no trailing slash).
+        const pagePath = window.location.pathname;
+        const appUrl = (/\.html?$/i.test(pagePath) ? pagePath.replace(/[^/]*$/, '') : pagePath.replace(/\/?$/, '/')) + 'app.html' + window.location.hash;
+
+        const CanvasPage = () => {
+            const user = typeof auth !== 'undefined' ? auth.current() : null;
+            window.lameyerCanvasCuenta = user ? user.id : null;
+            return (
             <section className="max-w-[110rem] mx-auto pb-10 relative z-10">
                 <h1 className="sr-only">Business Model Canvas</h1>
                 <iframe
-                    src={`app.html${window.location.hash}`}
+                    key={user ? user.id : 'sin-cuenta'}
+                    src={appUrl}
                     title="Business Model Canvas"
                     className="block w-full rounded-[2rem] border border-gray-200 bg-white shadow-sm"
                     style={{ height: 'max(560px, calc(100dvh - 10rem))' }}
@@ -49,7 +62,8 @@
                     Tus notas se guardan solo en este navegador. Usa «Exportar» para llevarlas a otro equipo. · <a href="/cuenta/" className="font-bold text-blue-600 hover:underline">Mi cuenta</a>
                 </p>
             </section>
-        );
+            );
+        };
 
         renderPage(CanvasPage);
     </script>
