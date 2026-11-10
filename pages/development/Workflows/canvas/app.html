@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Business Model Canvas · Lameyer</title>
+    <meta name="robots" content="noindex, nofollow">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <!-- Copia de animations/canvas/. Se abre dentro de ./index.html, que pide iniciar sesión (js/acceso.jsx).
+         Abierto suelto, vuelve a esa página. Es una cortesía, igual que el pop-up: los datos son estáticos y las notas
+         viven solo en el navegador (localStorage). -->
+    <script>
+        (() => {
+            const dir = p => p.replace(/[^/]*$/, '');   // /…/canvas/app.html y /…/canvas/index.html → /…/canvas/
+            let dentro = false;
+            try { dentro = window.top !== window && dir(window.top.location.pathname) === dir(location.pathname); } catch (e) {}
+            if (!dentro) { try { window.top.location.replace(dir(location.pathname)); } catch (e) { location.replace('about:blank'); } }   // enmarcado por otro sitio: no se muestra
+        })();
+    </script>
+    <link rel="stylesheet" href="lameyer-fondo.css">
+    <link rel="stylesheet" href="estilo.css">
+</head>
+<body>
+    <div class="circuit-bg"></div>
+
+    <main>
+        <header class="cabecera">
+            <a class="logo" href="/cuenta/" target="_top">LAMEYER<span>/canvas</span></a>
+            <h1>Business Model <span>Canvas</span></h1>
+            <div class="vista" id="vista" role="radiogroup" aria-label="Contenido de los bloques">
+                <span class="pildora" aria-hidden="true"></span>
+                <button role="radio" data-vista="desc" aria-checked="true">Descripción</button>
+                <button role="radio" data-vista="notas" aria-checked="false">Mis notas</button>
+            </div>
+            <div class="acciones">
+                <button id="bImportar" title="Cargar notas desde un JSON exportado">Importar</button>
+                <input type="file" id="fImportar" accept=".json,application/json" hidden>
+                <button id="bExportar" title="Descargar tus notas como JSON">Exportar</button>
+                <button id="bLimpiar" title="Borrar todas las notas">Limpiar</button>
+            </div>
+        </header>
+
+        <!-- El canvas llena la ventana: sin scroll; los bloques y su texto se escalan con el tamaño de la ventana -->
+        <section class="lienzo" id="lienzo" aria-label="Business Model Canvas" title="Clic en un bloque para abrirlo · ← → cambiar de bloque · Esc cerrar · Las notas se guardan solo en este navegador"></section>
+    </main>
+
+    <div class="velo" id="velo"></div>
+    <div class="popup" id="popup" role="dialog" aria-modal="true" aria-labelledby="pTitulo" hidden></div>
+
+    <script src="datos.js"></script>
+    <script>
+    (() => {
+      const BLOQUES = window.CANVAS || [];
+      const CLAVE = 'lameyer-canvas/1';
+      const $ = id => document.getElementById(id);
+      const lienzo = $('lienzo'), popup = $('popup'), velo = $('velo');
+      const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      const svg = d => `<svg viewBox="0 0 24 24" aria-hidden="true">${d}</svg>`;
+      const dos = n => String(n).padStart(2, '0');
+
+      // --- Notas (localStorage, con tolerancia a errores) ---
+      let notas = {};
+      try { notas = JSON.parse(localStorage.getItem(CLAVE)) || {}; } catch { notas = {}; }
+      const guardar = () => { try { localStorage.setItem(CLAVE, JSON.stringify(notas)); } catch {} };
+
+      // --- Bloques ---
+      lienzo.innerHTML = BLOQUES.map((b, i) => `
+        <button class="bloque glass" style="grid-area:${b.area};--i:${i}" data-id="${b.id}" aria-haspopup="dialog">
+          <span class="num">${dos(b.orden)}</span>
+          <span class="cuenta" data-cuenta></span>
+          <span class="ico">${svg(b.icono)}</span>
+          <h2>${esc(b.titulo)}</h2>
+          <span class="cuerpo">
+            <span class="capa desc">${esc(b.resumen)}</span>
+            <span class="capa mias" data-mias></span>
+          </span>
+          <span class="mas">Abrir →</span>
+        </button>`).join('');
+
+      const botones = [...lienzo.querySelectorAll('.bloque')];
+      botones.forEach(el => {
+        el.addEventListener('animationend', e => { if (e.animationName === 'aparece') el.classList.add('animado'); });
+        el.addEventListener('pointermove', e => {
+          const r = el.getBoundingClientRect();
+          el.style.setProperty('--mx', `${e.clientX - r.left}px`);
+          el.style.setProperty('--my', `${e.clientY - r.top}px`);
+        });
+        el.addEventListener('click', () => abrir(el.dataset.id));
+      });
+
+      // Cuenta + notas visibles dentro de cada bloque (capa «Mis notas»)
+      const contar = () => botones.forEach(el => {
+        const lista = notas[el.dataset.id] || [], n = lista.length, c = el.querySelector('[data-cuenta]');
+        c.textContent = n || ''; c.classList.toggle('si', n > 0);
+        el.querySelector('[data-mias]').innerHTML = n
+          ? lista.map((t, k) => `<span class="nota" style="--k:${k}">${esc(t)}</span>`).join('')
+          : '<span class="vacio">Sin notas todavía · clic para agregar</span>';
+      });
+
+      // --- Interruptor Descripción / Mis notas ---
+      const VISTA = 'lameyer-canvas/vista';
+      const interruptor = $('vista');
+      function ponerVista(v, animar) {
+        const notasOn = v === 'notas';
+        document.body.classList.toggle('modo-notas', notasOn);
+        interruptor.querySelectorAll('[data-vista]').forEach(b => b.setAttribute('aria-checked', String(b.dataset.vista === v)));
+        if (animar) botones.forEach(el => {          // ola azul que recorre cada bloque, escalonada
+          el.classList.remove('ola'); void el.offsetWidth; el.classList.add('ola');
+        });
+        try { localStorage.setItem(VISTA, v); } catch {}
+      }
+      interruptor.addEventListener('click', e => {
+        const b = e.target.closest('[data-vista]');
+        if (b && b.getAttribute('aria-checked') !== 'true') ponerVista(b.dataset.vista, true);
+      });
+      botones.forEach(el => el.addEventListener('animationend', e => { if (e.animationName === 'ola') el.classList.remove('ola'); }));
+      let vistaInicial = 'desc';
+      try { vistaInicial = localStorage.getItem(VISTA) === 'notas' ? 'notas' : 'desc'; } catch {}
+      ponerVista(vistaInicial, false);
+
+      // --- Pop-up que nace desde el bloque ---
+      let actual = null, origen = null;
+
+      function origenDesde(id) {
+        const el = lienzo.querySelector(`[data-id="${id}"]`), r = el.getBoundingClientRect();
+        popup.style.setProperty('--ox', `${r.left + r.width / 2 - innerWidth / 2}px`);
+        popup.style.setProperty('--oy', `${r.top + r.height / 2 - innerHeight / 2}px`);
+        return el;
+      }
+
+      function pintar(b) {
+        const lista = notas[b.id] || [];
+        let j = 0; const s = () => `class="esc" style="--j:${j++}"`;
+        popup.innerHTML = `
+          <div class="top">
+            <span class="ico">${svg(b.icono)}</span>
+            <div><div class="kicker">${dos(b.orden)} · Bloque</div><h2 id="pTitulo">${esc(b.titulo)}</h2></div>
+            <button class="cerrar" id="pCerrar" aria-label="Cerrar">×</button>
+          </div>
+          <p class="resumen esc" style="--j:${j++}">${esc(b.resumen)}</p>
+          <div ${s()}><h3>Preguntas guía</h3><ol class="preguntas">${b.preguntas.map(q => `<li>${esc(q)}</li>`).join('')}</ol></div>
+          <div ${s()}><h3>Ejemplos</h3><div class="etiquetas">${b.ejemplos.map(e => `<span>${esc(e)}</span>`).join('')}</div></div>
+          <div ${s()}>
+            <h3>Tus notas</h3>
+            <ul class="notas" id="pNotas">${lista.map((t, k) => `<li><span>${esc(t)}</span><button data-k="${k}" aria-label="Borrar nota">×</button></li>`).join('')}</ul>
+            <form class="agregar" id="pForm"><input id="pTexto" placeholder="Agregar una idea…" maxlength="200" autocomplete="off"><button>Agregar</button></form>
+          </div>
+          <div class="pie esc" style="--j:${j++}">
+            <span class="pos">${BLOQUES.indexOf(b) + 1} / ${BLOQUES.length}</span>
+            <button id="pAnt" aria-label="Bloque anterior">← Anterior</button>
+            <button id="pSig" aria-label="Bloque siguiente">Siguiente →</button>
+          </div>`;
+
+        $('pCerrar').onclick = cerrar;
+        $('pAnt').onclick = () => mover(-1);
+        $('pSig').onclick = () => mover(1);
+        $('pForm').onsubmit = e => {
+          e.preventDefault();
+          const t = $('pTexto').value.trim(); if (!t) return;
+          (notas[b.id] = notas[b.id] || []).push(t); guardar(); contar(); pintarNotas(b);
+          $('pTexto').value = ''; $('pTexto').focus();
+        };
+        $('pNotas').onclick = e => {
+          const k = e.target.dataset.k; if (k === undefined) return;
+          notas[b.id].splice(+k, 1); guardar(); contar(); pintarNotas(b);
+        };
+      }
+
+      function pintarNotas(b) {
+        $('pNotas').innerHTML = (notas[b.id] || []).map((t, k) => `<li><span>${esc(t)}</span><button data-k="${k}" aria-label="Borrar nota">×</button></li>`).join('');
+      }
+
+      function abrir(id) {
+        const b = BLOQUES.find(x => x.id === id); if (!b) return;
+        origen = origenDesde(id); actual = b;
+        botones.forEach(el => el.classList.toggle('destacado', el === origen));
+        pintar(b);
+        popup.hidden = false;
+        popup.classList.remove('abierto'); void popup.offsetWidth;   // reinicia la animación
+        requestAnimationFrame(() => { popup.classList.add('abierto'); velo.classList.add('abierto'); });
+        setTimeout(() => $('pCerrar') && $('pCerrar').focus({ preventScroll: true }), 60);
+        history.replaceState(null, '', `#${id}`);
+      }
+
+      function cerrar() {
+        if (!actual) return;
+        const el = origenDesde(actual.id);
+        popup.classList.remove('abierto'); velo.classList.remove('abierto');
+        botones.forEach(x => x.classList.remove('destacado'));
+        actual = null;
+        setTimeout(() => { if (!actual) popup.hidden = true; }, 450);
+        history.replaceState(null, '', location.pathname + location.search);
+        el.focus({ preventScroll: true });
+      }
+
+      function mover(d) {
+        if (!actual) return;
+        const i = (BLOQUES.indexOf(actual) + d + BLOQUES.length) % BLOQUES.length;
+        abrir(BLOQUES[i].id);
+      }
+
+      velo.onclick = cerrar;
+      addEventListener('keydown', e => {
+        if (!actual) return;
+        if (e.key === 'Escape') cerrar();
+        if (e.target.tagName === 'INPUT') return;
+        if (e.key === 'ArrowRight') mover(1);
+        if (e.key === 'ArrowLeft') mover(-1);
+      });
+
+      // --- Exportar / limpiar ---
+      $('bExportar').onclick = () => {
+        const salida = BLOQUES.map(b => ({ id: b.id, titulo: b.titulo, notas: notas[b.id] || [] }));
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(new Blob([JSON.stringify(salida, null, 2)], { type: 'application/json' }));
+        a.download = 'business-model-canvas.json'; a.click();
+        setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+      };
+      // Importar: acepta el formato de «Exportar» ([{ id, notas: [] }]) o un objeto { id: [notas] }.
+      // Se suman a las notas actuales sin duplicar; ids desconocidos y valores que no son texto se ignoran.
+      $('bImportar').onclick = () => $('fImportar').click();
+      $('fImportar').onchange = async e => {
+        const f = e.target.files[0]; e.target.value = '';
+        if (!f) return;
+        let datos;
+        try { datos = JSON.parse(await f.text()); } catch { alert('El archivo no es un JSON válido.'); return; }
+        const pares = Array.isArray(datos)
+          ? datos.filter(x => x && typeof x === 'object').map(x => [x.id, x.notas])
+          : (datos && typeof datos === 'object' ? Object.entries(datos) : []);
+        const ids = new Set(BLOQUES.map(b => b.id));
+        let n = 0;
+        for (const [id, lista] of pares) {
+          if (!ids.has(id) || !Array.isArray(lista)) continue;
+          const actuales = notas[id] = notas[id] || [];
+          for (const t of lista) {
+            if (typeof t !== 'string') continue;
+            const v = t.trim().slice(0, 200);
+            if (v && !actuales.includes(v)) { actuales.push(v); n++; }
+          }
+        }
+        if (!n) { alert('No se encontraron notas nuevas en el archivo.'); return; }
+        guardar(); contar();
+        if (actual) pintarNotas(actual);
+        alert(`Se importaron ${n} nota${n === 1 ? '' : 's'}.`);
+      };
+      $('bLimpiar').onclick = () => {
+        if (!confirm('¿Borrar todas las notas del canvas?')) return;
+        notas = {}; guardar(); contar();
+      };
+
+      contar();
+      const hash = location.hash.slice(1);
+      if (hash) setTimeout(() => abrir(hash), 700);
+    })();
+    </script>
+</body>
+</html>

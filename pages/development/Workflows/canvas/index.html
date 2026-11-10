@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>Business Model Canvas - Lameyer</title>
+    <!-- Private page for logged-in users: js/acceso.jsx (rule 'required') shows the login pop-up until there is a session. -->
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root">
+        <noscript>
+            <h1>Business Model Canvas</h1>
+            <p>Activa JavaScript e inicia sesión con los datos de tu cuenta para abrir el Business Model Canvas.</p>
+            <p><a href="/cuenta/">Mi cuenta</a></p>
+        </noscript>
+    </div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/acceso.jsx"></script>
+    <script type="text/babel">
+        // The canvas itself (copy of animations/canvas/) lives in app.html and is only mounted once AccessGate lets the page render.
+        // An iframe keeps its full-window CSS (html, body, main, h1) away from the site's Layout.
+        // Notes stay in this browser (localStorage 'lameyer-canvas/1', shared by the iframe because it is the same origin).
+        const CanvasPage = () => (
+            <section className="max-w-[110rem] mx-auto pb-10 relative z-10">
+                <h1 className="sr-only">Business Model Canvas</h1>
+                <iframe
+                    src={`app.html${window.location.hash}`}
+                    title="Business Model Canvas"
+                    className="block w-full rounded-[2rem] border border-gray-200 bg-white shadow-sm"
+                    style={{ height: 'max(560px, calc(100dvh - 10rem))' }}
+                />
+                <p className="mt-4 text-center text-xs text-gray-500 font-medium">
+                    Tus notas se guardan solo en este navegador. Usa «Exportar» para llevarlas a otro equipo. · <a href="/cuenta/" className="font-bold text-blue-600 hover:underline">Mi cuenta</a>
+                </p>
+            </section>
+        );
+
+        renderPage(CanvasPage);
+    </script>
+</body>
+</html>

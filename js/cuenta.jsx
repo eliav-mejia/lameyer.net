@@ -23,6 +23,7 @@ const CUENTA = {
     logoutAll: 'Cerrar sesión en todos los dispositivos', logout: 'Cerrar sesión',
     danger: 'Eliminar cuenta', dangerText: 'Borra tu cuenta y tu perfil para siempre. Escribe ELIMINAR para confirmar.',
     deleteBtn: 'Eliminar mi cuenta', deleteFail: 'No se pudo eliminar la cuenta. Inténtalo más tarde o escríbenos.',
+    tools: 'Herramientas', canvasTitle: 'Business Model Canvas', canvasText: 'Los 9 bloques del modelo de negocio, con preguntas guía y tus notas.', open: 'Abrir',
     working: 'Procesando…', error: 'No se pudo guardar. Inténtalo de nuevo.',
 };
 const PROVIDER_LABEL = { email: 'Email y contraseña', google: 'Google', azure: 'Microsoft', linkedin_oidc: 'LinkedIn', apple: 'Apple', github: 'GitHub' };
@@ -167,6 +168,19 @@ const MethodsCard = ({ identities }) => (
     </Card>
 );
 
+// Tools for logged-in users (each one is also gated by its own rule in js/acceso.jsx).
+const ToolsCard = () => (
+    <Card title={CUENTA.tools}>
+        <a href="/pages/development/Workflows/canvas/" className="flex items-center justify-between gap-4 px-5 py-4 rounded-2xl border border-gray-100 bg-gray-50 hover:border-blue-500 transition-colors">
+            <span>
+                <span className="block font-bold text-gray-900">{CUENTA.canvasTitle}</span>
+                <span className="block text-xs text-gray-500 font-medium mt-1">{CUENTA.canvasText}</span>
+            </span>
+            <span className="text-xs font-black uppercase tracking-widest text-blue-600 flex-none">{CUENTA.open} →</span>
+        </a>
+    </Card>
+);
+
 const SessionsCard = () => {
     const a = useAction();
     return (
@@ -277,6 +291,7 @@ const CuentaPage = () => {
             <div className="space-y-6">
                 {recovery && <PasswordCard sb={sb} recovery onDone={() => { clearRecovery(); setRecovery(false); }} />}
                 <ProfileCard sb={sb} user={user} nombre={nombre} setNombre={setNombre} />
+                <ToolsCard />
                 <EmailCard sb={sb} user={user} />
                 {!recovery && <PasswordCard sb={sb} recovery={false} onDone={clearRecovery} />}
                 <MethodsCard identities={identities} />

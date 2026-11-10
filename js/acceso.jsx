@@ -8,8 +8,10 @@
 // First matching prefix wins. Pages without a rule (inicio, términos, comunidad...) open freely.
 //   required: the page content is not rendered until the visitor logs in; the pop-up cannot be closed.
 //   optional: the page renders normally; the pop-up opens once per browser session and can be dismissed.
+//   text (optional): message in the pop-up for this rule; otherwise ACCESS_TXT.requiredText / optionalText.
 const ACCESS_RULES = [
     { path: '/pages/components/', mode: 'required' },
+    { path: '/pages/development/Workflows/canvas/', mode: 'required', text: 'Inicia sesión con los datos de tu cuenta para abrir el Business Model Canvas.' },
     { path: '/academia/', mode: 'optional' },
 ];
 
@@ -95,7 +97,7 @@ const AccessGate = ({ rule, user, onUser, children }) => {
                     user={null}
                     onUser={onUser}
                     locked={locked}
-                    notice={locked ? ACCESS_TXT.requiredText : ACCESS_TXT.optionalText}
+                    notice={rule.text || (locked ? ACCESS_TXT.requiredText : ACCESS_TXT.optionalText)}
                     onClose={locked ? () => {} : skip}
                     footer={locked ? (
                         <p className="mt-4 text-center text-xs font-bold space-x-4">
