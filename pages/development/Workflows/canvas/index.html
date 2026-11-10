@@ -8,7 +8,7 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png">
     <link rel="manifest" href="/site.webmanifest">
     <title>Business Model Canvas - Lameyer</title>
-    <!-- Private page for logged-in users: js/acceso.jsx (rule 'required') shows the login pop-up until there is a session. -->
+    <!-- js/acceso.jsx (rule 'optional'): login pop-up once per browser session, with a close button. Without login the canvas works but saves nothing. -->
     <meta name="robots" content="noindex, nofollow">
     <meta name="referrer" content="no-referrer">
     <!-- Opened from disk (file://) the site scripts (/js/…) and in-browser Babel cannot load and the page stays white:
@@ -28,7 +28,7 @@
     <div id="root">
         <noscript>
             <h1>Business Model Canvas</h1>
-            <p>Activa JavaScript e inicia sesión con los datos de tu cuenta para abrir el Business Model Canvas.</p>
+            <p>Activa JavaScript para abrir el Business Model Canvas. Inicia sesión con los datos de tu cuenta para guardar tus notas.</p>
             <p><a href="/cuenta/">Mi cuenta</a></p>
         </noscript>
     </div>
@@ -36,30 +36,40 @@
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>
     <script type="text/babel">
-        // The canvas itself (copy of animations/canvas/) lives in app.html and is only mounted once AccessGate lets the page render.
+        // The canvas itself (copy of animations/canvas/) lives in app.html. The access rule is 'optional': it opens with or without a session.
         // An iframe keeps its full-window CSS (html, body, main, h1) away from the site's Layout.
         // Notes stay in this browser, one canvas per account (localStorage 'lameyer-canvas/2/<user id>'); a new account starts empty.
         // Each account gets its own canvas: app.html reads window.lameyerCanvasCuenta (same origin) and keys its notes by it.
-        // AccessGate only renders this page with a session, so auth.current() is the logged-in user here.
+        // Logging in or out (pop-up, header or another tab) swaps the iframe for that account's canvas.
+        // auth.current() only reads localStorage, so checking it every second costs nothing and covers the same tab too.
+        const currentId = () => { const u = typeof auth !== 'undefined' ? auth.current() : null; return u ? u.id : null; };
         // app.html next to this page, also when it is served as /…/canvas (no trailing slash).
         const pagePath = window.location.pathname;
         const appUrl = (/\.html?$/i.test(pagePath) ? pagePath.replace(/[^/]*$/, '') : pagePath.replace(/\/?$/, '/')) + 'app.html' + window.location.hash;
 
         const CanvasPage = () => {
-            const user = typeof auth !== 'undefined' ? auth.current() : null;
-            window.lameyerCanvasCuenta = user ? user.id : null;
+            const [cuenta, setCuenta] = useState(currentId);
+            useEffect(() => {
+                const check = () => setCuenta(currentId());
+                const timer = setInterval(check, 1000);
+                window.addEventListener('storage', check);
+                return () => { clearInterval(timer); window.removeEventListener('storage', check); };
+            }, []);
+            window.lameyerCanvasCuenta = cuenta;
             return (
             <section className="max-w-[110rem] mx-auto pb-10 relative z-10">
                 <h1 className="sr-only">Business Model Canvas</h1>
                 <iframe
-                    key={user ? user.id : 'sin-cuenta'}
+                    key={cuenta || 'sin-cuenta'}
                     src={appUrl}
                     title="Business Model Canvas"
                     className="block w-full rounded-[2rem] border border-gray-200 bg-white shadow-sm"
                     style={{ height: 'max(560px, calc(100dvh - 10rem))' }}
                 />
                 <p className="mt-4 text-center text-xs text-gray-500 font-medium">
-                    Tus notas se guardan solo en este navegador. Usa «Exportar» para llevarlas a otro equipo. · <a href="/cuenta/" className="font-bold text-blue-600 hover:underline">Mi cuenta</a>
+                    {cuenta
+                        ? <>Tus notas se guardan en este navegador, en tu cuenta. Usa «Exportar» para llevarlas a otro equipo. · <a href="/cuenta/" className="font-bold text-blue-600 hover:underline">Mi cuenta</a></>
+                        : <>Sin sesión: las notas no se guardan al recargar. Usa «Exportar» o <a href="/cuenta/" className="font-bold text-blue-600 hover:underline">inicia sesión</a> para guardarlas.</>}
                 </p>
             </section>
             );
