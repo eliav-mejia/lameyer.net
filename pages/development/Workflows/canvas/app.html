@@ -17,11 +17,12 @@
             // Carpeta de la página: /…/canvas/app.html, /…/canvas/index.html, /…/canvas/ y /…/canvas → /…/canvas/
             const dir = p => /\.html?$/i.test(p) ? p.replace(/[^/]*$/, '') : p.replace(/\/?$/, '/');
             const aqui = dir(location.pathname);
-            let dentro = false, mismoOrigen = true;
-            try { dentro = window.top !== window && dir(window.top.location.pathname) === aqui; } catch (e) { mismoOrigen = false; }
-            if (dentro) return;
-            if (!mismoOrigen) { location.replace('about:blank'); return; }   // enmarcado por otro sitio: no se muestra
-            window.top.location.replace(aqui);                               // suelto o en otra página: a la página con sesión
+            // Se mira la página que lo contiene (parent), no la pestaña (top): así también funciona si esa página va dentro de otro marco.
+            const padre = window.parent;
+            if (padre === window) { location.replace(aqui); return; }        // suelto: a la página con el aviso de sesión
+            let dentro = false;
+            try { dentro = dir(padre.location.pathname) === aqui; } catch (e) { location.replace('about:blank'); return; }   // enmarcado por otro sitio
+            if (!dentro) padre.location.replace(aqui);                        // dentro de otra página del sitio: esa página pasa al canvas
         })();
     </script>
     <link rel="stylesheet" href="lameyer-fondo.css">

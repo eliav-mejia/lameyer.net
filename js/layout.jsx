@@ -426,14 +426,16 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notic
     const title = mode === 'signup' ? TXT.signup : mode === 'reset' ? TXT.resetTitle : TXT.login;
 
     return (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a192f]/60 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => !locked && e.target === e.currentTarget && onClose()}>
-            <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="auth-title" className="relative w-full max-w-md max-h-[calc(100vh-2rem)] overflow-y-auto bg-white border border-gray-200 rounded-[2rem] shadow-2xl p-8">
+        // Phones (css/site.css .auth-*): 15 % smaller, always fits the screen with the page visible around it; the body scrolls, the close button does not.
+        <div className="auth-overlay fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[#0a192f]/60 backdrop-blur-sm animate-fade-in" onMouseDown={(e) => !locked && e.target === e.currentTarget && onClose()}>
+            <div ref={dialogRef} role="dialog" aria-modal="true" aria-labelledby="auth-title" className="auth-dialog relative w-full max-w-md flex flex-col bg-white border border-gray-200 rounded-[2rem] shadow-2xl overflow-hidden">
                 {!locked && (
-                    <button type="button" onClick={onClose} aria-label={TXT.close} className="absolute top-5 right-5 p-2 rounded-xl text-gray-500 hover:text-blue-600 transition-colors">
+                    <button type="button" onClick={onClose} aria-label={TXT.close} className="auth-close absolute top-5 right-5 z-10 p-2 rounded-xl bg-white text-gray-500 hover:text-blue-600 transition-colors">
                         <svg className="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
                     </button>
                 )}
 
+                <div className="auth-body min-h-0 overflow-y-auto overscroll-contain p-8">
                 {user ? (
                     <div className="text-center pt-2">
                         <div className="w-16 h-16 mx-auto mb-5 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-2xl font-black">
@@ -524,6 +526,7 @@ const AuthModal = ({ mode, setMode, user, onUser, onClose, locked = false, notic
                         {footer}
                     </>
                 )}
+                </div>
             </div>
         </div>
     );

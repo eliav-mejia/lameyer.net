@@ -131,6 +131,26 @@ body {
 }
 .animate-fade-in { animation: fade-in 0.5s ease-out forwards; }
 
+/* Account / access pop-up (AuthModal in js/layout.jsx). The close button sits outside .auth-body, so it never scrolls away. */
+.auth-dialog { max-height: calc(100vh - 2rem); max-height: calc(100dvh - 2rem); }
+.auth-body { -webkit-overflow-scrolling: touch; }
+
+/* Phones: everything 15 % smaller (zoom) and the window always fits the screen with the page visible around it
+   (2rem above and below, 1rem at the sides). If the content is taller, .auth-body scrolls inside the window.
+   zoom also scales the window's own lengths, so its max-height is divided by .85 to keep the real 2rem margins. */
+@media (max-width: 639px) {
+    .auth-overlay { padding: 2rem 1rem; }
+    .auth-dialog { zoom: .85; border-radius: 1.75rem; max-height: calc((100vh - 4rem) / .85); max-height: calc((100dvh - 4rem) / .85); }
+    .auth-close { top: .875rem; right: .875rem; }
+    .auth-body { padding: 1.5rem 1.5rem 1.25rem; }
+    .auth-body .mb-8 { margin-bottom: 1.25rem; }
+    .auth-body .mb-6 { margin-bottom: 1rem; }
+    .auth-body .mt-6 { margin-top: 1rem; }
+    .auth-body .mt-4 { margin-top: .75rem; }
+    .auth-body .space-y-4 > :not([hidden]) ~ :not([hidden]) { margin-top: .75rem; }
+    .auth-body .space-y-3 > :not([hidden]) ~ :not([hidden]) { margin-top: .5rem; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     html { scroll-behavior: auto; }
     .particles { display: none; }
