@@ -55,6 +55,50 @@
             <p><strong>La regla:</strong> Cada lenguaje hace su trabajo y solo su trabajo.</p>
         </noscript>
     </div>
+    <!-- respaldo:inicio · generado por tools/generar-blog.mjs -->
+    <style>body{margin:0}#respaldo{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a202c;background:#fff;max-width:760px;margin:0 auto;padding:32px 16px 64px;line-height:1.6}#respaldo h1{font-size:2rem;line-height:1.15;margin:.5em 0}#respaldo h2{font-size:1.3rem;margin:1.6em 0 .4em}#respaldo a{color:#2563eb;font-weight:600}#respaldo .aviso{font-size:.85rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a}</style>
+    <div id="respaldo" hidden data-raiz="../../../../">
+        <p class="aviso">Vista simplificada: el diseño completo no pudo cargarse. <a href="https://lameyer.net/blog/desarrollo/nivel-1/lenguajes-de-programacion/">Abrir en lameyer.net</a></p>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 1 · Lanzamiento</p>
+            <h1>Lenguajes de programación: qué hace cada uno dentro de un proyecto web</h1>
+            <p>YAML, HTML, CSS, Python y JavaScript no compiten entre sí: cada uno tiene un trabajo. Saber cuál toca evita la mitad de los errores de un principiante.</p>
+            <h2>Qué es</h2>
+            <p>Un recorrido por los cinco lenguajes que aparecen en cualquier proyecto de Lameyer y por la frontera entre ellos: qué describe la estructura, qué da estilo, qué añade comportamiento, qué automatiza y qué configura.</p>
+            <h2>Por qué importa</h2>
+            <p>Muchos fallos de quien empieza vienen de pedirle a un lenguaje un trabajo que no es suyo. Un mapa claro de responsabilidades hace que el código sea más fácil de leer, de depurar y de entregar.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Reconocer qué lenguaje usar para cada tarea.</li>
+                <li>Leer un archivo y saber qué papel cumple en el sitio.</li>
+                <li>Entender cómo se conectan entre sí al publicar una página.</li>
+                <li>Elegir la herramienta más sencilla que resuelve el problema.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Es la base del Nivel 1: todos los demás módulos dan por hecho este vocabulario.</p>
+            <p><strong>La regla:</strong> Cada lenguaje hace su trabajo y solo su trabajo.</p>
+    </div>
+    <script>
+        (function () {
+            var root = document.getElementById('root'), f = document.getElementById('respaldo');
+            var montado = function () { for (var c = root.firstElementChild; c; c = c.nextElementSibling) if (c.tagName !== 'NOSCRIPT') return true; return false; };
+            var mostrar = function () {
+                if (montado() || !f.hidden) return;
+                if (location.protocol === 'file:') {
+                    var raiz = f.getAttribute('data-raiz');
+                    Array.prototype.forEach.call(f.querySelectorAll('a[href^="/"]'), function (a) {
+                        var h = a.getAttribute('href'), q = h.search(/[?#]/), ruta = q < 0 ? h : h.slice(0, q);
+                        a.setAttribute('href', raiz + ruta.slice(1) + (ruta.charAt(ruta.length - 1) === '/' ? 'index.html' : '') + (q < 0 ? '' : h.slice(q)));
+                    });
+                }
+                f.hidden = false;
+            };
+            if (window.MutationObserver) new MutationObserver(function () { if (montado()) f.hidden = true; }).observe(root, { childList: true });
+            if (location.protocol === 'file:') return mostrar();
+            window.addEventListener('error', function () { setTimeout(mostrar, 1500); });
+            setTimeout(mostrar, 8000);
+        })();
+    </script>
+    <!-- respaldo:fin -->
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>

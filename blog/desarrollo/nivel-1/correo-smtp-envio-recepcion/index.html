@@ -55,6 +55,50 @@
             <p><strong>La regla:</strong> Un cambio en la zona y luego una prueba; nunca varios cambios a ciegas.</p>
         </noscript>
     </div>
+    <!-- respaldo:inicio · generado por tools/generar-blog.mjs -->
+    <style>body{margin:0}#respaldo{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a202c;background:#fff;max-width:760px;margin:0 auto;padding:32px 16px 64px;line-height:1.6}#respaldo h1{font-size:2rem;line-height:1.15;margin:.5em 0}#respaldo h2{font-size:1.3rem;margin:1.6em 0 .4em}#respaldo a{color:#2563eb;font-weight:600}#respaldo .aviso{font-size:.85rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a}</style>
+    <div id="respaldo" hidden data-raiz="../../../../">
+        <p class="aviso">Vista simplificada: el diseño completo no pudo cargarse. <a href="https://lameyer.net/blog/desarrollo/nivel-1/correo-smtp-envio-recepcion/">Abrir en lameyer.net</a></p>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 1 · Lanzamiento</p>
+            <h1>Correo profesional sin buzón de pago: recibir y enviar desde el dominio del cliente</h1>
+            <p>Recibir y enviar son dos sistemas distintos. Cómo una pequeña empresa puede tener una dirección con su dominio y qué comprobaciones protegen su entrega.</p>
+            <h2>Qué es</h2>
+            <p>Cómo dar a un cliente una dirección de correo con su propio dominio usando reenvío para recibir y un servidor SMTP para responder desde la misma dirección, sin contratar un buzón.</p>
+            <h2>Por qué importa</h2>
+            <p>Un correo con dominio propio genera confianza, y uno mal configurado acaba en spam o, peor, corta el buzón que el cliente ya tenía. Entender las dos direcciones del correo evita ambos problemas.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Distinguir la recepción (DNS) del envío (SMTP).</li>
+                <li>Saber cuándo esta solución no es adecuada para un cliente.</li>
+                <li>Entender qué aportan SPF y DMARC a la entregabilidad.</li>
+                <li>Probar que el correo funciona en ambas direcciones.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Se apoya en Registros DNS del dominio raíz y completa la identidad digital del Nivel 1.</p>
+            <p><strong>La regla:</strong> Un cambio en la zona y luego una prueba; nunca varios cambios a ciegas.</p>
+    </div>
+    <script>
+        (function () {
+            var root = document.getElementById('root'), f = document.getElementById('respaldo');
+            var montado = function () { for (var c = root.firstElementChild; c; c = c.nextElementSibling) if (c.tagName !== 'NOSCRIPT') return true; return false; };
+            var mostrar = function () {
+                if (montado() || !f.hidden) return;
+                if (location.protocol === 'file:') {
+                    var raiz = f.getAttribute('data-raiz');
+                    Array.prototype.forEach.call(f.querySelectorAll('a[href^="/"]'), function (a) {
+                        var h = a.getAttribute('href'), q = h.search(/[?#]/), ruta = q < 0 ? h : h.slice(0, q);
+                        a.setAttribute('href', raiz + ruta.slice(1) + (ruta.charAt(ruta.length - 1) === '/' ? 'index.html' : '') + (q < 0 ? '' : h.slice(q)));
+                    });
+                }
+                f.hidden = false;
+            };
+            if (window.MutationObserver) new MutationObserver(function () { if (montado()) f.hidden = true; }).observe(root, { childList: true });
+            if (location.protocol === 'file:') return mostrar();
+            window.addEventListener('error', function () { setTimeout(mostrar, 1500); });
+            setTimeout(mostrar, 8000);
+        })();
+    </script>
+    <!-- respaldo:fin -->
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>

@@ -55,6 +55,50 @@
             <p><strong>La regla:</strong> Nada se cobra ni se paga fuera del registro.</p>
         </noscript>
     </div>
+    <!-- respaldo:inicio · generado por tools/generar-blog.mjs -->
+    <style>body{margin:0}#respaldo{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a202c;background:#fff;max-width:760px;margin:0 auto;padding:32px 16px 64px;line-height:1.6}#respaldo h1{font-size:2rem;line-height:1.15;margin:.5em 0}#respaldo h2{font-size:1.3rem;margin:1.6em 0 .4em}#respaldo a{color:#2563eb;font-weight:600}#respaldo .aviso{font-size:.85rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a}</style>
+    <div id="respaldo" hidden data-raiz="../../../../">
+        <p class="aviso">Vista simplificada: el diseño completo no pudo cargarse. <a href="https://lameyer.net/blog/desarrollo/nivel-3/odoo-contabilidad/">Abrir en lameyer.net</a></p>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 3 · Operaciones</p>
+            <h1>Contabilidad en Odoo: facturar, conciliar y entender los reportes</h1>
+            <p>Una introducción a la contabilidad dentro de Odoo para pymes: facturación, conciliación bancaria y los reportes que el negocio necesita leer.</p>
+            <h2>Qué es</h2>
+            <p>Los conceptos básicos de la aplicación de contabilidad: cómo se registran ventas y compras, cómo se concilian con el banco y qué reportes resumen la salud del negocio.</p>
+            <h2>Por qué importa</h2>
+            <p>La contabilidad es donde se comprueba si el negocio gana dinero. Tenerla en el mismo sistema que las ventas evita retrabajo y errores de captura.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Entender el recorrido de una factura.</li>
+                <li>Saber qué significa conciliar y por qué importa.</li>
+                <li>Leer los reportes básicos.</li>
+                <li>Saber cuándo involucrar al contador del cliente.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Es la fase de decisión del proyecto: el cliente la activa cuando sus pagos ya están en producción.</p>
+            <p><strong>La regla:</strong> Nada se cobra ni se paga fuera del registro.</p>
+    </div>
+    <script>
+        (function () {
+            var root = document.getElementById('root'), f = document.getElementById('respaldo');
+            var montado = function () { for (var c = root.firstElementChild; c; c = c.nextElementSibling) if (c.tagName !== 'NOSCRIPT') return true; return false; };
+            var mostrar = function () {
+                if (montado() || !f.hidden) return;
+                if (location.protocol === 'file:') {
+                    var raiz = f.getAttribute('data-raiz');
+                    Array.prototype.forEach.call(f.querySelectorAll('a[href^="/"]'), function (a) {
+                        var h = a.getAttribute('href'), q = h.search(/[?#]/), ruta = q < 0 ? h : h.slice(0, q);
+                        a.setAttribute('href', raiz + ruta.slice(1) + (ruta.charAt(ruta.length - 1) === '/' ? 'index.html' : '') + (q < 0 ? '' : h.slice(q)));
+                    });
+                }
+                f.hidden = false;
+            };
+            if (window.MutationObserver) new MutationObserver(function () { if (montado()) f.hidden = true; }).observe(root, { childList: true });
+            if (location.protocol === 'file:') return mostrar();
+            window.addEventListener('error', function () { setTimeout(mostrar, 1500); });
+            setTimeout(mostrar, 8000);
+        })();
+    </script>
+    <!-- respaldo:fin -->
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>

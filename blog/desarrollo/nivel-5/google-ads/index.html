@@ -55,6 +55,50 @@
             <p><strong>La regla:</strong> Una sola fuente de conversiones por cuenta.</p>
         </noscript>
     </div>
+    <!-- respaldo:inicio · generado por tools/generar-blog.mjs -->
+    <style>body{margin:0}#respaldo{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a202c;background:#fff;max-width:760px;margin:0 auto;padding:32px 16px 64px;line-height:1.6}#respaldo h1{font-size:2rem;line-height:1.15;margin:.5em 0}#respaldo h2{font-size:1.3rem;margin:1.6em 0 .4em}#respaldo a{color:#2563eb;font-weight:600}#respaldo .aviso{font-size:.85rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a}</style>
+    <div id="respaldo" hidden data-raiz="../../../../">
+        <p class="aviso">Vista simplificada: el diseño completo no pudo cargarse. <a href="https://lameyer.net/blog/desarrollo/nivel-5/google-ads/">Abrir en lameyer.net</a></p>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 5 · Publicidad y métricas</p>
+            <h1>Google Ads: aparecer cuando alguien ya está buscando</h1>
+            <p>Búsqueda frente a descubrimiento, palabras clave y pujas automáticas: por qué Google Ads funciona distinto que las redes sociales y cómo conectarlo con las ventas reales.</p>
+            <h2>Qué es</h2>
+            <p>Una introducción a Google Ads: tipos de campaña, intención de búsqueda, palabras clave, pujas inteligentes y la importación de conversiones desde Analytics.</p>
+            <h2>Por qué importa</h2>
+            <p>Quien busca ya tiene una necesidad. Aparecer en ese momento es valioso, pero sin conversiones bien medidas las pujas automáticas optimizan hacia el objetivo equivocado.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Distinguir intención de búsqueda de interés.</li>
+                <li>Entender cómo aprende una puja automática.</li>
+                <li>Leer los términos de búsqueda reales.</li>
+                <li>Evitar contar conversiones dos veces.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Continúa lo aprendido en Seguimiento y datos (Nivel 2).</p>
+            <p><strong>La regla:</strong> Una sola fuente de conversiones por cuenta.</p>
+    </div>
+    <script>
+        (function () {
+            var root = document.getElementById('root'), f = document.getElementById('respaldo');
+            var montado = function () { for (var c = root.firstElementChild; c; c = c.nextElementSibling) if (c.tagName !== 'NOSCRIPT') return true; return false; };
+            var mostrar = function () {
+                if (montado() || !f.hidden) return;
+                if (location.protocol === 'file:') {
+                    var raiz = f.getAttribute('data-raiz');
+                    Array.prototype.forEach.call(f.querySelectorAll('a[href^="/"]'), function (a) {
+                        var h = a.getAttribute('href'), q = h.search(/[?#]/), ruta = q < 0 ? h : h.slice(0, q);
+                        a.setAttribute('href', raiz + ruta.slice(1) + (ruta.charAt(ruta.length - 1) === '/' ? 'index.html' : '') + (q < 0 ? '' : h.slice(q)));
+                    });
+                }
+                f.hidden = false;
+            };
+            if (window.MutationObserver) new MutationObserver(function () { if (montado()) f.hidden = true; }).observe(root, { childList: true });
+            if (location.protocol === 'file:') return mostrar();
+            window.addEventListener('error', function () { setTimeout(mostrar, 1500); });
+            setTimeout(mostrar, 8000);
+        })();
+    </script>
+    <!-- respaldo:fin -->
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>

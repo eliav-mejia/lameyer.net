@@ -55,6 +55,50 @@
             <p><strong>La regla:</strong> La publicidad acelera lo que funciona; no arregla lo que no funciona.</p>
         </noscript>
     </div>
+    <!-- respaldo:inicio · generado por tools/generar-blog.mjs -->
+    <style>body{margin:0}#respaldo{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a202c;background:#fff;max-width:760px;margin:0 auto;padding:32px 16px 64px;line-height:1.6}#respaldo h1{font-size:2rem;line-height:1.15;margin:.5em 0}#respaldo h2{font-size:1.3rem;margin:1.6em 0 .4em}#respaldo a{color:#2563eb;font-weight:600}#respaldo .aviso{font-size:.85rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a}</style>
+    <div id="respaldo" hidden data-raiz="../../../../">
+        <p class="aviso">Vista simplificada: el diseño completo no pudo cargarse. <a href="https://lameyer.net/blog/desarrollo/nivel-2/trafico-pagado-vs-organico/">Abrir en lameyer.net</a></p>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 2 · Visibilidad</p>
+            <h1>Tráfico web: pagado frente a orgánico y cómo evaluarlos cada mes</h1>
+            <p>Qué hace y qué no hace la publicidad por un sitio, qué proporción de tráfico pagado es sana según la etapa del negocio y qué rastreadores no hay que bloquear.</p>
+            <h2>Qué es</h2>
+            <p>Los canales por los que llegan las visitas, la diferencia entre comprar tráfico y ganarlo, y una evaluación mensual que separa lo que la publicidad realmente aporta.</p>
+            <h2>Por qué importa</h2>
+            <p>Muchos negocios confunden más visitas con más ventas, o bloquean sin saberlo a los rastreadores que les traerían tráfico gratuito. Tener bandas de referencia evita ambas trampas.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Distinguir los canales de tráfico y su papel.</li>
+                <li>Interpretar la proporción entre pagado y orgánico.</li>
+                <li>Evaluar cada mes si la inversión es incremental.</li>
+                <li>Revisar que el sitio no bloquee rastreadores útiles.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Cierra el Nivel 2 y abre el Nivel 5, dedicado a la publicidad.</p>
+            <p><strong>La regla:</strong> La publicidad acelera lo que funciona; no arregla lo que no funciona.</p>
+    </div>
+    <script>
+        (function () {
+            var root = document.getElementById('root'), f = document.getElementById('respaldo');
+            var montado = function () { for (var c = root.firstElementChild; c; c = c.nextElementSibling) if (c.tagName !== 'NOSCRIPT') return true; return false; };
+            var mostrar = function () {
+                if (montado() || !f.hidden) return;
+                if (location.protocol === 'file:') {
+                    var raiz = f.getAttribute('data-raiz');
+                    Array.prototype.forEach.call(f.querySelectorAll('a[href^="/"]'), function (a) {
+                        var h = a.getAttribute('href'), q = h.search(/[?#]/), ruta = q < 0 ? h : h.slice(0, q);
+                        a.setAttribute('href', raiz + ruta.slice(1) + (ruta.charAt(ruta.length - 1) === '/' ? 'index.html' : '') + (q < 0 ? '' : h.slice(q)));
+                    });
+                }
+                f.hidden = false;
+            };
+            if (window.MutationObserver) new MutationObserver(function () { if (montado()) f.hidden = true; }).observe(root, { childList: true });
+            if (location.protocol === 'file:') return mostrar();
+            window.addEventListener('error', function () { setTimeout(mostrar, 1500); });
+            setTimeout(mostrar, 8000);
+        })();
+    </script>
+    <!-- respaldo:fin -->
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>

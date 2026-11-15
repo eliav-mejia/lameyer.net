@@ -60,11 +60,49 @@ const headBlock = ({ type, title, description, url, published, graph }) => [
     '    <!-- seo:fin -->',
 ].join('\n');
 
-const noscript = (inner) => `<div id="root">
+// #root lleva el texto en <noscript> (sin JavaScript) y, justo después, una copia visible de respaldo:
+// si React no llega a montar la página (abierta desde el disco con file://, CDN bloqueado, error de script),
+// el guardián la muestra en lugar de dejar la página en blanco. Desde el disco, los enlaces /… se vuelven relativos.
+const RESPALDO_CSS = 'body{margin:0}#respaldo{font-family:system-ui,-apple-system,Segoe UI,sans-serif;color:#1a202c;background:#fff;max-width:760px;margin:0 auto;padding:32px 16px 64px;line-height:1.6}'
+    + '#respaldo h1{font-size:2rem;line-height:1.15;margin:.5em 0}#respaldo h2{font-size:1.3rem;margin:1.6em 0 .4em}#respaldo a{color:#2563eb;font-weight:600}'
+    + '#respaldo .aviso{font-size:.85rem;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:10px 14px;color:#1e3a8a}';
+const noscript = (inner, url) => {
+    const depth = url.slice(SITE.length).split('/').filter(Boolean).length;
+    const raiz = '../'.repeat(depth) || './';
+    return `<div id="root">
         <noscript>
 ${inner}
         </noscript>
-    </div>`;
+    </div>
+    <!-- respaldo:inicio · generado por tools/generar-blog.mjs -->
+    <style>${RESPALDO_CSS}</style>
+    <div id="respaldo" hidden data-raiz="${raiz}">
+        <p class="aviso">Vista simplificada: el diseño completo no pudo cargarse. <a href="https://lameyer.net${url.slice(SITE.length)}">Abrir en lameyer.net</a></p>
+${inner}
+    </div>
+    <script>
+        (function () {
+            var root = document.getElementById('root'), f = document.getElementById('respaldo');
+            var montado = function () { for (var c = root.firstElementChild; c; c = c.nextElementSibling) if (c.tagName !== 'NOSCRIPT') return true; return false; };
+            var mostrar = function () {
+                if (montado() || !f.hidden) return;
+                if (location.protocol === 'file:') {
+                    var raiz = f.getAttribute('data-raiz');
+                    Array.prototype.forEach.call(f.querySelectorAll('a[href^="/"]'), function (a) {
+                        var h = a.getAttribute('href'), q = h.search(/[?#]/), ruta = q < 0 ? h : h.slice(0, q);
+                        a.setAttribute('href', raiz + ruta.slice(1) + (ruta.charAt(ruta.length - 1) === '/' ? 'index.html' : '') + (q < 0 ? '' : h.slice(q)));
+                    });
+                }
+                f.hidden = false;
+            };
+            if (window.MutationObserver) new MutationObserver(function () { if (montado()) f.hidden = true; }).observe(root, { childList: true });
+            if (location.protocol === 'file:') return mostrar();
+            window.addEventListener('error', function () { setTimeout(mostrar, 1500); });
+            setTimeout(mostrar, 8000);
+        })();
+    </script>
+    <!-- respaldo:fin -->`;
+};
 
 // Páginas escritas a mano: solo se cambian el bloque SEO del <head> real y el <noscript>.
 const patchPage = (file, url, block, fallback) => {
@@ -78,7 +116,8 @@ const patchPage = (file, url, block, fallback) => {
     head = head.replace(/<link rel="canonical" href="[^"]*">/, `<link rel="canonical" href="${url}">`);
     head = head.replace(/\n    <!-- seo:inicio[\s\S]*?<!-- seo:fin -->/, '');
     head = head.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${block}`);
-    body = body.replace(/<div id="root">(?:\s*<noscript>[\s\S]*?<\/noscript>\s*)?<\/div>/, noscript(fallback));
+    body = body.replace(/\n    <!-- respaldo:inicio[\s\S]*?<!-- respaldo:fin -->/, '');
+    body = body.replace(/<div id="root">(?:\s*<noscript>[\s\S]*?<\/noscript>\s*)?<\/div>/, noscript(fallback, url));
     fs.writeFileSync(file, head + body);
 };
 
@@ -108,7 +147,7 @@ ${block}
 </head>
 <body>
 
-    ${noscript(fallback)}
+    ${noscript(fallback, url)}
 
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>
