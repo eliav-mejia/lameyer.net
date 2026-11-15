@@ -2,14 +2,15 @@
 // Carga: /js/layout.jsx → /js/acceso.jsx → /js/desarrollo-datos.js (datos, JS plano) → [/js/academia.jsx solo en /blog/] → /js/blog.jsx
 // La categoría Ciberseguridad (/blog/ciberseguridad/) vive en /js/academia.jsx (las capas).
 
+// Orden: Desarrollo primero (izquierda en escritorio), después Ciberseguridad.
 const BLOG_CATEGORIAS = [
-    {
-        id: 'ciberseguridad', href: '/blog/ciberseguridad/', nombre: 'Ciberseguridad', orden: 'por capas',
-        texto: 'Defensa en capas, del perímetro al núcleo: APIs, edge serverless, integraciones, núcleo modular y lo que el sistema expone.',
-    },
     {
         id: 'desarrollo', href: '/blog/desarrollo/', nombre: 'Desarrollo', orden: 'por niveles',
         texto: 'La ruta de la Academia Lameyer en seis niveles: un artículo por módulo para saber qué aprenderás y por qué importa.',
+    },
+    {
+        id: 'ciberseguridad', href: '/blog/ciberseguridad/', nombre: 'Ciberseguridad', orden: 'por capas',
+        texto: 'Defensa en capas, del perímetro al núcleo: APIs, edge serverless, integraciones, núcleo modular y lo que el sistema expone.',
     },
 ];
 
@@ -129,7 +130,7 @@ const BlogHome = () => {
             <section className="pt-12 md:pt-24 pb-10 md:pb-14 text-center relative z-10 animate-fade-in">
                 <div className="inline-block mb-6 md:mb-8 px-4 md:px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.25em] md:tracking-[0.5em] uppercase bg-blue-50/50">Blog · Academia Lameyer</div>
                 <h1 className="text-4xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6 md:mb-8 leading-[0.95]">Aprende a construir<br/><span className="text-blue-600">y a proteger</span></h1>
-                <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">Dos categorías: Ciberseguridad, ordenada por capas, y Desarrollo, ordenado por los niveles de la Academia.</p>
+                <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">Dos categorías: Desarrollo, ordenado por los niveles de la Academia, y Ciberseguridad, ordenada por capas.</p>
             </section>
             <section className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pb-16 relative z-10" aria-label="Categorías">
                 {BLOG_CATEGORIAS.map(c => (

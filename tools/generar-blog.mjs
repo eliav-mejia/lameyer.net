@@ -297,7 +297,7 @@ for (const post of devPosts) {
 // --- 5. Portada del blog ---
 {
     const url = `${SITE}/blog/`;
-    const description = 'Blog de Lameyer y su Academia: Ciberseguridad ordenada por capas y Desarrollo ordenado por los seis niveles de la Academia.';
+    const description = 'Blog de Lameyer y su Academia: Desarrollo ordenado por los seis niveles de la Academia y Ciberseguridad ordenada por capas.';
     write('blog', fullPage({
         title: 'Blog Lameyer: ciberseguridad y desarrollo', description, url,
         block: headBlock({ type: 'website', title: 'Blog Lameyer', description, url,
@@ -309,8 +309,8 @@ for (const post of devPosts) {
             '            <h1>Blog Lameyer</h1>',
             `            <p>${esc(description)}</p>`,
             '            <ul>',
-            `                <li><a href="/blog/ciberseguridad/">Ciberseguridad</a>: ${ACADEMIA_POSTS.length} artículos en ${SERIES.length} capas</li>`,
             `                <li><a href="/blog/desarrollo/">Desarrollo</a>: ${devPosts.length} artículos en ${NIVELES.length} niveles</li>`,
+            `                <li><a href="/blog/ciberseguridad/">Ciberseguridad</a>: ${ACADEMIA_POSTS.length} artículos en ${SERIES.length} capas</li>`,
             '            </ul>',
         ].join('\n'),
         scripts: ['/js/academia.jsx', '/js/blog.jsx'],

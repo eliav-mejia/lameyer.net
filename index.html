@@ -66,14 +66,14 @@
     <script type="text/babel" src="js/layout.jsx"></script>
     <script type="text/babel" src="js/acceso.jsx"></script>
     <script type="text/babel">
-        // Blog teaser: the five Ciberseguridad capas (perimeter → inside, keep in sync with SERIES[].capa in /js/academia.jsx) + Desarrollo.
+        // Blog teaser: Desarrollo first, then the five Ciberseguridad capas (perimeter → inside, keep in sync with SERIES[].capa in /js/academia.jsx).
         const ACADEMIA_HIGHLIGHTS = [
+            { num: 'Desarrollo', label: 'Seis niveles de la Academia', text: 'Un artículo por módulo, del primer sitio a los agentes de IA', href: '/blog/desarrollo/' },
             { num: 'Capa 01', label: 'Seguridad de APIs', text: 'El perímetro: DDoS, WAF, API Shield, límites de tasa y túnel', href: '/blog/ciberseguridad/?series=seguridad-apis' },
             { num: 'Capa 02', label: 'Edge Serverless', text: 'Funciones, caché y autenticación cerca del usuario', href: '/blog/ciberseguridad/?series=edge-serverless' },
             { num: 'Capa 03', label: 'Automatización de flujos', text: 'Webhooks, colas e integraciones fiables', href: '/blog/ciberseguridad/?series=automatizacion-flujos' },
             { num: 'Capa 04', label: 'Núcleo Modular', text: 'Límites, contratos y propiedad de los datos', href: '/blog/ciberseguridad/?series=nucleo-modular' },
             { num: 'Capa 05', label: 'Búsqueda y visibilidad', text: 'Lo que el sistema expone a buscadores e IA', href: '/blog/ciberseguridad/?series=busqueda-visibilidad' },
-            { num: 'Desarrollo', label: 'Seis niveles de la Academia', text: 'Un artículo por módulo, del primer sitio a los agentes de IA', href: '/blog/desarrollo/' },
         ];
 
         const ContentCard = ({ title, desc, align, active, icon }) => {
@@ -260,7 +260,7 @@
                 <div className="max-w-6xl mx-auto">
                     <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-8 mb-12">
                         <div>
-                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Blog · Ciberseguridad por capas y Desarrollo por niveles</p>
+                            <p className="text-[10px] font-bold uppercase tracking-[0.4em] text-blue-500 mb-4">Blog · Desarrollo por niveles y Ciberseguridad por capas</p>
                             <h2 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-tight">
                                 Aprende a construir<br/><span className="text-blue-600">y a proteger</span>
                             </h2>
