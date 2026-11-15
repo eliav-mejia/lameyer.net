@@ -11,6 +11,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
+import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
@@ -31,6 +32,12 @@ vm.runInContext(fs.readFileSync(path.join(ROOT, 'js', 'desarrollo-datos.js'), 'u
 const { SERIES, ACADEMIA_POSTS, seriesOf } = ctx.ciber;
 const { NIVELES, DESARROLLO_INTRO, DESARROLLO_POSTS, nivelById } = ctx.dev;
 const SORTED = [...SERIES].sort((a, b) => a.capa - b.capa);
+
+// --- versión de los scripts ---
+// Cada /js/… del blog se enlaza con ?v=<hash del archivo>: al cambiar el archivo cambia la URL y el navegador
+// no reutiliza la copia de su caché (GitHub Pages sirve max-age=600).
+const version = (rel) => crypto.createHash('sha1').update(fs.readFileSync(path.join(ROOT, rel))).digest('hex').slice(0, 8);
+const conVersion = (html) => html.replace(/src="\/js\/([\w.-]+\.(?:jsx|js))(?:\?v=[0-9a-f]+)?"/g, (m, f) => `src="/js/${f}?v=${version('js/' + f)}"`);
 
 // --- utilidades ---
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
@@ -118,7 +125,7 @@ const patchPage = (file, url, block, fallback) => {
     head = head.replace(/(<link rel="canonical" href="[^"]*">)/, `$1\n${block}`);
     body = body.replace(/\n    <!-- respaldo:inicio[\s\S]*?<!-- respaldo:fin -->/, '');
     body = body.replace(/<div id="root">(?:\s*<noscript>[\s\S]*?<\/noscript>\s*)?<\/div>/, noscript(fallback, url));
-    fs.writeFileSync(file, head + body);
+    fs.writeFileSync(file, conVersion(head + body));
 };
 
 // Páginas generadas por completo.
@@ -163,7 +170,7 @@ ${scripts.map(s => `    <script type="text/babel" src="${s}"></script>`).join('\
 const write = (rel, html) => {
     const file = path.join(ROOT, rel, 'index.html');
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, html);
+    fs.writeFileSync(file, conVersion(html));
 };
 
 const collection = (url, name, description, items, crumbs) => [
