@@ -29,11 +29,11 @@ const SERIES = [
         title: 'Defensa en capas',
         accent: 'para APIs headless',
         intro: 'Una API headless sin frontend expone claves y datos al raspado, a la fuerza bruta y a ataques directos al origen. Recorre cada capa del modelo de defensa de Cloudflare, del edge a tu origen.',
-        step: 'Capa',
+        step: 'Barrera',
         from: 'Cliente',
         to: 'Origen',
         flowLabel: 'Recorrido de la petición',
-        typesLabel: 'Capas de defensa',
+        typesLabel: 'Barreras de defensa',
         facet: 'Amenaza',
         facetsLabel: 'Amenazas cubiertas',
         verb: 'Detiene',
@@ -633,45 +633,52 @@ const byStep = (a, b) => (typeOf(a).layer - typeOf(b).layer) || (isCross(a) - is
 const linkClass = 'text-blue-600 font-bold hover:underline';
 
 // --- FLOW DIAGRAM ---
-// Start -> the series' types -> end. Highlights `active` (one id or a list); clickable when `onSelect` is given.
-const LayerFlow = ({ series, active, onSelect, dark }) => {
+// (The data block for tools/generar-blog.mjs ends at the marker above.)
+
+// A native dropdown: the phone opens its own picker, desktop gets a compact select.
+const FiltroSelect = ({ label, value, onChange, options }) => (
+    <label className="block">
+        <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-1.5">{label}</span>
+        <span className="relative block">
+            <select value={value} onChange={(e) => onChange(e.target.value)}
+                className={`w-full appearance-none pl-4 pr-10 py-3 rounded-2xl border bg-white text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-colors ${value !== 'all' && value !== 'layer' ? 'border-blue-500 text-blue-700' : 'border-gray-200 text-gray-700'}`}>
+                {options.map(([v, text]) => <option key={v} value={v}>{text}</option>)}
+            </select>
+            <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
+        </span>
+    </label>
+);
+
+// The steps of a series as a dropdown menu (<details>): closed it names the current step, open it lists every step in order.
+const StepsMenu = ({ series, active }) => {
     const s = seriesById(series);
     const activeIds = [].concat(active);
     const types = ACADEMIA_TYPES.filter(t => t.series === series);
-    const compact = types.length > 6;
-    const node = (t) => {
-        const isOn = activeIds.includes(t.id);
-        const base = `flex-1 ${compact ? 'min-w-[92px] p-3' : 'min-w-[120px] p-4'} rounded-2xl border text-left transition-all duration-300`;
-        const tone = isOn
-            ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-600/30 scale-105'
-            : dark
-                ? 'bg-slate-800/60 border-slate-700 text-slate-300 hover:border-blue-500/60'
-                : 'bg-white/90 border-gray-200 text-gray-700 hover:border-blue-500';
-        const content = (
-            <>
-                <span className={`block text-[10px] font-bold uppercase tracking-[0.2em] mb-1 ${isOn ? 'text-blue-100' : 'text-blue-500'}`}>{stepLabel(t)}</span>
-                <span className="block text-sm font-black leading-tight">{t.short}</span>
-            </>
-        );
-        return onSelect ? (
-            <button key={t.id} onClick={() => onSelect(isOn ? 'all' : t.id)} aria-pressed={isOn} className={base + ' ' + tone}>{content}</button>
-        ) : (
-            <div key={t.id} className={base + ' ' + tone} aria-current={isOn ? 'step' : undefined}>{content}</div>
-        );
-    };
-
-    const endpoint = (label) => (
-        <div className={`hidden md:flex items-center justify-center px-4 rounded-2xl border border-dashed text-[10px] font-bold uppercase tracking-[0.2em] ${dark ? 'border-slate-600 text-slate-400' : 'border-gray-300 text-gray-400'}`}>
-            {label}
-        </div>
-    );
-
+    const current = types.find(t => activeIds.includes(t.id));
     return (
-        <div className="flex items-stretch gap-3 overflow-x-auto no-scrollbar py-2 px-1" aria-label={`${s.flowLabel} de ${s.from} a ${s.to}`}>
-            {endpoint(s.from)}
-            {types.map(node)}
-            {endpoint(s.to)}
-        </div>
+        <details className="group rounded-[1.5rem] border border-gray-100 bg-white/95 shadow-lg shadow-gray-200/40 open:shadow-xl">
+            <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer flex items-center justify-between gap-4 px-5 md:px-6 py-4">
+                <span className="min-w-0">
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">{s.flowLabel} · {types.length} {s.typesLabel.toLowerCase()}</span>
+                    <span className="block font-black text-gray-900 truncate">{current ? `${stepLabel(current)} · ${current.label}` : s.typesLabel}</span>
+                </span>
+                <span aria-hidden="true" className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <ol className="px-3 pb-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+                {types.map(t => {
+                    const on = activeIds.includes(t.id);
+                    return (
+                        <li key={t.id}>
+                            <a href={`${CIBER_BASE}?type=${t.id}`} aria-current={on ? 'step' : undefined}
+                                className={`flex items-baseline gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${on ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}`}>
+                                <span className={`text-[10px] uppercase tracking-[0.15em] flex-shrink-0 ${on ? 'text-blue-100' : 'text-blue-500'}`}>{stepLabel(t)}</span>
+                                <span>{t.label}</span>
+                            </a>
+                        </li>
+                    );
+                })}
+            </ol>
+        </details>
     );
 };
 
@@ -724,13 +731,6 @@ const Chip = ({ active, onClick, children, count }) => (
     </button>
 );
 
-const FilterGroup = ({ title, children }) => (
-    <div className="mb-8">
-        <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3">{title}</h3>
-        <div className="flex flex-wrap gap-2">{children}</div>
-    </div>
-);
-
 const CrossBadges = ({ post }) => isCross(post) ? (
     <div className="flex flex-wrap items-center gap-1.5 mb-4">
         <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400">Cruza</span>
@@ -745,7 +745,7 @@ const PostCard = ({ post }) => {
     return (
         <a
             href={post.path}
-            className="group flex flex-col p-8 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300 animate-fade-in"
+            className="group flex flex-col p-6 md:p-8 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300 animate-fade-in"
         >
             <div className="flex items-center justify-between gap-3 mb-5">
                 <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">{isCross(post) ? 'Cruce' : stepLabel(t)}</span>
@@ -766,13 +766,6 @@ const PostCard = ({ post }) => {
         </a>
     );
 };
-
-const StatTile = ({ value, label }) => (
-    <div className="bg-white p-6 rounded-3xl shadow-xl border border-gray-50 flex items-center gap-4">
-        <div className="min-w-10 h-10 px-2 bg-blue-600 rounded-xl flex items-center justify-center text-white font-bold">{value}</div>
-        <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-tight">{label}</p>
-    </div>
-);
 
 // --- CAPAS (Blog · Ciberseguridad) ---
 const SORTED_SERIES = [...SERIES].sort((a, b) => a.capa - b.capa);
@@ -795,7 +788,11 @@ const BlogBreadcrumb = ({ items }) => (
 const CapaNav = ({ active, onSelect }) => (
     <>
         <BlogBreadcrumb items={[['Blog', '/blog/'], ['Ciberseguridad', active === 'all' ? null : CIBER_BASE]]} />
-        <nav className="pt-6 flex flex-wrap justify-center gap-2 relative z-10" aria-label="Capas de ciberseguridad">
+        <div className="md:hidden pt-6 relative z-10">
+            <FiltroSelect label="Capa" value={active} onChange={onSelect}
+                options={[['all', `Todas las capas (${ACADEMIA_POSTS.length})`], ...SORTED_SERIES.map(x => [x.id, `${capaLabel(x)} · ${x.label} (${ACADEMIA_POSTS.filter(p => typeOf(p).series === x.id).length})`])]} />
+        </div>
+        <nav className="hidden md:flex pt-6 flex-wrap justify-center gap-2 relative z-10" aria-label="Capas de ciberseguridad">
             <Chip active={active === 'all'} onClick={() => onSelect('all')} count={ACADEMIA_POSTS.length}>Todas las capas</Chip>
             {SORTED_SERIES.map(x => (
                 <Chip key={x.id} active={x.id === active} onClick={() => onSelect(x.id)}
@@ -815,14 +812,14 @@ const CapasOverview = ({ q, setQ, onSelect }) => {
         <>
             <CapaNav active="all" onSelect={onSelect} />
 
-            <section className="pt-12 pb-12 text-center relative z-10 animate-fade-in">
-                <div className="inline-block mb-8 px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.5em] uppercase bg-blue-50/50">
-                    Blog · Ciberseguridad · Todas las capas
+            <section className="pt-8 md:pt-12 pb-8 md:pb-12 text-center relative z-10 animate-fade-in">
+                <div className="inline-block mb-6 md:mb-8 px-4 md:px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.25em] md:tracking-[0.5em] uppercase bg-blue-50/50">
+                    Ciberseguridad · Todas las capas
                 </div>
-                <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-8 leading-[0.9]">
+                <h1 className="text-4xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6 md:mb-8 leading-[0.95]">
                     Seguridad por capas,<br/><span className="text-blue-600">del perímetro al núcleo</span>
                 </h1>
-                <p className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">
+                <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">
                     Cinco capas, {ACADEMIA_POSTS.length} artículos. Cada capa protege lo que la anterior deja pasar: primero el perímetro de la API,
                     después el edge, las integraciones, el núcleo de negocio y, por último, lo que el sistema expone al mundo.
                 </p>
@@ -836,23 +833,23 @@ const CapasOverview = ({ q, setQ, onSelect }) => {
                         const n = ACADEMIA_POSTS.filter(p => typeOf(p).series === x.id).length;
                         const steps = ACADEMIA_TYPES.filter(t => t.series === x.id);
                         return (
-                            <li key={x.id} style={{ marginLeft: `${(x.capa - 1) * 2}%`, marginRight: `${(x.capa - 1) * 2}%` }}>
+                            <li key={x.id} className="md:[margin-inline:var(--sangria)]" style={{ '--sangria': `${(x.capa - 1) * 2}%` }}>
                                 <button onClick={() => onSelect(x.id)}
-                                    className="group w-full text-left p-6 md:p-7 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 transition-all">
-                                    <div className="flex flex-wrap items-start gap-5">
-                                        <span className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex flex-col items-center justify-center flex-shrink-0">
+                                    className="group w-full text-left p-5 md:p-7 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 transition-all">
+                                    <div className="flex items-start gap-4 md:gap-5">
+                                        <span className="w-12 h-12 md:w-14 md:h-14 rounded-2xl bg-blue-600 text-white flex flex-col items-center justify-center flex-shrink-0">
                                             <span className="text-[8px] font-bold uppercase tracking-widest text-blue-100">Capa</span>
                                             <span className="text-xl font-black leading-none">{x.capa}</span>
                                         </span>
-                                        <div className="flex-1 min-w-[220px]">
-                                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500 mb-1">{x.capaShort}</p>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500 mb-1">{x.capaShort}<span className="sm:hidden"> · {n} artículos</span></p>
                                             <h3 className="text-xl md:text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{x.label}</h3>
                                             <p className="text-sm text-gray-500 font-medium mt-1 mb-3">{x.capaRole}</p>
-                                            <div className="flex flex-wrap gap-1.5">
+                                            <div className="hidden md:flex flex-wrap gap-1.5">
                                                 {steps.map(t => <span key={t.id} className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold">{t.short}</span>)}
                                             </div>
                                         </div>
-                                        <span className="text-xs font-bold text-gray-400 whitespace-nowrap self-center">{n} artículos <span className="text-blue-600 group-hover:translate-x-1 inline-block transition-transform">→</span></span>
+                                        <span className="hidden sm:inline text-xs font-bold text-gray-400 whitespace-nowrap self-center">{n} artículos <span className="text-blue-600 group-hover:translate-x-1 inline-block transition-transform">→</span></span>
                                     </div>
                                 </button>
                             </li>
@@ -903,6 +900,7 @@ const CapasOverview = ({ q, setQ, onSelect }) => {
 const AcademiaDashboard = () => {
     const [filters, setFilters] = useState(readParams);
     const set = (patch) => setFilters(f => ({ ...f, ...patch }));
+    const [openFilters, setOpenFilters] = useState(false);
 
     useEffect(() => writeParams(filters), [filters]);
 
@@ -919,10 +917,6 @@ const AcademiaDashboard = () => {
     const zones = ZONES.filter(z => z.series === s.id);
     const posts = ACADEMIA_POSTS.filter(p => typeOf(p).series === s.id);
     const allThreats = [...new Set(posts.flatMap(p => p.threats))].sort();
-
-    const toggleThreat = (th) => set({
-        threats: filters.threats.includes(th) ? filters.threats.filter(x => x !== th) : [...filters.threats, th],
-    });
 
     const matchesQuery = (post) => {
         const q = filters.q.trim().toLowerCase();
@@ -949,130 +943,81 @@ const AcademiaDashboard = () => {
     const hasFilters = filters.q || filters.type !== 'all' || filters.zone !== 'all' || filters.kind !== 'all' || filters.threats.length;
     const reset = () => setFilters(f => ({ ...f, q: '', type: 'all', zone: 'all', kind: 'all', threats: [] }));
     const crossCount = posts.filter(isCross).length;
+    const activeCount = [filters.type !== 'all', filters.zone !== 'all', filters.kind !== 'all', filters.threats.length > 0].filter(Boolean).length;
 
     return (
         <>
             <CapaNav active={s.id} onSelect={switchSeries} />
 
             {/* Hero */}
-            <section className="pt-12 pb-12 text-center relative z-10">
+            <section className="pt-8 md:pt-12 pb-8 md:pb-12 text-center relative z-10">
                 <div className="animate-fade-in" key={s.id}>
-                    <div className="inline-block mb-8 px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.5em] uppercase bg-blue-50/50">
-                        {s.eyebrow}
+                    <div className="inline-block mb-6 md:mb-8 px-4 md:px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.25em] md:tracking-[0.5em] uppercase bg-blue-50/50">
+                        {capaLabel(s)} · {s.label}
                     </div>
-                    <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-8 leading-[0.9]">
+                    <h1 className="text-4xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6 md:mb-8 leading-[0.95]">
                         {s.title}<br/><span className="text-blue-600">{s.accent}</span>
                     </h1>
-                    <p className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">{s.intro}</p>
+                    <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">{s.intro}</p>
                 </div>
             </section>
 
-            {/* Flow (click a step to filter) */}
-            <section className="max-w-6xl mx-auto mb-12 relative z-10">
-                <p className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-4">{s.flowLabel} · haz clic para filtrar</p>
-                <LayerFlow series={s.id} active={filters.type} onSelect={(type) => set({ type })} />
-            </section>
-
-            {/* Stats */}
-            <section className="max-w-6xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4 mb-16 relative z-10">
-                <StatTile value={posts.length} label="Artículos" />
-                <StatTile value={types.length} label={s.typesLabel} />
-                {crossCount
-                    ? <StatTile value={crossCount} label="Cruces" />
-                    : <StatTile value={allThreats.length} label={s.facetsLabel} />}
-                <StatTile value={results.length} label="Coinciden ahora" />
-            </section>
-
-            {/* Filters + results */}
-            <section className="max-w-7xl mx-auto pb-24 grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-10 relative z-20" aria-labelledby="entradas-title">
-                <h2 id="entradas-title" className="sr-only">Entradas de la academia</h2>
-                <aside className="lg:sticky lg:top-40 self-start p-8 rounded-[2rem] bg-white/90 backdrop-blur-md border border-gray-100 shadow-xl shadow-gray-200/40">
-                    <label htmlFor="academia-search" className="block text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-3">Buscar</label>
-                    <input
-                        id="academia-search"
-                        type="search"
-                        value={filters.q}
-                        onChange={(e) => set({ q: e.target.value })}
-                        placeholder={s.placeholder}
-                        className="w-full px-5 py-3 mb-8 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
-                    />
-
-                    <FilterGroup title="Tipo">
-                        <Chip active={filters.type === 'all'} onClick={() => set({ type: 'all' })}>Todos</Chip>
-                        {types.map(t => (
-                            <Chip key={t.id} active={filters.type === t.id} onClick={() => set({ type: t.id })}
-                                count={posts.filter(p => typesOfPost(p).includes(t.id) && passes(p, 'type')).length}>
-                                {t.label}
-                            </Chip>
-                        ))}
-                    </FilterGroup>
-
-                    <FilterGroup title="Zona">
-                        <Chip active={filters.zone === 'all'} onClick={() => set({ zone: 'all' })}>Todos</Chip>
-                        {zones.map(z => (
-                            <Chip key={z.id} active={filters.zone === z.id} onClick={() => set({ zone: z.id })}
-                                count={posts.filter(p => typesOfPost(p).some(id => typeById(id).zone === z.id) && passes(p, 'zone')).length}>
-                                {z.label}
-                            </Chip>
-                        ))}
-                    </FilterGroup>
-
-                    {crossCount ? (
-                        <FilterGroup title="Formato">
-                            <Chip active={filters.kind === 'all'} onClick={() => set({ kind: 'all' })}>Todos</Chip>
-                            {KINDS.map(k => (
-                                <Chip key={k.id} active={filters.kind === k.id} onClick={() => set({ kind: k.id })}
-                                    count={posts.filter(p => k.test(p) && passes(p, 'kind')).length}>
-                                    {k.label}
-                                </Chip>
-                            ))}
-                        </FilterGroup>
-                    ) : null}
-
-                    <FilterGroup title={s.facet}>
-                        {allThreats.map(th => (
-                            <Chip key={th} active={filters.threats.includes(th)} onClick={() => toggleThreat(th)}>{th}</Chip>
-                        ))}
-                    </FilterGroup>
-
-                    {hasFilters ? (
-                        <button onClick={reset} className="w-full py-3 rounded-full border border-gray-200 hover:border-blue-500 text-xs font-bold uppercase tracking-widest text-gray-600 hover:text-blue-600 transition-colors">
-                            Borrar filtros
+            {/* Filters: every facet is a dropdown. Phones: folded behind «Filtros»; desktop: one row. */}
+            <section className="max-w-7xl mx-auto mb-10 relative z-20" aria-label="Buscar y filtrar">
+                <div className="p-4 md:p-6 rounded-[1.5rem] md:rounded-[2rem] bg-white/95 backdrop-blur-md border border-gray-100 shadow-xl shadow-gray-200/40">
+                    <div className="flex gap-3">
+                        <label htmlFor="academia-search" className="sr-only">Buscar</label>
+                        <input
+                            id="academia-search"
+                            type="search"
+                            value={filters.q}
+                            onChange={(e) => set({ q: e.target.value })}
+                            placeholder={`Buscar · ${s.placeholder}`}
+                            className="flex-1 min-w-0 px-4 md:px-5 py-3 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 transition-all"
+                        />
+                        <button onClick={() => setOpenFilters(o => !o)} aria-expanded={openFilters} aria-controls="academia-filtros"
+                            className="md:hidden flex-shrink-0 inline-flex items-center gap-2 px-4 rounded-2xl border border-gray-200 text-sm font-bold text-gray-700">
+                            Filtros{activeCount ? <span className="px-1.5 rounded-full bg-blue-600 text-white text-[10px]">{activeCount}</span> : null}
+                            <span aria-hidden="true" className={`transition-transform ${openFilters ? 'rotate-180' : ''}`}>▾</span>
                         </button>
-                    ) : null}
-                </aside>
-
-                <div>
-                    <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-                        <p className="text-sm font-bold text-gray-500" aria-live="polite">
-                            {results.length} {results.length === 1 ? 'artículo' : 'artículos'}
-                        </p>
-                        <label className="flex items-center gap-3 text-xs font-bold uppercase tracking-widest text-gray-400">
-                            Ordenar
-                            <select
-                                value={filters.sort}
-                                onChange={(e) => set({ sort: e.target.value })}
-                                className="px-4 py-2 rounded-full border border-gray-200 bg-white text-gray-700 normal-case tracking-normal text-sm font-bold focus:outline-none focus:border-blue-500"
-                            >
-                                <option value="layer">Orden por {s.step.toLowerCase()}</option>
-                                <option value="title">Título A–Z</option>
-                                <option value="read">Lectura más corta</option>
-                            </select>
-                        </label>
                     </div>
 
-                    {results.length ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {results.map(post => <PostCard key={post.path} post={post} />)}
-                        </div>
-                    ) : (
-                        <div className="p-16 rounded-[2rem] border border-dashed border-gray-300 text-center">
-                            <p className="text-lg font-black text-gray-900 mb-2">Ningún artículo coincide con estos filtros</p>
-                            <p className="text-sm text-gray-500 font-medium mb-6">Prueba a quitar un filtro de {s.facet.toLowerCase()} o a borrar la búsqueda.</p>
-                            <button onClick={reset} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all">Borrar filtros</button>
-                        </div>
-                    )}
+                    <div id="academia-filtros" className={`${openFilters ? 'grid' : 'hidden'} md:grid grid-cols-1 sm:grid-cols-2 ${crossCount ? 'md:grid-cols-5' : 'md:grid-cols-4'} gap-3 mt-4`}>
+                        <FiltroSelect label={s.typesLabel} value={filters.type} onChange={(type) => set({ type })}
+                            options={[['all', `Cualquier ${s.step.toLowerCase()}`], ...types.map(t => [t.id, `${stepLabel(t)} · ${t.short} (${posts.filter(p => typesOfPost(p).includes(t.id) && passes(p, 'type')).length})`])]} />
+                        <FiltroSelect label="Zona" value={filters.zone} onChange={(zone) => set({ zone })}
+                            options={[['all', 'Todas las zonas'], ...zones.map(z => [z.id, `${z.label} (${posts.filter(p => typesOfPost(p).some(id => typeById(id).zone === z.id) && passes(p, 'zone')).length})`])]} />
+                        {crossCount ? (
+                            <FiltroSelect label="Formato" value={filters.kind} onChange={(kind) => set({ kind })}
+                                options={[['all', 'Todos los formatos'], ...KINDS.map(k => [k.id, `${k.label} (${posts.filter(p => k.test(p) && passes(p, 'kind')).length})`])]} />
+                        ) : null}
+                        <FiltroSelect label={s.facet} value={filters.threats[0] || 'all'} onChange={(th) => set({ threats: th === 'all' ? [] : [th] })}
+                            options={[['all', `Cualquier ${s.facet.toLowerCase()}`], ...allThreats.map(th => [th, `${th} (${posts.filter(p => p.threats.includes(th) && passes(p, 'threats')).length})`])]} />
+                        <FiltroSelect label="Ordenar" value={filters.sort} onChange={(sort) => set({ sort })}
+                            options={[['layer', `Por ${s.step.toLowerCase()}`], ['title', 'Título A–Z'], ['read', 'Lectura más corta']]} />
+                    </div>
                 </div>
+
+                <div className="flex items-center justify-between gap-4 mt-5 px-1">
+                    <p className="text-sm font-bold text-gray-500" aria-live="polite">{results.length} {results.length === 1 ? 'artículo' : 'artículos'}</p>
+                    {hasFilters ? <button onClick={reset} className={linkClass + ' text-sm'}>Borrar filtros</button> : null}
+                </div>
+            </section>
+
+            {/* Results */}
+            <section className="max-w-7xl mx-auto pb-24 relative z-10" aria-labelledby="entradas-title">
+                <h2 id="entradas-title" className="sr-only">Artículos de la capa</h2>
+                {results.length ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6">
+                        {results.map(post => <PostCard key={post.path} post={post} />)}
+                    </div>
+                ) : (
+                    <div className="p-10 md:p-16 rounded-[2rem] border border-dashed border-gray-300 text-center">
+                        <p className="text-lg font-black text-gray-900 mb-2">Ningún artículo coincide con estos filtros</p>
+                        <p className="text-sm text-gray-500 font-medium mb-6">Prueba a quitar un filtro o a borrar la búsqueda.</p>
+                        <button onClick={reset} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full transition-all">Borrar filtros</button>
+                    </div>
+                )}
             </section>
         </>
     );
@@ -1158,7 +1103,7 @@ const AcademiaPostLayout = ({ path, controls, children }) => {
 
     return (
         <>
-            <header className="max-w-4xl mx-auto pt-16 pb-10 relative z-10 animate-fade-in">
+            <header className="max-w-4xl mx-auto pt-10 md:pt-16 pb-8 md:pb-10 relative z-10 animate-fade-in">
                 <a href={`${CIBER_BASE}?series=${s.id}`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors mb-10">
                     ← Ciberseguridad · Capa {s.capa} · {s.label}
                 </a>
@@ -1170,15 +1115,15 @@ const AcademiaPostLayout = ({ path, controls, children }) => {
                         </a>
                     ))}
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-[1.05] mb-6">{post.title}</h1>
+                <h1 className="text-3xl md:text-6xl font-black text-gray-900 tracking-tighter leading-[1.05] mb-6">{post.title}</h1>
                 <p className="text-xl text-gray-500 font-medium leading-relaxed mb-6">{post.summary}</p>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400">
                     <time dateTime={post.published}>{formatDate(post.published)}</time> · {post.readTime} min de lectura
                 </p>
             </header>
 
-            <section className="max-w-6xl mx-auto mb-12 relative z-10">
-                <LayerFlow series={s.id} active={typesOfPost(post)} />
+            <section className="max-w-6xl mx-auto mb-8 relative z-30">
+                <StepsMenu series={s.id} active={typesOfPost(post)} />
             </section>
 
             <section className="max-w-6xl mx-auto pb-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12 relative z-20">

@@ -46,13 +46,54 @@ const Pill = ({ active, onClick, children, count }) => (
     </button>
 );
 
+const NivelSelect = ({ label, value, onChange, options }) => (
+    <label className="block">
+        <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400 mb-1.5">{label}</span>
+        <span className="relative block">
+            <select value={value} onChange={(e) => onChange(e.target.value)}
+                className={`w-full appearance-none pl-4 pr-10 py-3 rounded-2xl border bg-white text-sm font-bold focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 ${value !== 'all' ? 'border-blue-500 text-blue-700' : 'border-gray-200 text-gray-700'}`}>
+                {options.map(([v, text]) => <option key={v} value={v}>{text}</option>)}
+            </select>
+            <span aria-hidden="true" className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-gray-400">▾</span>
+        </span>
+    </label>
+);
+
+// The modules of a level as a dropdown menu: closed it names the current module, open it lists the level in order.
+const ModulosMenu = ({ nivel, actual }) => {
+    const list = postsDeNivel(nivel.n);
+    const i = list.indexOf(actual);
+    return (
+        <details className="group rounded-[1.5rem] border border-gray-100 bg-white/95 shadow-lg shadow-gray-200/40 open:shadow-xl">
+            <summary className="list-none [&::-webkit-details-marker]:hidden cursor-pointer flex items-center justify-between gap-4 px-5 md:px-6 py-4">
+                <span className="min-w-0">
+                    <span className="block text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">Nivel {nivel.n} · {nivel.nombre} · módulo {i + 1} de {list.length}</span>
+                    <span className="block font-black text-gray-900 truncate">{actual.modulo}</span>
+                </span>
+                <span aria-hidden="true" className="flex-shrink-0 w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center transition-transform group-open:rotate-180">▾</span>
+            </summary>
+            <ol className="px-3 pb-3 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-1">
+                {list.map((p, k) => (
+                    <li key={p.slug}>
+                        <a href={p.path} aria-current={p === actual ? 'page' : undefined}
+                            className={`flex items-baseline gap-3 px-3 py-2.5 rounded-xl text-sm font-bold transition-colors ${p === actual ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-blue-50 hover:text-blue-700'}`}>
+                            <span className={`text-[10px] uppercase tracking-[0.15em] flex-shrink-0 ${p === actual ? 'text-blue-100' : 'text-blue-500'}`}>{String(k + 1).padStart(2, '0')}</span>
+                            <span>{p.modulo}</span>
+                        </a>
+                    </li>
+                ))}
+            </ol>
+        </details>
+    );
+};
+
 const EstadoBadge = ({ estado }) => (
     <span className={`px-2.5 py-1 rounded-full border text-[10px] font-bold ${ESTADOS[estado].tone}`}>{ESTADOS[estado].label}</span>
 );
 
 const ModuloCard = ({ post }) => (
     <a href={post.path}
-        className="group flex flex-col p-7 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300 animate-fade-in">
+        className="group flex flex-col p-6 md:p-7 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all duration-300 animate-fade-in">
         <div className="flex items-center justify-between gap-3 mb-4">
             <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">{nivelLabel(post.nivel)} · Módulo</span>
             <EstadoBadge estado={post.estado} />
@@ -71,7 +112,7 @@ const ModuloCard = ({ post }) => (
 
 const IntroCard = () => (
     <a href={DESARROLLO_INTRO.path}
-        className="group block p-8 md:p-10 rounded-[2.5rem] bg-slate-900 text-white shadow-2xl hover:-translate-y-1 transition-all">
+        className="group block p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-slate-900 text-white shadow-2xl hover:-translate-y-1 transition-all">
         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-400 mb-3">Empieza aquí · Introducción</p>
         <h3 className="text-2xl md:text-3xl font-black leading-tight mb-3 group-hover:text-blue-300 transition-colors">{DESARROLLO_INTRO.title}</h3>
         <p className="text-slate-300 font-medium leading-relaxed max-w-3xl">{DESARROLLO_INTRO.summary}</p>
@@ -85,14 +126,14 @@ const BlogHome = () => {
     const counts = { ciberseguridad: `${ciber} artículos · 5 capas`, desarrollo: `${DESARROLLO_POSTS.length + 1} artículos · ${NIVELES.length} niveles` };
     return (
         <>
-            <section className="pt-24 pb-14 text-center relative z-10 animate-fade-in">
-                <div className="inline-block mb-8 px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.5em] uppercase bg-blue-50/50">Blog · Academia Lameyer</div>
-                <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-8 leading-[0.9]">Aprende a construir<br/><span className="text-blue-600">y a proteger</span></h1>
-                <p className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">Dos categorías: Ciberseguridad, ordenada por capas, y Desarrollo, ordenado por los niveles de la Academia.</p>
+            <section className="pt-12 md:pt-24 pb-10 md:pb-14 text-center relative z-10 animate-fade-in">
+                <div className="inline-block mb-6 md:mb-8 px-4 md:px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.25em] md:tracking-[0.5em] uppercase bg-blue-50/50">Blog · Academia Lameyer</div>
+                <h1 className="text-4xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6 md:mb-8 leading-[0.95]">Aprende a construir<br/><span className="text-blue-600">y a proteger</span></h1>
+                <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">Dos categorías: Ciberseguridad, ordenada por capas, y Desarrollo, ordenado por los niveles de la Academia.</p>
             </section>
             <section className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pb-16 relative z-10" aria-label="Categorías">
                 {BLOG_CATEGORIAS.map(c => (
-                    <a key={c.id} href={c.href} className="group p-10 rounded-[2.5rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all">
+                    <a key={c.id} href={c.href} className="group p-7 md:p-10 rounded-[2rem] md:rounded-[2.5rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 hover:-translate-y-1 transition-all">
                         <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-500 mb-4">Categoría · {c.orden}</p>
                         <h2 className="text-4xl font-black text-gray-900 tracking-tight mb-4 group-hover:text-blue-600 transition-colors">{c.nombre}</h2>
                         <p className="text-gray-500 font-medium leading-relaxed mb-8">{c.texto}</p>
@@ -131,16 +172,20 @@ const DesarrolloIndex = () => {
         <>
             <div className="max-w-7xl mx-auto"><Crumbs items={[['Blog', '/blog/'], ['Desarrollo', null]]} /></div>
 
-            <section className="pt-10 pb-10 text-center relative z-10 animate-fade-in">
-                <div className="inline-block mb-8 px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.5em] uppercase bg-blue-50/50">Blog · Desarrollo · Por niveles</div>
-                <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-8 leading-[0.9]">Seis niveles,<br/><span className="text-blue-600">un módulo a la vez</span></h1>
-                <p className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">
+            <section className="pt-8 md:pt-10 pb-8 md:pb-10 text-center relative z-10 animate-fade-in">
+                <div className="inline-block mb-6 md:mb-8 px-4 md:px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.25em] md:tracking-[0.5em] uppercase bg-blue-50/50">Blog · Desarrollo · Por niveles</div>
+                <h1 className="text-4xl md:text-8xl font-black text-gray-900 tracking-tighter mb-6 md:mb-8 leading-[0.95]">Seis niveles,<br/><span className="text-blue-600">un módulo a la vez</span></h1>
+                <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">
                     La ruta de la Academia Lameyer, de publicar tu primer sitio a operar un negocio con agentes de IA. Un artículo por módulo:
                     qué es, por qué importa y qué sabrás hacer. Los instructivos paso a paso se quedan dentro de la Academia.
                 </p>
             </section>
 
-            <nav className="flex flex-wrap justify-center gap-2 mb-12 relative z-10" aria-label="Niveles">
+            <div className="md:hidden mb-8 relative z-10">
+                <NivelSelect label="Nivel" value={String(nivel)} onChange={(v) => setNivel(v === 'all' ? 'all' : Number(v))}
+                    options={[['all', `Todos los niveles (${DESARROLLO_POSTS.length})`], ...NIVELES.map(x => [String(x.n), `Nivel ${x.n} · ${x.nombre} (${postsDeNivel(x.n).length})`])]} />
+            </div>
+            <nav className="hidden md:flex flex-wrap justify-center gap-2 mb-12 relative z-10" aria-label="Niveles">
                 <Pill active={nivel === 'all'} onClick={() => setNivel('all')} count={DESARROLLO_POSTS.length}>Todos los niveles</Pill>
                 {NIVELES.map(x => (
                     <Pill key={x.n} active={nivel === x.n} onClick={() => setNivel(x.n)} count={postsDeNivel(x.n).length}>{x.n} · {x.nombre}</Pill>
@@ -154,7 +199,7 @@ const DesarrolloIndex = () => {
                     <ol className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {NIVELES.map(x => (
                             <li key={x.n}>
-                                <button onClick={() => setNivel(x.n)} className="group w-full h-full text-left p-7 rounded-[2rem] border border-gray-100 bg-white/90 shadow-xl shadow-gray-200/40 hover:border-blue-500 transition-all">
+                                <button onClick={() => setNivel(x.n)} className="group w-full h-full text-left p-5 md:p-7 rounded-[1.5rem] md:rounded-[2rem] border border-gray-100 bg-white/90 shadow-xl shadow-gray-200/40 hover:border-blue-500 transition-all">
                                     <div className="flex items-center gap-4 mb-4">
                                         <span className="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center text-xl font-black">{x.n}</span>
                                         <div>
@@ -163,7 +208,7 @@ const DesarrolloIndex = () => {
                                         </div>
                                     </div>
                                     <p className="text-sm text-gray-500 font-medium leading-relaxed mb-4">{x.objetivo}</p>
-                                    <ul className="flex flex-wrap gap-1.5 mb-4">
+                                    <ul className="hidden md:flex flex-wrap gap-1.5 mb-4">
                                         {postsDeNivel(x.n).map(p => <li key={p.slug} className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold">{p.modulo}</li>)}
                                     </ul>
                                     <p className="text-xs font-bold text-gray-400">{postsDeNivel(x.n).length} módulos <span className="text-blue-600">→</span></p>
@@ -253,13 +298,15 @@ const DesarrolloArticle = ({ post }) => {
                     <span className="px-3 py-1 rounded-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest">{post.modulo}</span>
                     <EstadoBadge estado={post.estado} />
                 </div>
-                <h1 className="text-4xl md:text-6xl font-black text-gray-900 tracking-tighter leading-[1.05] mb-6">{post.title}</h1>
-                <p className="text-xl text-gray-500 font-medium leading-relaxed mb-6">{post.summary}</p>
+                <h1 className="text-3xl md:text-6xl font-black text-gray-900 tracking-tighter leading-[1.05] mb-6">{post.title}</h1>
+                <p className="text-lg md:text-xl text-gray-500 font-medium leading-relaxed mb-6">{post.summary}</p>
                 <p className="text-xs font-bold uppercase tracking-widest text-gray-400"><time dateTime={post.published}>{blogDate(post.published)}</time> · {post.readTime} min de lectura</p>
             </header>
 
-            <section className="max-w-6xl mx-auto pb-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-12 relative z-20">
-                <article className="p-8 md:p-12 rounded-[2.5rem] bg-white/95 border border-gray-100 shadow-xl shadow-gray-200/40 [&>h2:first-child]:mt-0">
+            {intro ? null : <section className="max-w-6xl mx-auto mb-8 relative z-30"><ModulosMenu nivel={n} actual={post} /></section>}
+
+            <section className="max-w-6xl mx-auto pb-16 grid grid-cols-1 lg:grid-cols-[1fr_280px] gap-8 md:gap-12 relative z-20">
+                <article className="p-6 md:p-12 rounded-[2.5rem] bg-white/95 border border-gray-100 shadow-xl shadow-gray-200/40 [&>h2:first-child]:mt-0">
                     {intro ? post.secciones.map(sec => (
                         <Sec key={sec.h} h={sec.h}>
                             {(sec.p || []).map((t, k) => <Para key={k}>{t}</Para>)}
@@ -287,14 +334,7 @@ const DesarrolloArticle = ({ post }) => {
                         <div className="p-6 rounded-[2rem] bg-slate-900 text-white">
                             <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-400 mb-2">Nivel {n.n} · {n.nombre}</h3>
                             <p className="text-sm text-slate-300 font-medium leading-relaxed mb-4">{n.objetivo}</p>
-                            <ol className="space-y-2">
-                                {postsDeNivel(n.n).map(p => (
-                                    <li key={p.slug}>
-                                        <a href={p.path} aria-current={p === post ? 'page' : undefined}
-                                            className={`block text-sm font-bold leading-snug transition-colors ${p === post ? 'text-blue-400' : 'text-slate-300 hover:text-white'}`}>{p.modulo}</a>
-                                    </li>
-                                ))}
-                            </ol>
+                            <a href={`/blog/desarrollo/?nivel=${n.n}`} className="text-sm font-bold text-blue-400 hover:text-blue-300">Ver los {postsDeNivel(n.n).length} módulos del nivel →</a>
                         </div>
                     )}
                     <div className="p-6 rounded-[2rem] bg-white/95 border border-gray-100 shadow-lg shadow-gray-200/40">
