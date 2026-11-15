@@ -1,4 +1,4 @@
-// Shared by EVERY page of the site (home, /pages/*, /academia/*).
+// Shared by EVERY page of the site (home, /pages/*, /blog/*).
 // Load it first:  <script type="text/babel" src="/js/layout.jsx"></script>
 // Then the page's own script calls renderPage(MyPage).
 const { useState, useEffect, useLayoutEffect, useRef } = React;
@@ -15,7 +15,7 @@ const NAV_LINKS = [
     { href: '/pages/development/', label: 'Desarrollo' },
     { href: '/pages/components/', label: 'Componentes' },
     { href: '/pages/community/', label: 'Comunidad', also: ['/pages/stack/'] },
-    { href: '/academia/', label: 'Academia' },
+    { href: '/blog/', label: 'Blog' },
 ];
 
 const isActive = (link) => [link.href, ...(link.also || [])].some(href => window.location.pathname.startsWith(href.replace(/\/$/, '')));

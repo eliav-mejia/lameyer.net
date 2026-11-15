@@ -5,7 +5,7 @@ Uso (desde la raíz del repositorio):   python tools/generar-sitemap.py
 Se omiten las carpetas internas (_docs, _interno, tools, public, Workflows), el 404 y las páginas con
 <meta name="robots" content="noindex">. La fecha <lastmod> sale de article:published_time cuando existe.
 Vuelve a ejecutarlo tras añadir o quitar páginas (después de generar-paginas-producto.py y
-generar-seo-academia.mjs).
+generar-blog.mjs).
 """
 import pathlib
 import re

@@ -1,26 +1,31 @@
-// Academia only. Loaded after /js/layout.jsx (which provides Layout, RegisterCTA, renderPage, React hooks).
+// Blog · Ciberseguridad (formerly the Academia). Loaded after /js/layout.jsx (which provides Layout, RegisterCTA, renderPage, React hooks).
 //
-// Every entry is a folder:  /academia/<series>/<slug>/index.html   (e.g. /academia/seguridad-apis/limitacion-de-tasa/)
+// Every entry is a folder:  /blog/ciberseguridad/<series>/<slug>/index.html   (e.g. /blog/ciberseguridad/seguridad-apis/limitacion-de-tasa/)
 // and one object in ACADEMIA_POSTS below with the same `slug`. Search either name to find the other.
 //
 // HOW TO ADD AN ENTRY
-//   1. Copy an entry folder inside its series, e.g. academia/seguridad-apis/limitacion-de-tasa/ -> academia/seguridad-apis/mi-nueva-entrada/
+//   1. Copy an entry folder inside its series, e.g. blog/ciberseguridad/seguridad-apis/limitacion-de-tasa/ -> .../seguridad-apis/mi-nueva-entrada/
 //   2. Edit its index.html: <title>, description, canonical, CONTROLS (checklist) and Content.
 //      Nothing else: renderPost() finds the entry from the page's own URL.
 //   3. Add an object to ACADEMIA_POSTS with `slug: 'mi-nueva-entrada'` and a `type` from ACADEMIA_TYPES.
 //      The dashboard lists it automatically. For a crossover, also give it `crosses: [...]` and a short `label`.
-//   4. A new series needs one entry in SERIES, its ACADEMIA_TYPES and ZONES, and a folder /academia/<series-id>/.
+//   4. A new series (capa) needs one entry in SERIES (with `capa`), its ACADEMIA_TYPES and ZONES, and a folder /blog/ciberseguridad/<series-id>/.
+//   5. Run node tools/generar-blog.mjs and python tools/generar-sitemap.py.
 
 // --- ACADEMIA ---
 
 // Folder names, series ids and slugs are in Spanish (1.0.7); type and zone ids stay as short internal keys.
+// Blog · Ciberseguridad (2.0.0): every series is one CAPA, ordered from the perimeter inwards (`capa`).
 // The academia is split into series. Each series has its own types (shown as an ordered flow),
 // zones, facet name and call to action. A post belongs to one type and may also `cross` others.
 const SERIES = [
     {
         id: 'seguridad-apis',
+        capa: 1,
+        capaShort: 'Perímetro',
+        capaRole: 'La primera barrera: lo que una petición cruza antes de tocar tu sistema.',
         label: 'Seguridad de APIs',
-        eyebrow: 'ACADEMIA · SEGURIDAD DE APIS',
+        eyebrow: 'CIBERSEGURIDAD · SEGURIDAD DE APIS',
         title: 'Defensa en capas',
         accent: 'para APIs headless',
         intro: 'Una API headless sin frontend expone claves y datos al raspado, a la fuerza bruta y a ataques directos al origen. Recorre cada capa del modelo de defensa de Cloudflare, del edge a tu origen.',
@@ -36,45 +41,12 @@ const SERIES = [
         cta: { title: '¿Necesitas blindar tu API?', text: 'Diseñamos y desplegamos defensas en capas con Cloudflare para APIs headless.' },
     },
     {
-        id: 'busqueda-visibilidad',
-        label: 'Búsqueda de código y visibilidad',
-        eyebrow: 'ACADEMIA · BÚSQUEDA DE CÓDIGO Y VISIBILIDAD',
-        title: 'Código localizable,',
-        accent: 'páginas localizables',
-        intro: 'Organizar, filtrar y buscar semánticamente código y repositorios, y después publicar lo que construyes para que rastreadores, buscadores y sistemas de IA lo encuentren. Cada etapa, más los cruces donde las etapas se encuentran.',
-        step: 'Etapa',
-        from: 'Repositorio',
-        to: 'Resultados',
-        flowLabel: 'Recorrido de descubrimiento',
-        typesLabel: 'Etapas',
-        facet: 'Problema',
-        facetsLabel: 'Problemas cubiertos',
-        verb: 'Resuelve',
-        placeholder: 'p. ej. embeddings, LCP, JSON-LD',
-        cta: { title: '¿Quieres que encuentren tu código y tu documentación?', text: 'Creamos búsqueda semántica de código y sitios de documentación rápidos, rastreables y estructurados.' },
-    },
-    {
-        id: 'nucleo-modular',
-        label: 'Núcleo Modular',
-        eyebrow: 'ACADEMIA · NÚCLEO MODULAR',
-        title: 'Un núcleo que puedes',
-        accent: 'reconstruir por piezas',
-        intro: 'La «MC» de MC-SE (Modular Core, Núcleo Modular): dividir la lógica de negocio en módulos con límites y contratos claros, para que el edge, los flujos y las integraciones puedan llamarla sin saber cómo funciona por dentro.',
-        step: 'Paso',
-        from: 'Monolito',
-        to: 'Módulos',
-        flowLabel: 'Recorrido de modularización',
-        typesLabel: 'Pasos',
-        facet: 'Caso de uso',
-        facetsLabel: 'Casos de uso cubiertos',
-        verb: 'Resuelve',
-        placeholder: 'p. ej. OpenAPI, workspaces, migraciones',
-        cta: { title: '¿Desenredando un monolito?', text: 'Diseñamos núcleos modulares con contratos tipados sobre los que construir funciones serverless e integraciones.' },
-    },
-    {
         id: 'edge-serverless',
+        capa: 2,
+        capaShort: 'Edge',
+        capaRole: 'Donde se ejecuta la lógica, se autentica y se cachea, lejos del servidor de origen.',
         label: 'Edge Serverless',
-        eyebrow: 'ACADEMIA · EDGE SERVERLESS',
+        eyebrow: 'CIBERSEGURIDAD · EDGE SERVERLESS',
         title: 'Lógica que se ejecuta',
         accent: 'cerca del usuario',
         intro: 'La «SE» de MC-SE (Serverless Edge, Edge Serverless): ejecutar la lógica de las peticiones, la caché y las tareas programadas en funciones serverless en el edge, con el almacenamiento a su lado y sin servidores que parchear.',
@@ -91,8 +63,11 @@ const SERIES = [
     },
     {
         id: 'automatizacion-flujos',
+        capa: 3,
+        capaShort: 'Integraciones',
+        capaRole: 'Webhooks, colas y terceros: las puertas de entrada que más se olvidan.',
         label: 'Automatización de flujos',
-        eyebrow: 'ACADEMIA · AUTOMATIZACIÓN DE FLUJOS',
+        eyebrow: 'CIBERSEGURIDAD · AUTOMATIZACIÓN DE FLUJOS',
         title: 'Conecta tus flujos',
         accent: 'con lógica serverless',
         intro: 'Webhooks, colas y flujos duraderos que conectan formularios, CRM, hojas de cálculo y pasarelas de pago con tu núcleo modular, de forma fiable, incluso cuando alguno de ellos está caído.',
@@ -106,6 +81,48 @@ const SERIES = [
         verb: 'Resuelve',
         placeholder: 'p. ej. webhook, reintento, idempotencia',
         cta: { title: '¿Los pasos manuales te frenan?', text: 'Automatizamos flujos de negocio con funciones serverless, colas e integraciones.' },
+    },
+    {
+        id: 'nucleo-modular',
+        capa: 4,
+        capaShort: 'Núcleo',
+        capaRole: 'Límites, contratos y propiedad de datos: quién puede tocar qué dentro del sistema.',
+        label: 'Núcleo Modular',
+        eyebrow: 'CIBERSEGURIDAD · NÚCLEO MODULAR',
+        title: 'Un núcleo que puedes',
+        accent: 'reconstruir por piezas',
+        intro: 'La «MC» de MC-SE (Modular Core, Núcleo Modular): dividir la lógica de negocio en módulos con límites y contratos claros, para que el edge, los flujos y las integraciones puedan llamarla sin saber cómo funciona por dentro.',
+        step: 'Paso',
+        from: 'Monolito',
+        to: 'Módulos',
+        flowLabel: 'Recorrido de modularización',
+        typesLabel: 'Pasos',
+        facet: 'Caso de uso',
+        facetsLabel: 'Casos de uso cubiertos',
+        verb: 'Resuelve',
+        placeholder: 'p. ej. OpenAPI, workspaces, migraciones',
+        cta: { title: '¿Desenredando un monolito?', text: 'Diseñamos núcleos modulares con contratos tipados sobre los que construir funciones serverless e integraciones.' },
+    },
+    {
+        id: 'busqueda-visibilidad',
+        capa: 5,
+        capaShort: 'Exposición',
+        capaRole: 'Lo que el sistema publica: qué ven rastreadores, buscadores e IA, y qué no deberían ver.',
+        label: 'Búsqueda de código y visibilidad',
+        eyebrow: 'CIBERSEGURIDAD · BÚSQUEDA DE CÓDIGO Y VISIBILIDAD',
+        title: 'Código localizable,',
+        accent: 'páginas localizables',
+        intro: 'Organizar, filtrar y buscar semánticamente código y repositorios, y después publicar lo que construyes para que rastreadores, buscadores y sistemas de IA lo encuentren. Cada etapa, más los cruces donde las etapas se encuentran.',
+        step: 'Etapa',
+        from: 'Repositorio',
+        to: 'Resultados',
+        flowLabel: 'Recorrido de descubrimiento',
+        typesLabel: 'Etapas',
+        facet: 'Problema',
+        facetsLabel: 'Problemas cubiertos',
+        verb: 'Resuelve',
+        placeholder: 'p. ej. embeddings, LCP, JSON-LD',
+        cta: { title: '¿Quieres que encuentren tu código y tu documentación?', text: 'Creamos búsqueda semántica de código y sitios de documentación rápidos, rastreables y estructurados.' },
     },
 ];
 
@@ -601,8 +618,9 @@ const ACADEMIA_POSTS = [
 const seriesById = (id) => SERIES.find(s => s.id === id);
 const typeById = (id) => ACADEMIA_TYPES.find(t => t.id === id);
 const typeOf = (post) => typeById(post.type);
-// The URL of every entry comes from its series and slug: /academia/<series>/<slug>/
-ACADEMIA_POSTS.forEach(p => { p.path = `/academia/${typeOf(p).series}/${p.slug}/`; });
+// The URL of every entry comes from its series and slug: /blog/ciberseguridad/<series>/<slug>/
+const CIBER_BASE = '/blog/ciberseguridad/';
+ACADEMIA_POSTS.forEach(p => { p.path = `${CIBER_BASE}${typeOf(p).series}/${p.slug}/`; });
 const seriesOf = (post) => seriesById(typeOf(post).series);
 const typesOfPost = (post) => [post.type, ...(post.crosses || [])];
 const isCross = (post) => Boolean(post.crosses && post.crosses.length);
@@ -663,7 +681,7 @@ const readParams = () => {
     const type = p.get('type') || 'all';
     const t = typeById(type);
     return {
-        series: p.get('series') || (t ? t.series : SERIES[0].id),
+        series: p.get('series') || (t ? t.series : 'all'),
         q: p.get('q') || '',
         type,
         zone: p.get('zone') || 'all',
@@ -675,7 +693,7 @@ const readParams = () => {
 
 const writeParams = (f) => {
     const p = new URLSearchParams();
-    if (f.series !== SERIES[0].id) p.set('series', f.series);
+    if (f.series !== 'all') p.set('series', f.series);
     if (f.q) p.set('q', f.q);
     if (f.type !== 'all') p.set('type', f.type);
     if (f.zone !== 'all') p.set('zone', f.zone);
@@ -756,19 +774,151 @@ const StatTile = ({ value, label }) => (
     </div>
 );
 
+// --- CAPAS (Blog · Ciberseguridad) ---
+const SORTED_SERIES = [...SERIES].sort((a, b) => a.capa - b.capa);
+const capaLabel = (s) => `Capa ${String(s.capa).padStart(2, '0')}`;
+
+const BlogBreadcrumb = ({ items }) => (
+    <nav aria-label="Ruta" className="pt-10 relative z-10 text-center">
+        <ol className="inline-flex flex-wrap items-center justify-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">
+            {items.map(([label, href], i) => (
+                <li key={label} className="flex items-center gap-2">
+                    {i ? <span aria-hidden="true">/</span> : null}
+                    {href ? <a href={href} className="hover:text-blue-600 transition-colors">{label}</a> : <span className="text-blue-600">{label}</span>}
+                </li>
+            ))}
+        </ol>
+    </nav>
+);
+
+// "Todas las capas" first, then one chip per capa in perimeter → inside order.
+const CapaNav = ({ active, onSelect }) => (
+    <>
+        <BlogBreadcrumb items={[['Blog', '/blog/'], ['Ciberseguridad', active === 'all' ? null : CIBER_BASE]]} />
+        <nav className="pt-6 flex flex-wrap justify-center gap-2 relative z-10" aria-label="Capas de ciberseguridad">
+            <Chip active={active === 'all'} onClick={() => onSelect('all')} count={ACADEMIA_POSTS.length}>Todas las capas</Chip>
+            {SORTED_SERIES.map(x => (
+                <Chip key={x.id} active={x.id === active} onClick={() => onSelect(x.id)}
+                    count={ACADEMIA_POSTS.filter(p => typeOf(p).series === x.id).length}>
+                    {x.capa} · {x.label}
+                </Chip>
+            ))}
+        </nav>
+    </>
+);
+
+const CapasOverview = ({ q, setQ, onSelect }) => {
+    const words = q.trim().toLowerCase().split(/\s+/).filter(Boolean);
+    const match = (post) => !words.length || words.every(w => [post.title, post.summary, ...post.tags, ...post.threats, seriesOf(post).label].join(' ').toLowerCase().includes(w));
+    const total = ACADEMIA_POSTS.filter(match).length;
+    return (
+        <>
+            <CapaNav active="all" onSelect={onSelect} />
+
+            <section className="pt-12 pb-12 text-center relative z-10 animate-fade-in">
+                <div className="inline-block mb-8 px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.5em] uppercase bg-blue-50/50">
+                    Blog · Ciberseguridad · Todas las capas
+                </div>
+                <h1 className="text-5xl md:text-8xl font-black text-gray-900 tracking-tighter mb-8 leading-[0.9]">
+                    Seguridad por capas,<br/><span className="text-blue-600">del perímetro al núcleo</span>
+                </h1>
+                <p className="text-lg md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">
+                    Cinco capas, {ACADEMIA_POSTS.length} artículos. Cada capa protege lo que la anterior deja pasar: primero el perímetro de la API,
+                    después el edge, las integraciones, el núcleo de negocio y, por último, lo que el sistema expone al mundo.
+                </p>
+            </section>
+
+            {/* All capas first */}
+            <section className="max-w-5xl mx-auto mb-16 relative z-10" aria-labelledby="capas-title">
+                <h2 id="capas-title" className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-6">Todas las capas · de fuera hacia dentro</h2>
+                <ol className="space-y-3">
+                    {SORTED_SERIES.map(x => {
+                        const n = ACADEMIA_POSTS.filter(p => typeOf(p).series === x.id).length;
+                        const steps = ACADEMIA_TYPES.filter(t => t.series === x.id);
+                        return (
+                            <li key={x.id} style={{ marginLeft: `${(x.capa - 1) * 2}%`, marginRight: `${(x.capa - 1) * 2}%` }}>
+                                <button onClick={() => onSelect(x.id)}
+                                    className="group w-full text-left p-6 md:p-7 rounded-[2rem] border border-gray-100 bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 hover:border-blue-500 transition-all">
+                                    <div className="flex flex-wrap items-start gap-5">
+                                        <span className="w-14 h-14 rounded-2xl bg-blue-600 text-white flex flex-col items-center justify-center flex-shrink-0">
+                                            <span className="text-[8px] font-bold uppercase tracking-widest text-blue-100">Capa</span>
+                                            <span className="text-xl font-black leading-none">{x.capa}</span>
+                                        </span>
+                                        <div className="flex-1 min-w-[220px]">
+                                            <p className="text-[10px] font-bold uppercase tracking-[0.25em] text-blue-500 mb-1">{x.capaShort}</p>
+                                            <h3 className="text-xl md:text-2xl font-black text-gray-900 group-hover:text-blue-600 transition-colors">{x.label}</h3>
+                                            <p className="text-sm text-gray-500 font-medium mt-1 mb-3">{x.capaRole}</p>
+                                            <div className="flex flex-wrap gap-1.5">
+                                                {steps.map(t => <span key={t.id} className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-500 text-[10px] font-bold">{t.short}</span>)}
+                                            </div>
+                                        </div>
+                                        <span className="text-xs font-bold text-gray-400 whitespace-nowrap self-center">{n} artículos <span className="text-blue-600 group-hover:translate-x-1 inline-block transition-transform">→</span></span>
+                                    </div>
+                                </button>
+                            </li>
+                        );
+                    })}
+                </ol>
+            </section>
+
+            {/* Then every article, grouped by capa */}
+            <section className="max-w-7xl mx-auto pb-24 relative z-20" aria-labelledby="todas-title">
+                <div className="flex flex-wrap items-end justify-between gap-4 mb-8">
+                    <h2 id="todas-title" className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight">Todos los artículos por capa</h2>
+                    <div className="w-full md:w-80">
+                        <label htmlFor="ciber-search" className="sr-only">Buscar en ciberseguridad</label>
+                        <input id="ciber-search" type="search" value={q} onChange={(e) => setQ(e.target.value)} placeholder="Buscar: DDoS, webhooks, JSON-LD…"
+                            className="w-full px-5 py-3 rounded-2xl border border-gray-200 bg-white text-gray-900 font-medium focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20" />
+                        <p className="mt-2 text-xs font-bold text-gray-400" aria-live="polite">{total} {total === 1 ? 'artículo' : 'artículos'}</p>
+                    </div>
+                </div>
+                {SORTED_SERIES.map(x => {
+                    const list = ACADEMIA_POSTS.filter(p => typeOf(p).series === x.id && match(p)).sort(byStep);
+                    if (!list.length) return null;
+                    return (
+                        <div key={x.id} className="mb-16">
+                            <div className="flex flex-wrap items-baseline justify-between gap-3 mb-6 pb-3 border-b border-gray-200">
+                                <h3 className="text-2xl font-black text-gray-900"><span className="text-blue-600">{capaLabel(x)}</span> · {x.label}</h3>
+                                <button onClick={() => onSelect(x.id)} className={linkClass + ' text-sm'}>Filtrar esta capa →</button>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                                {list.map(post => <PostCard key={post.path} post={post} />)}
+                            </div>
+                        </div>
+                    );
+                })}
+                {!total ? (
+                    <div className="p-16 rounded-[2rem] border border-dashed border-gray-300 text-center">
+                        <p className="text-lg font-black text-gray-900 mb-2">Ningún artículo coincide</p>
+                        <button onClick={() => setQ('')} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-full">Borrar búsqueda</button>
+                    </div>
+                ) : null}
+            </section>
+
+            <RegisterCTA title="¿Quieres blindar tu plataforma capa por capa?" text="Auditamos y desplegamos defensas del perímetro al núcleo para APIs, edge e integraciones." />
+        </>
+    );
+};
+
 const AcademiaDashboard = () => {
     const [filters, setFilters] = useState(readParams);
     const set = (patch) => setFilters(f => ({ ...f, ...patch }));
 
     useEffect(() => writeParams(filters), [filters]);
 
+    const switchSeries = (series) => setFilters(f => ({ ...f, series, q: '', type: 'all', zone: 'all', kind: 'all', threats: [] }));
+    useEffect(() => { window.scrollTo({ top: 0, behavior: 'smooth' }); }, [filters.series]);
+
+    // Default view: every capa first, then the entries grouped by capa.
+    if (!seriesById(filters.series)) {
+        return <CapasOverview q={filters.q} setQ={(q) => set({ q })} onSelect={switchSeries} />;
+    }
+
     const s = seriesById(filters.series);
     const types = ACADEMIA_TYPES.filter(t => t.series === s.id);
     const zones = ZONES.filter(z => z.series === s.id);
     const posts = ACADEMIA_POSTS.filter(p => typeOf(p).series === s.id);
     const allThreats = [...new Set(posts.flatMap(p => p.threats))].sort();
-
-    const switchSeries = (series) => setFilters(f => ({ ...f, series, q: '', type: 'all', zone: 'all', kind: 'all', threats: [] }));
 
     const toggleThreat = (th) => set({
         threats: filters.threats.includes(th) ? filters.threats.filter(x => x !== th) : [...filters.threats, th],
@@ -802,15 +952,7 @@ const AcademiaDashboard = () => {
 
     return (
         <>
-            {/* Series switch */}
-            <nav className="pt-12 flex flex-wrap justify-center gap-2 relative z-10" aria-label="Series de la academia">
-                {SERIES.map(x => (
-                    <Chip key={x.id} active={x.id === s.id} onClick={() => switchSeries(x.id)}
-                        count={ACADEMIA_POSTS.filter(p => typeOf(p).series === x.id).length}>
-                        {x.label}
-                    </Chip>
-                ))}
-            </nav>
+            <CapaNav active={s.id} onSelect={switchSeries} />
 
             {/* Hero */}
             <section className="pt-12 pb-12 text-center relative z-10">
@@ -1001,7 +1143,7 @@ const AcademiaPostLayout = ({ path, controls, children }) => {
     // Same-series posts that share at least one type with this one: the crossovers.
     const related = ordered.filter(p => p !== post && typesOfPost(p).some(id => typesOfPost(post).includes(id)));
 
-    useEffect(() => { document.title = `${postLabel(post)} - Academia Lameyer`; }, []);
+    useEffect(() => { document.title = `${postLabel(post)} - Blog Lameyer`; }, []);
 
     const NavCard = ({ p, dir }) => p ? (
         <a href={p.path} className={`group flex-1 p-6 rounded-[2rem] border border-gray-100 bg-white/90 shadow-lg shadow-gray-200/40 hover:border-blue-500 transition-all ${dir === 'next' ? 'text-right' : ''}`}>
@@ -1017,13 +1159,13 @@ const AcademiaPostLayout = ({ path, controls, children }) => {
     return (
         <>
             <header className="max-w-4xl mx-auto pt-16 pb-10 relative z-10 animate-fade-in">
-                <a href={`/academia/?series=${s.id}`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors mb-10">
-                    ← Panel de la academia · {s.label}
+                <a href={`${CIBER_BASE}?series=${s.id}`} className="inline-flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-gray-400 hover:text-blue-600 transition-colors mb-10">
+                    ← Ciberseguridad · Capa {s.capa} · {s.label}
                 </a>
                 <div className="flex flex-wrap items-center gap-3 mb-6">
                     <span className="px-4 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.3em] uppercase bg-blue-50/50">{isCross(post) ? 'Cruce' : stepLabel(t)}</span>
                     {typesOfPost(post).map((id, n) => (
-                        <a key={id} href={`/academia/?type=${id}`} className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${n === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-blue-200 text-blue-600 hover:border-blue-500'}`}>
+                        <a key={id} href={`${CIBER_BASE}?type=${id}`} className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest transition-colors ${n === 0 ? 'bg-blue-600 text-white hover:bg-blue-700' : 'border border-blue-200 text-blue-600 hover:border-blue-500'}`}>
                             {n === 0 ? '' : '× '}{typeById(id).label}
                         </a>
                     ))}
@@ -1049,7 +1191,7 @@ const AcademiaPostLayout = ({ path, controls, children }) => {
                         <h3 className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-400 mb-4">{s.verb}</h3>
                         <div className="flex flex-wrap gap-2">
                             {post.threats.map(th => (
-                                <a key={th} href={`/academia/?series=${s.id}&threats=${encodeURIComponent(th)}`} className="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 hover:border-blue-500 text-xs font-bold text-slate-300 transition-colors">{th}</a>
+                                <a key={th} href={`${CIBER_BASE}?series=${s.id}&threats=${encodeURIComponent(th)}`} className="px-3 py-1 rounded-full bg-slate-800 border border-slate-700 hover:border-blue-500 text-xs font-bold text-slate-300 transition-colors">{th}</a>
                             ))}
                         </div>
                     </div>

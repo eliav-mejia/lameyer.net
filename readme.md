@@ -13,7 +13,7 @@ En Lameyer.net puedes:
 
 - **Encontrar la mejor oferta en componentes.** La [tienda](https://lameyer.net/pages/components/) reúne componentes del PC, redes,
   equipo básico y herramientas, con precios en euros o pesos mexicanos según tu país, devolución en 30 días y garantía de 3 años.
-- **Aprender a diseñar, programar, desplegar y mantener tu propio software.** La [academia](https://lameyer.net/academia/) recorre paso a
+- **Aprender a diseñar, programar, desplegar y mantener tu propio software.** La [academia](https://lameyer.net/blog/) recorre paso a
   paso cinco series: Núcleo Modular, Edge Serverless, automatización de flujos, seguridad de APIs y búsqueda de código y visibilidad.
 - **Construir con el respaldo de la infraestructura de Lameyer.** En [Desarrollo](https://lameyer.net/pages/development/) te contamos
   cómo podemos acompañar tu proyecto, y en [Comunidad](https://lameyer.net/pages/community/) encontrarás código abierto, talleres,
@@ -52,7 +52,7 @@ Sin paso de build: las páginas usan Tailwind, React y Babel desde CDNs.
 
 ## Estructura de carpetas
 
-Cada página es una carpeta con un `index.html`, así las URLs quedan limpias (`/pages/stack/`, `/academia/seguridad-apis/limitacion-de-tasa/`)
+Cada página es una carpeta con un `index.html`, así las URLs quedan limpias (`/pages/stack/`, `/blog/ciberseguridad/seguridad-apis/limitacion-de-tasa/`)
 y todas las páginas se añaden igual: copiar una carpeta y editarla.
 
 ```
@@ -86,7 +86,7 @@ lameyer.net/
 │
 ├── tools/
 │   ├── generar-paginas-producto.py   crea pages/components/<slug>/ a partir de public/db/productos.json
-│   ├── generar-seo-academia.mjs      Open Graph, JSON-LD y <noscript> de /academia/ a partir de js/academia.jsx
+│   ├── generar-blog.mjs              blog: SEO de Ciberseguridad + páginas de Desarrollo, /blog/ y /blog/desarrollo/
 │   ├── generar-sitemap.py            sitemap.xml con cada página pública (robots.txt lo anuncia)
 │   ├── generar-pdf.sh                HTML → PDF con Edge/Chrome headless (documentos de _docs/ y _interno/)
 │   └── i18n/deepl-prefill.mjs        pre-traduce con DeepL las claves que faltan (PENDIENTE: aún no hay locales/)
@@ -109,8 +109,12 @@ lameyer.net/
 │   ├── community/index.html      /pages/community/   canales: Stack (interno), Skool y GitHub (externos)
 │   └── stack/index.html          /pages/stack/       fuera del menú; se llega desde Comunidad y la portada
 │
-└── academia/
-    ├── index.html                /academia/  panel de filtros (?series=nucleo-modular, ?series=seguridad-apis, ...)
+└── blog/                         2.0.0: el blog sustituye a /academia/ (las URLs antiguas redirigen desde 404.html)
+    ├── index.html                /blog/  portada: dos categorías (generada por tools/generar-blog.mjs)
+    ├── desarrollo/               Desarrollo por niveles: índice (?nivel=N), introduccion/ y nivel-1/ … nivel-6/,
+    │                             un artículo por módulo de Meyer/Academy (GENERADO desde js/desarrollo-datos.js)
+    └── ciberseguridad/
+    ├── index.html                /blog/ciberseguridad/  «Todas las capas» primero; ?series=<capa> filtra una capa
     │
     ├── nucleo-modular/           Núcleo Modular
     │   ├── arquitectura-nucleo-modular/                  visión general
@@ -253,19 +257,25 @@ Para ocultar un producto pon `"active": false`; para mostrarlo agotado pon `"sto
 El script lista las carpetas de producto cuyo slug ya no está en la base de datos; bórralas a mano
 y añade `'/pages/components/<slug-antiguo>/': '/pages/components/'` a la lista `moved` de `404.html`.
 
-## Añadir una entrada a la academia
+## Blog · Desarrollo: añadir un módulo
 
-1. Copia la carpeta de una entrada dentro de su serie, p. ej. `academia/seguridad-apis/limitacion-de-tasa/` en `academia/seguridad-apis/mi-nueva-entrada/`.
+1. Añade un objeto a `DESARROLLO_POSTS` en `js/desarrollo-datos.js` (nivel, slug, módulo, qué es, por qué importa, qué sabrás hacer, regla, dónde encaja).
+   Regla editorial: resumir el módulo de `Meyer/Academy/Level N/`, nunca el tutorial (sin pasos, comandos, valores ni clientes).
+2. Ejecuta `node tools/generar-blog.mjs` y `python tools/generar-sitemap.py`. No edites a mano las páginas de `blog/desarrollo/`.
+
+## Blog · Ciberseguridad: añadir una entrada
+
+1. Copia la carpeta de una entrada dentro de su capa, p. ej. `blog/ciberseguridad/seguridad-apis/limitacion-de-tasa/` en `blog/ciberseguridad/seguridad-apis/mi-nueva-entrada/`.
 2. En su `index.html` cambia `<title>`, la descripción, la URL canónica, `CONTROLS` y `Content`.
    La última línea sigue siendo `renderPost(CONTROLS, Content);`: la página encuentra su entrada a partir de su propia URL.
 3. Añade a `ACADEMIA_POSTS` en `js/academia.jsx` un objeto con `slug: 'mi-nueva-entrada'` y un `type` de `ACADEMIA_TYPES`.
    Si se te olvida, la página te dice qué slug falta.
-4. Ejecuta `node tools/generar-seo-academia.mjs` (Open Graph, JSON-LD y `<noscript>`) y `python tools/generar-sitemap.py`.
+4. Ejecuta `node tools/generar-blog.mjs` (Open Graph, JSON-LD y `<noscript>`) y `python tools/generar-sitemap.py`.
 
-## Añadir una serie a la academia
+## Añadir una capa a Ciberseguridad
 
-1. Añade la serie a `SERIES`, sus pasos a `ACADEMIA_TYPES` y sus zonas a `ZONES` en `js/academia.jsx`.
-2. Crea `academia/<id-serie>/` y añade entradas como se indica arriba.
+1. Añade la serie a `SERIES` (con `capa`, `capaShort`, `capaRole`), sus pasos a `ACADEMIA_TYPES` y sus zonas a `ZONES` en `js/academia.jsx`.
+2. Crea `blog/ciberseguridad/<id-serie>/` y añade entradas como se indica arriba.
 3. Añade una tarjeta a `ACADEMIA_HIGHLIGHTS` en `index.html`.
 
 ## Renombrar o mover una entrada
@@ -273,7 +283,7 @@ y añade `'/pages/components/<slug-antiguo>/': '/pages/components/'` a la lista 
 Cambia el nombre de la carpeta y el `slug`, y después añade `'/ruta/antigua/': '/ruta/nueva/'` a la lista `moved` de `404.html`
 para que los enlaces antiguos sigan funcionando.
 
-Enlaza siempre con barra final (`/pages/stack/`, `/academia/seguridad-apis/limitacion-de-tasa/`).
+Enlaza siempre con barra final (`/pages/stack/`, `/blog/ciberseguridad/seguridad-apis/limitacion-de-tasa/`).
 
 ## Pendiente: traducción y CMS headless
 

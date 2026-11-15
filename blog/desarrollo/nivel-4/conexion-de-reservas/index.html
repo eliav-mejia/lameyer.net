@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Página generada por tools/generar-blog.mjs: edita js/desarrollo-datos.js o js/blog.jsx, no este archivo. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>Conectar un motor de reservas a un sitio estático - Blog Lameyer</title>
+    <meta name="description" content="Cómo un sitio sin servidor puede ofrecer citas en línea: las piezas que intervienen, las formas de integrarlas y por qué reservar no es lo mismo que cobrar.">
+    <link rel="canonical" href="https://lameyer.net/blog/desarrollo/nivel-4/conexion-de-reservas/">
+    <!-- seo:inicio · generado por tools/generar-blog.mjs; no editar a mano -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Lameyer">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Conectar un motor de reservas a un sitio estático">
+    <meta property="og:description" content="Cómo un sitio sin servidor puede ofrecer citas en línea: las piezas que intervienen, las formas de integrarlas y por qué reservar no es lo mismo que cobrar.">
+    <meta property="og:url" content="https://lameyer.net/blog/desarrollo/nivel-4/conexion-de-reservas/">
+    <meta property="og:image" content="https://lameyer.net/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <meta property="article:published_time" content="2026-11-15">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","@id":"https://lameyer.net/blog/desarrollo/nivel-4/conexion-de-reservas/#articulo","headline":"Conectar un motor de reservas a un sitio estático","description":"Cómo un sitio sin servidor puede ofrecer citas en línea: las piezas que intervienen, las formas de integrarlas y por qué reservar no es lo mismo que cobrar.","datePublished":"2026-11-15","dateModified":"2026-11-15","inLanguage":"es","url":"https://lameyer.net/blog/desarrollo/nivel-4/conexion-de-reservas/","mainEntityOfPage":"https://lameyer.net/blog/desarrollo/nivel-4/conexion-de-reservas/","image":"https://lameyer.net/icon-512.png","keywords":"Reservas, Citas, Integración, Sesión","articleSection":"Desarrollo · Nivel 4 · Nube y datos","timeRequired":"PT3M","author":{"@type":"Organization","name":"Lameyer","url":"https://lameyer.net/","logo":{"@type":"ImageObject","url":"https://lameyer.net/icon-512.png"}},"publisher":{"@type":"Organization","name":"Lameyer","url":"https://lameyer.net/","logo":{"@type":"ImageObject","url":"https://lameyer.net/icon-512.png"}}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://lameyer.net/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://lameyer.net/blog/"},{"@type":"ListItem","position":3,"name":"Desarrollo","item":"https://lameyer.net/blog/desarrollo/"},{"@type":"ListItem","position":4,"name":"Nivel 4 · Nube y datos","item":"https://lameyer.net/blog/desarrollo/?nivel=4"},{"@type":"ListItem","position":5,"name":"Conectar un motor de reservas a un sitio estático","item":"https://lameyer.net/blog/desarrollo/nivel-4/conexion-de-reservas/"}]}]}</script>
+    <!-- seo:fin -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root">
+        <noscript>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 4 · Nube y datos</p>
+            <h1>Conectar un motor de reservas a un sitio estático</h1>
+            <p>Cómo un sitio sin servidor puede ofrecer citas en línea: las piezas que intervienen, las formas de integrarlas y por qué reservar no es lo mismo que cobrar.</p>
+            <h2>Qué es</h2>
+            <p>La arquitectura de un servicio de reservas separado del sitio del cliente: cómo se muestran los horarios, cómo se comparte la sesión del usuario y qué opciones existen para integrarlo.</p>
+            <h2>Por qué importa</h2>
+            <p>Las reservas en línea ahorran llamadas y huecos vacíos en la agenda, pero mezclar mal dos sistemas genera dobles reservas o datos de clientes en el lugar equivocado.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Entender el reparto de trabajo entre sitio y motor de reservas.</li>
+                <li>Comparar las formas de integrar un servicio externo.</li>
+                <li>Pensar el aislamiento de datos entre clientes.</li>
+                <li>Distinguir la reserva del pago.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Usa lo aprendido en Supabase y prepara la variante «tienda con reservas».</p>
+            <p><strong>La regla:</strong> Una reserva no es un pago; cada uno tiene su propio registro.</p>
+        </noscript>
+    </div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/acceso.jsx"></script>
+    <script src="/js/desarrollo-datos.js"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        renderDesarrolloPost();
+    </script>
+</body>
+</html>

@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <!-- Página generada por tools/generar-blog.mjs: edita js/desarrollo-datos.js o js/blog.jsx, no este archivo. -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>Cobrar con Stripe: enlaces de pago y las cuatro formas de integrar un cobro - Blog Lameyer</title>
+    <meta name="description" content="Del enlace de pago creado a mano a la integración completa por API: cuándo basta un enlace, cuándo hace falta algo más y dónde debe vivir cada precio.">
+    <link rel="canonical" href="https://lameyer.net/blog/desarrollo/nivel-1/pagos-stripe/">
+    <!-- seo:inicio · generado por tools/generar-blog.mjs; no editar a mano -->
+    <meta property="og:type" content="article">
+    <meta property="og:site_name" content="Lameyer">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Cobrar con Stripe: enlaces de pago y las cuatro formas de integrar un cobro">
+    <meta property="og:description" content="Del enlace de pago creado a mano a la integración completa por API: cuándo basta un enlace, cuándo hace falta algo más y dónde debe vivir cada precio.">
+    <meta property="og:url" content="https://lameyer.net/blog/desarrollo/nivel-1/pagos-stripe/">
+    <meta property="og:image" content="https://lameyer.net/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <meta property="article:published_time" content="2026-11-15">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","@id":"https://lameyer.net/blog/desarrollo/nivel-1/pagos-stripe/#articulo","headline":"Cobrar con Stripe: enlaces de pago y las cuatro formas de integrar un cobro","description":"Del enlace de pago creado a mano a la integración completa por API: cuándo basta un enlace, cuándo hace falta algo más y dónde debe vivir cada precio.","datePublished":"2026-11-15","dateModified":"2026-11-15","inLanguage":"es","url":"https://lameyer.net/blog/desarrollo/nivel-1/pagos-stripe/","mainEntityOfPage":"https://lameyer.net/blog/desarrollo/nivel-1/pagos-stripe/","image":"https://lameyer.net/icon-512.png","keywords":"Stripe, Enlaces de pago, Checkout, Elements, Página de gracias","articleSection":"Desarrollo · Nivel 1 · Lanzamiento","timeRequired":"PT5M","author":{"@type":"Organization","name":"Lameyer","url":"https://lameyer.net/","logo":{"@type":"ImageObject","url":"https://lameyer.net/icon-512.png"}},"publisher":{"@type":"Organization","name":"Lameyer","url":"https://lameyer.net/","logo":{"@type":"ImageObject","url":"https://lameyer.net/icon-512.png"}}},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://lameyer.net/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://lameyer.net/blog/"},{"@type":"ListItem","position":3,"name":"Desarrollo","item":"https://lameyer.net/blog/desarrollo/"},{"@type":"ListItem","position":4,"name":"Nivel 1 · Lanzamiento","item":"https://lameyer.net/blog/desarrollo/?nivel=1"},{"@type":"ListItem","position":5,"name":"Cobrar con Stripe: enlaces de pago y las cuatro formas de integrar un cobro","item":"https://lameyer.net/blog/desarrollo/nivel-1/pagos-stripe/"}]}]}</script>
+    <!-- seo:fin -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root">
+        <noscript>
+            <p><a href="/blog/">Blog</a> / <a href="/blog/desarrollo/">Desarrollo</a> / Nivel 1 · Lanzamiento</p>
+            <h1>Cobrar con Stripe: enlaces de pago y las cuatro formas de integrar un cobro</h1>
+            <p>Del enlace de pago creado a mano a la integración completa por API: cuándo basta un enlace, cuándo hace falta algo más y dónde debe vivir cada precio.</p>
+            <h2>Qué es</h2>
+            <p>El primer cobro de un negocio en línea: productos, precios y enlaces de pago, la página de agradecimiento, y una comparación de las cuatro formas de integrar Stripe según el tamaño del catálogo.</p>
+            <h2>Por qué importa</h2>
+            <p>Cobrar es el momento en que un sitio se convierte en negocio. Elegir el método adecuado evita sobrediseñar una tienda pequeña o quedarse corto en una grande, y un precio escrito en dos sitios termina, tarde o temprano, siendo dos precios distintos.</p>
+            <h2>Qué sabrás hacer al terminar</h2>
+            <ul>
+                <li>Elegir entre enlace de pago, Checkout, Elements o API completa.</li>
+                <li>Conectar el cobro con el sitio y su página de agradecimiento.</li>
+                <li>Distinguir el modo de prueba del modo real.</li>
+                <li>Mantener un único origen para cada precio.</li>
+            </ul>
+            <h2>Dónde encaja en la ruta</h2>
+            <p>Cierra el Nivel 1 y conecta con el seguimiento de ventas del Nivel 2 y el catálogo de Odoo del Nivel 3.</p>
+            <p><strong>La regla:</strong> Un precio se escribe una sola vez, en un solo lugar.</p>
+        </noscript>
+    </div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/acceso.jsx"></script>
+    <script src="/js/desarrollo-datos.js"></script>
+    <script type="text/babel" src="/js/blog.jsx"></script>
+    <script type="text/babel">
+        renderDesarrolloPost();
+    </script>
+</body>
+</html>

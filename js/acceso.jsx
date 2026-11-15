@@ -12,7 +12,7 @@
 const ACCESS_RULES = [
     { path: '/pages/components/', mode: 'required' },
     { path: '/pages/development/Workflows/canvas/', mode: 'optional', text: 'Inicia sesión con los datos de tu cuenta para guardar tu Business Model Canvas. También puedes cerrar este aviso y usarlo sin cuenta: las notas no se guardan.' },
-    { path: '/academia/', mode: 'optional' },
+    { path: '/blog/', mode: 'optional' },
 ];
 
 const ACCESS_TXT = {
