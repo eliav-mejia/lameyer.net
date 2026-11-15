@@ -458,6 +458,23 @@
   };
   bSeguir.onclick = () => { st.seguir = !st.seguir; st.mira = null; actualizarBotones(); };
 
+  // Ocultar / mostrar el panel de acciones (se recuerda en este navegador). Sin panel, centro() deja la línea
+  // en toda la zona libre entre la cabecera y el controlador.
+  const bPanel = $('bPanel');
+  const PANEL_KEY = 'lm-timeline-panel';
+  function ponerPanel(oculto) {
+    panel.hidden = oculto;
+    document.body.classList.toggle('sin-panel', oculto);
+    bPanel.textContent = oculto ? 'Mostrar panel' : 'Ocultar panel';
+    bPanel.setAttribute('aria-pressed', String(oculto));
+    bPanel.classList.toggle('activo', oculto);
+    try { localStorage.setItem(PANEL_KEY, oculto ? 'oculto' : 'visible'); } catch (e) {}
+  }
+  let panelGuardado = null;
+  try { panelGuardado = localStorage.getItem(PANEL_KEY); } catch (e) {}
+  ponerPanel(panelGuardado === 'oculto');
+  bPanel.onclick = () => ponerPanel(!panel.hidden);
+
   addEventListener('keydown', ev => {
     if (ev.target.tagName === 'INPUT' || ev.target.tagName === 'SELECT') return;
     const k = ev.key;
@@ -471,6 +488,7 @@
     else if (k === 'Escape') enfocar(null, true);
     else if (k === 'Enter' && !st.dentro) bRama.click();
     else if (k === 'f' || k === 'F') bSeguir.click();
+    else if (k === 'p' || k === 'P') bPanel.click();
   });
 
   // --- Dibujo ---------------------------------------------------------------------------------------------------
