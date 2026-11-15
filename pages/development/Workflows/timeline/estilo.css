@@ -122,6 +122,7 @@
 .aviso b { font-weight: 800; }
 
 /* --- Panel de acciones --- */
+.panel[hidden] { display: none; }
 .panel {
     position: fixed;
     right: 20px;
