@@ -215,6 +215,15 @@
     .chips { display: none; }
 }
 
+/* Teléfono en horizontal: el panel pasa a la derecha y deja libre la franja de la línea (linea.js centra la
+   línea en el espacio de la izquierda). */
+@media (max-width: 900px) and (orientation: landscape) and (max-height: 520px) {
+    .panel { left: auto; right: 16px; top: 60px; bottom: 84px; width: min(340px, 42vw); max-height: none; }
+    .marquesina { top: 44px; }
+    .marquesina .pista { font-size: 56px; }
+    .control { bottom: 12px; padding: 6px 8px; }
+}
+
 @media (prefers-reduced-motion: reduce) {
     .marquesina .pista { animation: none; }
 }

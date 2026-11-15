@@ -171,17 +171,35 @@
   const fondo = $('fondo'), pista = $('pista'), panel = $('panel');
   const bPlay = $('bPlay'), bRama = $('bRama'), bSeguir = $('bSeguir'), rZoom = $('rZoom');
   let W = 0, H = 0, DPR = 1;
+  // (CX, CY) = punto de pantalla donde la cámara coloca la línea. Escritorio: el centro de la ventana.
+  // Móvil (≤ 900 px, como estilo.css): el centro de la zona libre. En vertical el panel va abajo, así que la línea
+  // queda centrada en la franja superior (entre la cabecera y el panel); en horizontal el panel va a la derecha
+  // y la línea se centra en el espacio de la izquierda, entre la cabecera y el controlador.
+  let CX = 0, CY = 0;
+  const MOVIL = 900, CABECERA = 64;
+  const esMovil = () => W <= MOVIL;
+  const control = document.querySelector('.control');
+  function centro() {
+    if (!esMovil()) return [W / 2, H / 2];
+    const p = panel.getBoundingClientRect();
+    const c = control ? control.getBoundingClientRect().top : H;
+    const lateral = p.width > 0 && p.left > W * 0.4;                 // panel a la derecha (horizontal)
+    const debajo = !lateral && p.height > 0 && p.top > CABECERA + 120; // panel abajo (vertical)
+    const abajo = debajo ? p.top : (c > CABECERA + 80 ? c : H);
+    return [lateral ? Math.round(p.left / 2) : W / 2, Math.round((CABECERA + abajo) / 2)];
+  }
 
   function medir() {
     DPR = Math.min(2, window.devicePixelRatio || 1);
     W = innerWidth; H = innerHeight;
     cv.width = capa.width = W * DPR; cv.height = capa.height = H * DPR;
+    [CX, CY] = centro();
   }
   addEventListener('resize', medir);
   medir();
 
-  const aPantalla = (x, y) => [(x - st.cam.x) * st.cam.z + W / 2, (y - st.cam.y) * st.cam.z + H / 2];
-  const aMundo = (sx, sy) => [(sx - W / 2) / st.cam.z + st.cam.x, (sy - H / 2) / st.cam.z + st.cam.y];
+  const aPantalla = (x, y) => [(x - st.cam.x) * st.cam.z + CX, (y - st.cam.y) * st.cam.z + CY];
+  const aMundo = (sx, sy) => [(sx - CX) / st.cam.z + st.cam.x, (sy - CY) / st.cam.z + st.cam.y];
 
   // Chips de etapa
   const chips = $('chips');
@@ -350,7 +368,7 @@
     const antes = st.dentro;
     if (!st.dentro && z >= Z_ENTRA) {
       // Entrar: la rama de la etapa actual más cercana al cursor (o al centro)
-      const [wx, wy] = aMundo(sx ?? W / 2, sy ?? H / 2);
+      const [wx, wy] = aMundo(sx ?? CX, sy ?? CY);
       const e = etapaEn(st.px);
       st.foco = ramaCercana(e, Math.max(st.px, e.x0), wy);
       if (st.px > st.foco.b && !etapaEn(wx).futura) st.foco = ramaCercana(etapaEn(wx), wx, wy);
@@ -369,8 +387,8 @@
       // Sin seguimiento: acercar hacia el punto bajo el cursor
       const [wx, wy] = aMundo(ev.clientX, ev.clientY);
       const z = Math.min(Z_MAX, Math.max(Z_MIN, st.cam.z * f));
-      st.cam.x = wx - (ev.clientX - W / 2) / z;
-      st.cam.y = wy - (ev.clientY - H / 2) / z;
+      st.cam.x = wx - (ev.clientX - CX) / z;
+      st.cam.y = wy - (ev.clientY - CY) / z;
       st.cam.z = z;
     }
     zoomA(st.zMeta * f, ev.clientX, ev.clientY);
@@ -700,7 +718,7 @@
 
     // Rejilla de fondo acompaña la cámara (mismo tamaño visual, desplazada con el mundo)
     let g = 80 * z; while (g < 56) g *= 2; while (g >= 112) g /= 2;
-    const ox = ((W / 2 - st.cam.x * z) % g + g) % g, oy = ((H / 2 - st.cam.y * z) % g + g) % g;
+    const ox = ((CX - st.cam.x * z) % g + g) % g, oy = ((CY - st.cam.y * z) % g + g) % g;
     fondo.style.setProperty('--g', `${g}px`);
     fondo.style.setProperty('--gm', `${g / 4}px`);
     fondo.style.setProperty('--grid-x', `${ox}px`);
@@ -723,11 +741,13 @@
 
     // Cámara
     const k = 1 - Math.pow(0.002, dt);
+    const [cx, cy] = centro();   // el panel cambia de alto o se gira el teléfono: la línea se recoloca con suavidad
+    CX += (cx - CX) * k; CY += (cy - CY) * k;
     st.cam.z += (st.zMeta - st.cam.z) * k;
     if (st.seguir) {
       const [px, py] = pulso();
       const ty = st.dentro && st.foco ? (activa(st.foco, st.px) ? py : st.foco.carril * 0.5) : 0;
-      const adelanto = (W * 0.08) / st.cam.z * (st.dentro && st.foco && st.foco.atras ? -1 : 1);
+      const adelanto = (esMovil() ? 0 : W * 0.08) / st.cam.z * (st.dentro && st.foco && st.foco.atras ? -1 : 1);
       st.cam.x += (px + adelanto - st.cam.x) * k;
       st.cam.y += (ty - st.cam.y) * k;
     } else if (st.mira != null) {
