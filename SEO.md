@@ -36,8 +36,8 @@ Las fichas de producto captan búsquedas de cola larga ("batería iPhone 13", "S
 |---|---|---|---|---|
 | Portada | website | summary | `Organization` + `WebSite` | a mano, `index.html` |
 | Páginas `/pages/*` | website | summary | `BreadcrumbList` | a mano |
-| Panel `/academia/` | website | summary | `CollectionPage` + `ItemList` + `BreadcrumbList` | `tools/generar-seo-academia.mjs` |
-| Entrada de academia | article (+ `article:published_time`) | summary | `TechArticle` + `BreadcrumbList` | `tools/generar-seo-academia.mjs` |
+| Índices `/blog/`, `/blog/ciberseguridad/`, `/blog/desarrollo/` | website | summary | `Blog` / `CollectionPage` + `ItemList` + `BreadcrumbList` | `tools/generar-blog.mjs` |
+| Artículo del blog | article (+ `article:published_time`) | summary | `TechArticle` (Ciberseguridad) / `Article` (Desarrollo) + `BreadcrumbList` | `tools/generar-blog.mjs` |
 | Ficha de producto | product | summary_large_image | `BreadcrumbList` (estático) + `Product` con precio y stock (inyectado por `js/tienda.jsx`) | `tools/generar-paginas-producto.py` |
 
 Comunes: `og:site_name` = Lameyer, `og:locale` = es_ES, `og:image` = foto del producto o `https://lameyer.net/icon-512.png`.
@@ -52,7 +52,7 @@ Comunes: `og:site_name` = Lameyer, `og:locale` = es_ES, `og:image` = foto del pr
 | Cambio | Ejecuta |
 |---|---|
 | Producto nuevo o editado | `python tools/generar-paginas-producto.py` y `python tools/generar-sitemap.py` |
-| Entrada de academia nueva o editada | `node tools/generar-seo-academia.mjs` y `python tools/generar-sitemap.py` |
+| Artículo del blog nuevo o editado | `node tools/generar-blog.mjs` y `python tools/generar-sitemap.py` |
 | Página nueva | reglas 1–11 a mano, luego `python tools/generar-sitemap.py` |
 
 Tras publicar: enviar `https://lameyer.net/sitemap.xml` en Google Search Console y validar JSON-LD en
