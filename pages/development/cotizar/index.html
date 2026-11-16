@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.ico" sizes="48x48">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+    <link rel="manifest" href="/site.webmanifest">
+    <title>Cotiza tu desarrollo - Lameyer</title>
+    <meta name="description" content="Cotiza tu desarrollo a partir de builds de muestra: cada build son 12 horas con 3 agentes por 99 € (precio también en pesos). La cotización detallada es personalizada y puedes empezar con el anticipo de cualquier build.">
+    <link rel="canonical" href="https://lameyer.net/pages/development/cotizar/">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Lameyer">
+    <meta property="og:locale" content="es_ES">
+    <meta property="og:title" content="Cotiza tu desarrollo - Lameyer">
+    <meta property="og:description" content="Builds de muestra de 12 horas con 3 agentes por 99 €. Cotización detallada personalizada; empieza con el anticipo de cualquier build.">
+    <meta property="og:url" content="https://lameyer.net/pages/development/cotizar/">
+    <meta property="og:image" content="https://lameyer.net/icon-512.png">
+    <meta name="twitter:card" content="summary">
+    <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"OfferCatalog","name":"Builds de muestra Lameyer","url":"https://lameyer.net/pages/development/cotizar/","description":"Cada build: 12 horas de desarrollo con 3 agentes por 99 €.","itemListElement":[{"@type":"Offer","name":"Build de 12 horas con 3 agentes","price":"99.00","priceCurrency":"EUR","url":"https://lameyer.net/pages/development/cotizar/"}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Inicio","item":"https://lameyer.net/"},{"@type":"ListItem","position":2,"name":"Desarrollo","item":"https://lameyer.net/pages/development/"},{"@type":"ListItem","position":3,"name":"Cotiza tu desarrollo","item":"https://lameyer.net/pages/development/cotizar/"}]}]}</script>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/site.css">
+
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+    <script crossorigin src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/7.23.5/babel.min.js"></script>
+</head>
+<body>
+
+    <div id="root">
+        <noscript>
+            <p><a href="/pages/development/">Desarrollo</a> / Cotiza tu desarrollo</p>
+            <h1>Cotiza tu desarrollo a partir de builds de muestra</h1>
+            <p>Cada build: 12 horas de desarrollo con 3 agentes por 99 € (≈ 2,037 MXN). La cotización detallada es personalizada; puedes empezar con el anticipo de cualquiera de los builds.</p>
+            <ul>
+                <li>Tienda con enlaces de pago</li>
+                <li>Agenda de citas</li>
+                <li>Cotizador en línea</li>
+                <li>Portal con inicio de sesión</li>
+                <li>Revista o sitio editorial</li>
+                <li>Landing 3D interactiva</li>
+                <li>Renta de equipo</li>
+                <li>Panel de negocio</li>
+                <li>Asistente de WhatsApp</li>
+            </ul>
+            <p>Escríbenos a <a href="mailto:contacto@lameyer.net">contacto@lameyer.net</a>.</p>
+        </noscript>
+    </div>
+
+    <script type="text/babel" src="/js/layout.jsx"></script>
+    <script type="text/babel" src="/js/acceso.jsx"></script>
+    <script type="text/babel">
+        // --- DATOS ---
+        // Un build = 12 horas de desarrollo con 3 agentes, 99 € (se cobra en EUR; los pesos son orientativos).
+        // Para cambiar el precio o el paquete, edita BUILD. Para añadir una muestra, añade una entrada a MUESTRAS.
+        // Regla editorial: sin nombres de clientes ni enlaces a sus sitios (aislamiento de sitios).
+        const BUILD = { horas: 12, agentes: 3, eur: 99 };
+        const WHATSAPP = '34602557685';                 // mismo número que la tienda (js/tienda.jsx)
+        const MXN_RESPALDO = 20.5806;                    // tipo BCE de respaldo si la API no responde
+        const RATES = 'https://api.frankfurter.dev/v1/latest?base=EUR&symbols=MXN';
+
+        const MUESTRAS = [
+            { id: 'tienda', icono: '🛍️', nombre: 'Tienda con enlaces de pago', tipo: 'Comercio',
+              texto: 'Catálogo con fichas de producto y botón de pago directo, sin carrito ni plataforma mensual.',
+              incluye: ['Catálogo y ficha de producto', 'Cobro con enlaces de pago', 'Diseño adaptado a móvil'] },
+            { id: 'citas', icono: '📅', nombre: 'Agenda de citas', tipo: 'Servicios',
+              texto: 'Reservas en línea conectadas a tu sitio: presencial, a domicilio o videollamada.',
+              incluye: ['Calendario de disponibilidad', 'Confirmación por correo', 'Integrada en tu sitio'] },
+            { id: 'cotizador', icono: '🧮', nombre: 'Cotizador en línea', tipo: 'Ventas',
+              texto: 'El cliente elige opciones, ve el precio al momento y envía su cotización.',
+              incluye: ['Opciones y precios configurables', 'Envío de la cotización', 'Precio en EUR y MXN'] },
+            { id: 'portal', icono: '🔐', nombre: 'Portal con inicio de sesión', tipo: 'Clientes',
+              texto: 'Área privada para tus clientes con registro, inicio de sesión social y su perfil.',
+              incluye: ['Registro e inicio de sesión', 'Perfil del cliente', 'Datos protegidos por usuario'] },
+            { id: 'editorial', icono: '📰', nombre: 'Revista o sitio editorial', tipo: 'Medios',
+              texto: 'Portadas, secciones y páginas por tema, listas para posicionarse en buscadores.',
+              incluye: ['Portada y secciones', 'Páginas por tema', 'SEO técnico de base'] },
+            { id: '3d', icono: '🧊', nombre: 'Landing 3D interactiva', tipo: 'Marca',
+              texto: 'Una página de presentación con un modelo 3D que se mueve al hacer scroll.',
+              incluye: ['Escena 3D por etapas', 'Animación con el scroll', 'Formulario de contacto'] },
+            { id: 'renta', icono: '🎥', nombre: 'Renta de equipo', tipo: 'Alquiler',
+              texto: 'Catálogo de equipo con precios por día, bolsa de renta y solicitud de reserva.',
+              incluye: ['Catálogo con precio por día', 'Bolsa de renta', 'Solicitud con inicio de sesión'] },
+            { id: 'panel', icono: '📊', nombre: 'Panel de negocio', tipo: 'Datos',
+              texto: 'Un tablero con tus ventas e indicadores, en español e inglés, en una sola página.',
+              incluye: ['Indicadores clave', 'Pestañas por área', 'Español e inglés'] },
+            { id: 'whatsapp', icono: '💬', nombre: 'Asistente de WhatsApp', tipo: 'Automatización',
+              texto: 'Los mensajes de WhatsApp se convierten en datos ordenados: pedidos, citas o contactos.',
+              incluye: ['Recepción automática de mensajes', 'Datos limpios y ordenados', 'Aviso a tu equipo'] },
+        ];
+
+        // --- MONEDA ---
+        // La bandera del encabezado (useLocale en js/layout.jsx) decide qué moneda va primero: España → EUR, México → MXN.
+        const useMxn = () => {
+            const [rate, setRate] = useState(MXN_RESPALDO);
+            const [fecha, setFecha] = useState(null);
+            useEffect(() => {
+                let vivo = true;
+                fetch(RATES).then(r => (r.ok ? r.json() : Promise.reject(r.status)))
+                    .then(d => { if (vivo && d && d.rates && d.rates.MXN) { setRate(d.rates.MXN); setFecha(d.date); } })
+                    .catch(() => {});
+                return () => { vivo = false; };
+            }, []);
+            return { rate, fecha };
+        };
+        const fmtEur = (n) => new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+        const fmtMxn = (n) => new Intl.NumberFormat('es-MX', { style: 'currency', currency: 'MXN', currencyDisplay: 'code', maximumFractionDigits: 0 }).format(n);
+
+        const Precio = ({ eur, rate, mx, grande }) => {
+            const principal = mx ? `≈ ${fmtMxn(eur * rate)}` : fmtEur(eur);
+            const segundo = mx ? `Se cobra ${fmtEur(eur)}` : `≈ ${fmtMxn(eur * rate)}`;
+            return (
+                <div>
+                    <p translate="no" className={`${grande ? 'text-4xl md:text-5xl' : 'text-3xl'} font-black text-gray-900 tracking-tight leading-none whitespace-nowrap`}>{principal}</p>
+                    <p translate="no" className="mt-1.5 text-xs font-bold text-gray-400">{segundo}</p>
+                </div>
+            );
+        };
+
+        const mensaje = (lista, totalEur, rate) => [
+            'Hola, quiero cotizar un desarrollo con Lameyer.',
+            '',
+            ...lista.map(m => `• ${m.nombre} — build de ${BUILD.horas} h con ${BUILD.agentes} agentes (${fmtEur(BUILD.eur)})`),
+            '',
+            `Total de builds: ${fmtEur(totalEur)} (≈ ${fmtMxn(totalEur * rate)})`,
+            'Me interesa empezar con el anticipo y recibir la cotización detallada.',
+        ].join('\n');
+
+        // --- PÁGINA ---
+        const CotizarPage = () => {
+            const locale = useLocale();
+            const mx = locale.currency === 'MXN';
+            const { rate, fecha } = useMxn();
+            const [sel, setSel] = useState([]);
+            const toggle = (id) => setSel(s => (s.includes(id) ? s.filter(x => x !== id) : [...s, id]));
+            const lista = MUESTRAS.filter(m => sel.includes(m.id));
+            const n = lista.length;
+            const total = n * BUILD.eur;
+            const texto = mensaje(lista, total, rate);
+            const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(texto)}`;
+            const mail = `mailto:${CONTACT_EMAIL}?subject=${encodeURIComponent('Cotización de desarrollo · anticipo')}&body=${encodeURIComponent(texto)}`;
+            const reservar = (m) => `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensaje([m], BUILD.eur, rate))}`;
+
+            return (
+                <>
+                    <nav aria-label="Ruta" className="max-w-7xl mx-auto pt-10 relative z-10">
+                        <ol className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.25em] text-gray-400">
+                            <li><a href="/pages/development/" className="hover:text-blue-600 transition-colors">Desarrollo</a></li>
+                            <li aria-hidden="true">/</li>
+                            <li className="text-blue-600">Cotiza tu desarrollo</li>
+                        </ol>
+                    </nav>
+
+                    <section className="pt-8 md:pt-12 pb-10 text-center relative z-10 animate-fade-in">
+                        <div className="inline-block mb-6 md:mb-8 px-4 md:px-5 py-1.5 border border-blue-200 text-blue-600 text-[10px] font-bold rounded-full tracking-[0.25em] md:tracking-[0.5em] uppercase bg-blue-50/50">Desarrollo · Cotizar</div>
+                        <h1 className="text-4xl md:text-7xl font-black text-gray-900 tracking-tighter mb-6 leading-[0.95]">Cotiza tu desarrollo<br/><span className="text-blue-600">a partir de builds reales</span></h1>
+                        <p className="text-base md:text-xl text-gray-500 max-w-3xl mx-auto font-medium">
+                            Elige uno o varios builds de muestra como punto de partida. Cada build son {BUILD.horas} horas de desarrollo con {BUILD.agentes} agentes.
+                        </p>
+                    </section>
+
+                    {/* Paquete base */}
+                    <section className="max-w-5xl mx-auto mb-12 relative z-10">
+                        <div className="grid grid-cols-1 md:grid-cols-[1fr_auto] gap-6 items-center p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-slate-900 text-white shadow-2xl">
+                            <div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-blue-400 mb-3">Cada build incluye</p>
+                                <div className="flex flex-wrap gap-3">
+                                    <span className="px-4 py-2 rounded-full bg-white/10 text-sm font-black">⏱ {BUILD.horas} horas</span>
+                                    <span className="px-4 py-2 rounded-full bg-white/10 text-sm font-black">🤖 {BUILD.agentes} agentes</span>
+                                    <span className="px-4 py-2 rounded-full bg-blue-600 text-sm font-black" translate="no">{fmtEur(BUILD.eur)} · ≈ {fmtMxn(BUILD.eur * rate)}</span>
+                                </div>
+                            </div>
+                            <p className="text-sm text-slate-300 font-medium leading-relaxed md:max-w-xs">
+                                La cotización detallada es personalizada. Puedes empezar hoy con el anticipo de cualquiera de los builds.
+                            </p>
+                        </div>
+                    </section>
+
+                    {/* Tarjetas */}
+                    <section className="max-w-7xl mx-auto pb-12 relative z-20" aria-labelledby="muestras-title">
+                        <h2 id="muestras-title" className="text-center text-[10px] font-bold uppercase tracking-[0.3em] text-gray-400 mb-6">Builds de muestra · marca los que te interesan</h2>
+                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {MUESTRAS.map(m => {
+                                const on = sel.includes(m.id);
+                                return (
+                                    <article key={m.id}
+                                        className={`flex flex-col p-6 md:p-7 rounded-[1.5rem] md:rounded-[2rem] border bg-white/90 backdrop-blur-md shadow-xl shadow-gray-200/40 transition-all duration-300 ${on ? 'border-blue-500 ring-2 ring-blue-500/20' : 'border-gray-100 hover:border-blue-300'}`}>
+                                        <div className="flex items-center justify-between gap-3 mb-4">
+                                            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-blue-500">{m.tipo} · Build de muestra</span>
+                                            <span aria-hidden="true" className="text-2xl">{m.icono}</span>
+                                        </div>
+                                        <h3 className="text-xl font-black text-gray-900 leading-tight mb-3">{m.nombre}</h3>
+                                        <p className="text-sm text-gray-500 font-medium leading-relaxed mb-4">{m.texto}</p>
+                                        <ul className="space-y-1.5 mb-6 flex-1">
+                                            {m.incluye.map(t => (
+                                                <li key={t} className="flex gap-2 text-sm text-gray-600 font-medium"><span className="text-blue-500">✓</span>{t}</li>
+                                            ))}
+                                        </ul>
+                                        <div className="flex flex-wrap gap-1.5 mb-5">
+                                            <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">{BUILD.horas} h de build</span>
+                                            <span className="px-2.5 py-1 rounded-full bg-gray-100 text-gray-600 text-[10px] font-bold">{BUILD.agentes} agentes</span>
+                                        </div>
+                                        <div className="flex items-end justify-between gap-4 pt-5 border-t border-gray-100">
+                                            <Precio eur={BUILD.eur} rate={rate} mx={mx} />
+                                            <div className="flex flex-col items-end gap-2">
+                                                <button type="button" onClick={() => toggle(m.id)} aria-pressed={on}
+                                                    className={`px-4 py-2 rounded-full text-xs font-black border transition-colors ${on ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-200 text-gray-700 hover:border-blue-500 hover:text-blue-600'}`}>
+                                                    {on ? '✓ En tu cotización' : '+ Añadir'}
+                                                </button>
+                                                <a href={reservar(m)} target="_blank" rel="noopener" className="text-xs font-bold text-blue-600 hover:underline">Empezar con anticipo →</a>
+                                            </div>
+                                        </div>
+                                    </article>
+                                );
+                            })}
+                        </div>
+                    </section>
+
+                    {/* Resumen */}
+                    <section className="max-w-5xl mx-auto pb-16 relative z-20" aria-labelledby="resumen-title">
+                        <div className="p-6 md:p-10 rounded-[2rem] md:rounded-[2.5rem] bg-white/95 border border-gray-100 shadow-2xl shadow-gray-200/50">
+                            <h2 id="resumen-title" className="text-3xl md:text-4xl font-black text-gray-900 tracking-tight mb-2">Tu cotización</h2>
+                            <p className="text-sm text-gray-500 font-medium mb-6">
+                                {n ? `${n} ${n === 1 ? 'build' : 'builds'} · ${n * BUILD.horas} horas de desarrollo · ${BUILD.agentes} agentes por build`
+                                   : 'Marca uno o varios builds de muestra para ver tu estimación.'}
+                            </p>
+                            {n ? (
+                                <ul className="divide-y divide-gray-100 mb-6">
+                                    {lista.map(m => (
+                                        <li key={m.id} className="flex items-center justify-between gap-4 py-3">
+                                            <span className="font-bold text-gray-800">{m.icono} {m.nombre}</span>
+                                            <span className="flex items-center gap-3">
+                                                <span translate="no" className="text-sm font-black text-gray-900 whitespace-nowrap">{mx ? fmtMxn(BUILD.eur * rate) : fmtEur(BUILD.eur)}</span>
+                                                <button type="button" onClick={() => toggle(m.id)} aria-label={`Quitar ${m.nombre}`} className="w-7 h-7 rounded-full bg-gray-100 text-gray-500 hover:bg-red-50 hover:text-red-600 text-sm font-black">×</button>
+                                            </span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            ) : null}
+                            <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+                                {n ? <Precio eur={total} rate={rate} mx={mx} grande /> : <p className="text-sm font-bold text-gray-400">Sin builds seleccionados</p>}
+                                <div className="flex flex-col sm:flex-row gap-3">
+                                    <a href={n ? wa : undefined} target="_blank" rel="noopener" aria-disabled={!n}
+                                        className={`text-center px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs transition-all ${n ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-xl hover:scale-105' : 'bg-gray-100 text-gray-400 pointer-events-none'}`}>
+                                        Empezar con anticipo · WhatsApp
+                                    </a>
+                                    <a href={n ? mail : undefined} aria-disabled={!n}
+                                        className={`text-center px-8 py-4 rounded-full font-black uppercase tracking-widest text-xs border transition-all ${n ? 'border-gray-300 text-gray-700 hover:border-blue-500 hover:text-blue-600' : 'border-gray-100 text-gray-300 pointer-events-none'}`}>
+                                        Enviar por correo
+                                    </a>
+                                </div>
+                            </div>
+                            <p className="mt-6 text-xs text-gray-400 font-medium leading-relaxed">
+                                Estimación orientativa a partir de builds de muestra. La cotización detallada es personalizada según tu proyecto;
+                                puedes empezar con el anticipo de cualquiera de los builds. Precios en EUR; los pesos son orientativos
+                                al tipo del Banco Central Europeo{fecha ? ` del ${new Date(fecha + 'T00:00:00').toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}` : ''}.
+                            </p>
+                        </div>
+                    </section>
+
+                    <ContactSection
+                        title="¿Algo distinto a las muestras?"
+                        text="Cuéntanos tu proyecto y preparamos una cotización personalizada."
+                    />
+                </>
+            );
+        };
+
+        renderPage(CotizarPage);
+    </script>
+</body>
+</html>
