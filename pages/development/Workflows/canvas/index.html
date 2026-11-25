@@ -36,7 +36,7 @@
     <script type="text/babel" src="/js/layout.jsx"></script>
     <script type="text/babel" src="/js/acceso.jsx"></script>
     <script type="text/babel">
-        // The canvas itself (copy of animations/canvas/) lives in app.html. The access rule is 'optional': it opens with or without a session.
+        // The canvas itself (copy of Games & Films/Web/canvas/) lives in app.html. The access rule is 'optional': it opens with or without a session.
         // An iframe keeps its full-window CSS (html, body, main, h1) away from the site's Layout.
         // Notes stay in this browser, one canvas per account (localStorage 'lameyer-canvas/2/<user id>'); a new account starts empty.
         // Each account gets its own canvas: app.html reads window.lameyerCanvasCuenta (same origin) and keys its notes by it.
@@ -77,5 +77,6 @@
 
         renderPage(CanvasPage);
     </script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "c4f11076854641df9448c6eb6d02a73f"}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>

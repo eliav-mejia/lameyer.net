@@ -90,6 +90,7 @@ TEMPLATE = """<!DOCTYPE html>
     <script type="text/babel">
         renderProduct();
     </script>
+<!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{{"token": "c4f11076854641df9448c6eb6d02a73f"}}'></script><!-- End Cloudflare Web Analytics -->
 </body>
 </html>
 """
